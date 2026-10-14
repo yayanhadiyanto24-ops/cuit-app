@@ -6,59 +6,137 @@
   <title>CUIT – Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --bg: #f6f5fb; --card: #fff; --ink: #292d32; --primary: #6c5ce7; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { background: var(--bg); color: var(--ink); padding: 16px; max-width: 500px; margin: auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .banner { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); border-radius: 16px; padding: 20px; color: #1a1a24; margin-bottom: 20px; }
-    .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    .btn-sm { padding: 6px 12px; font-size: 14px; }
-    .post-card { background: #fff; border-radius: 12px; padding: 16px; margin-top: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    :root {
+      --bg: #f6f5fb;
+      --card: #ffffff;
+      --ink: #1e1e2d;
+      --primary: #6c5ce7;
+      --primary-light: #a29bfe;
+      --secondary: #ff7675;
+      --gray: #8c8c9e;
+      --light-gray: #eee;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--ink); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
     
-    /* Modal Pop-up */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 16px; width: 90%; max-width: 400px; }
-    textarea, input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; }
+    /* Top Header */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(246, 245, 251, 0.9); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); }
+    .logo { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .stat-badge { background: #fff; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+    
+    /* Banner */
+    .banner-container { padding: 0 16px; margin-bottom: 20px; }
+    .banner { background: linear-gradient(135deg, #a8c0ff, #3f2b96); border-radius: 20px; padding: 20px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2); }
+    .banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .banner p { font-size: 13px; opacity: 0.9; margin-bottom: 16px; max-width: 80%; line-height: 1.4; }
+    
+    /* Buttons */
+    .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn:active { transform: scale(0.97); }
+    .btn-light { background: #fff; color: var(--primary); }
+    .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+    
+    /* Feed Section */
+    .section-title { padding: 0 16px; font-size: 18px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .filter-tabs { display: flex; gap: 8px; padding: 0 16px; margin-bottom: 16px; overflow-x: auto; }
+    .tab { padding: 6px 14px; border-radius: 20px; background: #fff; font-size: 13px; font-weight: 500; color: var(--gray); cursor: pointer; border: 1px solid transparent; }
+    .tab.active { background: var(--primary); color: #fff; }
+    
+    /* Cards */
+    .feed-container { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+    .post-card { background: var(--card); border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555; }
+    .user-name { font-weight: 600; font-size: 14px; }
+    .post-time { font-size: 11px; color: var(--gray); }
+    .post-body { font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 12px; word-break: break-word; }
+    .post-footer { display: flex; gap: 16px; border-top: 1px solid #f0f0f5; padding-top: 10px; font-size: 13px; color: var(--gray); }
+    .action-item { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+    
+    /* Bottom Navigation Bar */
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 20; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--gray); text-decoration: none; cursor: pointer; }
+    .nav-item.active { color: var(--primary); font-weight: bold; }
+    .nav-icon { font-size: 18px; }
+
+    /* Modals */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
+    .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .modal-content h3 { margin-bottom: 12px; font-size: 18px; }
+    textarea, input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--light-gray); border-radius: 10px; font-size: 14px; outline: none; }
+    textarea:focus, input:focus { border-color: var(--primary); }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h2 style="color: var(--primary);">CUIT</h2>
-    <button id="authBtn" class="btn btn-sm">Masuk</button>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="logo">CUIT ✨</div>
+    <div class="top-actions">
+      <div class="stat-badge">🔔 <span id="notif-count">0</span></div>
+      <div class="stat-badge">🪙 <span id="coin-count">120</span></div>
+      <button id="authBtn" class="btn btn-sm">Masuk</button>
+    </div>
   </div>
 
-  <div class="banner">
-    <h2>Curhat dapat Duit</h2>
-    <p style="font-size: 13px; margin: 6px 0 14px;">Setiap cerita punya arti. Didengar, dihargai, dan dapat hadiah!</p>
-    <button id="openPostBtn" class="btn">+ Curhat</button>
+  <!-- Banner -->
+  <div class="banner-container">
+    <div class="banner">
+      <h2>Curhat dapat Duit</h2>
+      <p>Cerita kamu didengar, dihargai, dan bisa dapat apresiasi dari teman-teman!</p>
+      <button id="openPostBtn" class="btn btn-light">+ Curhat Sekarang</button>
+    </div>
   </div>
 
-  <h3>Beranda</h3>
-  <div id="postsList"><p style="color: #666; margin-top: 10px;">Mengambil data curhatan...</p></div>
+  <!-- Section Title & Filters -->
+  <div class="section-title">
+    <span>Beranda</span>
+  </div>
+  <div class="filter-tabs">
+    <div class="tab active">Semua</div>
+    <div class="tab">Populer</div>
+    <div class="tab">Mengikuti</div>
+  </div>
+
+  <!-- Posts Feed -->
+  <div class="feed-container" id="postsList">
+    <p style="text-align: center; color: var(--gray); margin-top: 20px;">Memuat cerita...</p>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="nav-bar">
+    <div class="nav-item active"><span class="nav-icon">🏠</span>Beranda</div>
+    <div class="nav-item"><span class="nav-icon">🔍</span>Cari</div>
+    <div class="nav-item" id="navCreate"><span class="nav-icon">➕</span>Buat</div>
+    <div class="nav-item"><span class="nav-icon">📻</span>Live</div>
+    <div class="nav-item"><span class="nav-icon">👤</span>Profil</div>
+  </div>
 
   <!-- Pop-up Login -->
   <div id="authModal" class="modal">
     <div class="modal-content">
-      <h3>Masuk / Daftar Akun</h3>
-      <input type="email" id="email" placeholder="Email">
+      <h3>Masuk ke CUIT</h3>
+      <p style="font-size: 12px; color: var(--gray); margin-bottom: 12px;">Masuk untuk mulai berbagi cerita dan mengumpulkan koin.</p>
+      <input type="email" id="email" placeholder="Email kamu">
       <input type="password" id="password" placeholder="Kata Sandi">
-      <div style="margin-top: 10px; display: flex; gap: 8px;">
-        <button id="doLogin" class="btn btn-sm">Masuk</button>
-        <button id="doSignUp" class="btn btn-sm" style="background:#555;">Daftar</button>
-        <button id="closeAuth" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
+      <div style="margin-top: 16px; display: flex; gap: 8px;">
+        <button id="doLogin" class="btn btn-sm" style="flex:1;">Masuk</button>
+        <button id="doSignUp" class="btn btn-sm" style="flex:1; background:#555;">Daftar</button>
+        <button id="closeAuth" class="btn btn-sm" style="background:#eee; color:#333;">Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- Pop-up Tulis Curhatan -->
+  <!-- Pop-up Buat Curhatan -->
   <div id="postModal" class="modal">
     <div class="modal-content">
-      <h3>Tulis Curhatan Kamu</h3>
-      <textarea id="postContent" rows="4" placeholder="Apa yang sedang kamu rasakan hari ini?"></textarea>
-      <div style="margin-top: 10px; display: flex; gap: 8px;">
-        <button id="submitPost" class="btn btn-sm">Kirim Curhat</button>
-        <button id="closePost" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
+      <h3>Ruang Curhat</h3>
+      <textarea id="postContent" rows="5" placeholder="Tuliskan perasaannya hari ini..."></textarea>
+      <div style="margin-top: 12px; display: flex; gap: 8px;">
+        <button id="submitPost" class="btn btn-sm" style="flex:1;">Terbitkan</button>
+        <button id="closePost" class="btn btn-sm" style="background:#eee; color:#333;">Batal</button>
       </div>
     </div>
   </div>
@@ -73,7 +151,6 @@
     const authBtn = document.getElementById('authBtn');
     let currentUser = null;
 
-    // Cek Sesi Login
     async function checkUser() {
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
@@ -94,25 +171,26 @@
       }
     };
 
-    document.getElementById('openPostBtn').onclick = () => {
+    function openCurhatDialog() {
       if (!currentUser) {
-        alert('Kamu harus masuk/login terlebih dahulu untuk curhat!');
+        alert('Silakan masuk terlebih dahulu untuk curhat!');
         authModal.style.display = 'flex';
       } else {
         postModal.style.display = 'flex';
       }
-    };
+    }
 
+    document.getElementById('openPostBtn').onclick = openCurhatDialog;
+    document.getElementById('navCreate').onclick = openCurhatDialog;
     document.getElementById('closeAuth').onclick = () => authModal.style.display = 'none';
     document.getElementById('closePost').onclick = () => postModal.style.display = 'none';
 
-    // Register & Login
     document.getElementById('doSignUp').onclick = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const { error } = await supabaseClient.auth.signUp({ email, password });
       if (error) alert('Error: ' + error.message);
-      else alert('Pendaftaran berhasil! Silakan klik Masuk.');
+      else alert('Pendaftaran berhasil! Silakan masuk.');
     };
 
     document.getElementById('doLogin').onclick = async () => {
@@ -126,39 +204,52 @@
       }
     };
 
-    // Kirim Curhatan ke Supabase
+    // Menyimpan ke tabel 'curhat' di Supabase
     document.getElementById('submitPost').onclick = async () => {
       const content = document.getElementById('postContent').value;
-      if (!content) return alert('Isi curhatan tidak boleh kosong!');
+      if (!content) return alert('Isi cerita tidak boleh kosong!');
 
-      const { error } = await supabaseClient.from('posts').insert([
+      const { error } = await supabaseClient.from('curhat').insert([
         { content: content, user_id: currentUser.id }
       ]);
 
       if (error) {
         alert('Gagal mengirim: ' + error.message);
       } else {
-        alert('Curhatan berhasil diterbitkan!');
+        alert('Curhatan kamu berhasil terbit!');
         document.getElementById('postContent').value = '';
         postModal.style.display = 'none';
         loadPosts();
       }
     };
 
-    // Ambil Semua Curhatan dari Supabase
+    // Mengambil data dari tabel 'curhat' di Supabase
     async function loadPosts() {
       const container = document.getElementById('postsList');
-      const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
 
       if (error || !data || data.length === 0) {
-        container.innerHTML = '<p style="color: #666; margin-top: 10px;">Belum ada curhatan.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--gray); margin-top: 20px;">Belum ada curhatan di beranda.</p>';
         return;
       }
 
       container.innerHTML = data.map(p => `
         <div class="post-card">
-          <p>${p.content}</p>
-          <small style="color:#888;">${new Date(p.created_at).toLocaleString('id-ID')}</small>
+          <div class="post-header">
+            <div class="user-info">
+              <div class="avatar">👤</div>
+              <div>
+                <div class="user-name">Anggota CUIT</div>
+                <div class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</div>
+              </div>
+            </div>
+          </div>
+          <div class="post-body">${p.content}</div>
+          <div class="post-footer">
+            <div class="action-item">❤️ Suka</div>
+            <div class="action-item">💬 Tanggapi</div>
+            <div class="action-item">🎁 Hadiah</div>
+          </div>
         </div>
       `).join('');
     }
