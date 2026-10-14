@@ -7,209 +7,390 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #f4f7fe;
+      --bg: #f4f6fc;
       --card-bg: #ffffff;
       --primary: #6c5ce7;
+      --primary-light: #ece8ff;
       --primary-gradient: linear-gradient(135deg, #7451f8, #513cd8);
-      --text-dark: #1e1e38;
-      --gray: #8c8ea3;
-      --light-gray: #f2f4f9;
+      --text-main: #1c1d36;
+      --text-sub: #828599;
+      --border-color: #f0f2f8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text-dark); padding-bottom: 80px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text-main); padding-bottom: 75px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
 
-    /* Top Stats */
-    .top-stats-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 16px 4px; }
-    .stat-pill { background: #ffffff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); color: #1e1e38; }
+    /* Top Stats Bar */
+    .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 16px 4px; background: #fff; }
+    .stat-badge { background: #f0f3fa; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; color: #23233c; }
 
-    /* Header Banner Visual CUIT */
-    .hero-banner-custom { padding: 10px 16px 16px; position: relative; display: flex; align-items: center; justify-content: space-between; }
-    .hero-left { display: flex; align-items: center; gap: 12px; }
-    .cuit-icon-box { width: 56px; height: 56px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; box-shadow: 0 8px 18px rgba(108, 92, 231, 0.3); flex-shrink: 0; }
-    .cuit-text-box .title { font-size: 30px; font-weight: 900; color: #1e1354; letter-spacing: -1px; line-height: 1; }
-    .cuit-text-box .sub { font-size: 13px; font-style: italic; color: #4834d4; font-weight: 700; margin-top: 2px; }
-    .cuit-text-box .desc { font-size: 11px; color: #555; margin-top: 4px; font-weight: 600; }
-    
-    .hero-right-illustrations { display: flex; align-items: center; gap: 4px; position: relative; }
-    .bubble-heart { background: var(--primary-gradient); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25); transform: rotate(-8deg); }
-    .coins-stack { background: linear-gradient(135deg, #ffd700, #ff9900); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 14px; box-shadow: 0 6px 14px rgba(255, 153, 0, 0.4); border: 2px solid #fff; }
+    /* Banner Visual Header CUIT */
+    .hero-banner { background: linear-gradient(180deg, #e8f0fe 0%, #f4f6fc 100%); padding: 12px 16px 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .hero-left { display: flex; gap: 10px; align-items: flex-start; max-width: 75%; }
+    .logo-box { width: 52px; height: 52px; background: linear-gradient(135deg, #a272ff, #5c41f4); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(92, 65, 244, 0.25); flex-shrink: 0; }
+    .logo-heart { width: 24px; height: 24px; background: #ff4d79; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+    .hero-text h1 { font-size: 26px; font-weight: 900; color: #28157e; line-height: 1; letter-spacing: -0.5px; }
+    .hero-text .sub-title { font-size: 12px; font-weight: 800; color: #28157e; margin-top: 1px; font-style: italic; }
+    .hero-text .tagline { font-size: 10px; font-weight: 600; color: #382490; margin-top: 4px; line-height: 1.3; }
 
-    /* Kartu Landing Page */
-    .landing-card { background: linear-gradient(180deg, #ffffff 0%, #eef3fe 100%); margin: 0 12px 16px; padding: 24px 20px; border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); }
-    .heart-icon-box { width: 54px; height: 54px; background: #6c5ce7; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; margin-bottom: 16px; box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3); }
-    .landing-card h2 { font-size: 24px; font-weight: 900; color: #1e1e38; margin-bottom: 12px; }
-    .landing-card p { font-size: 14px; color: #555; line-height: 1.5; margin-bottom: 20px; }
+    .hero-right-decor { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .decor-bubble { width: 34px; height: 34px; background: linear-gradient(135deg, #a272ff, #5c41f4); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; transform: rotate(-10deg); }
+    .decor-coins { background: linear-gradient(135deg, #ffca28, #ffa000); padding: 2px 6px; border-radius: 10px; display: flex; align-items: center; color: #fff; font-weight: 900; font-size: 11px; border: 1.5px solid #fff; }
 
-    .btn-masuk-landing { background: var(--primary-gradient); color: #fff; border: none; padding: 14px; border-radius: 16px; font-weight: 800; font-size: 15px; cursor: pointer; width: 100%; display: block; text-align: center; box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3); margin-bottom: 12px; }
-    .btn-jelajah-landing { background: #eef0f8; color: #4834d4; border: none; padding: 12px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer; width: 100%; display: block; text-align: center; }
-
-    /* Kartu Kategori Perasaan */
-    .feelings-card { background: #ffffff; margin: 0 12px 20px; padding: 20px 16px; border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); }
-    .feelings-card h3 { font-size: 18px; font-weight: 800; color: #1e1e38; margin-bottom: 14px; }
-    
-    .tags-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .tag-item { padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: none; }
-    
-    /* Warna Tag Kategori */
-    .tag-bahagia { background: #e8f8f0; color: #2ecc71; }
-    .tag-sedih { background: #eaf2ff; color: #3498db; }
-    .tag-marah { background: #ffebee; color: #e74c3c; }
-    .tag-bingung { background: #fff8e1; color: #f39c12; }
-    .tag-cemas { background: #f3e5f5; color: #9b59b6; }
-    .tag-bersyukur { background: #e0f2f1; color: #16a085; }
-    .tag-kecewa { background: #eceff1; color: #607d8b; }
-    .tag-semangat { background: #fff3e0; color: #e67e22; }
-    .tag-kesepian { background: #e8eaf6; color: #3f51b5; }
-    .tag-cinta { background: #fce4ec; color: #e91e63; }
-    .tag-rindu { background: #f3e5f5; color: #8e44ad; }
-    .tag-humor { background: #fffde7; color: #f1c40f; }
-
-    .feelings-footer-text { font-size: 12px; color: var(--gray); line-height: 1.5; }
-
-    /* Page Visibility */
-    .page-section { display: none; }
+    /* Page Visibility & Sections */
+    .page-section { display: none; padding: 12px 16px; }
     .page-section.active { display: block; }
 
-    /* Feed Board Normal */
-    .beranda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .btn-curhat-purple { background: var(--primary-gradient); color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; }
+    /* Tombol Kembali (Back) */
+    .back-btn { width: 36px; height: 36px; background: #ece8ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 16px; margin-bottom: 12px; border: none; cursor: pointer; }
+
+    /* Headers Section */
+    .section-title { font-size: 22px; font-weight: 900; color: #1c1d36; margin-bottom: 4px; }
+    .section-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 16px; }
+
+    /* Buttons */
+    .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 10px 18px; border-radius: 14px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.25); }
+    .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 10px 18px; border-radius: 14px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .btn-sm-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Filter Pills */
+    .pills-group { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .pill-btn { padding: 8px 18px; border-radius: 16px; background: #eef1f8; color: #5a5e75; font-size: 12px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
+    .pill-btn.active { background: var(--primary); color: #ffffff; }
+
+    /* Post Cards Feed */
     .feed-container { display: flex; flex-direction: column; gap: 12px; }
-    .post-card { background: #ffffff; border-radius: 20px; padding: 16px; border: 1px solid #edf0f8; }
-    .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .post-card { background: #ffffff; border-radius: 20px; padding: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     .user-info { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #e2e5f0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .user-name { font-weight: 700; font-size: 14px; }
-    .post-time { font-size: 11px; color: var(--gray); }
-    .post-body { font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 12px; }
-    .post-footer { display: flex; gap: 16px; border-top: 1px solid #ebedf5; padding-top: 10px; font-size: 13px; color: var(--gray); font-weight: 600; }
+    .avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: #e2e7f5; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #d0d7ea; }
+    .user-details { display: flex; flex-direction: column; gap: 2px; }
+    .user-name-row { display: flex; align-items: center; gap: 6px; }
+    .user-name { font-weight: 800; font-size: 14px; color: var(--text-main); }
+    .user-handle { font-size: 12px; color: var(--text-sub); font-weight: 500; }
+    .badge-row { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+    .badge-pemula { background: #ece8ff; color: var(--primary); }
+    .badge-perasaan { background: #e8f8f0; color: #2ecc71; }
+    .post-time { font-size: 11px; color: var(--text-sub); }
 
-    /* Nav Bar Bottom */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eef0f6; z-index: 20; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--gray); cursor: pointer; font-weight: 600; }
+    .post-body { font-size: 14px; line-height: 1.5; color: #2c2e43; margin-bottom: 12px; word-break: break-word; }
+    .badge-publik { background: #eaf2ff; color: #3498db; margin-bottom: 12px; display: inline-flex; }
+
+    .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 10px; overflow-x: auto; }
+    .action-chip { background: #f4f6fc; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
+
+    /* Inputs & Form Controls */
+    input[type="text"], textarea, select { width: 100%; padding: 12px; border: 1px solid #e2e7f5; border-radius: 14px; font-size: 13px; outline: none; background: #fff; margin-bottom: 10px; }
+
+    /* Info Yellow Box (Live) */
+    .info-box-yellow { background: #fffde7; border: 1px solid #fff59d; padding: 14px; border-radius: 16px; font-size: 12px; color: #7f6000; line-height: 1.5; margin-bottom: 14px; }
+
+    /* Profil Page Card Layout */
+    .profile-card { background: #ffffff; border-radius: 20px; padding: 18px; border: 1px solid var(--border-color); margin-bottom: 14px; }
+    .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+    .stat-card-item { background: #f8f9fe; padding: 12px; border-radius: 14px; }
+    .stat-card-item .val { font-size: 18px; font-weight: 900; color: var(--text-main); }
+    .stat-card-item .lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+    .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+    /* Bottom Navigation Bar */
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
-    .nav-icon { font-size: 18px; margin-bottom: 2px; }
+    .nav-item.active .nav-icon-bg { background: #ece8ff; width: 42px; height: 26px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .nav-icon { font-size: 16px; }
 
-    /* Modals */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
-    .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 90%; max-width: 400px; }
-    textarea, input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--light-gray); border-radius: 12px; font-size: 14px; outline: none; }
-    .btn-modal { background: var(--primary-gradient); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+    .modal-content { background: #fff; padding: 22px; border-radius: 20px; width: 90%; max-width: 380px; }
   </style>
 </head>
 <body>
 
-  <!-- Top Stats -->
-  <div class="top-stats-bar">
-    <div class="stat-pill">🔔 1</div>
-    <div class="stat-pill">🪙 120</div>
+  <!-- Top Stats Bar -->
+  <div class="top-bar">
+    <div class="stat-badge">🔔 1</div>
+    <div class="stat-badge">🪙 120</div>
   </div>
 
-  <!-- Header Banner CUIT -->
-  <div class="hero-banner-custom">
+  <!-- Hero Banner CUIT -->
+  <div class="hero-banner">
     <div class="hero-left">
-      <div class="cuit-icon-box">🤍</div>
-      <div class="cuit-text-box">
-        <div class="title">CUIT✨</div>
-        <div class="sub">Curhat dapat Duit</div>
-        <div class="desc">Cerita kamu didengar, dihargai, dan bisa dapat hadiah!</div>
+      <div class="logo-box">
+        <div class="logo-heart">❤️</div>
+      </div>
+      <div class="hero-text">
+        <h1>CUIT✨</h1>
+        <div class="sub-title">Curhat dapat Duit</div>
+        <div class="tagline">Cerita kamu didengar, dihargai, dan bisa dapat hadiah!</div>
       </div>
     </div>
-    <div class="hero-right-illustrations">
-      <div class="bubble-heart">💜</div>
-      <div class="coins-stack">C</div>
+    <div class="hero-right-decor">
+      <div class="decor-bubble">🤍</div>
+      <div class="decor-coins">🪙 C</div>
     </div>
   </div>
 
-  <!-- TAMPILAN UNTUK PENGUNJUNG / BELUM LOGIN (LANDING SECTION) -->
-  <div id="landingView" class="page-section active">
-    
-    <div class="landing-card">
-      <div class="heart-icon-box">🤍</div>
-      <h2>Cerita kamu berarti.</h2>
-      <p>Ruang aman untuk berbagi perasaan, menemukan teman, dan saling memberi dukungan.</p>
-      
-      <button class="btn-masuk-landing" onclick="authModal.style.display='flex'">Masuk ke CUIT</button>
-      <button class="btn-jelajah-landing" onclick="exploreAsGuest()">Jelajahi sebagai Pengunjung</button>
+  <!-- 1. HALAMAN BERANDA -->
+  <div id="pageHome" class="page-section active">
+    <button class="back-btn" onclick="alert('Ini adalah halaman utama')">←</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+      <h2 class="section-title">Beranda</h2>
+      <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
+    </div>
+    <div class="section-sub">Ada cerita baru untuk kamu hari ini.</div>
+
+    <div class="pills-group">
+      <button class="pill-btn active">Semua</button>
+      <button class="pill-btn">Mengikuti</button>
     </div>
 
-    <div class="feelings-card">
-      <h3>Mulai dari perasaanmu</h3>
-      
-      <div class="tags-grid">
-        <button class="tag-item tag-bahagia" onclick="filterByTag('Bahagia')">🌱 Bahagia</button>
-        <button class="tag-item tag-sedih" onclick="filterByTag('Sedih')">🌧️ Sedih</button>
-        <button class="tag-item tag-marah" onclick="filterByTag('Marah')">🌶️ Marah</button>
-        <button class="tag-item tag-bingung" onclick="filterByTag('Bingung')">🌀 Bingung</button>
-        <button class="tag-item tag-cemas" onclick="filterByTag('Cemas')">☁️ Cemas</button>
-        <button class="tag-item tag-bersyukur" onclick="filterByTag('Bersyukur')">🤲 Bersyukur</button>
-        <button class="tag-item tag-kecewa" onclick="filterByTag('Kecewa')">🌊 Kecewa</button>
-        <button class="tag-item tag-semangat" onclick="filterByTag('Semangat')">🔥 Semangat</button>
-        <button class="tag-item tag-kesepian" onclick="filterByTag('Kesepian')">🌙 Kesepian</button>
-        <button class="tag-item tag-cinta" onclick="filterByTag('Cinta')">🌸 Cinta</button>
-        <button class="tag-item tag-rindu" onclick="filterByTag('Rindu')">💜 Rindu</button>
-        <button class="tag-item tag-humor" onclick="filterByTag('Humor')">😄 Humor</button>
+    <div class="feed-container" id="postsList">
+      <!-- Post Card 1 -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="user-info">
+            <div class="avatar-circle">🤍</div>
+            <div class="user-details">
+              <div class="user-name-row">
+                <span class="user-name">Yan</span>
+                <span class="user-handle">@anggotapn66b</span>
+              </div>
+              <div class="badge-row">
+                <span class="btn-sm-badge badge-pemula">PEMULA</span>
+                <span class="btn-sm-badge badge-perasaan">🌱 Bahagia</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+            <button class="btn-secondary" style="padding: 4px 8px; border-radius: 8px;">🚩</button>
+            <span class="post-time">14/10/26, 10.45</span>
+          </div>
+        </div>
+        <div class="post-body">Mencoba apk cuit</div>
+        <span class="btn-sm-badge badge-publik">🌐 Publik</span>
+        <div class="post-footer-actions">
+          <div class="action-chip">♡ Suka (1)</div>
+          <div class="action-chip">💬 Komentar (0)</div>
+          <div class="action-chip">🎁 Gift (0)</div>
+          <div class="action-chip">Profil</div>
+        </div>
       </div>
 
-      <p class="feelings-footer-text">
-        Baca curhatan publik tanpa akun. Untuk menyukai, berkomentar, memberi gift, atau membuat cerita, silakan masuk sebagai anggota demo.
+      <!-- Post Card 2 -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="user-info">
+            <div class="avatar-circle">💠</div>
+            <div class="user-details">
+              <div class="user-name-row">
+                <span class="user-name">Nara Putri</span>
+                <span class="user-handle">@ruangsenja</span>
+              </div>
+              <div class="badge-row">
+                <span class="btn-sm-badge badge-pemula" style="background:#eaf2ff; color:#3498db;">AKTIF</span>
+                <span class="btn-sm-badge badge-perasaan" style="background:#f3e5f5; color:#9b59b6;">☁️ Cemas</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+            <button class="btn-secondary" style="padding: 4px 8px; border-radius: 8px;">🚩</button>
+            <span class="post-time">8 menit lalu</span>
+          </div>
+        </div>
+        <div class="post-body">Besok ada langkah baru yang harus kuambil. Jujur, aku takut gagal. Tapi hari ini aku memilih menyiapkan diri sedikit demi sedikit, bukan menyerah sebelum mencoba.</div>
+        <span class="btn-sm-badge badge-publik">🌐 Publik</span>
+        <div class="post-footer-actions">
+          <div class="action-chip">♡ Suka (3)</div>
+          <div class="action-chip">💬 Komentar (1)</div>
+          <div class="action-chip">🎁 Gift (0)</div>
+          <div class="action-chip">Profil</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HALAMAN CARI (JELAJAHI CUIT) -->
+  <div id="pageSearch" class="page-section">
+    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <h2 class="section-title">Jelajahi CUIT</h2>
+    <input type="text" placeholder="Cari curhatan, anggota, komunitas..." style="margin-top: 10px;">
+    
+    <label style="font-size: 12px; font-weight: 700; color: #333; margin-top: 6px; display: block;">Filter perasaan</label>
+    <select>
+      <option>Semua perasaan</option>
+      <option>🌱 Bahagia</option>
+      <option>🌧️ Sedih</option>
+      <option>🌶️ Marah</option>
+      <option>☁️ Cemas</option>
+    </select>
+
+    <div class="pills-group" style="margin-top: 10px;">
+      <button class="pill-btn active">Semua</button>
+      <button class="pill-btn">Curhatan</button>
+      <button class="pill-btn">Anggota</button>
+      <button class="pill-btn">Komunitas</button>
+    </div>
+
+    <div class="feed-container">
+      <div class="post-card">
+        <div class="post-header">
+          <div class="user-info">
+            <div class="avatar-circle">🤍</div>
+            <div class="user-details">
+              <div class="user-name-row">
+                <span class="user-name">Yan</span>
+                <span class="user-handle">@anggotapn66b</span>
+              </div>
+              <div class="badge-row">
+                <span class="btn-sm-badge badge-pemula">PEMULA</span>
+                <span class="btn-sm-badge badge-perasaan">🌱 Bahagia</span>
+              </div>
+            </div>
+          </div>
+          <span class="post-time">14/10/26, 10.45</span>
+        </div>
+        <div class="post-body">Mencoba apk cuit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. HALAMAN BUAT CURHATAN -->
+  <div id="pageCreate" class="page-section">
+    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <h2 class="section-title">Buat curhatan</h2>
+    <div class="section-sub">Tulis dengan nyaman. Ceritamu bisa menjadi penguat bagi orang lain.</div>
+
+    <div style="background: #fff; padding: 16px; border-radius: 20px; border: 1px solid var(--border-color);">
+      <label style="font-size: 13px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 8px;">Apa yang ingin kamu ceritakan?</label>
+      <textarea rows="5" placeholder="Tulis ceritamu di sini..."></textarea>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 14px;">0/1200 karakter</div>
+
+      <label style="font-size: 13px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 8px;">Pilih perasaan</label>
+      <select>
+        <option>🌱 Bahagia</option>
+        <option>🌧️ Sedih</option>
+        <option>🌶️ Marah</option>
+        <option>☁️ Cemas</option>
+      </select>
+
+      <label style="font-size: 13px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 8px; margin-top: 10px;">Siapa yang boleh membaca?</label>
+      <select>
+        <option>Publik</option>
+        <option>Hanya Pengikut</option>
+        <option>Privat</option>
+      </select>
+
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button class="btn-primary" style="flex: 1;" onclick="alert('Curhatan berhasil diterbitkan!')">Terbitkan</button>
+        <button class="btn-secondary" style="flex: 1.2;" onclick="alert('Disimpan ke draf')">Simpan sebagai Draf</button>
+        <button class="btn-secondary" style="background: #f4f6fc;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. HALAMAN LIVE TEKS -->
+  <div id="pageLive" class="page-section">
+    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+      <div>
+        <h2 class="section-title">Live Teks</h2>
+        <div class="section-sub" style="margin-bottom: 0;">Ngobrol lewat tulisan, tanpa audio atau video.</div>
+      </div>
+      <button class="btn-primary" onclick="alert('Mulai Live Teks!')">+ Mulai Live</button>
+    </div>
+
+    <div class="info-box-yellow">
+      Simulasi lokal: komentar tidak tersinkron antarperangkat. Biaya mulai 10 koin berbayar; masuk dan absen masing-masing 1 koin berbayar.
+    </div>
+
+    <div style="background: #fff; padding: 20px; border-radius: 20px; text-align: center; color: var(--text-sub); font-size: 13px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+      Belum ada Live aktif. Kamu bisa mencoba memulai jika level dan saldo memenuhi syarat.
+    </div>
+
+    <div style="background: #fff; padding: 18px; border-radius: 20px; border: 1px solid var(--border-color);">
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 8px;">Catatan Live</h3>
+      <p style="font-size: 12px; color: var(--text-sub); line-height: 1.5;">
+        Timer simulasi diperbarui saat halaman dibuka. Sesi otomatis ditandai selesai jika melewati batas durasi. Peringkat dihitung dari nilai gift, bukan biaya masuk atau absen.
       </p>
     </div>
 
-  </div>
-
-  <!-- TAMPILAN BERANDA UTAMA (SAAT LOGIN ATAU JELAJAH) -->
-  <div id="pageHome" class="page-section" style="padding: 0 12px;">
-    <div class="beranda-header">
-      <h2>Beranda Curhatan</h2>
-      <button class="btn-curhat-purple" id="openPostBtn">+ Curhat</button>
-    </div>
-    <div class="feed-container" id="postsList">
-      <p style="text-align: center; color: var(--gray); margin-top: 20px;">Memuat cerita...</p>
+    <div style="text-align: center; font-size: 11px; color: var(--text-sub); margin-top: 20px;">
+      CUIT • Curhat Dapat Duit • Prototipe lokal
     </div>
   </div>
 
-  <!-- CARI -->
-  <div id="pageSearch" class="page-section" style="padding: 0 12px;">
-    <h2 style="margin-bottom: 12px;">Cari Curhatan</h2>
-    <input type="text" id="searchInput" placeholder="Ketik kata kunci atau nama..." onkeyup="searchPosts()">
-    <div class="feed-container" id="searchResults" style="margin-top: 12px;">
-      <p style="text-align: center; color: var(--gray);">Tulis kata kunci untuk mencari curhatan.</p>
+  <!-- 5. HALAMAN PROFIL -->
+  <div id="pageProfile" class="page-section">
+    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <h2 class="section-title" style="margin-bottom: 16px;">Profil</h2>
+
+    <div class="profile-card">
+      <div class="profile-header-flex">
+        <div class="user-info">
+          <div class="avatar-circle" style="width: 54px; height: 54px; font-size: 24px;">🤍</div>
+          <div>
+            <div style="font-size: 18px; font-weight: 900;" id="profName">Yan</div>
+            <div style="font-size: 12px; color: var(--text-sub);" id="profHandle">@anggota0k6qt</div>
+            <span class="btn-sm-badge badge-pemula" style="margin-top: 4px;">PEMULA</span>
+          </div>
+        </div>
+        <button class="btn-secondary" style="padding: 6px 14px;" onclick="alert('Ubah Profil')">Edit</button>
+      </div>
+
+      <div style="font-size: 13px; color: #444; margin-bottom: 10px;">Anggota baru CUIT.</div>
+
+      <div class="profile-stats-grid">
+        <div class="stat-card-item">
+          <div class="val">0</div>
+          <div class="lbl">Pengikut</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val">0</div>
+          <div class="lbl">Mengikuti</div>
+        </div>
+      </div>
+
+      <div class="stat-card-item" style="margin-bottom: 12px;">
+        <div class="val">0</div>
+        <div class="lbl">Skor demo</div>
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; text-align: center;" onclick="alert('Buka Panel Moderasi')">Panel moderasi demo</button>
+    </div>
+
+    <div class="profile-menu-grid">
+      <div class="menu-btn-item" onclick="alert('Buka Dompet')">🪙 Dompet</div>
+      <div class="menu-btn-item" onclick="alert('Buka Notifikasi')">🔔 Notifikasi</div>
+      <div class="menu-btn-item" onclick="alert('Buka Komunitas')">👥 Komunitas</div>
+      <div class="menu-btn-item" onclick="alert('Buka Pengaturan')">⚙️ Pengaturan</div>
     </div>
   </div>
 
-  <!-- LIVE -->
-  <div id="pageLive" class="page-section" style="padding: 0 12px;">
-    <h2 style="margin-bottom: 12px;">Ruang Live Curhat 📻</h2>
-    <div style="background: #fff; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
-      <p style="font-weight: 700; color: var(--primary);">Syarat & Ketentuan Live:</p>
-      <ul style="font-size: 12px; margin-left: 18px; margin-top: 6px; line-height: 1.5; color: #444;">
-        <li>Pengguna terdaftar dan sudah login ke akun.</li>
-        <li>Minimal saldo 100 koin untuk membuat ruang siaran.</li>
-      </ul>
-      <button onclick="alert('Fitur siaran live audio siap diluncurkan!')" class="btn-curhat-purple" style="width: 100%; margin-top: 12px; justify-content: center;">Mulai Siaran</button>
-    </div>
-  </div>
-
-  <!-- PROFIL -->
-  <div id="pageProfile" class="page-section" style="padding: 0 12px;">
-    <h2 style="margin-bottom: 12px;">Profil Saya</h2>
-    <div style="text-align: center; padding: 16px; background: #fff; border-radius: 18px; margin-bottom: 14px;">
-      <div class="avatar" style="width:52px; height:52px; margin:0 auto 8px; font-size:22px;">👤</div>
-      <div id="profName" style="font-weight: 800; font-size: 16px;">Tamu CUIT</div>
-      <div id="profEmail" style="font-size: 12px; color: var(--gray);">Belum login</div>
-      <button id="profLogoutBtn" onclick="authBtnAction()" class="btn-modal" style="background:#ff7675; margin-top:10px; width:auto; padding:6px 16px; display:none;">Keluar</button>
-    </div>
-    <h3 style="font-size: 14px; margin-bottom: 10px;">Riwayat Curhatan Saya</h3>
-    <div class="feed-container" id="myPostsList"></div>
-  </div>
-
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation Bar -->
   <div class="nav-bar">
-    <div class="nav-item active" onclick="switchTab('landingView', this)"><span class="nav-icon">🏠</span>Beranda</div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)"><span class="nav-icon">🔍</span>Cari</div>
-    <div class="nav-item" id="navCreate"><span class="nav-icon">➕</span>Buat</div>
-    <div class="nav-item" onclick="switchTab('pageLive', this)"><span class="nav-icon">📻</span>Live</div>
-    <div class="nav-item" onclick="switchTab('pageProfile', this)"><span class="nav-icon">👤</span>Profil</div>
+    <div class="nav-item active" onclick="switchTab('pageHome', this)">
+      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
+      <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageSearch', this)">
+      <span class="nav-icon">🔍</span>
+      <span>Cari</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageCreate', this)">
+      <span class="nav-icon">➕</span>
+      <span>Buat</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageLive', this)">
+      <span class="nav-icon">📄</span>
+      <span>Live</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageProfile', this)">
+      <span class="nav-icon">🙂</span>
+      <span>Profil</span>
+    </div>
   </div>
 
   <!-- Pop-up Login -->
@@ -218,24 +399,10 @@
       <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun</h3>
       <input type="email" id="email" placeholder="Alamat Email">
       <input type="password" id="password" placeholder="Kata Sandi">
-      <div style="margin-top: 12px; display: flex; gap: 8px;">
-        <button id="doLogin" class="btn-modal" style="flex:1;">Masuk</button>
-        <button id="doSignUp" class="btn-modal" style="flex:1; background:#555;">Daftar</button>
-        <button id="closeAuth" class="btn-modal" style="background:#eee; color:#333;">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Pop-up Curhat -->
-  <div id="postModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 8px;">Ruang Curhat</h3>
-      <label style="font-size: 12px; color: var(--gray); font-weight: 700;">Nama Panggilan Pengirim:</label>
-      <input type="text" id="nicknameInput" placeholder="Contoh: Yan Kasmaran">
-      <textarea id="postContent" rows="4" placeholder="Tuliskan cerita perasaannya..."></textarea>
-      <div style="margin-top: 12px; display: flex; gap: 8px;">
-        <button id="submitPost" class="btn-modal" style="flex:1;">Terbitkan</button>
-        <button id="closePost" class="btn-modal" style="background:#eee; color:#333;">Batal</button>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button id="doLogin" class="btn-primary" style="flex:1;">Masuk</button>
+        <button id="doSignUp" class="btn-secondary" style="flex:1;">Daftar</button>
+        <button id="closeAuth" class="btn-secondary" style="background:#eee;" onclick="document.getElementById('authModal').style.display='none'">Batal</button>
       </div>
     </div>
   </div>
@@ -245,187 +412,30 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const authModal = document.getElementById('authModal');
-    const postModal = document.getElementById('postModal');
     let currentUser = null;
-    let allPostsCache = [];
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
-      
-      document.getElementById(pageId).classList.add('active');
-      if (navElement) navElement.classList.add('active');
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
+        nav.classList.remove('active');
+        const iconBg = nav.querySelector('.nav-icon-bg');
+        if (iconBg) {
+          nav.innerHTML = nav.innerHTML.replace('<div class="nav-icon-bg">', '').replace('</div>', '');
+        }
+      });
 
-      if (pageId === 'pageProfile') renderProfile();
+      document.getElementById(pageId).classList.add('active');
+      if (navElement) {
+        navElement.classList.add('active');
+      }
     }
 
     async function checkUser() {
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
-      loadPosts();
-    }
-
-    async function authBtnAction() {
       if (currentUser) {
-        await supabaseClient.auth.signOut();
-        location.reload();
-      } else {
-        authModal.style.display = 'flex';
-      }
-    }
-
-    function exploreAsGuest() {
-      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
-    }
-
-    function filterByTag(tagName) {
-      exploreAsGuest();
-      searchPostsByTag(tagName);
-    }
-
-    function openCurhatDialog() {
-      if (!currentUser) {
-        alert('Silakan masuk terlebih dahulu untuk curhat!');
-        authModal.style.display = 'flex';
-      } else {
-        const savedName = localStorage.getItem('cuit_nickname') || '';
-        document.getElementById('nicknameInput').value = savedName;
-        postModal.style.display = 'flex';
-      }
-    }
-
-    document.getElementById('openPostBtn').onclick = openCurhatDialog;
-    document.getElementById('navCreate').onclick = openCurhatDialog;
-    document.getElementById('closeAuth').onclick = () => authModal.style.display = 'none';
-    document.getElementById('closePost').onclick = () => postModal.style.display = 'none';
-
-    document.getElementById('doSignUp').onclick = async () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const { error } = await supabaseClient.auth.signUp({ email, password });
-      if (error) alert('Error: ' + error.message);
-      else alert('Pendaftaran berhasil! Silakan klik Masuk.');
-    };
-
-    document.getElementById('doLogin').onclick = async () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) alert('Gagal masuk: ' + error.message);
-      else {
-        authModal.style.display = 'none';
-        checkUser();
-        exploreAsGuest();
-      }
-    };
-
-    document.getElementById('submitPost').onclick = async () => {
-      const nickname = document.getElementById('nicknameInput').value.trim();
-      const content = document.getElementById('postContent').value.trim();
-
-      if (!nickname) return alert('Nama panggilan wajib diisi!');
-      if (!content) return alert('Isi cerita tidak boleh kosong!');
-
-      localStorage.setItem('cuit_nickname', nickname);
-
-      const { error } = await supabaseClient.from('curhat').insert([
-        { content: content, user_id: currentUser.id, user_email: currentUser.email, username: nickname }
-      ]);
-
-      if (error) {
-        alert('Gagal mengirim: ' + error.message);
-      } else {
-        alert('Curhatan berhasil diterbitkan!');
-        document.getElementById('postContent').value = '';
-        postModal.style.display = 'none';
-        loadPosts();
-      }
-    };
-
-    async function loadPosts() {
-      const container = document.getElementById('postsList');
-      const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
-
-      if (error || !data || data.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--gray); margin-top: 20px;">Belum ada curhatan di beranda.</p>';
-        allPostsCache = [];
-        return;
-      }
-
-      allPostsCache = data;
-      container.innerHTML = data.map(p => renderCardHTML(p)).join('');
-    }
-
-    function renderCardHTML(p) {
-      const displayName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
-      return `
-        <div class="post-card">
-          <div class="post-header">
-            <div class="user-info">
-              <div class="avatar">👤</div>
-              <div>
-                <div class="user-name">${displayName}</div>
-                <div class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</div>
-              </div>
-            </div>
-          </div>
-          <div class="post-body">${p.content}</div>
-          <div class="post-footer">
-            <div class="action-item" onclick="alert('Masuk akun untuk memberikan suka!')">❤️ Suka</div>
-            <div class="action-item" onclick="alert('Masuk akun untuk menanggapi!')">💬 Tanggapi</div>
-            <div class="action-item" onclick="alert('Masuk akun untuk memberi hadiah!')">🎁 Hadiah</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function searchPosts() {
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      searchPostsByTag(query);
-    }
-
-    function searchPostsByTag(query) {
-      const container = document.getElementById('searchResults');
-      if (!query) {
-        container.innerHTML = '<p style="text-align: center; color: var(--gray);">Tulis kata kunci untuk mencari curhatan.</p>';
-        return;
-      }
-
-      const filtered = allPostsCache.filter(p => {
-        return (p.content && p.content.toLowerCase().includes(query)) || (p.username && p.username.toLowerCase().includes(query));
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--gray);">Tidak ditemukan curhatan yang sesuai.</p>';
-      } else {
-        container.innerHTML = filtered.map(p => renderCardHTML(p)).join('');
-      }
-    }
-
-    function renderProfile() {
-      const profName = document.getElementById('profName');
-      const profEmail = document.getElementById('profEmail');
-      const myPostsContainer = document.getElementById('myPostsList');
-      const logoutBtn = document.getElementById('profLogoutBtn');
-
-      if (currentUser) {
-        const savedName = localStorage.getItem('cuit_nickname') || currentUser.email.split('@')[0];
-        profName.innerText = savedName;
-        profEmail.innerText = currentUser.email;
-        logoutBtn.style.display = 'inline-block';
-
-        const myPosts = allPostsCache.filter(p => p.user_id === currentUser.id);
-        if (myPosts.length === 0) {
-          myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px;">Kamu belum pernah menerbitkan curhatan.</p>';
-        } else {
-          myPostsContainer.innerHTML = myPosts.map(p => renderCardHTML(p)).join('');
-        }
-      } else {
-        profName.innerText = 'Tamu CUIT';
-        profEmail.innerText = 'Belum masuk akun';
-        logoutBtn.style.display = 'none';
-        myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px;">Silakan masuk untuk melihat riwayat curhatan kamu.</p>';
+        document.getElementById('profName').innerText = localStorage.getItem('cuit_nickname') || 'Yan';
+        document.getElementById('profHandle').innerText = '@' + currentUser.email.split('@')[0];
       }
     }
 
