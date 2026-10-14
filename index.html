@@ -1,348 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>CUIT — Curhat dapat Duit</title>
-
-<!-- Supabase JS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root{--bg:#f6f5fb;--card:#fff;--ink:#29283a;--muted:#77768a;--line:#e9e7f1;--primary:#7164c8;--primary2:#eeeaff;--mint:#e0f5ec;--pink:#ffe6ed;--blue:#e4efff;--gold:#f6e7bd;--shadow:0 5px 22px #34275b0b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:13px;padding:10px 14px;background:var(--primary);color:white;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#f0eef8;color:#50477f}.danger{background:#fff0f1;color:#a8324c}.tiny{padding:6px 9px;font-size:12px}.muted{color:var(--muted)}.small{font-size:12px}.wrap{max-width:1040px;margin:auto;padding:16px 14px 90px}.top-actions{display:flex;gap:7px}.page{display:none}.page.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}h1,h2,h3,p{margin-top:0}h1{font-size:26px;line-height:1.2}h2{font-size:20px;margin-bottom:12px}h3{font-size:16px;margin-bottom:7px}.row{display:flex;align-items:center;gap:9px}.between{justify-content:space-between}.wraprow{display:flex;flex-wrap:wrap;gap:8px}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 9px;background:#f1eff8;color:#655c87;font-size:12px;font-weight:650}.emotion{background:var(--emo,#f1eff8)}.avatar{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:50%;font-size:22px;border:2px solid #fff;box-shadow:0 0 0 1px #ddd7ef}.av-PEMULA{background:#f5f3ef}.av-SAHABAT{background:#c9f0df}.av-AKTIF{background:#c7ddff}.av-BINTANG{background:#e2d1ff}.av-VIP{background:linear-gradient(135deg,#fff0bd,#d5a83e)}.av-SULTAN{background:linear-gradient(135deg,#272533,#d9ad48);color:white}.posthead{display:flex;gap:10px;align-items:center;margin-bottom:12px}.postbody{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 13px}.actions{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--line);padding-top:10px}.actions button{font-size:12px;padding:7px 10px}.field{margin:10px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}.field input,.field textarea,.field select,.searchbox{width:100%;border:1px solid #dedbea;border-radius:12px;padding:11px 12px;background:#fff;color:var(--ink);outline-color:#8d80df}.field textarea{min-height:125px;resize:vertical}.nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#ffffffed;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:center;padding:7px max(8px,env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom));gap:4px}.nav button{flex:1;max-width:190px;background:transparent;color:#77738b;padding:8px 3px;font-size:12px}.nav button.active{background:var(--primary2);color:#5c50b1}.nav span{display:block;font-size:19px;line-height:1.2}.notice{padding:10px 12px;border-radius:12px;background:#fff6d9;color:#735c19;font-size:13px;margin-bottom:12px}.empty{text-align:center;padding:25px;color:var(--muted)}.tabs{display:flex;gap:7px;margin-bottom:12px}.tabs button{background:#efedf6;color:#6d6688}.tabs button.active{background:var(--primary);color:#fff}.listitem{padding:12px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border-bottom:0}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.giftgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.gift{background:#fbf9ff;color:var(--ink);border:1px solid var(--line);padding:12px 5px}.gift strong{display:block}.gift span{display:block;font-size:12px;color:var(--muted)}.hero{padding:25px;background:linear-gradient(135deg,#f1edff,#e6f8f1);border-radius:24px;margin-bottom:15px}.kpi{background:#f8f6ff;border-radius:15px;padding:12px}.kpi strong{display:block;font-size:20px}.divider{height:1px;background:var(--line);margin:13px 0}.comment{background:#f8f7fc;border-radius:13px;padding:10px;margin-top:8px}.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#302b46;color:white;padding:10px 16px;border-radius:13px;z-index:30;box-shadow:var(--shadow);max-width:90%;display:none}.modalback{position:fixed;inset:0;background:#201b3688;z-index:20;display:none;align-items:flex-end;justify-content:center;padding:12px}.modal{width:min(560px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:22px;padding:18px}.modalback.show{display:flex}.close{float:right;background:#f0eef8;color:#50477f}.footer-note{font-size:12px;color:var(--muted);text-align:center;padding:10px}.community-card{display:flex;gap:12px;align-items:flex-start}.community-icon{width:48px;height:48px;display:grid;place-items:center;background:#f0eaff;border-radius:15px;font-size:23px;flex-shrink:0}
-@media(min-width:760px){.wrap{padding:24px 22px 35px}.nav{position:sticky;bottom:0;border:1px solid var(--line);border-radius:17px;max-width:700px;margin:0 auto 12px}.modalback{align-items:center}.grid2{grid-template-columns:repeat(3,minmax(0,1fr))}}
-
-/* Banner CUIT Modern */
-.cuit-banner{position:relative;isolation:isolate;display:flex;align-items:center;gap:12px;min-height:164px;margin:0 0 18px;padding:24px 15px 17px;overflow:hidden;border-radius:23px;background:radial-gradient(ellipse at 8% 92%,#d8caff 0,transparent 35%),radial-gradient(ellipse at 95% 20%,#bfe4ff 0,transparent 35%),linear-gradient(115deg,#f8f7ff 0%,#fff5fb 48%,#e9f7ff 100%);box-shadow:0 5px 20px #453a8710}
-.banner-art{flex:0 0 clamp(58px,16vw,112px);width:clamp(58px,16vw,112px);aspect-ratio:1;border-radius:30%;display:grid;place-items:center;background:linear-gradient(145deg,#c26bff,#5144f0 72%,#2c57e8);box-shadow:inset 0 4px 6px #ffffff8c,0 8px 15px #5140cb3d;transform:rotate(-4deg)}
-.banner-chat{width:67%;height:58%;position:relative;display:grid;place-items:center;border-radius:28% 28% 28% 10%;background:#fff;box-shadow:0 3px 5px #291a7b22;transform:rotate(4deg)}
-.banner-chat span{font-size:clamp(22px,5vw,42px);line-height:1;color:#ff4ba4;text-shadow:0 2px 0 #ffb4dc}
-.banner-copy{position:relative;z-index:1;min-width:0;flex:1}
-.banner-wordmark{position:relative;width:max-content;max-width:100%;font-family:system-ui,-apple-system,"Arial Black",sans-serif;font-size:clamp(39px,8.7vw,72px);font-weight:1000;letter-spacing:-.075em;line-height:.88;background:linear-gradient(180deg,#2187ff 0%,#1247e7 48%,#6325d9 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.banner-tagline{margin-top:7px;font-family:"Brush Script MT","Segoe Script",cursive;font-size:clamp(17px,4vw,30px);font-weight:800;font-style:italic;color:#35218d;white-space:nowrap}
-.banner-caption{margin-top:9px;font-size:clamp(9px,2.1vw,14px);font-weight:650;font-style:italic;line-height:1.35;color:#252d83}
-.banner-actions{position:absolute;top:9px;right:9px;display:flex;gap:5px}
-.banner-action{padding:5px 8px;border-radius:99px;background:#ffffffc9;font-size:11px;box-shadow:0 2px 7px #413a7910}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUIT – Curhat dapat Duit</title>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --bg: #f6f5fb; --card: #fff; --ink: #292d32; --primary: #6c5ce7; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+    body { background: var(--bg); color: var(--ink); padding: 16px; }
+    .banner { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); border-radius: 16px; padding: 20px; color: #1a1a24; margin-bottom: 20px; }
+    .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    .btn-sm { padding: 6px 12px; font-size: 14px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    
+    /* Modal / Pop-up style */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
+    .modal-content { background: #fff; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
+    .modal input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; }
+  </style>
 </head>
 <body>
-<div class="wrap">
 
-<header class="cuit-banner" aria-label="CUIT — Curhat dapat Duit">
-  <div class="banner-art" aria-hidden="true"><div class="banner-chat"><span>♥</span></div></div>
-  <div class="banner-copy">
-    <div class="banner-wordmark">CUIT</div>
-    <div class="banner-tagline">Curhat dapat Duit</div>
-    <div class="banner-caption">Setiap cerita punya arti.<br>Didengar, dihargai, dan dapat hadiah!</div>
+  <div class="header">
+    <h2>CUIT</h2>
+    <button id="authBtn" class="btn btn-sm">Masuk</button>
   </div>
-  <div class="banner-actions">
-    <button class="banner-action secondary tiny" onclick="openPage('notifications')">🔔 <b id="unread">0</b></button>
-    <button class="banner-action secondary tiny" onclick="openPage('wallet')">🪙 <span id="coinmini">0</span></button>
-    <button class="banner-action tiny" id="authBtn" onclick="handleAuthAction()">Masuk</button>
+
+  <div class="banner">
+    <h1>Curhat dapat Duit</h1>
+    <p>Setiap cerita punya arti. Didengar, dihargai, dan dapat hadiah!</p>
+    <br>
+    <button id="curhatBtn" class="btn">+ Curhat</button>
   </div>
-</header>
 
-<!-- BERANDA (Pengunjung Bebas Akses) -->
-<section id="page-home" class="page active">
-  <div class="row between">
-    <div>
-      <h1>Beranda</h1>
-      <p class="muted">Ada cerita baru untuk kamu hari ini.</p>
-    </div>
-    <button onclick="requireAuth(() => openPage('create'))">＋ Curhat</button>
-  </div>
-  <div class="tabs">
-    <button id="feed-all" class="active" onclick="setFeed('all')">Semua</button>
-    <button id="feed-follow" onclick="requireAuth(() => setFeed('follow'))">Mengikuti</button>
-  </div>
-  <div id="feed"></div>
-</section>
+  <h3>Beranda</h3>
+  <div id="postsList" style="margin-top: 12px;"><p style="color: #666;">Belum ada curhatan.</p></div>
 
-<!-- CARI -->
-<section id="page-search" class="page">
-  <h1>Jelajahi CUIT</h1>
-  <div class="field"><input class="searchbox" id="searchInput" placeholder="Cari curhatan..." oninput="renderSearch()"></div>
-  <div class="field"><label>Filter Perasaan</label><select id="searchEmotion" onchange="renderSearch()"><option value="">Semua Perasaan</option></select></div>
-  <div id="searchResults"></div>
-</section>
-
-<!-- BUAT CURHATAN -->
-<section id="page-create" class="page">
-  <h1>Buat Curhatan</h1>
-  <div class="card">
-    <div class="field"><label for="postText">Apa yang ingin kamu ceritakan?</label><textarea id="postText" maxlength="1200" placeholder="Tulis ceritamu di sini..."></textarea></div>
-    <div class="field"><label for="postEmotion">Pilih Perasaan</label><select id="postEmotion"></select></div>
-    <div class="field"><label for="postVisibility">Siapa yang boleh membaca?</label><select id="postVisibility"><option value="Publik">Publik</option><option value="Khusus Member">Khusus Member</option></select></div>
-    <button onclick="publishPost()">Terbitkan</button>
-  </div>
-</section>
-
-<!-- LIVE TEKS -->
-<section id="page-live" class="page">
-  <div class="row between">
-    <div><h1>Live Teks</h1><p class="muted">Ngobrol lewat tulisan tanpa audio/video.</p></div>
-    <button onclick="requireAuth(() => startLive())">＋ Mulai Live</button>
-  </div>
-  <div id="liveList"></div>
-</section>
-
-<!-- PROFIL -->
-<section id="page-profile" class="page">
-  <h1>Profil Saya</h1>
-  <div id="profileBox"></div>
-  <div class="card" style="margin-top:13px"><h2>Curhatan Saya</h2><div id="myPosts"></div></div>
-</section>
-
-<!-- DOMPET -->
-<section id="page-wallet" class="page">
-  <h1>Dompet CUIT</h1>
-  <div class="grid2">
-    <div class="kpi"><span class="muted small">Koin Gratis</span><strong id="freeBalance">0</strong></div>
-    <div class="kpi"><span class="muted small">Koin Berbayar</span><strong id="paidBalance">0</strong></div>
-  </div>
-  <div class="card" style="margin-top:13px"><h2>Paket Koin</h2><div id="coinPackages"></div></div>
-  <div class="card"><h2>Riwayat Transaksi</h2><div id="transactions"></div></div>
-</section>
-
-<!-- NOTIFIKASI -->
-<section id="page-notifications" class="page">
-  <div class="row between"><h1>Notifikasi</h1><button class="secondary tiny" onclick="markAllRead()">Tandai semua dibaca</button></div>
-  <div id="notificationList"></div>
-</section>
-
-<div class="footer-note">CUIT • Curhat Dapat Duit</div>
-</div>
-
-<nav class="nav" id="nav">
-  <button onclick="openPage('home')" data-page="home" class="active"><span>⌂</span>Beranda</button>
-  <button onclick="openPage('search')" data-page="search"><span>⌕</span>Cari</button>
-  <button onclick="requireAuth(() => openPage('create'))" data-page="create"><span>＋</span>Buat</button>
-  <button onclick="openPage('live')" data-page="live"><span>▤</span>Live</button>
-  <button onclick="requireAuth(() => openPage('profile'))" data-page="profile"><span>☺</span>Profil</button>
-</nav>
-
-<div id="toast" class="toast"></div>
-<div id="modalback" class="modalback" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
-
-<script>
-'use strict';
-
-// 1. KREDENSIAL SUPABASE LANGSUNG DENGAN ID PROYEK KAMU
-const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// 2. KONFIGURASI APLIKASI
-const CONFIG = {
-  gifts: [
-    {name:'Salam',value:1,emoji:'👋',words:'Salam hangat!'},
-    {name:'Senyum',value:2,emoji:'😊',words:'Senyum dulu!'},
-    {name:'Semangat',value:3,emoji:'💪',words:'Tetap semangat!'},
-    {name:'Doa',value:5,emoji:'🤲',words:'Doa terbaik untukmu.'},
-    {name:'Bintang',value:10,emoji:'⭐',words:'Kamu bersinar!'},
-    {name:'Bunga',value:20,emoji:'🌷',words:'Setulus apresiasi.'},
-    {name:'Mahkota',value:50,emoji:'👑',words:'Luar biasa!'},
-    {name:'Sultan',value:100,emoji:'💎',words:'Dukungan istimewa!'}
-  ],
-  liveStart: 10,
-  liveEnter: 1
-};
-
-const EMOTIONS = [['Bahagia','#dff4e5','🌱'],['Sedih','#dceaff','🌧️'],['Marah','#ffe0e5','🌶️'],['Bingung','#fff2c9','🌀'],['Cemas','#eee2ff','☁️'],['Bersyukur','#d8f5ec','🤲'],['Kecewa','#e3e8f0','🌫️'],['Semangat','#ffe8d3','🔥'],['Kesepian','#e3e9f1','🌙'],['Cinta','#ffe0eb','💗'],['Rindu','#e9e0ff','💜'],['Humor','#fff0c7','😄']];
-
-let currentUser = null;
-
-const $ = id => document.getElementById(id);
-const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function toast(msg){ const t=$('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toast.timer); toast.timer=setTimeout(()=>t.style.display='none',2600); }
-
-// 3. INISIALISASI DAN SESI AUTH
-async function initSession() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-    currentUser = profile;
-    $('authBtn').textContent = 'Keluar';
-  } else {
-    currentUser = null;
-    $('authBtn').textContent = 'Masuk';
-  }
-  updateUIHeader();
-  fetchPosts();
-}
-
-function updateUIHeader() {
-  if (currentUser) {
-    $('freeBalance').textContent = currentUser.free_coins || 0;
-    $('paidBalance').textContent = currentUser.paid_coins || 0;
-    $('coinmini').textContent = (currentUser.free_coins \vert{}\vert{} 0) + (currentUser.paid_coins \vert{}\vert{} 0); } else {$('freeBalance').textContent = 0;
-    $('paidBalance').textContent = 0;
-    $('coinmini').textContent = 0;
-  }
-}
-
-function requireAuth(actionCallback) {
-  if (!currentUser) {
-    showAuthModal();
-    return false;
-  }
-  actionCallback();
-}
-
-function handleAuthAction() {
-  if (currentUser) {
-    supabase.auth.signOut().then(() => {
-      currentUser = null;
-      toast('Berhasil keluar.');
-      initSession();
-    });
-  } else {
-    showAuthModal();
-  }
-}
-
-function showAuthModal() {
-  modal(`
-    <button class="close" onclick="closeModal()">Tutup</button>
-    <h2>Masuk atau Daftar</h2>
-    <div class="field"><label>Email</label><input id="authEmail" type="email" placeholder="email@domain.com"></div>
-    <div class="field"><label>Kata Sandi</label><input id="authPassword" type="password" placeholder="******"></div>
-    <div class="wraprow">
-      <button onclick="loginWithSupabase()">Masuk</button>
-      <button class="secondary" onclick="registerWithSupabase()">Daftar Baru</button>
-    </div>
-  `);
-}
-
-async function loginWithSupabase() {
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value.trim();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return toast('Gagal masuk: ' + error.message);
-  closeModal();
-  toast('Berhasil masuk!');
-  initSession();
-}
-
-async function registerWithSupabase() {
-  const email = $('authEmail').value.trim();
-  const password = $('authPassword').value.trim();
-  const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) return toast('Gagal daftar: ' + error.message);
-  closeModal();
-  toast('Pendaftaran berhasil! Silakan cek email kamu atau masuk.');
-}
-
-// 4. BROWSE & FETCH CURHATAN
-async function fetchPosts() {
-  let query = supabase.from('posts').select('*, profiles(name, username, level)').order('created_at', { ascending: false });
-  const { data: posts, error } = await query;
-  if (error) return console.error(error);
-  renderFeedHTML(posts || []);
-}
-
-function renderFeedHTML(posts) {
-  $('feed').innerHTML = posts.length ? posts.map(p => `
-    <article class="card">
-      <div class="posthead">
-        <div class="avatar av-${p.profiles?.level || 'PEMULA'}">🤍</div>
-        <div>
-          <strong>${esc(p.profiles?.name || 'Anonim')}</strong> <span class="muted small">@${esc(p.profiles?.username || 'user')}</span>
-          <div class="wraprow"><span class="pill">${p.emotion || 'Perasaan'}</span></div>
-        </div>
-      </div>
-      <div class="postbody">${esc(p.text)}</div>
-      <div class="actions">
-        <button class="secondary" onclick="requireAuth(() => likePost('${p.id}'))">♡ Suka (${p.likes_count || 0})</button>
-        <button class="secondary" onclick="requireAuth(() => openComments('${p.id}'))">💬 Komentar</button>
-        <button class="secondary" onclick="requireAuth(() => openGiftModal('${p.user_id}'))">🎁 Gift 100% Host</button>
-      </div>
-    </article>
-  `).join('') : '<div class="card empty">Belum ada curhatan.</div>';
-}
-
-// 5. NAVIGASI HALAMAN
-function openPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = $('page-' + name);
-  if (target) target.classList.add('active');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.page === name));
-  if (name === 'profile' && currentUser) renderProfile();
-}
-
-function modal(html) { $('modal').innerHTML = html; $('modalback').classList.add('show'); }
-function closeModal() { $('modalback').classList.remove('show'); }
-
-// 6. TERBITKAN POSTINGAN
-async function publishPost() {
-  requireAuth(async () => {
-    const text = $('postText').value.trim();
-    const emotion = $('postEmotion').value;
-    const visibility = $('postVisibility').value;
-    if (!text) return toast('Tulisan tidak boleh kosong.');
-
-    const { error } = await supabase.from('posts').insert([{ user_id: currentUser.id, text, emotion, visibility }]);
-    if (error) return toast('Gagal diterbitkan: ' + error.message);
-
-    // Tambah skor keaktifan ke Supabase
-    await supabase.rpc('increment_score', { user_id_param: currentUser.id, amount: 2 });
-
-    $('postText').value = '';
-    toast('Curhatan berhasil diterbitkan!');
-    openPage('home');
-    fetchPosts();
-  });
-}
-
-// 7. TRANSAKSI GIFT (100% KE HOST)
-function openGiftModal(recipientId) {
-  modal(`
-    <button class="close" onclick="closeModal()">Tutup</button>
-    <h2>Kirim Gift (100% ke Host) 🎁</h2>
-    <div class="giftgrid">
-      ${CONFIG.gifts.map(g => `<button class="gift" onclick="sendGift('${recipientId}',${g.value}, '${g.name}')"><strong>${g.emoji} ${g.name}</strong><span>${g.value} Koin</span></button>`).join('')}
-    </div>
-  `);
-}
-
-async function sendGift(recipientId, giftValue, giftName) {
-  if ((currentUser.free_coins + currentUser.paid_coins) < giftValue) {
-    return toast('Saldo koin kamu tidak cukup!');
-  }
-
-  // Panggil Stored Procedure SQL Supabase
-  const { error } = await supabase.rpc('process_gift_transaction', {
-    p_sender_id: currentUser.id,
-    p_recipient_id: recipientId,
-    p_gift_value: giftValue
-  });
-
-  if (error) return toast('Gagal mengirim gift: ' + error.message);
-
-  closeModal();
-  toast(`Gift ${giftName} terkirim! 100% koin diterima host.`);
-  initSession();
-}
-
-function renderProfile() {
-  $('profileBox').innerHTML = `
-    <div class="card">
-      <h2>${esc(currentUser.name || 'Pengguna CUIT')}</h2>
-      <p class="muted">@${esc(currentUser.username || 'user')}</p>
-      <span class="pill">${currentUser.level || 'PEMULA'}</span>
-      <div class="grid2" style="margin-top:12px">
-        <div class="kpi"><strong>${currentUser.score || 0}</strong><span class="small muted">Skor Poin</span></div>
+  <!-- Pop-up Login -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <h3>Masuk ke CUIT</h3>
+      <p style="font-size: 13px; color: #666; margin: 8px 0;">Gunakan email & kata sandi kamu</p>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Kata Sandi">
+      <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center;">
+        <button id="doLogin" class="btn btn-sm">Masuk</button>
+        <button id="doSignUp" class="btn btn-sm" style="background:#555;">Daftar</button>
+        <button id="closeModal" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
       </div>
     </div>
-  `;
-}
+  </div>
 
-// Inisialisasi Pilihan Emotion
-$('postEmotion').innerHTML = EMOTIONS.map(e => `<option value="${e[0]}">${e[2]} ${e[0]}</option>`).join('');
-$('searchEmotion').innerHTML = '<option value="">Semua Perasaan</option>' + EMOTIONS.map(e => `<option value="${e[0]}">${e[2]} ${e[0]}</option>`).join('');
+  <script>
+    // Inisialisasi Supabase
+    const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-initSession();
-</script>
+    const modal = document.getElementById('loginModal');
+    const authBtn = document.getElementById('authBtn');
+    const curhatBtn = document.getElementById('curhatBtn');
+
+    // Buka Modal saat tombol Masuk / Curhat diklik
+    authBtn.onclick = () => modal.style.display = 'flex';
+    curhatBtn.onclick = () => modal.style.display = 'flex';
+    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+
+    // Proses Daftar
+    document.getElementById('doSignUp').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) alert('Gagal daftar: ' + error.message);
+      else alert('Pendaftaran berhasil! Silakan klik Masuk.');
+    };
+
+    // Proses Login
+    document.getElementById('doLogin').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) alert('Gagal masuk: ' + error.message);
+      else {
+        alert('Berhasil masuk!');
+        modal.style.display = 'none';
+        authBtn.innerText = 'Keluar';
+      }
+    };
+  </script>
 </body>
 </html>
