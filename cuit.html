@@ -128,9 +128,9 @@
 <script>
 'use strict';
 
-// 1. KREDENSIAL SUPABASE
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'; // Ganti dengan URL Supabase kamu
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';                // Ganti dengan Anon Key Supabase kamu
+// 1. KREDENSIAL SUPABASE LANGSUNG DENGAN ID PROYEK KAMU
+const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // 2. KONFIGURASI APLIKASI
@@ -152,7 +152,6 @@ const CONFIG = {
 const EMOTIONS = [['Bahagia','#dff4e5','🌱'],['Sedih','#dceaff','🌧️'],['Marah','#ffe0e5','🌶️'],['Bingung','#fff2c9','🌀'],['Cemas','#eee2ff','☁️'],['Bersyukur','#d8f5ec','🤲'],['Kecewa','#e3e8f0','🌫️'],['Semangat','#ffe8d3','🔥'],['Kesepian','#e3e9f1','🌙'],['Cinta','#ffe0eb','💗'],['Rindu','#e9e0ff','💜'],['Humor','#fff0c7','😄']];
 
 let currentUser = null;
-let currentFeedMode = 'all';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
