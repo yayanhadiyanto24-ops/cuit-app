@@ -31,7 +31,7 @@ jobs:
           java-version: '21'
 
       - name: Siapkan Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Siapkan proyek Capacitor
         run: |
