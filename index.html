@@ -115,7 +115,7 @@
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-around; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
@@ -447,7 +447,7 @@
       <h3>🪙 Dompet & Top-Up Koin</h3>
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
         <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">120</span> Koin</div>
-        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">6.000</span></div>
+        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">600</span></div>
       </div>
       
       <label style="font-size: 12px; font-weight: 800; display: block; margin-top: 8px;">Pilih Paket Top-Up Koin Berbayar:</label>
@@ -463,16 +463,16 @@
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
       <h3>💸 Penarikan Saldo CUIT</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Koin Berbayar = Rp 50</div>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Koin Berbayar = Rp 5</div>
 
       <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan:</label>
       <select id="cashoutType" onchange="calcCashoutFee()">
-        <option value="dana">DANA (Min. Rp 10.000 / 200 Koin - Admin Rp 500)</option>
+        <option value="dana">DANA (Admin Rp 500)</option>
         <option value="bank">Transfer Bank (Biaya Transfer Rp 2.500 + Admin Rp 500)</option>
       </select>
 
       <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Koin Berbayar Dicairkan:</label>
-      <input type="number" id="cashoutCoins" value="200" oninput="calcCashoutFee()">
+      <input type="number" id="cashoutCoins" value="2000" oninput="calcCashoutFee()">
 
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
         <div>Gross Tunai: Rp <span id="coGross">10.000</span></div>
@@ -744,7 +744,7 @@
 
     function openWalletModal() {
       document.getElementById('wPaidCoin').innerText = paidCoins;
-      document.getElementById('wPaidValue').innerText = (paidCoins * 50).toLocaleString('id-ID');
+      document.getElementById('wPaidValue').innerText = (paidCoins * 5).toLocaleString('id-ID');
       document.getElementById('walletModal').style.display = 'flex';
     }
 
@@ -763,7 +763,7 @@
     function calcCashoutFee() {
       const type = document.getElementById('cashoutType').value;
       const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-      const gross = coins * 50;
+      const gross = coins * 5; // Konversi 1 Koin = Rp 5
       const fee = type === 'bank' ? 3000 : 500;
       const net = Math.max(0, gross - fee);
 
@@ -776,7 +776,7 @@
       const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
       const account = document.getElementById('cashoutAccount').value.trim();
 
-      if (coins < 200) return alert('Minimum penarikan adalah 200 Koin Berbayar (Rp 10.000)!');
+      if (coins < 200) return alert('Minimum penarikan adalah 200 Koin Berbayar (Rp 1.000)!');
       if (coins > paidCoins) return alert('Saldo Koin Berbayar Anda tidak cukup!');
       if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
 
