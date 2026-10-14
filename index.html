@@ -98,10 +98,15 @@
 
     .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
     .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-    .stat-card-item { background: #f8f9fe; padding: 10px; border-radius: 12px; }
-    .stat-card-item .val { font-size: 16px; font-weight: 900; color: var(--text-main); }
-    .stat-card-item .lbl { font-size: 10px; color: var(--text-sub); margin-top: 1px; }
+    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 12px 0; }
+    .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
+    .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
+    .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
+
+    /* Progress Bar Level */
+    .level-progress-container { background: #f0f3fa; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
+    .progress-bar-bg { width: 100%; height: 8px; background: #e2e7f5; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
+    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
 
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
@@ -298,10 +303,14 @@
             <span class="btn-sm-badge badge-pemula" id="profLevelTitle" style="margin-top: 2px;">🌱 PEMULA</span>
           </div>
         </div>
-        <button class="btn-secondary" style="padding: 5px 12px;" onclick="alert('Edit profil')">Edit</button>
+        <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
       </div>
 
       <div class="profile-stats-grid">
+        <div class="stat-card-item">
+          <div class="val" id="profExp">0 EXP</div>
+          <div class="lbl">Poin Level</div>
+        </div>
         <div class="stat-card-item">
           <div class="val" id="profFollowers">0</div>
           <div class="lbl">Pengikut</div>
@@ -312,7 +321,18 @@
         </div>
       </div>
 
-      <button class="btn-secondary" style="width: 100%; text-align: center;" onclick="openModerationPanel()">Panel Moderasi</button>
+      <!-- Level Progress Box -->
+      <div class="level-progress-container">
+        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
+          <span>Kemajuan Level</span>
+          <span id="levelNextInfo">50 EXP menuju 💧 PENDENGAR</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="levelProgressBar"></div>
+        </div>
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
@@ -349,6 +369,19 @@
     </div>
   </div>
 
+  <!-- Pop-up Modal Edit Profil -->
+  <div id="editProfileModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 8px;">Edit Profil Kamu</h3>
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">Nama Tampilan Baru:</label>
+      <input type="text" id="editDisplayName" placeholder="Masukkan nama tampilan...">
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex:1;" onclick="saveProfileChanges()">Simpan</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('editProfileModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Konfigurasi Prototipe (Pengaturan) -->
   <div id="configModal" class="modal">
     <div class="modal-content">
@@ -365,7 +398,7 @@
       <div class="config-list-item"><b>Ambang level:</b> 🌱 PEMULA 0 · 💧 PENDENGAR 50 · 🤝 SAHABAT 200 · 🔥 ACTIVE CUITER 500 · 👑 SULTAN CURHAT 1200</div>
 
       <div style="background: #fffde7; border: 1px solid #fff59d; padding: 10px; border-radius: 12px; font-size: 10.5px; color: #7f6000; margin-top: 10px;">
-        <b>Aturan koin yang disepakati:</b> 1 koin = Rp5. Gift Live tanpa potongan; host menerima 100% koin gift. Penarikan DANA minimum Rp10.000 dengan biaya layanan Rp500. Rekening bank minimum Rp10.000 dengan biaya layanan Rp500 ditambah estimasi biaya transfer Rp2.500 (harus diverifikasi). Semua transaksi masih simulasi lokal.
+        <b>Aturan koin yang disepakati:</b> 1 koin = Rp5. Gift Live tanpa potongan; host menerima 100% koin gift. Penarikan DANA minimum Rp10.000 dengan biaya layanan Rp500. Rekening bank minimum Rp10.000 dengan biaya layanan Rp500 ditambah estimasi biaya transfer Rp2.500.
       </div>
 
       <button class="btn-primary" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('configModal').style.display='none'">Oke</button>
@@ -393,36 +426,26 @@
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar untuk Penulis</div>
       
       <div class="gift-grid">
-        <!-- 1 Koin (8 jenis) -->
+        <!-- 1 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat!')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Manis')">🌸 Manis (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Adem')">🍃 Adem (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Kece')">✨ Kece (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Hadir')">🎈 Hadir (1 🪙)</div>
 
-        <!-- 2 Koin (7 jenis) -->
+        <!-- 2 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk Hangat (2 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin Dulu (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Lanjut Cerita')">💬 Lanjut Cerita (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Damai')">🕊️ Damai (2 🪙)</div>
 
-        <!-- 3 Koin (6 jenis) -->
+        <!-- 3 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Kamu Hebat (3 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga Empati (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Solusi Mantap')">💡 Solusi Mantap (3 🪙)</div>
 
-        <!-- 5 Koin (5 jenis) -->
+        <!-- 5 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Karya Indah (5 🪙)</div>
 
-        <!-- 10 Koin (4 jenis) -->
+        <!-- 10, 20, 50, 100 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang Cerita (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Ruang Aman')">🏰 Ruang Aman (10 🪙)</div>
-
-        <!-- 20, 50, 100 Koin -->
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Karya Agung (20 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
@@ -432,7 +455,7 @@
     </div>
   </div>
 
-  <!-- Pop-up Dompet & Top-Up -->
+  <!-- Pop-up Dompet & Top-Up DANA -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Dompet & Top-Up Koin</h3>
@@ -441,10 +464,15 @@
         <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">600</span></div>
       </div>
       
+      <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
+        <b>Tujuan Pembayaran e-Wallet DANA:</b><br>
+        📱 <b>085624189461</b> (a.n CUIT Official)
+      </div>
+
       <label style="font-size: 12px; font-weight: 800; display: block; margin-top: 8px;">Pilih Paket Top-Up Koin Berbayar:</label>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackage(1000, 100)">💰 Paket Rp 1.000 (100 Koin)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackage(5000, 600)">🎁 Paket Rp 5.000 (600 Koin - Bonus 100)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackage(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 100)">💰 Paket Rp 1.000 (100 Koin)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 600)">🎁 Paket Rp 5.000 (600 Koin - Bonus 100)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
     </div>
@@ -486,7 +514,8 @@
       FREE_COINS_DAILY: 20,
       MAX_CHAR_FREE_CURHAT: 20,
       MAX_CHAR_FREE_COMMENT: 12,
-      COIN_RATE_RP: 5
+      COIN_RATE_RP: 5,
+      DANA_NUMBER: '085624189461'
     };
 
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
@@ -494,12 +523,13 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
+    let customDisplayName = localStorage.getItem('cuit_user_name') || null;
     let allPostsCache = [];
     let likesStore = {};
 
     let freeCoins = 20;
     let paidCoins = 120;
-    let usedPaidCoins = 0;
+    let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -531,14 +561,36 @@
     function updateCoinUI() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
+      localStorage.setItem('cuit_user_exp', usedPaidCoins);
+      if (document.getElementById('pageProfile').classList.contains('active')) {
+        renderProfileData();
+      }
     }
 
     function getUserLevel() {
-      if (usedPaidCoins >= 1200) return { title: '👑 SULTAN CURHAT', icon: '👑' };
-      if (usedPaidCoins >= 500) return { title: '🔥 ACTIVE CUITER', icon: '🔥' };
-      if (usedPaidCoins >= 200) return { title: '🤝 SAHABAT', icon: '🤝' };
-      if (usedPaidCoins >= 50) return { title: '💧 PENDENGAR', icon: '💧' };
-      return { title: '🌱 PEMULA', icon: '🌱' };
+      if (usedPaidCoins >= 1200) return { title: '👑 SULTAN CURHAT', icon: '👑', next: null, target: 1200 };
+      if (usedPaidCoins >= 500) return { title: '🔥 ACTIVE CUITER', icon: '🔥', next: '👑 SULTAN CURHAT', target: 1200, prev: 500 };
+      if (usedPaidCoins >= 200) return { title: '🤝 SAHABAT', icon: '🤝', next: '🔥 ACTIVE CUITER', target: 500, prev: 200 };
+      if (usedPaidCoins >= 50) return { title: '💧 PENDENGAR', icon: '💧', next: '🤝 SAHABAT', target: 200, prev: 50 };
+      return { title: '🌱 PEMULA', icon: '🌱', next: '💧 PENDENGAR', target: 50, prev: 0 };
+    }
+
+    // EDIT PROFIL FUNGSI
+    function openEditProfileModal() {
+      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      document.getElementById('editDisplayName').value = currentName;
+      document.getElementById('editProfileModal').style.display = 'flex';
+    }
+
+    function saveProfileChanges() {
+      const newName = document.getElementById('editDisplayName').value.trim();
+      if (!newName) return alert('Nama tidak boleh kosong!');
+      customDisplayName = newName;
+      localStorage.setItem('cuit_user_name', newName);
+      document.getElementById('editProfileModal').style.display = 'none';
+      renderProfileData();
+      loadPosts();
+      alert('Profil berhasil diperbarui!');
     }
 
     function toggleCurhatLimit() {
@@ -556,12 +608,6 @@
     }
 
     async function submitNewPost() {
-      if (!currentUser) {
-        alert('Silakan masuk akun terlebih dahulu untuk membuat curhatan!');
-        document.getElementById('authModal').style.display = 'flex';
-        return;
-      }
-
       const type = document.getElementById('curhatCoinType').value;
       const content = document.getElementById('postContent').value.trim();
       const feeling = document.getElementById('postFeeling').value;
@@ -569,9 +615,18 @@
       if (!content) return alert('Isi cerita tidak boleh kosong!');
 
       if (type === 'free') {
-        if (freeCoins < 5) return alert('Koin gratisan habis (butuh 5 koin gratisan)!');
-        if (content.length > CONFIG.MAX_CHAR_FREE_CURHAT) return alert(`Maksimal curhat koin gratisan adalah ${CONFIG.MAX_CHAR_FREE_CURHAT} karakter!`);
-        freeCoins -= 5;
+        if (content.length > CONFIG.MAX_CHAR_FREE_CURHAT) {
+          return alert(`Maksimal curhat koin gratisan adalah ${CONFIG.MAX_CHAR_FREE_CURHAT} karakter!`);
+        }
+        
+        if (freeCoins >= 5) {
+          freeCoins -= 5;
+        } else if (paidCoins >= 1) {
+          paidCoins -= 1;
+          usedPaidCoins += 1;
+        } else {
+          return alert('Koin gratisan dan koin berbayar kamu tidak cukup!');
+        }
       } else {
         if (paidCoins < 1) return alert('Saldo koin berbayar tidak cukup!');
         paidCoins -= 1;
@@ -580,8 +635,11 @@
 
       updateCoinUI();
 
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+
       const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser.id, user_email: currentUser.email, username: currentUser.email.split('@')[0], feeling }
+        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling }
       ]);
 
       if (!error) {
@@ -611,7 +669,7 @@
       let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
       let feelingTag = p.feeling || 'Bahagia';
       const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
-      const handle = p.user_email ? `@${p.user_email.split('@')[0]}` : '@cuituser';
+      const handle = p.user_email ? `@${p.user_email.split('@')[0]}` : '@yayan.hadiyanto1';
       const likesCount = likesStore[p.id] || 0;
       const userLvl = getUserLevel();
 
@@ -659,8 +717,15 @@
     }
 
     function toggleLike(postId) {
-      if (freeCoins < 1) return alert('Koin gratisan habis untuk memberi Like!');
-      freeCoins -= 1;
+      if (freeCoins > 0) {
+        freeCoins -= 1;
+      } else if (paidCoins > 0) {
+        paidCoins -= 1;
+        usedPaidCoins += 1;
+      } else {
+        return alert('Koin gratisan dan koin berbayar kamu habis untuk memberi Like!');
+      }
+
       updateCoinUI();
       likesStore[postId] = (likesStore[postId] || 0) + 1;
       loadPosts();
@@ -689,7 +754,7 @@
       usedPaidCoins += cost;
       updateCoinUI();
       document.getElementById('giftModal').style.display = 'none';
-      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} Koin Berbayar)!`);
+      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} Koin Berbayar)! +${cost} EXP Poin.`);
       loadPosts();
     }
 
@@ -739,11 +804,22 @@
       document.getElementById('walletModal').style.display = 'flex';
     }
 
-    function buyPackage(price, coins) {
-      alert(`Simulasi Top-up Rp ${price.toLocaleString('id-ID')} berhasil! +${coins} Koin Berbayar.`);
-      paidCoins += coins;
-      updateCoinUI();
-      openWalletModal();
+    // TOP-UP INTEGRASI DANA DENGAN NOMINAL OTOMATIS
+    function buyPackageDANA(price, coins) {
+      const note = encodeURIComponent(`Topup CUIT ${coins} Koin`);
+      const danaUrl = `https://link.dana.id/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}&notes=${note}`;
+      
+      window.open(danaUrl, '_blank');
+
+      setTimeout(() => {
+        if (confirm(`Anda diarahkan untuk membayar Rp ${price.toLocaleString('id-ID')} ke e-Wallet DANA (${CONFIG.DANA_NUMBER}).\n\nKlik "OK" jika Anda sudah menyelesaikan transfer untuk menambahkan ${coins} Koin Berbayar secara otomatis.`)) {
+          paidCoins += coins;
+          usedPaidCoins += Math.floor(coins / 10);
+          updateCoinUI();
+          openWalletModal();
+          alert(`Top-Up Berhasil! +${coins} Koin Berbayar telah ditambahkan ke dompet kamu.`);
+        }
+      }, 800);
     }
 
     function openCashoutModal() {
@@ -799,16 +875,35 @@
 
     function renderProfileData() {
       const userLvl = getUserLevel();
+      const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const handleName = currentUser ? `@${currentUser.email.split('@')[0]}` : '@yayan.hadiyanto1';
+
+      document.getElementById('profName').innerText = displayName;
+      document.getElementById('profHandle').innerText = handleName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
       document.getElementById('profLevelTitle').innerText = userLvl.title;
+      document.getElementById('profExp').innerText = `${usedPaidCoins} EXP`;
+
+      // Kalkulasi Progress Level Bar
+      const progressBar = document.getElementById('levelProgressBar');
+      const nextInfo = document.getElementById('levelNextInfo');
+
+      if (!userLvl.next) {
+        progressBar.style.width = '100%';
+        nextInfo.innerText = 'Level Maksimal!';
+      } else {
+        const range = userLvl.target - userLvl.prev;
+        const currentProgress = usedPaidCoins - userLvl.prev;
+        const percentage = Math.min(100, Math.max(0, (currentProgress / range) * 100));
+        const needed = userLvl.target - usedPaidCoins;
+
+        progressBar.style.width = `${percentage}%`;
+        nextInfo.innerText = `${needed} EXP lagi menuju ${userLvl.next}`;
+      }
 
       if (currentUser) {
-        document.getElementById('profName').innerText = currentUser.email.split('@')[0];
-        document.getElementById('profHandle').innerText = `@${currentUser.email.split('@')[0]}`;
         document.getElementById('authBtnLogout').innerText = 'Keluar Akun';
       } else {
-        document.getElementById('profName').innerText = 'Tamu CUIT';
-        document.getElementById('profHandle').innerText = '@belum_login';
         document.getElementById('authBtnLogout').innerText = 'Masuk / Daftar';
       }
     }
@@ -842,4 +937,4 @@
     checkUser();
   </script>
 </body>
-  </html>
+</html>
