@@ -23,13 +23,13 @@ jobs:
       - name: Siapkan Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Siapkan Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: '17'
 
       - name: Siapkan Android SDK
         uses: android-actions/setup-android@v3
@@ -37,13 +37,9 @@ jobs:
       - name: Siapkan proyek Capacitor
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets
+          npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "CUIT" "com.cuit.app" --web-dir .
           npx cap add android
-          mkdir -p resources
-          [ -f icon.png ] && cp icon.png resources/icon.png || true
-          [ -f icon.png ] && cp icon.png resources/logo.png || true
-          npx cap-assets generate --android || true
           npx cap sync android
 
       - name: Build APK Android
