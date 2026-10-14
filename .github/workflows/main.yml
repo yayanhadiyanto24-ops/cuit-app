@@ -20,27 +20,26 @@ jobs:
       - name: Ambil kode CUIT
         uses: actions/checkout@v4
 
-      - name: Siapkan Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Siapkan Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Siapkan Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Siapkan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Siapkan folder dan Capacitor
+      - name: Siapkan folder www
         run: |
           mkdir -p www
           cp index.html www/index.html
           if [ -f banner.png ]; then cp banner.png www/; fi
           if [ -f icon.png ]; then cp icon.png www/; fi
-          
+
+      - name: Buat Proyek Capacitor
+        run: |
           npm init -y
           npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap init "CUIT" "com.cuit.app" --web-dir www
