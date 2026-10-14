@@ -14,6 +14,7 @@
       --text-dark: #1e1e38;
       --gray: #8c8ea3;
       --light-gray: #f2f4f9;
+      --green: #2ecc71;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg-sky); color: var(--text-dark); padding-bottom: 75px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
@@ -23,31 +24,29 @@
     .stat-pill { background: #ffffff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: #1e1e38; }
     .btn-auth-top { background: var(--primary-gradient); color: #fff; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
 
-    /* Header Banner Persis Gambar Contoh */
-    .hero-banner-custom { padding: 10px 16px 24px; position: relative; text-align: left; display: flex; align-items: center; justify-content: space-between; min-height: 120px; }
+    /* Header Banner Visual CUIT */
+    .hero-banner-custom { padding: 10px 16px 20px; position: relative; text-align: left; display: flex; align-items: center; justify-content: space-between; min-height: 110px; }
     .hero-left { display: flex; align-items: center; gap: 12px; }
-    .cuit-icon-box { width: 62px; height: 62px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; box-shadow: 0 8px 18px rgba(101, 64, 245, 0.35); flex-shrink: 0; }
-    .cuit-text-box .title { font-size: 34px; font-weight: 900; color: #210c6d; letter-spacing: -1px; line-height: 0.95; }
-    .cuit-text-box .sub { font-size: 13px; font-weight: 900; color: #210c6d; text-transform: uppercase; margin-top: 2px; }
+    .cuit-icon-box { width: 58px; height: 58px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 30px; box-shadow: 0 8px 18px rgba(101, 64, 245, 0.35); flex-shrink: 0; }
+    .cuit-text-box .title { font-size: 32px; font-weight: 900; color: #210c6d; letter-spacing: -1px; line-height: 0.95; }
+    .cuit-text-box .sub { font-size: 12px; font-weight: 900; color: #210c6d; text-transform: uppercase; margin-top: 2px; }
     .tagline-pill { display: inline-block; background: var(--primary-gradient); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-top: 6px; box-shadow: 0 3px 8px rgba(101, 64, 245, 0.3); }
     
-    /* Ilustrasi Koin & Bubble Hati Visual Kanan */
     .hero-right-illustrations { display: flex; align-items: center; gap: 4px; position: relative; }
-    .bubble-heart { background: var(--primary-gradient); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.25); transform: rotate(-8deg); }
-    .coins-stack { background: linear-gradient(135deg, #ffd700, #ff9900); width: 50px; height: 42px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 12px; box-shadow: 0 6px 14px rgba(255, 153, 0, 0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.2); border: 2px solid #fff; }
+    .bubble-heart { background: var(--primary-gradient); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.25); transform: rotate(-8deg); }
+    .coins-stack { background: linear-gradient(135deg, #ffd700, #ff9900); width: 46px; height: 40px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 11px; box-shadow: 0 6px 14px rgba(255, 153, 0, 0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.2); border: 2px solid #fff; }
 
-    /* Container Kartu Utama */
+    /* Container Utama */
     .main-card { background: #ffffff; margin: 0 12px; padding: 18px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
 
-    /* Beranda Section Header */
+    /* Section Headers & Filters */
     .beranda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .beranda-left { display: flex; align-items: center; gap: 12px; }
-    .feather-box { width: 48px; height: 48px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
+    .feather-box { width: 46px; height: 46px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
     .beranda-titles h2 { font-size: 22px; font-weight: 800; color: #1e1e38; line-height: 1.1; }
     .beranda-titles p { font-size: 12px; color: var(--gray); font-weight: 500; margin-top: 2px; }
     .btn-curhat-purple { background: var(--primary-gradient); color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 6px 16px rgba(101, 64, 245, 0.35); }
 
-    /* Pill Filter Tabs */
     .filter-pills { display: flex; gap: 10px; margin-bottom: 16px; }
     .pill-tab { padding: 8px 18px; border-radius: 20px; background: var(--light-gray); color: #555; font-size: 13px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; }
     .pill-tab.active { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
@@ -66,7 +65,18 @@
     .post-footer { display: flex; gap: 16px; border-top: 1px solid #ebedf5; padding-top: 10px; font-size: 13px; color: var(--gray); font-weight: 600; }
     .action-item { cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-    /* Navigation Bar Bottom */
+    /* Profil Advanced Layout */
+    .profile-card-custom { background: #f5f7ff; border-radius: 20px; padding: 18px; text-align: center; margin-bottom: 16px; border: 1px solid #e0e6ff; }
+    .profile-avatar-box { width: 60px; height: 60px; background: #e2e5f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 10px; }
+    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 16px 0 12px; }
+    .stat-box { background: #fff; padding: 10px; border-radius: 14px; text-align: center; border: 1px solid #edf0f8; }
+    .stat-box .num { font-size: 16px; font-weight: 800; color: var(--primary); }
+    .stat-box .lbl { font-size: 10px; color: var(--gray); font-weight: 600; margin-top: 2px; }
+
+    .wallet-card { background: linear-gradient(135deg, #1e1e38, #2a2a52); color: #fff; padding: 16px; border-radius: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-withdraw { background: #ffd700; color: #000; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
+
+    /* Nav Bar Bottom */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eef0f6; z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--gray); cursor: pointer; font-weight: 600; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
@@ -84,11 +94,11 @@
   <!-- Top Stats -->
   <div class="top-stats-bar">
     <div class="stat-pill">🔔 <span>1</span></div>
-    <div class="stat-pill">🪙 <span>120</span></div>
-    <button id="authBtn" class="btn-auth-top">Keluar</button>
+    <div class="stat-pill">🪙 <span id="coinDisplayTop">120</span></div>
+    <button id="authBtn" class="btn-auth-top">Masuk</button>
   </div>
 
-  <!-- Header Banner Visual CUIT -->
+  <!-- Header Banner CUIT -->
   <div class="hero-banner-custom">
     <div class="hero-left">
       <div class="cuit-icon-box">🤍</div>
@@ -104,7 +114,7 @@
     </div>
   </div>
 
-  <!-- Kartu Utama -->
+  <!-- Main Card -->
   <div class="main-card">
     
     <!-- HALAMAN 1: BERANDA -->
@@ -141,27 +151,60 @@
 
     <!-- HALAMAN 3: LIVE -->
     <div id="pageLive" class="page-section">
-      <h2 style="margin-bottom: 12px;">Live Curhat 📻</h2>
+      <h2 style="margin-bottom: 12px;">Ruang Live Curhat 📻</h2>
       <div style="background: var(--light-gray); padding: 16px; border-radius: 16px; margin-bottom: 16px;">
         <p style="font-weight: 700; color: var(--primary);">Syarat & Ketentuan Live:</p>
-        <ul style="font-size: 12px; margin-left: 18px; margin-top: 6px; line-height: 1.5;">
-          <li>Pengguna terdaftar dan sudah login.</li>
-          <li>Minimal saldo 100 koin untuk buka ruang siaran.</li>
-          <li>Saling menghargai sesama pengguna.</li>
+        <ul style="font-size: 12px; margin-left: 18px; margin-top: 6px; line-height: 1.5; color: #444;">
+          <li>Pengguna terdaftar dan sudah login ke akun.</li>
+          <li>Minimal saldo 100 koin untuk membuat ruang siaran.</li>
+          <li>Saling menghargai dan bebas ujaran kebencian.</li>
         </ul>
-        <button onclick="startLiveSession()" class="btn-curhat-purple" style="width: 100%; margin-top: 12px; justify-content: center;">Mulai Siaran</button>
+        <button onclick="startLiveSession()" class="btn-curhat-purple" style="width: 100%; margin-top: 12px; justify-content: center;">Mulai Siaran Live</button>
       </div>
     </div>
 
-    <!-- HALAMAN 4: PROFIL -->
+    <!-- HALAMAN 4: PROFIL LENGKAP -->
     <div id="pageProfile" class="page-section">
-      <h2 style="margin-bottom: 12px;">Profil Saya</h2>
-      <div style="text-align: center; padding: 16px; background: var(--light-gray); border-radius: 16px; margin-bottom: 16px;">
-        <div class="avatar" style="width:54px; height:54px; margin:0 auto 8px; font-size:24px;">👤</div>
-        <div id="profName" style="font-weight: 800; font-size: 16px;">Tamu CUIT</div>
-        <div id="profEmail" style="font-size: 12px; color: var(--gray);">Belum masuk akun</div>
+      <h2 style="margin-bottom: 14px;">Profil Saya</h2>
+      
+      <div class="profile-card-custom">
+        <div class="profile-avatar-box">👤</div>
+        <div id="profName" style="font-weight: 800; font-size: 18px; color: var(--text-dark);">Tamu CUIT</div>
+        <div id="profEmail" style="font-size: 12px; color: var(--gray); margin-top: 2px;">Belum masuk akun</div>
+        
+        <!-- Grid Statistik -->
+        <div class="profile-stats-grid">
+          <div class="stat-box">
+            <div class="num" id="statPostCount">0</div>
+            <div class="lbl">Curhatan</div>
+          </div>
+          <div class="stat-box">
+            <div class="num" id="statLikesCount">0</div>
+            <div class="lbl">Dukungan</div>
+          </div>
+          <div class="stat-box">
+            <div class="num" id="statCoinsCount">120</div>
+            <div class="lbl">Koin</div>
+          </div>
+        </div>
+
+        <button id="editNicknameBtn" onclick="openEditNicknameModal()" class="pill-tab" style="margin: 0 auto; display: none;">✏️ Ubah Nama Panggilan</button>
       </div>
-      <h3 style="font-size: 15px; margin-bottom: 10px;">Riwayat Curhatan Saya</h3>
+
+      <!-- Dompet Cuit -->
+      <div class="wallet-card">
+        <div>
+          <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; font-weight: 700;">Saldo Dompet CUIT</div>
+          <div style="font-size: 20px; font-weight: 900; margin-top: 2px;">Rp <span id="walletRupiah">12.000</span></div>
+        </div>
+        <button class="btn-withdraw" onclick="alert('Fitur Penarikan Duit (Cairkan Saldo ke DANA/Gopay) akan segera diaktifkan!')">Cairkan Duit</button>
+      </div>
+
+      <div class="beranda-header" style="margin-top: 20px; margin-bottom: 10px;">
+        <h3 style="font-size: 16px; font-weight: 800;">Riwayat Curhatan Saya</h3>
+        <button id="profLogoutBtn" onclick="authBtn.onclick()" class="btn-auth-top" style="background:#ff7675; display:none;">Keluar</button>
+      </div>
+
       <div class="feed-container" id="myPostsList"></div>
     </div>
 
@@ -200,6 +243,18 @@
       <div style="margin-top: 12px; display: flex; gap: 8px;">
         <button id="submitPost" class="btn-modal" style="flex:1;">Terbitkan</button>
         <button id="closePost" class="btn-modal" style="background:#eee; color:#333;">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pop-up Ubah Nickname -->
+  <div id="nicknameModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 8px;">Ubah Nama Panggilan</h3>
+      <input type="text" id="newNicknameInput" placeholder="Nama panggilan baru...">
+      <div style="margin-top: 12px; display: flex; gap: 8px;">
+        <button onclick="saveNewNickname()" class="btn-modal" style="flex:1;">Simpan</button>
+        <button onclick="document.getElementById('nicknameModal').style.display='none'" class="btn-modal" style="background:#eee; color:#333;">Batal</button>
       </div>
     </div>
   </div>
@@ -376,27 +431,53 @@
       }
     }
 
+    // Profil Lengkap Render
     function renderProfile() {
       const profName = document.getElementById('profName');
       const profEmail = document.getElementById('profEmail');
       const myPostsContainer = document.getElementById('myPostsList');
+      const logoutBtn = document.getElementById('profLogoutBtn');
+      const editBtn = document.getElementById('editNicknameBtn');
 
       if (currentUser) {
         const savedName = localStorage.getItem('cuit_nickname') || currentUser.email.split('@')[0];
         profName.innerText = savedName;
         profEmail.innerText = currentUser.email;
+        logoutBtn.style.display = 'inline-block';
+        editBtn.style.display = 'inline-flex';
 
         const myPosts = allPostsCache.filter(p => p.user_id === currentUser.id);
+        document.getElementById('statPostCount').innerText = myPosts.length;
+        document.getElementById('statLikesCount').innerText = myPosts.length * 3; // Estimasi interaksi
+
         if (myPosts.length === 0) {
-          myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px;">Kamu belum pernah menerbitkan curhatan.</p>';
+          myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px; margin-top: 10px;">Kamu belum pernah menerbitkan curhatan.</p>';
         } else {
           myPostsContainer.innerHTML = myPosts.map(p => renderCardHTML(p)).join('');
         }
       } else {
         profName.innerText = 'Tamu CUIT';
         profEmail.innerText = 'Belum masuk akun';
-        myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px;">Silakan masuk untuk melihat riwayat curhatan kamu.</p>';
+        logoutBtn.style.display = 'none';
+        editBtn.style.display = 'none';
+        document.getElementById('statPostCount').innerText = '0';
+        document.getElementById('statLikesCount').innerText = '0';
+        myPostsContainer.innerHTML = '<p style="text-align: center; color: var(--gray); font-size: 13px; margin-top: 10px;">Silakan masuk untuk melihat riwayat curhatan kamu.</p>';
       }
+    }
+
+    function openEditNicknameModal() {
+      document.getElementById('newNicknameInput').value = localStorage.getItem('cuit_nickname') || '';
+      document.getElementById('nicknameModal').style.display = 'flex';
+    }
+
+    function saveNewNickname() {
+      const val = document.getElementById('newNicknameInput').value.trim();
+      if (!val) return alert('Nama panggilan tidak boleh kosong!');
+      localStorage.setItem('cuit_nickname', val);
+      document.getElementById('nicknameModal').style.display = 'none';
+      renderProfile();
+      alert('Nama panggilan berhasil diperbarui!');
     }
 
     checkUser();
