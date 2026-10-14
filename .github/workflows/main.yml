@@ -34,11 +34,16 @@ jobs:
       - name: Siapkan Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Siapkan proyek Capacitor
+      - name: Siapkan struktur folder dan Capacitor
         run: |
+          mkdir -p www
+          cp index.html www/
+          [ -f banner.png ] && cp banner.png www/ || true
+          [ -f icon.png ] && cp icon.png www/ || true
+          
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "CUIT" "com.cuit.app" --web-dir .
+          npx cap init "CUIT" "com.cuit.app" --web-dir www
           npx cap add android
           npx cap sync android
 
