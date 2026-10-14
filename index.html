@@ -95,13 +95,11 @@
     <div class="nav-item">👤<br>Profil</div>
   </div>
 
-  <!-- Pop-up Login/Daftar -->
+  <!-- Pop-up Login/Daftar (Tanpa Input Nama) -->
   <div id="authModal" class="modal">
     <div class="modal-content">
-      <h3>Masuk ke CUIT</h3>
-      <p style="font-size: 12px; color: var(--gray); margin-bottom: 8px;">Isi nama panggilan jika mendaftar akun baru.</p>
-      <input type="text" id="usernameInput" placeholder="Nama Panggilan / Username">
-      <input type="email" id="email" placeholder="Email kamu">
+      <h3>Masuk / Daftar Akun</h3>
+      <input type="email" id="email" placeholder="Alamat Email">
       <input type="password" id="password" placeholder="Kata Sandi">
       <div style="margin-top: 16px; display: flex; gap: 8px;">
         <button id="doLogin" class="btn btn-sm" style="flex:1;">Masuk</button>
@@ -111,11 +109,13 @@
     </div>
   </div>
 
-  <!-- Pop-up Buat Curhatan -->
+  <!-- Pop-up Tulis Curhatan (Disertai Input Nama Panggilan) -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <h3>Ruang Curhat</h3>
-      <textarea id="postContent" rows="5" placeholder="Tuliskan perasaannya hari ini..."></textarea>
+      <label style="font-size: 12px; color: var(--gray); font-weight: 600;">Nama Panggilan Pengirim:</label>
+      <input type="text" id="nicknameInput" placeholder="Masukkan nama panggilan (contoh: Yan Kasmaran)">
+      <textarea id="postContent" rows="4" placeholder="Tuliskan perasaannya hari ini..."></textarea>
       <div style="margin-top: 12px; display: flex; gap: 8px;">
         <button id="submitPost" class="btn btn-sm" style="flex:1;">Terbitkan</button>
         <button id="closePost" class="btn btn-sm" style="background:#eee; color:#333;">Batal</button>
@@ -158,6 +158,9 @@
         alert('Silakan masuk terlebih dahulu untuk curhat!');
         authModal.style.display = 'flex';
       } else {
+        // Otomatis isi nama yang pernah dipakai sebelumnya (jika ada)
+        const savedName = localStorage.getItem('cuit_nickname') || '';
+        document.getElementById('nicknameInput').value = savedName;
         postModal.style.display = 'flex';
       }
     }
@@ -167,20 +170,10 @@
     document.getElementById('closeAuth').onclick = () => authModal.style.display = 'none';
     document.getElementById('closePost').onclick = () => postModal.style.display = 'none';
 
-    // Pendaftaran akun baru dengan menyimpan Nama Panggilan
     document.getElementById('doSignUp').onclick = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const username = document.getElementById('usernameInput').value || email.split('@')[0];
-
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { username: username }
-        }
-      });
-
+      const { error } = await supabaseClient.auth.signUp({ email, password });
       if (error) alert('Error: ' + error.message);
       else alert('Pendaftaran berhasil! Silakan masuk.');
     };
@@ -196,34 +189,37 @@
       }
     };
 
-    // Menyimpan postingan beserta username pengirim
+    // Kirim curhatan dengan Nama Panggilan dari input
     document.getElementById('submitPost').onclick = async () => {
-      const content = document.getElementById('postContent').value;
+      const nickname = document.getElementById('nicknameInput').value.trim();
+      const content = document.getElementById('postContent').value.trim();
+
+      if (!nickname) return alert('Nama panggilan wajib diisi!');
       if (!content) return alert('Isi cerita tidak boleh kosong!');
 
-      // Ambil username dari user metadata atau fallback dari email
-      const userDisplayName = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+      // Simpan nama panggilan ke HP agar tidak perlu diketik ulang terus
+      localStorage.setItem('cuit_nickname', nickname);
 
       const { error } = await supabaseClient.from('curhat').insert([
         { 
           content: content, 
           user_id: currentUser.id,
           user_email: currentUser.email,
-          username: userDisplayName
+          username: nickname
         }
       ]);
 
       if (error) {
         alert('Gagal mengirim: ' + error.message);
       } else {
-        alert('Curhatan kamu berhasil terbit!');
+        alert('Curhatan berhasil diterbitkan!');
         document.getElementById('postContent').value = '';
         postModal.style.display = 'none';
         loadPosts();
       }
     };
 
-    // Mengambil dan menampilkan nama panggilan di kartu curhatan
+    // Menampilkan postingan di Beranda
     async function loadPosts() {
       const container = document.getElementById('postsList');
       const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
@@ -234,7 +230,7 @@
       }
 
       container.innerHTML = data.map(p => {
-        // Tampilkan username, jika kosong pakai pemotong email, jika tidak ada pakai 'Pengguna CUIT'
+        // Tampilkan username/nama panggilan pilihan pengguna
         const displayName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
         
         return `
