@@ -7,109 +7,117 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #eef1f8;
+      --bg-sky: #e4eeff;
       --card: #ffffff;
       --primary: #6540f5;
-      --primary-light: #ece8ff;
-      --text-dark: #1b1b2f;
-      --gray: #8d8fa3;
-      --light-gray: #f2f3f8;
+      --primary-gradient: linear-gradient(135deg, #7442f8, #532bf0);
+      --text-dark: #1e1e38;
+      --gray: #8c8ea3;
+      --light-gray: #f2f4f9;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text-dark); padding-bottom: 75px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+    body { background: var(--bg-sky); color: var(--text-dark); padding-bottom: 75px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
 
-    /* Top Stats Header */
-    .top-stats-bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 12px 16px 4px; }
-    .stat-pill { background: #fff; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+    /* Top Bar Stats */
+    .top-stats-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 12px 16px 0; position: relative; z-index: 5; }
+    .stat-pill { background: #ffffff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: #1e1e38; }
+    .btn-auth-top { background: var(--primary-gradient); color: #fff; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
 
-    /* Header Visual Banner CUIT */
-    .hero-banner { padding: 10px 16px 20px; text-align: center; position: relative; overflow: hidden; background: linear-gradient(180deg, #e4ebfe 0%, #f6f5fb 100%); border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
-    .hero-content { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
-    .heart-box { width: 52px; height: 52px; background: linear-gradient(135deg, #7b5aff, #512bf0); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 26px; box-shadow: 0 6px 16px rgba(101, 64, 245, 0.3); }
-    .brand-title { font-size: 32px; font-weight: 900; color: #2d1390; letter-spacing: -1px; line-height: 1; }
-    .brand-subtitle { font-size: 13px; font-weight: 800; color: #2d1390; text-transform: uppercase; }
-    .tagline-badge { display: inline-block; background: #6540f5; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-top: 4px; box-shadow: 0 2px 8px rgba(101, 64, 245, 0.3); }
+    /* Header Banner Persis Gambar Contoh */
+    .hero-banner-custom { padding: 10px 16px 24px; position: relative; text-align: left; display: flex; align-items: center; justify-content: space-between; min-height: 120px; }
+    .hero-left { display: flex; align-items: center; gap: 12px; }
+    .cuit-icon-box { width: 62px; height: 62px; background: var(--primary-gradient); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; box-shadow: 0 8px 18px rgba(101, 64, 245, 0.35); flex-shrink: 0; }
+    .cuit-text-box .title { font-size: 34px; font-weight: 900; color: #210c6d; letter-spacing: -1px; line-height: 0.95; }
+    .cuit-text-box .sub { font-size: 13px; font-weight: 900; color: #210c6d; text-transform: uppercase; margin-top: 2px; }
+    .tagline-pill { display: inline-block; background: var(--primary-gradient); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-top: 6px; box-shadow: 0 3px 8px rgba(101, 64, 245, 0.3); }
+    
+    /* Ilustrasi Koin & Bubble Hati Visual Kanan */
+    .hero-right-illustrations { display: flex; align-items: center; gap: 4px; position: relative; }
+    .bubble-heart { background: var(--primary-gradient); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.25); transform: rotate(-8deg); }
+    .coins-stack { background: linear-gradient(135deg, #ffd700, #ff9900); width: 50px; height: 42px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-weight: 900; font-size: 12px; box-shadow: 0 6px 14px rgba(255, 153, 0, 0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.2); border: 2px solid #fff; }
 
-    /* Main Container Card */
-    .main-card { background: #fff; margin: 0 12px; padding: 16px; border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.03); }
+    /* Container Kartu Utama */
+    .main-card { background: #ffffff; margin: 0 12px; padding: 18px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
 
-    /* Sub Banner Beranda */
+    /* Beranda Section Header */
     .beranda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .beranda-title-box { display: flex; align-items: center; gap: 12px; }
-    .feather-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #7b5aff, #512bf0); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
-    .beranda-text h2 { font-size: 20px; font-weight: 800; color: #1b1b2f; line-height: 1.2; }
-    .beranda-text p { font-size: 12px; color: var(--gray); font-weight: 500; }
-    .btn-curhat-top { background: linear-gradient(135deg, #7b5aff, #512bf0); color: #fff; border: none; padding: 10px 18px; border-radius: 20px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
+    .beranda-left { display: flex; align-items: center; gap: 12px; }
+    .feather-box { width: 48px; height: 48px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
+    .beranda-titles h2 { font-size: 22px; font-weight: 800; color: #1e1e38; line-height: 1.1; }
+    .beranda-titles p { font-size: 12px; color: var(--gray); font-weight: 500; margin-top: 2px; }
+    .btn-curhat-purple { background: var(--primary-gradient); color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; box-shadow: 0 6px 16px rgba(101, 64, 245, 0.35); }
 
     /* Pill Filter Tabs */
     .filter-pills { display: flex; gap: 10px; margin-bottom: 16px; }
     .pill-tab { padding: 8px 18px; border-radius: 20px; background: var(--light-gray); color: #555; font-size: 13px; font-weight: 700; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; }
-    .pill-tab.active { background: var(--primary); color: #fff; box-shadow: 0 4px 10px rgba(101, 64, 245, 0.25); }
-
-    /* Pages Navigation */
-    .page-section { display: none; }
-    .page-section.active { display: block; }
+    .pill-tab.active { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 12px rgba(101, 64, 245, 0.3); }
 
     /* Feed Post Cards */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
     .feed-container { display: flex; flex-direction: column; gap: 12px; }
-    .post-card { background: #fdfdfd; border-radius: 18px; padding: 16px; border: 1px solid #f0f0f8; }
+    .post-card { background: #fafbff; border-radius: 20px; padding: 16px; border: 1px solid #edf0f8; }
     .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 10px; }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #e0e0f0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #e2e5f0; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .user-name { font-weight: 700; font-size: 14px; color: var(--text-dark); }
     .post-time { font-size: 11px; color: var(--gray); }
     .post-body { font-size: 14px; line-height: 1.5; color: #333; margin-bottom: 12px; word-break: break-word; }
-    .post-footer { display: flex; gap: 16px; border-top: 1px solid #f2f2f8; padding-top: 10px; font-size: 13px; color: var(--gray); font-weight: 600; }
+    .post-footer { display: flex; gap: 16px; border-top: 1px solid #ebedf5; padding-top: 10px; font-size: 13px; color: var(--gray); font-weight: 600; }
     .action-item { cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
     /* Navigation Bar Bottom */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eef0f6; z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--gray); cursor: pointer; font-weight: 600; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-icon { font-size: 18px; margin-bottom: 2px; }
 
-    /* Modal Dialogs */
+    /* Modals */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
     .modal-content { background: #fff; padding: 24px; border-radius: 20px; width: 90%; max-width: 400px; }
     textarea, input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--light-gray); border-radius: 12px; font-size: 14px; outline: none; }
-    .btn-modal { background: var(--primary); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .btn-modal { background: var(--primary-gradient); color: #fff; border: none; padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- Header Stat Lonceng & Koin -->
+  <!-- Top Stats -->
   <div class="top-stats-bar">
-    <div class="stat-pill">🔔 <span id="notif-count">1</span></div>
-    <div class="stat-pill">🪙 <span id="coin-count">120</span></div>
-    <button id="authBtn" class="pill-tab active" style="padding: 6px 14px;">Masuk</button>
+    <div class="stat-pill">🔔 <span>1</span></div>
+    <div class="stat-pill">🪙 <span>120</span></div>
+    <button id="authBtn" class="btn-auth-top">Keluar</button>
   </div>
 
-  <!-- Banner Header Gambar Referensi CUIT -->
-  <div class="hero-banner">
-    <div class="hero-content">
-      <div class="heart-box">🤍</div>
-      <div style="text-align: left;">
-        <div class="brand-title">CUIT</div>
-        <div class="brand-subtitle">(CURHAT dapat DUIT)</div>
+  <!-- Header Banner Visual CUIT -->
+  <div class="hero-banner-custom">
+    <div class="hero-left">
+      <div class="cuit-icon-box">🤍</div>
+      <div class="cuit-text-box">
+        <div class="title">CUIT</div>
+        <div class="sub">(CURHAT dapat DUIT)</div>
+        <div class="tagline-pill">Cerita, Dengar, Dapat Duit! ✨</div>
       </div>
     </div>
-    <div class="tagline-badge">Cerita, Dengar, Dapat Duit! ✨</div>
+    <div class="hero-right-illustrations">
+      <div class="bubble-heart">💜</div>
+      <div class="coins-stack">🪙<br>Rp</div>
+    </div>
   </div>
 
-  <!-- Kartu Utama Tampilan -->
+  <!-- Kartu Utama -->
   <div class="main-card">
     
     <!-- HALAMAN 1: BERANDA -->
     <div id="pageHome" class="page-section active">
       <div class="beranda-header">
-        <div class="beranda-title-box">
-          <div class="feather-icon">🪶</div>
-          <div class="beranda-text">
+        <div class="beranda-left">
+          <div class="feather-box">🪶</div>
+          <div class="beranda-titles">
             <h2>Beranda</h2>
             <p>Ada cerita baru untuk kamu hari ini.</p>
           </div>
         </div>
-        <button class="btn-curhat-top" id="openPostBtn">+ Curhat</button>
+        <button class="btn-curhat-purple" id="openPostBtn">+ Curhat</button>
       </div>
 
       <div class="filter-pills">
@@ -134,14 +142,14 @@
     <!-- HALAMAN 3: LIVE -->
     <div id="pageLive" class="page-section">
       <h2 style="margin-bottom: 12px;">Live Curhat 📻</h2>
-      <div style="background: var(--primary-light); padding: 16px; border-radius: 16px; margin-bottom: 16px;">
+      <div style="background: var(--light-gray); padding: 16px; border-radius: 16px; margin-bottom: 16px;">
         <p style="font-weight: 700; color: var(--primary);">Syarat & Ketentuan Live:</p>
         <ul style="font-size: 12px; margin-left: 18px; margin-top: 6px; line-height: 1.5;">
           <li>Pengguna terdaftar dan sudah login.</li>
           <li>Minimal saldo 100 koin untuk buka ruang siaran.</li>
           <li>Saling menghargai sesama pengguna.</li>
         </ul>
-        <button onclick="startLiveSession()" class="btn-curhat-top" style="width: 100%; margin-top: 12px; justify-content: center;">Mulai Siaran</button>
+        <button onclick="startLiveSession()" class="btn-curhat-purple" style="width: 100%; margin-top: 12px; justify-content: center;">Mulai Siaran</button>
       </div>
     </div>
 
