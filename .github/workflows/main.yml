@@ -38,12 +38,27 @@ jobs:
           if [ -f banner.png ]; then cp banner.png www/; fi
           if [ -f icon.png ]; then cp icon.png www/; fi
 
-      - name: Buat Proyek Capacitor
+      - name: Buat Proyek Capacitor dan Generate Icon
         run: |
           npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets
+
+          # Siapkan folder assets untuk ikon
+          mkdir -p assets
+          if [ -f icon.png ]; then
+            cp icon.png assets/icon-only.png
+            cp icon.png assets/icon-foreground.png
+            cp icon.png assets/icon-background.png
+          fi
+
           npx cap init "CUIT" "com.cuit.app" --web-dir www
           npx cap add android
+
+          # Bikin ikon Android otomatis dari icon.png
+          if [ -f icon.png ]; then
+            npx capacitor-assets generate --android
+          fi
+
           npx cap sync android
 
       - name: Build APK Android
