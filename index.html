@@ -23,18 +23,9 @@
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 6px 12px; background: #e8f0fe; }
     .stat-badge { background: #ffffff; padding: 3px 10px; border-radius: 16px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-    /* Banner Super Ramping */
-    .hero-banner { background: linear-gradient(180deg, #e8f0fe 0%, #f4f6fc 100%); padding: 6px 12px 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f5; }
-    .hero-left { display: flex; gap: 8px; align-items: center; max-width: 80%; }
-    .logo-box { width: 36px; height: 36px; background: linear-gradient(135deg, #a272ff, #5c41f4); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(92, 65, 244, 0.2); flex-shrink: 0; }
-    .logo-heart { width: 16px; height: 16px; background: #ff4d79; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; }
-    .hero-text h1 { font-size: 18px; font-weight: 900; color: #28157e; line-height: 1; letter-spacing: -0.5px; display: inline-block; }
-    .hero-text .sub-title { font-size: 10px; font-weight: 800; color: #28157e; font-style: italic; display: inline-block; margin-left: 4px; }
-    .hero-text .tagline { font-size: 9.5px; font-weight: 600; color: #382490; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .hero-right-decor { display: flex; align-items: center; gap: 4px; }
-    .decor-bubble { width: 26px; height: 26px; background: linear-gradient(135deg, #a272ff, #5c41f4); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; transform: rotate(-10deg); }
-    .decor-coins { background: linear-gradient(135deg, #ffca28, #ffa000); padding: 2px 5px; border-radius: 8px; display: flex; align-items: center; color: #fff; font-weight: 900; font-size: 9.5px; border: 1px solid #fff; }
+    /* Banner Image Container */
+    .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; }
+    .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
 
     /* Page Visibility & Sections */
     .page-section { display: none; padding: 10px 14px; }
@@ -140,22 +131,9 @@
     <div class="stat-badge" title="Koin Berbayar (Bisa Diuangkan)">🪙 <span id="paidCoinCount">120</span></div>
   </div>
 
-  <!-- Hero Banner CUIT Super Ramping -->
-  <div class="hero-banner">
-    <div class="hero-left">
-      <div class="logo-box">
-        <div class="logo-heart">❤️</div>
-      </div>
-      <div class="hero-text">
-        <h1>CUIT✨</h1>
-        <div class="sub-title">Curhat dapat Duit</div>
-        <div class="tagline">Cerita kamu didengar, dihargai, dan bisa dapat hadiah!</div>
-      </div>
-    </div>
-    <div class="hero-right-decor">
-      <div class="decor-bubble">🤍</div>
-      <div class="decor-coins">🪙 C</div>
-    </div>
+  <!-- Hero Banner Bergambar Resmi CUIT -->
+  <div class="cuit-banner-container">
+    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
   </div>
 
   <!-- 1. HALAMAN BERANDA -->
