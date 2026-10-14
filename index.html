@@ -4,91 +4,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CUIT – Curhat dapat Duit</title>
-  <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root { --bg: #f6f5fb; --card: #fff; --ink: #292d32; --primary: #6c5ce7; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { background: var(--bg); color: var(--ink); padding: 16px; }
+    body { background: var(--bg); color: var(--ink); padding: 16px; max-width: 500px; margin: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .banner { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); border-radius: 16px; padding: 20px; color: #1a1a24; margin-bottom: 20px; }
     .btn { background: var(--primary); color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
     .btn-sm { padding: 6px 12px; font-size: 14px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .post-card { background: #fff; border-radius: 12px; padding: 16px; margin-top: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     
-    /* Modal / Pop-up style */
+    /* Modal Pop-up */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; }
-    .modal-content { background: #fff; padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
-    .modal input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 16px; width: 90%; max-width: 400px; }
+    textarea, input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h2>CUIT</h2>
+    <h2 style="color: var(--primary);">CUIT</h2>
     <button id="authBtn" class="btn btn-sm">Masuk</button>
   </div>
 
   <div class="banner">
-    <h1>Curhat dapat Duit</h1>
-    <p>Setiap cerita punya arti. Didengar, dihargai, dan dapat hadiah!</p>
-    <br>
-    <button id="curhatBtn" class="btn">+ Curhat</button>
+    <h2>Curhat dapat Duit</h2>
+    <p style="font-size: 13px; margin: 6px 0 14px;">Setiap cerita punya arti. Didengar, dihargai, dan dapat hadiah!</p>
+    <button id="openPostBtn" class="btn">+ Curhat</button>
   </div>
 
   <h3>Beranda</h3>
-  <div id="postsList" style="margin-top: 12px;"><p style="color: #666;">Belum ada curhatan.</p></div>
+  <div id="postsList"><p style="color: #666; margin-top: 10px;">Mengambil data curhatan...</p></div>
 
   <!-- Pop-up Login -->
-  <div id="loginModal" class="modal">
+  <div id="authModal" class="modal">
     <div class="modal-content">
-      <h3>Masuk ke CUIT</h3>
-      <p style="font-size: 13px; color: #666; margin: 8px 0;">Gunakan email & kata sandi kamu</p>
+      <h3>Masuk / Daftar Akun</h3>
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Kata Sandi">
-      <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: center;">
+      <div style="margin-top: 10px; display: flex; gap: 8px;">
         <button id="doLogin" class="btn btn-sm">Masuk</button>
         <button id="doSignUp" class="btn btn-sm" style="background:#555;">Daftar</button>
-        <button id="closeModal" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
+        <button id="closeAuth" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pop-up Tulis Curhatan -->
+  <div id="postModal" class="modal">
+    <div class="modal-content">
+      <h3>Tulis Curhatan Kamu</h3>
+      <textarea id="postContent" rows="4" placeholder="Apa yang sedang kamu rasakan hari ini?"></textarea>
+      <div style="margin-top: 10px; display: flex; gap: 8px;">
+        <button id="submitPost" class="btn btn-sm">Kirim Curhat</button>
+        <button id="closePost" class="btn btn-sm" style="background:#ccc; color:#000;">Batal</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Inisialisasi Supabase
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const modal = document.getElementById('loginModal');
+    const authModal = document.getElementById('authModal');
+    const postModal = document.getElementById('postModal');
     const authBtn = document.getElementById('authBtn');
-    const curhatBtn = document.getElementById('curhatBtn');
+    let currentUser = null;
 
-    // Buka Modal saat tombol Masuk / Curhat diklik
-    authBtn.onclick = () => modal.style.display = 'flex';
-    curhatBtn.onclick = () => modal.style.display = 'flex';
-    document.getElementById('closeModal').onclick = () => modal.style.display = 'none';
+    // Cek Sesi Login
+    async function checkUser() {
+      const { data } = await supabaseClient.auth.getUser();
+      currentUser = data.user;
+      if (currentUser) {
+        authBtn.innerText = 'Keluar';
+      } else {
+        authBtn.innerText = 'Masuk';
+      }
+      loadPosts();
+    }
 
-    // Proses Daftar
+    authBtn.onclick = async () => {
+      if (currentUser) {
+        await supabaseClient.auth.signOut();
+        location.reload();
+      } else {
+        authModal.style.display = 'flex';
+      }
+    };
+
+    document.getElementById('openPostBtn').onclick = () => {
+      if (!currentUser) {
+        alert('Kamu harus masuk/login terlebih dahulu untuk curhat!');
+        authModal.style.display = 'flex';
+      } else {
+        postModal.style.display = 'flex';
+      }
+    };
+
+    document.getElementById('closeAuth').onclick = () => authModal.style.display = 'none';
+    document.getElementById('closePost').onclick = () => postModal.style.display = 'none';
+
+    // Register & Login
     document.getElementById('doSignUp').onclick = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if (error) alert('Gagal daftar: ' + error.message);
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) alert('Error: ' + error.message);
       else alert('Pendaftaran berhasil! Silakan klik Masuk.');
     };
 
-    // Proses Login
     document.getElementById('doLogin').onclick = async () => {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) alert('Gagal masuk: ' + error.message);
       else {
-        alert('Berhasil masuk!');
-        modal.style.display = 'none';
-        authBtn.innerText = 'Keluar';
+        authModal.style.display = 'none';
+        checkUser();
       }
     };
+
+    // Kirim Curhatan ke Supabase
+    document.getElementById('submitPost').onclick = async () => {
+      const content = document.getElementById('postContent').value;
+      if (!content) return alert('Isi curhatan tidak boleh kosong!');
+
+      const { error } = await supabaseClient.from('posts').insert([
+        { content: content, user_id: currentUser.id }
+      ]);
+
+      if (error) {
+        alert('Gagal mengirim: ' + error.message);
+      } else {
+        alert('Curhatan berhasil diterbitkan!');
+        document.getElementById('postContent').value = '';
+        postModal.style.display = 'none';
+        loadPosts();
+      }
+    };
+
+    // Ambil Semua Curhatan dari Supabase
+    async function loadPosts() {
+      const container = document.getElementById('postsList');
+      const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = '<p style="color: #666; margin-top: 10px;">Belum ada curhatan.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(p => `
+        <div class="post-card">
+          <p>${p.content}</p>
+          <small style="color:#888;">${new Date(p.created_at).toLocaleString('id-ID')}</small>
+        </div>
+      `).join('');
+    }
+
+    checkUser();
   </script>
 </body>
 </html>
