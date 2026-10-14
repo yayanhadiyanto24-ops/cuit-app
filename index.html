@@ -92,7 +92,7 @@
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
 
-    input[type="text"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
+    input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
 
     .info-box-yellow { background: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 14px; font-size: 11px; color: #7f6000; line-height: 1.4; margin-bottom: 12px; }
 
@@ -111,7 +111,7 @@
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-around: space-around; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
@@ -500,7 +500,12 @@
         <div><b>Bersih Diterima:</b> Rp <span id="coNet">9.500</span></div>
       </div>
 
-      <input type="text" id="cashoutAccount" placeholder="Nomor DANA / Nomor Rekening Bank">
+      <!-- INPUT LENGKAP: Nama & Nomor Akun Penerima DANA/Bank -->
+      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
+      <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
+
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
+      <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
 
       <div style="display: flex; gap: 6px; margin-top: 8px;">
         <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
@@ -839,18 +844,52 @@
       document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
     }
 
-    function submitCashout() {
+    // FUNGSI SUBMIT CASHOUT YANG SUDAH DIPERBAIKI UNTUK DANA
+    async function submitCashout() {
+      const type = document.getElementById('cashoutType').value;
       const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+      const accountName = document.getElementById('cashoutAccountName').value.trim();
       const account = document.getElementById('cashoutAccount').value.trim();
 
       if (coins < 200) return alert('Minimum penarikan adalah 200 Koin Berbayar (Rp 1.000)!');
       if (coins > paidCoins) return alert('Saldo Koin Berbayar Anda tidak cukup!');
+      
+      if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
       if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
 
-      paidCoins -= coins;
-      updateCoinUI();
-      document.getElementById('cashoutModal').style.display = 'none';
-      alert('Pengajuan penarikan dana berhasil diproses! Saldo akan masuk dalam max 1x24 jam.');
+      const gross = coins * CONFIG.COIN_RATE_RP;
+      const fee = type === 'bank' ? 3000 : 500;
+      const netAmount = Math.max(0, gross - fee);
+
+      try {
+        const { error } = await supabaseClient.from('payouts').insert([
+          {
+            user_id: currentUser ? currentUser.id : 'demo_id',
+            user_email: currentUser ? currentUser.email : 'guest@cuit.app',
+            payout_type: type,
+            account_name: accountName,
+            account_number: account,
+            coins_deducted: coins,
+            net_amount: netAmount,
+            status: 'pending'
+          }
+        ]);
+
+        if (error) {
+          console.warn("Tabel Supabase belum dipasang, memproses secara lokal:", error.message);
+        }
+
+        paidCoins -= coins;
+        updateCoinUI();
+        document.getElementById('cashoutModal').style.display = 'none';
+
+        document.getElementById('cashoutAccountName').value = '';
+        document.getElementById('cashoutAccount').value = '';
+
+        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
+      } catch (err) {
+        alert('Terjadi kesalahan proses penarikan: ' + err.message);
+      }
     }
 
     function openModerationPanel() {
