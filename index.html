@@ -2225,6 +2225,70 @@
       if (!error) alert('Pendaftaran berhasil! Silakan masuk.');
       else alert('Error: ' + error.message);
     }
+/* === FUNGSI MISI REELS FB === */
+async function openReelsModal() {
+  const container = document.getElementById('reelsListContainer');
+  document.getElementById('reelsModal').style.display = 'flex';
+
+  const today = new Date().toISOString().split('T')[0];
+  const claimedV1 = localStorage.getItem(`cuit_claimed_v1_${today}`);
+  const claimedV2 = localStorage.getItem(`cuit_claimed_v2_${today}`);
+  const claimedV3 = localStorage.getItem(`cuit_claimed_v3_${today}`);
+
+  container.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
+      ${claimedV1 
+        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+        : `<button onclick="watchReelsVideo('cuit_reels_v1', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+      }
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
+      ${claimedV2 
+        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+        : `<button onclick="watchReelsVideo('cuit_reels_v2', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+      }
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
+      ${claimedV3 
+        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+        : `<button onclick="watchReelsVideo('cuit_reels_v3', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+      }
+    </div>
+  `;
+}
+
+function watchReelsVideo(storageKey, videoSlot) {
+  let targetUrl = localStorage.getItem(storageKey);
+
+  if (!targetUrl || targetUrl === 'https://facebook.com' || targetUrl.trim() === '' || targetUrl === 'null') {
+    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
+  }
+
+  targetUrl = targetUrl.trim();
+
+  if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+    targetUrl = 'https://' + targetUrl;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const isClaimed = localStorage.getItem(`cuit_claimed_${videoSlot}_${today}`);
+
+  if (isClaimed) {
+    return alert('Video ini sudah diklaim koinnya hari ini!');
+  }
+
+  freeCoins += 10;
+  localStorage.setItem(`cuit_claimed_${videoSlot}_${today}`, 'true');
+  updateCoinUI();
+
+  alert('🎉 Selamat! 10 Koin Gratisan berhasil ditambahkan ke akun kamu.\n\nKlik OK untuk langsung menonton video.');
+
+  window.open(targetUrl, '_blank');
+  openReelsModal();
+}
 
     checkUser();
   </script>
