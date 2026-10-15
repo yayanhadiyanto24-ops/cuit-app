@@ -136,7 +136,7 @@
   <!-- Top Stats Bar -->
   <div class="top-bar">
     <div class="stat-badge" title="Koin Gratisan (Reset 24.00)">🆓 <span id="freeCoinCount">0</span></div>
-    <div class="stat-badge" title="Koin Berbayar (Bisa Diuangkan)">🪙 <span id="paidCoinCount">0</span></div>
+    <div class="stat-badge" title="Bank Koin Berbayar (Hasil Gift & Top-up / Bisa Diuangkan)">🪙 <span id="paidCoinCount">0</span></div>
   </div>
 
   <!-- Hero Banner Bergambar Resmi CUIT -->
@@ -244,7 +244,7 @@
       <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 6px;">Opsi Pembayaran / Curhat:</label>
       <select id="curhatCoinType" onchange="toggleCurhatLimit()">
         <option value="free">Pakai Koin Gratisan (1 Koin / 1.200 Karakter)</option>
-        <option value="paid">Pakai Koin Berbayar (1 Koin / 1.200 Karakter)</option>
+        <option value="paid">Pakai Bank Koin Berbayar (1 Koin / 1.200 Karakter)</option>
       </select>
 
       <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
@@ -349,7 +349,7 @@
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Dompet / Top-up</div>
+      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
       <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
       <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan</div>
@@ -469,9 +469,9 @@
   <!-- MODAL DOMPET & TOP-UP -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
-      <h3>🪙 Dompet & Top-Up Koin</h3>
+      <h3>🪙 Bank Koin & Top-Up Koin</h3>
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
-        <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">0</span> Koin</div>
+        <div><b>Saldo Bank Koin (Berbayar):</b> <span id="wPaidCoin">0</span> Koin</div>
         <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
       
@@ -492,7 +492,7 @@
   <!-- MODAL PENARIKAN DANA (CASHOUT) -->
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
-      <h3>💸 Penarikan Saldo CUIT</h3>
+      <h3>💸 Penarikan Saldo Bank Koin</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Koin Berbayar = Rp 5</div>
 
       <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan:</label>
@@ -681,14 +681,14 @@
       const textarea = document.getElementById('postContent');
       const coins = Math.ceil((textarea.value.length || 1) / 1200);
       const type = document.getElementById('curhatCoinType').value;
-      const label = type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar';
+      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
       document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
     }
 
     function updateCharCount(textarea) {
       const coins = Math.ceil(textarea.value.length / 1200) || 1;
       const type = document.getElementById('curhatCoinType').value;
-      const label = type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar';
+      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
       document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
     }
 
@@ -708,7 +708,7 @@
         freeCoins -= coinsNeeded;
       } else {
         if (paidCoins < coinsNeeded) {
-          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo koin kamu tidak cukup!`);
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
         }
         paidCoins -= coinsNeeded;
         usedPaidCoins += coinsNeeded;
@@ -852,7 +852,7 @@
       if (hours <= 0) return;
 
       if (paidCoins < hours) {
-        return alert(`Saldo koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
+        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
       }
 
       const expiryDate = new Date();
@@ -959,11 +959,9 @@
     }
 
     async function updateFollowCounts(myEmail, targetEmail) {
-      // Update my following count
       const { count: myFollowing } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
       await supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail);
 
-      // Update target followers count
       const { count: targetFollowers } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail);
       await supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail);
     }
@@ -982,7 +980,7 @@
         paidCoins -= 1;
         usedPaidCoins += 1;
       } else {
-        return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis!');
+        return alert('Saldo Koin Gratisan dan Bank Koin Berbayar kamu habis!');
       }
 
       updateCoinUI();
@@ -1043,11 +1041,12 @@
     }
 
     async function sendGiftAction(cost, giftName) {
-      if (paidCoins < cost) return alert('Saldo Koin Berbayar tidak mencukupi!');
+      if (paidCoins < cost) return alert('Saldo Bank Koin Berbayar tidak mencukupi!');
 
       if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
         
+        // 1. Potong Bank Koin Pengirim
         paidCoins -= cost;
         usedPaidCoins += cost;
         updateCoinUI();
@@ -1063,25 +1062,35 @@
             .eq('id', activeTargetPostId);
 
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
-          if (targetIdentifier) {
-            const { data: targetProfile } = await supabaseClient
-              .from('profiles')
-              .select('paid_coins')
-              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-              .single();
+          const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
-            if (targetProfile) {
-              const currentTargetCoins = targetProfile.paid_coins || 0;
-              await supabaseClient
+          // 2. Transfer 100% Koin Berbayar ke BANK KOIN Pemilik Postingan
+          if (targetIdentifier) {
+            // Jika penerima adalah diri sendiri/akun aktif saat ini
+            if (currentPost.user_email === myEmail) {
+              paidCoins += cost; // Koin bertambah kembali ke Bank Koin milik sendiri
+              updateCoinUI();
+            } else {
+              // Jika penerima adalah member lain
+              const { data: targetProfile } = await supabaseClient
                 .from('profiles')
-                .update({ paid_coins: currentTargetCoins + cost })
-                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+                .select('paid_coins')
+                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+                .single();
+
+              if (targetProfile) {
+                const currentTargetCoins = targetProfile.paid_coins || 0;
+                await supabaseClient
+                  .from('profiles')
+                  .update({ paid_coins: currentTargetCoins + cost })
+                  .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+              }
             }
           }
         }
       }
 
-      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! Pembuat postingan menerima 100% Koin Berbayar.`);
+      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! 100% koin gift telah masuk ke Bank Koin milik pembuat postingan.`);
       loadPosts();
     }
 
@@ -1144,7 +1153,7 @@
           usedPaidCoins += Math.floor(coins / 10);
           updateCoinUI();
           openWalletModal();
-          alert(`Top-Up Berhasil! +${coins} Koin Berbayar telah ditambahkan ke dompet kamu.`);
+          alert(`Top-Up Berhasil! +${coins} Koin Berbayar telah masuk ke Bank Koin kamu.`);
         }
       }, 800);
     }
@@ -1173,7 +1182,7 @@
       const account = document.getElementById('cashoutAccount').value.trim();
 
       if (coins < 200) return alert('Minimum penarikan adalah 200 Koin Berbayar (Rp 1.000)!');
-      if (coins > paidCoins) return alert('Saldo Koin Berbayar Anda tidak cukup!');
+      if (coins > paidCoins) return alert('Saldo Bank Koin Berbayar Anda tidak cukup!');
       
       if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
       if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
@@ -1245,7 +1254,6 @@
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
-      // Synchronize Followers and Following Realtime from Supabase
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
       const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
 
