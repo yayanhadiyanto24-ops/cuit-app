@@ -140,13 +140,13 @@
 <body>
 
   <!-- Top Stats Bar Compact -->
-<div class="top-bar">
-  <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-    🔄 Refresh
-  </button>
-  <div class="stat-badge" title="Koin Gratisan">🆓 <span id="freeCoinCount">0</span></div>
-  <div class="stat-badge" title="Bank Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
-</div>
+  <div class="top-bar">
+    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+      🔄 Refresh
+    </button>
+    <div class="stat-badge" title="Koin Gratisan">🆓 <span id="freeCoinCount">0</span></div>
+    <div class="stat-badge" title="Bank Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
+  </div>
 
   <!-- Hero Banner Bergambar Resmi CUIT -->
   <div class="cuit-banner-container">
@@ -391,6 +391,27 @@
     </div>
   </div>
 
+  <!-- MODAL BACA & TULIS KOMENTAR -->
+  <div id="commentsModal" class="modal">
+    <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <h3 style="font-size: 15px; font-weight: 800;">💬 Komentar</h3>
+        <button onclick="document.getElementById('commentsModal').style.display='none'" style="border: none; background: none; font-size: 16px; cursor: pointer;">✕</button>
+      </div>
+      
+      <!-- List Komentar -->
+      <div id="commentsList" style="flex: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; max-height: 300px;">
+        <p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>
+      </div>
+
+      <!-- Form Input Komentar -->
+      <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+        <textarea id="commentInputText" rows="2" placeholder="Tulis komentar kamu..." style="margin-bottom: 6px;"></textarea>
+        <button class="btn-primary" style="width: 100%;" onclick="submitCommentAction()">Kirim Komentar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL EDIT PROFIL -->
   <div id="editProfileModal" class="modal">
     <div class="modal-content">
@@ -552,6 +573,7 @@
     let profilesMap = {};
     let likesStore = {};
     let activeTargetPostId = null;
+    let activeCommentPostId = null;
     let followingSet = new Set();
     let currentFeedFilter = 'semua';
 
@@ -895,7 +917,7 @@
       
       const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
       const commentsCount = p.comments_count ?? 0;
-      const giftsCount = p.gifts_count ?? 0;
+      const giftsCoinsCount = p.gifts_count ?? 0; // Sekarang menyimpan total koin
       
       let authorPoin = 0;
       if (p.user_id && profilesMap[p.user_id] !== undefined) {
@@ -942,8 +964,8 @@
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
           <div class="post-footer-actions">
             <div class="action-chip" onclick="toggleLike('${p.id}')">♡ Suka (${likesCount})</div>
-            <div class="action-chip" onclick="addComment('${p.id}')">💬 Komentar (${commentsCount})</div>
-            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCount})</div>
+            <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
+            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
             <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
           </div>
         </div>
@@ -1012,9 +1034,39 @@
       }
     }
 
-    async function addComment(postId) {
-      const comm = prompt("Tulis komentar Anda (1 Koin per 1.200 Karakter):");
-      if (!comm) return;
+    /* FITUR KOMENTAR LENGKAP */
+    async function openCommentsModal(postId) {
+      activeCommentPostId = postId;
+      const listContainer = document.getElementById('commentsList');
+      document.getElementById('commentsModal').style.display = 'flex';
+      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>';
+
+      const { data: comments, error } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true });
+
+      if (error || !comments || comments.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 20px;">Belum ada komentar. Jadi yang pertama berkomentar!</p>';
+        return;
+      }
+
+      listContainer.innerHTML = comments.map(c => `
+        <div style="background: #f8f9fe; padding: 8px 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+            <span style="font-weight: 800; font-size: 11px; color: var(--text-main);">${c.username || 'Pengguna'}</span>
+            <span style="font-size: 9px; color: var(--text-sub);">${new Date(c.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+          </div>
+          <div style="font-size: 12px; color: #2c2e43; word-break: break-word;">${c.content}</div>
+        </div>
+      `).join('');
+    }
+
+    async function submitCommentAction() {
+      const input = document.getElementById('commentInputText');
+      const comm = input.value.trim();
+      if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
       const coinsNeeded = Math.ceil(comm.length / 1200);
 
@@ -1029,19 +1081,32 @@
 
       updateCoinUI();
 
-      const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
-      const currentComments = (currentPost && currentPost.comments_count) ? currentPost.comments_count : 0;
-      const newCommentCount = currentComments + 1;
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
-      if (currentPost) currentPost.comments_count = newCommentCount;
-      loadPosts();
+      const { error } = await supabaseClient.from('comments').insert([
+        {
+          post_id: activeCommentPostId,
+          content: comm,
+          user_id: currentUser ? currentUser.id : 'demo_id',
+          user_email: authorEmail,
+          username: authorName
+        }
+      ]);
 
-      await supabaseClient
-        .from('curhat')
-        .update({ comments_count: newCommentCount })
-        .eq('id', postId);
+      if (!error) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
+        const newCount = ((currentPost && currentPost.comments_count) || 0) + 1;
+        if (currentPost) currentPost.comments_count = newCount;
 
-      alert('Komentar berhasil dikirim!');
+        await supabaseClient.from('curhat').update({ comments_count: newCount }).eq('id', activeCommentPostId);
+
+        input.value = '';
+        openCommentsModal(activeCommentPostId);
+        loadPosts();
+      } else {
+        alert('Gagal mengirim komentar: ' + error.message);
+      }
     }
 
     function openGiftModal(postId) {
@@ -1062,12 +1127,13 @@
         document.getElementById('giftModal').style.display = 'none';
 
         if (currentPost) {
-          const newGiftCount = (currentPost.gifts_count || 0) + 1;
-          currentPost.gifts_count = newGiftCount;
+          // Menambahkan akumulasi nilai KOIN dari gift (bukan cuma hitungan kali)
+          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+          currentPost.gifts_count = newGiftCoinsCount;
 
           await supabaseClient
             .from('curhat')
-            .update({ gifts_count: newGiftCount })
+            .update({ gifts_count: newGiftCoinsCount })
             .eq('id', activeTargetPostId);
 
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
@@ -1075,12 +1141,10 @@
 
           // 2. Transfer 100% Koin Berbayar ke BANK KOIN Pemilik Postingan
           if (targetIdentifier) {
-            // Jika penerima adalah diri sendiri/akun aktif saat ini
             if (currentPost.user_email === myEmail) {
-              paidCoins += cost; // Koin bertambah kembali ke Bank Koin milik sendiri
+              paidCoins += cost;
               updateCoinUI();
             } else {
-              // Jika penerima adalah member lain
               const { data: targetProfile } = await supabaseClient
                 .from('profiles')
                 .select('paid_coins')
