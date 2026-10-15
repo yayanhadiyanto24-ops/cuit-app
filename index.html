@@ -124,7 +124,7 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-around: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
@@ -190,13 +190,25 @@
 
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-      <h2 class="section-title">Beranda</h2>
-      <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px;">
+      <div>
+        <h2 class="section-title">Beranda</h2>
+        <div class="section-sub" style="margin-bottom: 0;">Ada cerita baru secara real-time dari sesama anggota.</div>
+      </div>
+      
+      <!-- KOLOM KANAN: TOMBOL + CURHAT & TOMBOL KOIN GRATIS -->
+      <div style="display: flex; flexDirection: column; align-items: flex-end; gap: 6px;">
+        <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
+        <button 
+          onclick="openReelsModal()" 
+          style="backgroundColor: #ff9800; color: #fff; border: none; padding: 5px 12px; border-radius: 16px; font-weight: 800; font-size: 11px; cursor: pointer; box-shadow: 0 2px 6px rgba(255,152,0,0.3); display: flex; align-items: center; gap: 4px;"
+        >
+          🎁 +10 Koin Gratis
+        </button>
+      </div>
     </div>
-    <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
 
-    <div class="pills-group">
+    <div class="pills-group" style="margin-top: 10px;">
       <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
       <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
     </div>
@@ -232,6 +244,22 @@
 
     <div class="feed-container" id="postsList" style="margin-top: 10px;">
       <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
+    </div>
+  </div>
+
+  <!-- MODAL POP-UP MISI REELS FB BERHADIAH KOIN -->
+  <div id="reelsModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah</h3>
+      <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.4;">
+        Pilih video, berikan <b>Like & Komentar</b> di Facebook untuk klaim koin gratisan!
+      </p>
+
+      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+        <!-- Akan diisi otomatis oleh JavaScript -->
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -415,6 +443,13 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
+    <!-- AREA KHUSUS PANEL ADMIN RAHASIA YAN KASMARAN -->
+    <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
+      <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
+      <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola link Facebook Reels harian untuk Misi Koin Gratisan.</p>
+      <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola Reels FB</button>
+    </div>
+
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
       <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
@@ -424,6 +459,34 @@
     </div>
 
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
+  </div>
+
+  <!-- MODAL ADMIN EDIT LINK REELS (KHUSUS YAN KASMARAN) -->
+  <div id="adminReelsModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola Link Reels FB</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 14px;">Tempelkan tautan FB Reels harian untuk Video 1, 2, dan 3:</div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="font-size: 11px; font-weight: 800; display: block;">Video 1:</label>
+        <input type="text" id="adminVideo1" placeholder="https://facebook.com/reel/..." style="margin-top: 4px;">
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="font-size: 11px; font-weight: 800; display: block;">Video 2:</label>
+        <input type="text" id="adminVideo2" placeholder="https://facebook.com/reel/..." style="margin-top: 4px;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 11px; font-weight: 800; display: block;">Video 3:</label>
+        <input type="text" id="adminVideo3" placeholder="https://facebook.com/reel/..." style="margin-top: 4px;">
+      </div>
+
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-primary" style="flex: 1; background: #10b981;" onclick="saveAdminReelsLinks()">💾 Simpan</button>
+        <button class="btn-secondary" style="background: #eee;" onclick="document.getElementById('adminReelsModal').style.display='none'">Batal</button>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Navigation Bar -->
@@ -737,7 +800,7 @@
     let liveRealtimeChannel = null;
     let livePollingTimer = null;
     let isLeaderboardOpen = true;
-    let userHasLeftLive = false; // Mencegah auto-join paksa saat sudah keluar
+    let userHasLeftLive = false;
 
     let freeCoins = 20;
     let paidCoins = 0;
@@ -1965,6 +2028,18 @@
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
+      // Cek Akses Hak Khusus Admin (Yan Kasmaran)
+      const isYanKasmaran = (
+        displayName === 'Yan Kasmaran' || 
+        myEmail.includes('yan.kasmaran') || 
+        myEmail.includes('yayan.hadiyanto')
+      );
+      
+      const adminSection = document.getElementById('adminPanelSection');
+      if (adminSection) {
+        adminSection.style.display = isYanKasmaran ? 'block' : 'none';
+      }
+
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
       const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
 
@@ -1991,6 +2066,83 @@
         document.getElementById('authBtnLogout').innerText = 'Keluar Akun';
       } else {
         document.getElementById('authBtnLogout').innerText = 'Masuk / Daftar';
+      }
+    }
+
+    /* LOGIKA FITUR MISI REELS FB & PANEL ADMIN */
+    async function openReelsModal() {
+      const container = document.getElementById('reelsListContainer');
+      container.innerHTML = '<p style="font-size:11px; color:#888;">Memuat video harian...</p>';
+      document.getElementById('reelsModal').style.display = 'flex';
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('reels_missions')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (data && data.length > 0) {
+          container.innerHTML = data.map(item => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+              <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 ${item.slot_name}</span>
+              <button 
+                onclick="watchReelsVideo('${item.facebook_url}')"
+                style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;"
+              >
+                Tonton & Komen
+              </button>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p style="font-size:11px; color:#888;">Belum ada video aktif hari ini.</p>';
+        }
+      } catch (err) {
+        container.innerHTML = '<p style="font-size:11px; color:#e74c3c;">Gagal memuat video.</p>';
+      }
+    }
+
+    function watchReelsVideo(url) {
+      if (url && url !== 'https://facebook.com' && url.trim() !== '') {
+        window.open(url, '_blank');
+      } else {
+        alert('Belum ada link video yang dipasang oleh Admin.');
+      }
+    }
+
+    async function openAdminModal() {
+      try {
+        const { data } = await supabaseClient
+          .from('reels_missions')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (data) {
+          data.forEach(item => {
+            if (item.id === 1) document.getElementById('adminVideo1').value = item.facebook_url || '';
+            if (item.id === 2) document.getElementById('adminVideo2').value = item.facebook_url || '';
+            if (item.id === 3) document.getElementById('adminVideo3').value = item.facebook_url || '';
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      document.getElementById('adminReelsModal').style.display = 'flex';
+    }
+
+    async function saveAdminReelsLinks() {
+      const v1 = document.getElementById('adminVideo1').value.trim();
+      const v2 = document.getElementById('adminVideo2').value.trim();
+      const v3 = document.getElementById('adminVideo3').value.trim();
+
+      try {
+        await supabaseClient.from('reels_missions').update({ facebook_url: v1, updated_at: new Date().toISOString() }).eq('id', 1);
+        await supabaseClient.from('reels_missions').update({ facebook_url: v2, updated_at: new Date().toISOString() }).eq('id', 2);
+        await supabaseClient.from('reels_missions').update({ facebook_url: v3, updated_at: new Date().toISOString() }).eq('id', 3);
+
+        alert('✅ Link Video Reels FB berhasil diperbarui!');
+        document.getElementById('adminReelsModal').style.display = 'none';
+      } catch (err) {
+        alert('Gagal menyimpan link: ' + err.message);
       }
     }
 
