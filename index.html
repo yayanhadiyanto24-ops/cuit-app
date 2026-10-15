@@ -483,7 +483,7 @@
       <label style="font-size: 12px; font-weight: 800; display: block; margin-top: 8px;">Pilih Paket Top-Up Koin Berbayar:</label>
       <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 100)">💰 Paket Rp 1.000 (100 Koin)</button>
       <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 600)">🎁 Paket Rp 5.000 (600 Koin - Bonus 100)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
     </div>
@@ -623,11 +623,13 @@
       }
     }
 
-    function getUserLevel() {
-      if (usedPaidCoins >= 1200) return { title: '👑 SULTAN CURHAT', icon: '👑', next: null, target: 1200 };
-      if (usedPaidCoins >= 500) return { title: '🔥 ACTIVE CUITER', icon: '🔥', next: '👑 SULTAN CURHAT', target: 1200, prev: 500 };
-      if (usedPaidCoins >= 200) return { title: '🤝 SAHABAT', icon: '🤝', next: '🔥 ACTIVE CUITER', target: 500, prev: 200 };
-      if (usedPaidCoins >= 50) return { title: '💧 PENDENGAR', icon: '💧', next: '🤝 SAHABAT', target: 200, prev: 50 };
+    // MENGHITUNG LEVEL BERDASARKAN POIN ASLI
+    function getUserLevel(expPoints = null) {
+      const pts = (expPoints !== null) ? parseInt(expPoints) : usedPaidCoins;
+      if (pts >= 1200) return { title: '👑 SULTAN CURHAT', icon: '👑', next: null, target: 1200 };
+      if (pts >= 500) return { title: '🔥 ACTIVE CUITER', icon: '🔥', next: '👑 SULTAN CURHAT', target: 1200, prev: 500 };
+      if (pts >= 200) return { title: '🤝 SAHABAT', icon: '🤝', next: '🔥 ACTIVE CUITER', target: 500, prev: 200 };
+      if (pts >= 50) return { title: '💧 PENDENGAR', icon: '💧', next: '🤝 SAHABAT', target: 200, prev: 50 };
       return { title: '🌱 PEMULA', icon: '🌱', next: '💧 PENDENGAR', target: 50, prev: 0 };
     }
 
@@ -691,7 +693,7 @@
       const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
+        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0, author_exp: usedPaidCoins }
       ]);
 
       if (!error) {
@@ -813,7 +815,8 @@
       const commentsCount = p.comments_count ?? 0;
       const giftsCount = p.gifts_count ?? 0;
       
-      const userLvl = getUserLevel();
+      // Mengambil level asli dari pembuat postingan (bukan level kamu)
+      const userLvl = getUserLevel(p.author_exp ?? 0);
 
       return `
         <div class="post-card">
@@ -858,6 +861,7 @@
         }).subscribe();
     }
 
+    // FUNGSI LIKE SERBA BISA (LOKAL + SUPABASE)
     async function toggleLike(postId) {
       if (freeCoins >= 1) {
         freeCoins -= 1;
@@ -871,17 +875,25 @@
       updateCoinUI();
 
       const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
-      const newLikeCount = ((currentPost && currentPost.likes_count) ? currentPost.likes_count : (likesStore[postId] || 0)) + 1;
+      const currentLikes = (currentPost && currentPost.likes_count !== undefined && currentPost.likes_count !== null) ? currentPost.likes_count : (likesStore[postId] || 0);
+      const newLikeCount = currentLikes + 1;
+      
       likesStore[postId] = newLikeCount;
+      if (currentPost) currentPost.likes_count = newLikeCount;
+      loadPosts();
 
-      await supabaseClient
+      // Kirim pembaruan ke Supabase
+      const { error } = await supabaseClient
         .from('curhat')
         .update({ likes_count: newLikeCount })
         .eq('id', postId);
 
-      loadPosts();
+      if (error) {
+        console.warn("Update Supabase dialihkan:", error.message);
+      }
     }
 
+    // FUNGSI KOMENTAR SERBA BISA
     async function addComment(postId) {
       const comm = prompt("Tulis komentar Anda (1 Koin per 1.200 Karakter):");
       if (!comm) return;
@@ -900,7 +912,11 @@
       updateCoinUI();
 
       const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
-      const newCommentCount = (currentPost && currentPost.comments_count ? currentPost.comments_count : 0) + 1;
+      const currentComments = (currentPost && currentPost.comments_count) ? currentPost.comments_count : 0;
+      const newCommentCount = currentComments + 1;
+
+      if (currentPost) currentPost.comments_count = newCommentCount;
+      loadPosts();
 
       await supabaseClient
         .from('curhat')
@@ -908,7 +924,6 @@
         .eq('id', postId);
 
       alert('Komentar berhasil dikirim!');
-      loadPosts();
     }
 
     function openGiftModal(postId) {
@@ -916,6 +931,7 @@
       document.getElementById('giftModal').style.display = 'flex';
     }
 
+    // FUNGSI GIFT SERBA BISA
     async function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Koin Berbayar tidak mencukupi!');
       paidCoins -= cost;
@@ -925,7 +941,10 @@
 
       if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-        const newGiftCount = (currentPost && currentPost.gifts_count ? currentPost.gifts_count : 0) + 1;
+        const currentGifts = (currentPost && currentPost.gifts_count) ? currentPost.gifts_count : 0;
+        const newGiftCount = currentGifts + 1;
+
+        if (currentPost) currentPost.gifts_count = newGiftCount;
 
         await supabaseClient
           .from('curhat')
