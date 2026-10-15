@@ -133,8 +133,8 @@
 
   <!-- Top Stats Bar -->
   <div class="top-bar">
-    <div class="stat-badge" title="Koin Gratisan (Reset 24.00)">🆓 <span id="freeCoinCount">20</span></div>
-    <div class="stat-badge" title="Koin Berbayar (Bisa Diuangkan)">🪙 <span id="paidCoinCount">120</span></div>
+    <div class="stat-badge" title="Koin Gratisan (Reset 24.00)">🆓 <span id="freeCoinCount">0</span></div>
+    <div class="stat-badge" title="Koin Berbayar (Bisa Diuangkan)">🪙 <span id="paidCoinCount">0</span></div>
   </div>
 
   <!-- Hero Banner Bergambar Resmi CUIT -->
@@ -178,13 +178,13 @@
       </div>
     </div>
 
-    <!-- CAROUSEL POSTINGAN PROMOSI / SOROTAN RAMPING -->
+    <!-- CAROUSEL POSTINGAN PROMOSI / SOROTAN RAMPING POTRET -->
     <div id="promotedSection" style="display: none; margin-top: 12px; margin-bottom: 4px;">
       <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
         🚀 SOROTAN HARI INI
       </div>
       <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;">
-        <!-- Card promosi ramping berjejer di sini -->
+        <!-- Card promosi potret ramping berjejer di sini -->
       </div>
     </div>
 
@@ -471,8 +471,8 @@
     <div class="modal-content">
       <h3>🪙 Dompet & Top-Up Koin</h3>
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
-        <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">120</span> Koin</div>
-        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">600</span></div>
+        <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">0</span> Koin</div>
+        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
       
       <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
@@ -543,8 +543,8 @@
     let likesStore = {};
     let promotedPostsStore = JSON.parse(localStorage.getItem('cuit_promoted_posts') || '[]');
 
-    let freeCoins = 20;
-    let paidCoins = 120;
+    let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+    let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 120;
     let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0; // Poin Jam Terbang
 
     function switchTab(pageId, navElement) {
@@ -570,14 +570,46 @@
     async function checkUser() {
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
+      
+      if (currentUser) {
+        // Ambil saldo real dari Supabase
+        const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        if (profile) {
+          freeCoins = profile.free_coins ?? freeCoins;
+          paidCoins = profile.paid_coins ?? paidCoins;
+          usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
+        }
+      }
+
+      updateCoinUI();
       loadPosts();
       initRealtime();
+    }
+
+    async function syncCoinsToSupabase() {
+      // Simpan di LocalStorage sebagai cadangan lokal
+      localStorage.setItem('cuit_free_coins', freeCoins);
+      localStorage.setItem('cuit_paid_coins', paidCoins);
+      localStorage.setItem('cuit_user_exp', usedPaidCoins);
+
+      // Simpan Real di Database Supabase
+      if (currentUser) {
+        await supabaseClient.from('profiles').upsert({
+          id: currentUser.id,
+          email: currentUser.email,
+          username: customDisplayName || currentUser.email.split('@')[0],
+          free_coins: freeCoins,
+          paid_coins: paidCoins,
+          used_paid_coins: usedPaidCoins
+        });
+      }
     }
 
     function updateCoinUI() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
-      localStorage.setItem('cuit_user_exp', usedPaidCoins);
+      syncCoinsToSupabase();
+      
       if (document.getElementById('pageProfile').classList.contains('active')) {
         renderProfileData();
       }
@@ -603,7 +635,7 @@
       customDisplayName = newName;
       localStorage.setItem('cuit_user_name', newName);
       document.getElementById('editProfileModal').style.display = 'none';
-      renderProfileData();
+      updateCoinUI();
       loadPosts();
       alert('Profil berhasil diperbarui!');
     }
@@ -663,7 +695,7 @@
       }
     }
 
-        async function loadPosts() {
+    async function loadPosts() {
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
