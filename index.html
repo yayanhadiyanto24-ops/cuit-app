@@ -124,7 +124,7 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
@@ -836,7 +836,7 @@
 
     /* SISTEM CHECK RESET KOIN HARIAN (SETIAP HARI SETELAH JAM 00:00 WIB) */
     function checkDailyCoinReset() {
-      const todayDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+      const todayDate = new Date().toISOString().split('T')[0];
       const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
 
       if (lastResetDate !== todayDate) {
@@ -847,7 +847,6 @@
     }
 
     async function checkUser() {
-      // Jalankan pengecekan reset koin harian terlebih dahulu
       checkDailyCoinReset();
 
       const { data } = await supabaseClient.auth.getUser();
@@ -856,7 +855,6 @@
       if (currentUser) {
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
         if (profile) {
-          // Jika sudah berganti hari di local device, utamakan jatah koin harian gratis 20
           const todayDate = new Date().toISOString().split('T')[0];
           const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
           
@@ -2097,54 +2095,29 @@
       }
     }
 
-    /* LOGIKA FITUR MISI REELS FB & PANEL ADMIN (PERBAIKAN DARI PERMISSION DENIED) */
+    /* LOGIKA FITUR MISI REELS FB & PANEL ADMIN (PEMBARUAN LOGIKA LOCAL STORAGE) */
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
-      container.innerHTML = '<p style="font-size:11px; color:#888;">Memuat video harian...</p>';
       document.getElementById('reelsModal').style.display = 'flex';
 
-      try {
-        const { data } = await supabaseClient
-          .from('reels_missions')
-          .select('*')
-          .order('id', { ascending: true });
+      const localV1 = localStorage.getItem('cuit_reels_v1') || 'https://facebook.com';
+      const localV2 = localStorage.getItem('cuit_reels_v2') || 'https://facebook.com';
+      const localV3 = localStorage.getItem('cuit_reels_v3') || 'https://facebook.com';
 
-        if (data && data.length > 0) {
-          container.innerHTML = data.map(item => `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-              <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 ${item.slot_name}</span>
-              <button 
-                onclick="watchReelsVideo('${item.facebook_url}')"
-                style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;"
-              >
-                Tonton & Komen
-              </button>
-            </div>
-          `).join('');
-        } else {
-          // Fallback lokal jika tabel reels_missions belum dikonfigurasi di Supabase
-          const localV1 = localStorage.getItem('cuit_reels_v1') || 'https://facebook.com';
-          const localV2 = localStorage.getItem('cuit_reels_v2') || 'https://facebook.com';
-          const localV3 = localStorage.getItem('cuit_reels_v3') || 'https://facebook.com';
-
-          container.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-              <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
-              <button onclick="watchReelsVideo('${localV1}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-              <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
-              <button onclick="watchReelsVideo('${localV2}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-              <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
-              <button onclick="watchReelsVideo('${localV3}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
-            </div>
-          `;
-        }
-      } catch (err) {
-        container.innerHTML = '<p style="font-size:11px; color:#e74c3c;">Gagal memuat video.</p>';
-      }
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+          <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
+          <button onclick="watchReelsVideo('${localV1}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+          <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
+          <button onclick="watchReelsVideo('${localV2}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+          <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
+          <button onclick="watchReelsVideo('${localV3}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+        </div>
+      `;
     }
 
     function watchReelsVideo(url) {
@@ -2156,10 +2129,13 @@
     }
 
     async function openAdminModal() {
-      // Ambil nilai dari penyimpanan lokal terlebih dahulu
-      document.getElementById('adminVideo1').value = localStorage.getItem('cuit_reels_v1') || '';
-      document.getElementById('adminVideo2').value = localStorage.getItem('cuit_reels_v2') || '';
-      document.getElementById('adminVideo3').value = localStorage.getItem('cuit_reels_v3') || '';
+      const localV1 = localStorage.getItem('cuit_reels_v1');
+      const localV2 = localStorage.getItem('cuit_reels_v2');
+      const localV3 = localStorage.getItem('cuit_reels_v3');
+
+      document.getElementById('adminVideo1').value = localV1 !== null ? localV1 : 'https://facebook.com';
+      document.getElementById('adminVideo2').value = localV2 !== null ? localV2 : 'https://facebook.com';
+      document.getElementById('adminVideo3').value = localV3 !== null ? localV3 : 'https://facebook.com';
 
       try {
         const { data } = await supabaseClient
@@ -2169,9 +2145,9 @@
 
         if (data && data.length > 0) {
           data.forEach(item => {
-            if (item.id === 1 && item.facebook_url) document.getElementById('adminVideo1').value = item.facebook_url;
-            if (item.id === 2 && item.facebook_url) document.getElementById('adminVideo2').value = item.facebook_url;
-            if (item.id === 3 && item.facebook_url) document.getElementById('adminVideo3').value = item.facebook_url;
+            if (item.id === 1 && !localV1 && item.facebook_url) document.getElementById('adminVideo1').value = item.facebook_url;
+            if (item.id === 2 && !localV2 && item.facebook_url) document.getElementById('adminVideo2').value = item.facebook_url;
+            if (item.id === 3 && !localV3 && item.facebook_url) document.getElementById('adminVideo3').value = item.facebook_url;
           });
         }
       } catch (err) {
@@ -2185,7 +2161,7 @@
       const v2 = document.getElementById('adminVideo2').value.trim();
       const v3 = document.getElementById('adminVideo3').value.trim();
 
-      // Simpan selalu ke LocalStorage agar tidak terhalang permission denied
+      // Simpan selalu ke LocalStorage sebagai sumber data utama
       localStorage.setItem('cuit_reels_v1', v1);
       localStorage.setItem('cuit_reels_v2', v2);
       localStorage.setItem('cuit_reels_v3', v3);
