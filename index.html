@@ -196,7 +196,7 @@
         <div class="section-sub" style="margin-bottom: 0;">Ada cerita baru secara real-time dari sesama anggota.</div>
       </div>
       
-      <!-- KOLOM KANAN: TOMBOL + CURHAT & TOMBOL KOIN GRATIS BERDAMPINGAN/SANGAT TAJAM -->
+      <!-- KOLOM KANAN: TOMBOL + CURHAT & TOMBOL KOIN GRATIS TAJAM -->
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;">
         <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
         <button 
@@ -345,7 +345,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (LOGIKA KELUAR & DURASI LENGKAP) -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
   <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -461,7 +461,7 @@
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
   </div>
 
-  <!-- MODAL ADMIN EDIT LINK REELS (KHUSUS YAN KASMARAN) -->
+  <!-- MODAL ADMIN EDIT LINK REELS -->
   <div id="adminReelsModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola Link Reels FB</h3>
@@ -513,7 +513,7 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN (SAAT FOTO/NAMA DIKETUK) -->
+  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN -->
   <div id="userProfileModal" class="modal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
@@ -869,7 +869,7 @@
     }
 
     async function loadFollows() {
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
       const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
       if (data) {
         followingSet = new Set(data.map(f => f.following_email));
@@ -912,9 +912,8 @@
       return { title: '🌱 PEMULA', icon: '🌱', next: '💧 PENDENGAR', target: 50, prev: 0 };
     }
 
-    /* BUKA MODAL DETAIL PROFIL ANGGOTA LAIN */
     async function openUserProfileModal(email, name, poin) {
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
       const isSelf = (email === myEmail);
       
       const lvl = getUserLevel(poin);
@@ -950,7 +949,7 @@
     }
 
     function openEditProfileModal() {
-      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
       document.getElementById('editDisplayName').value = currentName;
       document.getElementById('editProfileModal').style.display = 'flex';
     }
@@ -1020,8 +1019,8 @@
 
       updateCoinUI();
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
       const { error } = await supabaseClient.from('curhat').insert([
         { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
@@ -1184,7 +1183,6 @@
       loadPosts();
     }
 
-    /* KARTU POSTINGAN DENGAN PROFIL YANG BISA DIKETUK DAN TANPA USERNAME @ */
     function renderCardHTML(p) {
       let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
       let feelingTag = p.feeling || 'Bahagia';
@@ -1204,7 +1202,7 @@
       }
 
       const userLvl = getUserLevel(authorPoin);
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
       const isSelf = (p.user_email === myEmail);
       const isFollowing = followingSet.has(p.user_email);
 
@@ -1245,7 +1243,7 @@
     }
 
     async function toggleFollow(targetEmail, btn) {
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
       if (!targetEmail || targetEmail === myEmail) return;
 
       if (followingSet.has(targetEmail)) {
@@ -1346,8 +1344,8 @@
 
       updateCoinUI();
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
       const { error } = await supabaseClient.from('comments').insert([
         {
@@ -1383,8 +1381,8 @@
     async function openLiveGiftModal() {
       if (!currentActiveLive) return alert('Tidak ada Live aktif!');
       
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
       const { data: messages } = await supabaseClient
         .from('live_messages')
@@ -1446,85 +1444,84 @@
     }
 
     async function executeSendGift() {
-  if (!pendingGiftData) return;
+      if (!pendingGiftData) return;
 
-  const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
-  const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
 
-  // KHUSUS POSTINGAN BERANDA: MENCEGAH SAWER KE POSTINGAN SENDIRI
-  if (!isLiveGiftContext && activeTargetPostId) {
-    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-    if (currentPost && currentPost.user_email === myEmail) {
-      document.getElementById('confirmGiftModal').style.display = 'none';
-      pendingGiftData = null;
-      return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
-    }
-  }
-
-  const { cost, giftName } = pendingGiftData;
-
-  paidCoins -= cost;
-  usedPaidCoins += cost;
-  updateCoinUI();
-  document.getElementById('confirmGiftModal').style.display = 'none';
-
-  if (isLiveGiftContext && currentActiveLive) {
-    const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
-    const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
-
-    await supabaseClient.from('live_messages').insert([
-      { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
-    ]);
-
-    const { data: targetProfile } = await supabaseClient
-      .from('profiles')
-      .select('paid_coins')
-      .eq('email', targetIdentifier)
-      .single();
-
-    if (targetProfile) {
-      const currentTargetCoins = targetProfile.paid_coins || 0;
-      await supabaseClient
-        .from('profiles')
-        .update({ paid_coins: currentTargetCoins + cost })
-        .eq('email', targetIdentifier);
-    }
-  } else if (activeTargetPostId) {
-    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-
-    if (currentPost) {
-      const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
-      currentPost.gifts_count = newGiftCoinsCount;
-
-      await supabaseClient
-        .from('curhat')
-        .update({ gifts_count: newGiftCoinsCount })
-        .eq('id', activeTargetPostId);
-
-      const targetIdentifier = currentPost.user_id || currentPost.user_email;
-
-      const { data: targetProfile } = await supabaseClient
-        .from('profiles')
-        .select('paid_coins')
-        .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-        .single();
-
-      if (targetProfile) {
-        const currentTargetCoins = targetProfile.paid_coins || 0;
-        await supabaseClient
-          .from('profiles')
-          .update({ paid_coins: currentTargetCoins + cost })
-          .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+      // MENCEGAH SAWER POSTINGAN SENDIRI
+      if (!isLiveGiftContext && activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+        if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+          document.getElementById('confirmGiftModal').style.display = 'none';
+          pendingGiftData = null;
+          return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
+        }
       }
+
+      const { cost, giftName } = pendingGiftData;
+
+      paidCoins -= cost;
+      usedPaidCoins += cost;
+      updateCoinUI();
+      document.getElementById('confirmGiftModal').style.display = 'none';
+
+      if (isLiveGiftContext && currentActiveLive) {
+        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+
+        await supabaseClient.from('live_messages').insert([
+          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+        ]);
+
+        const { data: targetProfile } = await supabaseClient
+          .from('profiles')
+          .select('paid_coins')
+          .eq('email', targetIdentifier)
+          .single();
+
+        if (targetProfile) {
+          const currentTargetCoins = targetProfile.paid_coins || 0;
+          await supabaseClient
+            .from('profiles')
+            .update({ paid_coins: currentTargetCoins + cost })
+            .eq('email', targetIdentifier);
+        }
+      } else if (activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+
+        if (currentPost) {
+          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+          currentPost.gifts_count = newGiftCoinsCount;
+
+          await supabaseClient
+            .from('curhat')
+            .update({ gifts_count: newGiftCoinsCount })
+            .eq('id', activeTargetPostId);
+
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+
+          const { data: targetProfile } = await supabaseClient
+            .from('profiles')
+            .select('paid_coins')
+            .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+            .single();
+
+          if (targetProfile) {
+            const currentTargetCoins = targetProfile.paid_coins || 0;
+            await supabaseClient
+              .from('profiles')
+              .update({ paid_coins: currentTargetCoins + cost })
+              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+          }
+        }
+        loadPosts();
+        triggerGiftAnimation(myName, giftName, cost, "Penulis");
+      }
+
+      pendingGiftData = null;
+      selectedLiveRecipient = null;
     }
-    loadPosts();
-    triggerGiftAnimation(myName, giftName, cost, "Penulis");
-  }
-
-  pendingGiftData = null;
-  selectedLiveRecipient = null;
-}
-
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
@@ -1585,7 +1582,6 @@
       }
     }
 
-    /* PENGATURAN RUANG LIVE TEKS & LEAVE SESSION ACCURATE */
     function leaveLiveSession() {
       userHasLeftLive = true;
       cleanupLiveSesssion();
@@ -1628,7 +1624,7 @@
         localStorage.setItem('cuit_active_live_id', activeLive.id);
 
         const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
-        const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+        const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
         const isHost = activeLive.host_email === myEmail;
 
         if (userHasLeftLive && !isHost) {
@@ -1727,8 +1723,8 @@
       usedPaidCoins += 10;
       updateCoinUI();
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
       const nowMs = Date.now();
       const maxLiveMs = nowMs + (60 * 60 * 1000);
@@ -1822,7 +1818,7 @@
       const msg = input.value.trim();
       if (!msg || !currentActiveLive) return;
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
 
       await supabaseClient.from('live_messages').insert([
         { live_id: currentActiveLive.id, username: myName, content: msg }
@@ -1845,7 +1841,6 @@
       renderFilteredFeed();
     }
 
-    /* PENCARIAN & FILTER LENGKAP (PERASAAN + DUA TOP 10 RANKING) */
     async function searchPosts() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const filterType = document.getElementById('mainSearchFilter').value;
@@ -2030,19 +2025,20 @@
 
     async function renderProfileData() {
       const userLvl = getUserLevel();
-      const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
       document.getElementById('profName').innerText = displayName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
-      // Cek Akses Hak Khusus Admin (Yan Kasmaran)
+      // HAK AKSES PANEL ADMIN BEBAS UNTUK AKUN YAN KASMARAN & MANTANPERAMAL
       const isYanKasmaran = (
         displayName === 'Yan Kasmaran' || 
         myEmail.includes('yan.kasmaran') || 
-        myEmail.includes('yayan.hadiyanto')
+        myEmail.includes('yayan.hadiyanto') ||
+        myEmail.includes('mantanperamal')
       );
       
       const adminSection = document.getElementById('adminPanelSection');
@@ -2086,7 +2082,7 @@
       document.getElementById('reelsModal').style.display = 'flex';
 
       try {
-        const { data, error } = await supabaseClient
+        const { data } = await supabaseClient
           .from('reels_missions')
           .select('*')
           .order('id', { ascending: true });
@@ -2112,7 +2108,7 @@
     }
 
     function watchReelsVideo(url) {
-      if (url && url !== 'https://facebook.com' && url.trim() !== '') {
+      if (url && url !== 'https://facebook.com' && url.trim() !== '' && url !== 'null') {
         window.open(url, '_blank');
       } else {
         alert('Belum ada link video yang dipasang oleh Admin.');
@@ -2145,12 +2141,22 @@
       const v3 = document.getElementById('adminVideo3').value.trim();
 
       try {
-        await supabaseClient.from('reels_missions').update({ facebook_url: v1, updated_at: new Date().toISOString() }).eq('id', 1);
-        await supabaseClient.from('reels_missions').update({ facebook_url: v2, updated_at: new Date().toISOString() }).eq('id', 2);
-        await supabaseClient.from('reels_missions').update({ facebook_url: v3, updated_at: new Date().toISOString() }).eq('id', 3);
+        const upsertData = [
+          { id: 1, slot_name: 'Video 1', facebook_url: v1, reward_coins: 10, updated_at: new Date().toISOString() },
+          { id: 2, slot_name: 'Video 2', facebook_url: v2, reward_coins: 10, updated_at: new Date().toISOString() },
+          { id: 3, slot_name: 'Video 3', facebook_url: v3, reward_coins: 10, updated_at: new Date().toISOString() }
+        ];
 
-        alert('✅ Link Video Reels FB berhasil diperbarui!');
-        document.getElementById('adminReelsModal').style.display = 'none';
+        const { error } = await supabaseClient
+          .from('reels_missions')
+          .upsert(upsertData);
+
+        if (!error) {
+          alert('✅ Link Video Reels FB berhasil disimpan!');
+          document.getElementById('adminReelsModal').style.display = 'none';
+        } else {
+          alert('Gagal menyimpan: ' + error.message);
+        }
       } catch (err) {
         alert('Gagal menyimpan link: ' + err.message);
       }
@@ -2197,4 +2203,4 @@
     checkUser();
   </script>
 </body>
-</html> 
+</html>
