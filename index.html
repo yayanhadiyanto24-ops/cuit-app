@@ -543,9 +543,9 @@
     let likesStore = {};
     let promotedPostsStore = JSON.parse(localStorage.getItem('cuit_promoted_posts') || '[]');
 
-    let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
-    let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 120;
-    let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0; // Poin Jam Terbang
+    let freeCoins = 20;
+    let paidCoins = 0;
+    let usedPaidCoins = 0; // Poin Jam Terbang
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -572,13 +572,26 @@
       currentUser = data.user;
       
       if (currentUser) {
-        // Ambil saldo real dari Supabase
+        // Ambil data profil real dari Supabase
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        
         if (profile) {
-          freeCoins = profile.free_coins ?? freeCoins;
-          paidCoins = profile.paid_coins ?? paidCoins;
-          usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
+          freeCoins = profile.free_coins ?? 20;
+          paidCoins = profile.paid_coins ?? 0;
+          usedPaidCoins = profile.used_paid_coins ?? 0;
+          if (profile.username) customDisplayName = profile.username;
+        } else {
+          // Akun baru: Inisialisasi data di Supabase
+          freeCoins = 20;
+          paidCoins = 0;
+          usedPaidCoins = 0;
+          await syncCoinsToSupabase();
         }
+      } else {
+        // Mode Tamu / Tanpa Login
+        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
+        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
       }
 
       updateCoinUI();
@@ -587,12 +600,10 @@
     }
 
     async function syncCoinsToSupabase() {
-      // Simpan di LocalStorage sebagai cadangan lokal
       localStorage.setItem('cuit_free_coins', freeCoins);
       localStorage.setItem('cuit_paid_coins', paidCoins);
       localStorage.setItem('cuit_user_exp', usedPaidCoins);
 
-      // Simpan Real di Database Supabase
       if (currentUser) {
         await supabaseClient.from('profiles').upsert({
           id: currentUser.id,
@@ -1079,7 +1090,14 @@
 
     function handleAuthAction() {
       if (currentUser) {
-        supabaseClient.auth.signOut().then(() => location.reload());
+        supabaseClient.auth.signOut().then(() => {
+          localStorage.removeItem('cuit_user_name');
+          localStorage.removeItem('cuit_free_coins');
+          localStorage.removeItem('cuit_paid_coins');
+          localStorage.removeItem('cuit_user_exp');
+          alert('Berhasil keluar akun!');
+          location.reload();
+        });
       } else {
         document.getElementById('authModal').style.display = 'flex';
       }
@@ -1090,6 +1108,11 @@
       const password = document.getElementById('password').value;
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (!error) {
+        localStorage.removeItem('cuit_user_name');
+        localStorage.removeItem('cuit_free_coins');
+        localStorage.removeItem('cuit_paid_coins');
+        localStorage.removeItem('cuit_user_exp');
+        
         document.getElementById('authModal').style.display = 'none';
         checkUser();
       } else alert('Gagal masuk: ' + error.message);
