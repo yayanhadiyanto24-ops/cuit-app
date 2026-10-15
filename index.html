@@ -39,6 +39,8 @@
     /* Buttons */
     .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2); }
     .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
+    .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+    .btn-follow.following { background: #eef1f8; color: var(--text-sub); }
     .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
 
     /* Filter Pills */
@@ -80,7 +82,7 @@
     .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
     
     .user-details { display: flex; flex-direction: column; gap: 1px; }
-    .user-name-row { display: flex; align-items: center; gap: 4px; }
+    .user-name-row { display: flex; align-items: center; gap: 6px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
     .user-handle { font-size: 11px; color: var(--text-sub); font-weight: 500; }
     .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
@@ -151,8 +153,8 @@
     <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
 
     <div class="pills-group">
-      <button class="pill-btn active" onclick="filterPosts('semua', this)">Semua</button>
-      <button class="pill-btn" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+      <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
+      <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
     </div>
 
     <!-- Tags Pilihan 16 Perasaan -->
@@ -270,7 +272,7 @@
 
       <div style="display: flex; gap: 6px; margin-top: 12px;">
         <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
-        <button class="btn-secondary" style="flex: 1.2;" onclick="alert('Cerita disimpan sebagai draf!')">Simpan sebagai Draf</button>
+        <button class="btn-secondary" style="flex: 1.2;" onclick="saveDraftLocally()">Simpan Draf</button>
         <button class="btn-secondary" style="background: #f4f6fc;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
       </div>
     </div>
@@ -395,9 +397,7 @@
 
   <!-- MODAL DETAIL POSTINGAN PROMOSI/SOROTAN -->
   <div id="promotedDetailModal" class="modal">
-    <div class="modal-content" id="promotedDetailContent">
-      <!-- Isi postingan sorotan utuh akan di-render dinamis -->
-    </div>
+    <div class="modal-content" id="promotedDetailContent"></div>
   </div>
 
   <!-- MODAL PENGATURAN -->
@@ -540,13 +540,15 @@
     let currentUser = null;
     let customDisplayName = localStorage.getItem('cuit_user_name') || null;
     let allPostsCache = [];
-    let profilesMap = {}; // Memetakan data level profil pengguna terbaru
+    let profilesMap = {};
     let likesStore = {};
     let activeTargetPostId = null;
+    let followingSet = new Set();
+    let currentFeedFilter = 'semua';
 
     let freeCoins = 20;
     let paidCoins = 0;
-    let usedPaidCoins = 0; // Poin Jam Terbang
+    let usedPaidCoins = 0;
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -566,6 +568,7 @@
       }
 
       if (pageId === 'pageProfile') renderProfileData();
+      if (pageId === 'pageCreate') loadDraftLocally();
     }
 
     async function checkUser() {
@@ -592,9 +595,18 @@
         usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
       }
 
+      await loadFollows();
       updateCoinUI();
       loadPosts();
       initRealtime();
+    }
+
+    async function loadFollows() {
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
+      if (data) {
+        followingSet = new Set(data.map(f => f.following_email));
+      }
     }
 
     async function syncCoinsToSupabase() {
@@ -650,6 +662,21 @@
       alert('Profil berhasil diperbarui!');
     }
 
+    function saveDraftLocally() {
+      const content = document.getElementById('postContent').value.trim();
+      if (!content) return alert('Teks curhatan masih kosong!');
+      localStorage.setItem('cuit_draft_content', content);
+      alert('Draf berhasil disimpan di HP!');
+    }
+
+    function loadDraftLocally() {
+      const draft = localStorage.getItem('cuit_draft_content');
+      if (draft && !document.getElementById('postContent').value) {
+        document.getElementById('postContent').value = draft;
+        updateCharCount(document.getElementById('postContent'));
+      }
+    }
+
     function toggleCurhatLimit() {
       const textarea = document.getElementById('postContent');
       const coins = Math.ceil((textarea.value.length || 1) / 1200);
@@ -697,6 +724,7 @@
       ]);
 
       if (!error) {
+        localStorage.removeItem('cuit_draft_content');
         alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
         document.getElementById('postContent').value = '';
         switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
@@ -710,7 +738,6 @@
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
 
-      // 1. Ambil data profil untuk sinkronisasi level terkini semua pengguna
       const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins');
       if (profilesData) {
         profilesMap = {};
@@ -720,7 +747,6 @@
         });
       }
 
-      // 2. Ambil postingan curhat
       const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
 
       if (error || !data || data.length === 0) {
@@ -741,7 +767,6 @@
           let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
           let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
           
-          // Tentukan level poin pembuat postingan di Sorotan
           let authorPoin = 0;
           if (post.user_id && profilesMap[post.user_id] !== undefined) {
             authorPoin = profilesMap[post.user_id];
@@ -757,7 +782,6 @@
 
           cardsHTML += `
             <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-              <!-- Avatar Circle + Lencana Level Dinamis -->
               <div style="position: relative; width: 26px; height: 26px;">
                 <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                   🤍
@@ -767,12 +791,10 @@
                 </div>
               </div>
 
-              <!-- Cuplikan Teks Curhatan di Tengah -->
               <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
                 ${snippet}
               </div>
 
-              <!-- Nama Pengguna di Bawah -->
               <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
                 ${rawName}
               </div>
@@ -790,7 +812,23 @@
         promotedSection.style.display = 'none';
       }
 
-      container.innerHTML = data.map(p => renderCardHTML(p)).join('');
+      renderFilteredFeed();
+    }
+
+    function renderFilteredFeed() {
+      const container = document.getElementById('postsList');
+      let filteredData = allPostsCache;
+
+      if (currentFeedFilter === 'mengikuti') {
+        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
+      }
+
+      if (filteredData.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">${currentFeedFilter === 'mengikuti' ? 'Belum ada curhatan dari member yang kamu ikuti.' : 'Belum ada curhatan di beranda.'}</p>`;
+        return;
+      }
+
+      container.innerHTML = filteredData.map(p => renderCardHTML(p)).join('');
     }
 
     function openPromotedDetail(postId) {
@@ -862,6 +900,9 @@
       }
 
       const userLvl = getUserLevel(authorPoin);
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const isSelf = (p.user_email === myEmail);
+      const isFollowing = followingSet.has(p.user_email);
 
       return `
         <div class="post-card">
@@ -874,8 +915,9 @@
               <div class="user-details">
                 <div class="user-name-row">
                   <span class="user-name">${rawName}</span>
-                  <span class="user-handle">${handle}</span>
+                  ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
                 </div>
+                <div class="user-handle">${handle}</div>
                 <div class="badge-row">
                   <span class="btn-sm-badge badge-pemula">${userLvl.title}</span>
                   <span class="btn-sm-badge tag-${cleanTag}">${feelingTag}</span>
@@ -897,6 +939,33 @@
           </div>
         </div>
       `;
+    }
+
+    async function toggleFollow(targetEmail, btn) {
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      if (!targetEmail || targetEmail === myEmail) return;
+
+      if (followingSet.has(targetEmail)) {
+        followingSet.delete(targetEmail);
+        await supabaseClient.from('follows').delete().eq('follower_email', myEmail).eq('following_email', targetEmail);
+      } else {
+        followingSet.add(targetEmail);
+        await supabaseClient.from('follows').insert([{ follower_email: myEmail, following_email: targetEmail }]);
+      }
+
+      await updateFollowCounts(myEmail, targetEmail);
+      loadPosts();
+      renderProfileData();
+    }
+
+    async function updateFollowCounts(myEmail, targetEmail) {
+      // Update my following count
+      const { count: myFollowing } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+      await supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail);
+
+      // Update target followers count
+      const { count: targetFollowers } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail);
+      await supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail);
     }
 
     function initRealtime() {
@@ -975,33 +1044,45 @@
 
     async function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Koin Berbayar tidak mencukupi!');
-      paidCoins -= cost;
-      usedPaidCoins += cost;
-      updateCoinUI();
-      document.getElementById('giftModal').style.display = 'none';
 
       if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-        const currentGifts = (currentPost && currentPost.gifts_count) ? currentPost.gifts_count : 0;
-        const newGiftCount = currentGifts + 1;
+        
+        paidCoins -= cost;
+        usedPaidCoins += cost;
+        updateCoinUI();
+        document.getElementById('giftModal').style.display = 'none';
 
-        if (currentPost) currentPost.gifts_count = newGiftCount;
+        if (currentPost) {
+          const newGiftCount = (currentPost.gifts_count || 0) + 1;
+          currentPost.gifts_count = newGiftCount;
 
-        await supabaseClient
-          .from('curhat')
-          .update({ gifts_count: newGiftCount })
-          .eq('id', activeTargetPostId);
+          await supabaseClient
+            .from('curhat')
+            .update({ gifts_count: newGiftCount })
+            .eq('id', activeTargetPostId);
+
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+          if (targetIdentifier) {
+            const { data: targetProfile } = await supabaseClient
+              .from('profiles')
+              .select('paid_coins')
+              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+              .single();
+
+            if (targetProfile) {
+              const currentTargetCoins = targetProfile.paid_coins || 0;
+              await supabaseClient
+                .from('profiles')
+                .update({ paid_coins: currentTargetCoins + cost })
+                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+            }
+          }
+        }
       }
 
-      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} Koin Berbayar)! +${cost} Poin Jam Terbang.`);
+      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! Pembuat postingan menerima 100% Koin Berbayar.`);
       loadPosts();
-    }
-
-    function filterByTag(tagName) {
-      document.getElementById('searchInput').value = tagName;
-      switchTab('pageSearch', document.querySelectorAll('.nav-item')[1]);
-      document.getElementById('feelingFilter').value = tagName;
-      searchPosts();
     }
 
     function filterByTag(tagName) {
@@ -1014,7 +1095,8 @@
     function filterPosts(type, btn) {
       document.querySelectorAll('.pills-group .pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      loadPosts();
+      currentFeedFilter = type;
+      renderFilteredFeed();
     }
 
     function searchPosts() {
@@ -1151,16 +1233,24 @@
       document.getElementById('configModal').style.display = 'flex';
     }
 
-    function renderProfileData() {
+    async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
       const handleName = currentUser ? `@${currentUser.email.split('@')[0]}` : '@yayan.hadiyanto1';
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       document.getElementById('profName').innerText = displayName;
       document.getElementById('profHandle').innerText = handleName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
+
+      // Synchronize Followers and Following Realtime from Supabase
+      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
+      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+
+      document.getElementById('profFollowers').innerText = followersCount || 0;
+      document.getElementById('profFollowing').innerText = followingCount || 0;
 
       const progressBar = document.getElementById('levelProgressBar');
       const nextInfo = document.getElementById('levelNextInfo');
