@@ -540,6 +540,7 @@
     let currentUser = null;
     let customDisplayName = localStorage.getItem('cuit_user_name') || null;
     let allPostsCache = [];
+    let profilesMap = {}; // Memetakan data level profil pengguna terbaru
     let likesStore = {};
     let activeTargetPostId = null;
 
@@ -623,7 +624,6 @@
       }
     }
 
-    // MENGHITUNG LEVEL BERDASARKAN POIN ASLI
     function getUserLevel(expPoints = null) {
       const pts = (expPoints !== null) ? parseInt(expPoints) : usedPaidCoins;
       if (pts >= 1200) return { title: '👑 SULTAN CURHAT', icon: '👑', next: null, target: 1200 };
@@ -693,7 +693,7 @@
       const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0, author_exp: usedPaidCoins }
+        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
       ]);
 
       if (!error) {
@@ -710,6 +710,17 @@
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
 
+      // 1. Ambil data profil untuk sinkronisasi level terkini semua pengguna
+      const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins');
+      if (profilesData) {
+        profilesMap = {};
+        profilesData.forEach(pr => {
+          if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
+          if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+        });
+      }
+
+      // 2. Ambil postingan curhat
       const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
 
       if (error || !data || data.length === 0) {
@@ -815,8 +826,19 @@
       const commentsCount = p.comments_count ?? 0;
       const giftsCount = p.gifts_count ?? 0;
       
-      // Mengambil level asli dari pembuat postingan (bukan level kamu)
-      const userLvl = getUserLevel(p.author_exp ?? 0);
+      // Mengambil level terbaru dari profil (jika cocok), jika tidak jatuh ke author_exp / lokal
+      let authorPoin = 0;
+      if (p.user_id && profilesMap[p.user_id] !== undefined) {
+        authorPoin = profilesMap[p.user_id];
+      } else if (p.user_email && profilesMap[p.user_email] !== undefined) {
+        authorPoin = profilesMap[p.user_email];
+      } else if (currentUser && (currentUser.id === p.user_id || currentUser.email === p.user_email)) {
+        authorPoin = usedPaidCoins;
+      } else {
+        authorPoin = p.author_exp ?? 0;
+      }
+
+      const userLvl = getUserLevel(authorPoin);
 
       return `
         <div class="post-card">
@@ -861,7 +883,6 @@
         }).subscribe();
     }
 
-    // FUNGSI LIKE SERBA BISA (LOKAL + SUPABASE)
     async function toggleLike(postId) {
       if (freeCoins >= 1) {
         freeCoins -= 1;
@@ -882,7 +903,6 @@
       if (currentPost) currentPost.likes_count = newLikeCount;
       loadPosts();
 
-      // Kirim pembaruan ke Supabase
       const { error } = await supabaseClient
         .from('curhat')
         .update({ likes_count: newLikeCount })
@@ -893,7 +913,6 @@
       }
     }
 
-    // FUNGSI KOMENTAR SERBA BISA
     async function addComment(postId) {
       const comm = prompt("Tulis komentar Anda (1 Koin per 1.200 Karakter):");
       if (!comm) return;
@@ -931,7 +950,6 @@
       document.getElementById('giftModal').style.display = 'flex';
     }
 
-    // FUNGSI GIFT SERBA BISA
     async function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Koin Berbayar tidak mencukupi!');
       paidCoins -= cost;
