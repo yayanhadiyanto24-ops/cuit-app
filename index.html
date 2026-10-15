@@ -146,7 +146,7 @@
     .live-chat-controls-sticky { background: #ffffff; padding: 6px 0; border-top: 1px solid #f0f2f8; z-index: 25; margin-bottom: 8px; }
     .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
 
-    /* ANIMASI POP-UP GIFT OVERLAY ALA TIKTOK */
+    /* ANIMASI POP-UP GIFT OVERLAY */
     #giftOverlayContainer { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 90%; max-width: 400px; }
     .gift-banner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 30px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, giftPopOut 0.5s ease-in 3.5s forwards; opacity: 0; width: fit-content; max-width: 100%; }
     .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
@@ -317,7 +317,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (MAKSIMAL 60 MENIT) -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (LOGIKA KELUAR & DURASI LENGKAP) -->
   <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -737,6 +737,7 @@
     let liveRealtimeChannel = null;
     let livePollingTimer = null;
     let isLeaderboardOpen = true;
+    let userHasLeftLive = false; // Mencegah auto-join paksa saat sudah keluar
 
     let freeCoins = 20;
     let paidCoins = 0;
@@ -750,7 +751,7 @@
         if (iconBg) nav.innerHTML = nav.innerHTML.replace('<div class="nav-icon-bg">', '').replace('</div>', '');
       });
 
-      if (pageId === 'pageLive' && currentActiveLive) {
+      if (pageId === 'pageLive' && currentActiveLive && !userHasLeftLive) {
         document.body.classList.add('is-in-live');
       } else {
         document.body.classList.remove('is-in-live');
@@ -997,12 +998,11 @@
 
       allPostsCache = data;
 
-      /* PERBAIKAN TIMESTAMPS AKURAT UNTUK DURASI SOROTAN HARI INI */
       const nowMs = Date.now();
       const activePromotions = data.filter(p => {
         if (!p.is_promoted || !p.promoted_until) return false;
         const expiryMs = new Date(p.promoted_until).getTime();
-        return expiryMs > nowMs; // Otomatis terhapus persis setelah 1 jam habis
+        return expiryMs > nowMs;
       });
 
       if (activePromotions.length > 0) {
@@ -1097,7 +1097,6 @@
         return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
       }
 
-      // PERHITUNGAN TIMESTAMPS BERBASIS MILIDETIK (BEBAS BUG TIMEZONE)
       const nowMs = Date.now();
       const expiryMs = nowMs + (hours * 3600 * 1000);
       const expiryISO = new Date(expiryMs).toISOString();
@@ -1513,7 +1512,18 @@
       }
     }
 
-    /* SISTEM LIVE TEKS TERANULIR OTOMATIS MAKSIMAL 60 MENIT */
+    /* PENGATURAN RUANG LIVE TEKS & LEAVE SESSION ACCURATE */
+    function leaveLiveSession() {
+      userHasLeftLive = true;
+      cleanupLiveSesssion();
+      
+      document.getElementById('liveChatBox').style.display = 'none';
+      document.getElementById('btnStartLiveHeader').style.display = 'block';
+      document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
+      
+      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+    }
+
     async function loadActiveLiveSession() {
       const { data: activeLive } = await supabaseClient
         .from('lives')
@@ -1529,9 +1539,10 @@
 
       if (activeLive) {
         const nowMs = Date.now();
-        const expiryMs = activeLive.ended_at ? new Date(activeLive.ended_at).getTime() : 0;
+        const createdMs = new Date(activeLive.created_at).getTime();
+        const expiryMs = activeLive.ended_at ? new Date(activeLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
 
-        if (expiryMs > 0 && nowMs >= expiryMs) {
+        if (nowMs >= expiryMs) {
           await supabaseClient.from('lives').update({ is_active: false }).eq('id', activeLive.id);
           cleanupLiveSesssion();
           statusBox.innerHTML = `Sesi Live Teks telah berakhir otomatis (Batas waktu 60 menit tercapai).`;
@@ -1542,13 +1553,23 @@
 
         currentActiveLive = activeLive;
         localStorage.setItem('cuit_active_live_id', activeLive.id);
-        
-        document.body.classList.add('is-in-live');
 
+        const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
         const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
         const isHost = activeLive.host_email === myEmail;
-        const remainingMinutes = expiryMs > 0 ? Math.max(0, Math.ceil((expiryMs - nowMs) / 60000)) : 60;
 
+        if (userHasLeftLive && !isHost) {
+          statusBox.innerHTML = `
+            <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 ADA LIVE BERJALAN (${remainingMinutes} mnt tersisa)</div>
+            <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
+            <button class="btn-primary" style="margin-top:6px;" onclick="reJoinLiveSession()">💬 Masuk Ruang Live</button>
+          `;
+          chatBox.style.display = 'none';
+          btnHeader.style.display = 'none';
+          return;
+        }
+
+        document.body.classList.add('is-in-live');
         statusBox.innerHTML = `
           <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
           <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
@@ -1577,10 +1598,9 @@
       }
     }
 
-    function leaveLiveSession() {
-      cleanupLiveSesssion();
-      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
-      alert('Kamu telah keluar dari ruang Live Chat.');
+    function reJoinLiveSession() {
+      userHasLeftLive = false;
+      loadActiveLiveSession();
     }
 
     function cleanupLiveSesssion() {
@@ -1638,7 +1658,7 @@
       const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       const nowMs = Date.now();
-      const maxLiveMs = nowMs + (60 * 60 * 1000); // Batas 60 Menit
+      const maxLiveMs = nowMs + (60 * 60 * 1000);
       const endedAtISO = new Date(maxLiveMs).toISOString();
 
       const { data, error } = await supabaseClient.from('lives').insert([
@@ -1646,6 +1666,7 @@
       ]).select().single();
 
       if (!error) {
+        userHasLeftLive = false;
         alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit.');
         loadActiveLiveSession();
       } else {
@@ -1757,7 +1778,6 @@
       const filterType = document.getElementById('mainSearchFilter').value;
       const container = document.getElementById('searchResults');
 
-      // 1. RANKING TOP 10 LEVEL / JAM TERBANG TERTINGGI
       if (filterType === 'top_level') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Top 10 Anggota Teraktif...</p>';
         const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
@@ -1787,7 +1807,6 @@
         return;
       }
 
-      // 2. RANKING TOP 10 PENGIKUT TERBANYAK
       if (filterType === 'top_followers') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Top 10 Anggota Terpopuler...</p>';
         const { data: topFollowed } = await supabaseClient.from('profiles').select('*').order('followers_count', { ascending: false }).limit(10);
@@ -1816,7 +1835,6 @@
         return;
       }
 
-      // 3. PENCARIAN STANDAR (TEKS + PERASAAN)
       let filtered = allPostsCache.filter(p => {
         const matchesQuery = !query || (p.content && p.content.toLowerCase().includes(query)) || (p.username && p.username.toLowerCase().includes(query));
         const matchesFeeling = (filterType === 'all') || (p.feeling && p.feeling.includes(filterType));
