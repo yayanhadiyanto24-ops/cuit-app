@@ -741,14 +741,38 @@
           let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
           let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
           
+          // Tentukan level poin pembuat postingan di Sorotan
+          let authorPoin = 0;
+          if (post.user_id && profilesMap[post.user_id] !== undefined) {
+            authorPoin = profilesMap[post.user_id];
+          } else if (post.user_email && profilesMap[post.user_email] !== undefined) {
+            authorPoin = profilesMap[post.user_email];
+          } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
+            authorPoin = usedPaidCoins;
+          } else {
+            authorPoin = post.author_exp ?? 0;
+          }
+
+          const userLvl = getUserLevel(authorPoin);
+
           cardsHTML += `
             <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-              <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                🤍
+              <!-- Avatar Circle + Lencana Level Dinamis -->
+              <div style="position: relative; width: 26px; height: 26px;">
+                <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                  🤍
+                </div>
+                <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                  ${userLvl.icon}
+                </div>
               </div>
+
+              <!-- Cuplikan Teks Curhatan di Tengah -->
               <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
                 ${snippet}
               </div>
+
+              <!-- Nama Pengguna di Bawah -->
               <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
                 ${rawName}
               </div>
@@ -826,7 +850,6 @@
       const commentsCount = p.comments_count ?? 0;
       const giftsCount = p.gifts_count ?? 0;
       
-      // Mengambil level terbaru dari profil (jika cocok), jika tidak jatuh ke author_exp / lokal
       let authorPoin = 0;
       if (p.user_id && profilesMap[p.user_id] !== undefined) {
         authorPoin = profilesMap[p.user_id];
