@@ -87,7 +87,7 @@
     .feed-container { display: flex; flex-direction: column; gap: 10px; }
     .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .avatar-container { position: relative; width: 40px; height: 40px; }
     .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e7f5; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #d0d7ea; }
     .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
@@ -95,7 +95,6 @@
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name-row { display: flex; align-items: center; gap: 6px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
-    .user-handle { font-size: 11px; color: var(--text-sub); font-weight: 500; }
     .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
     .post-time { font-size: 10px; color: var(--text-sub); }
 
@@ -135,192 +134,41 @@
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; }
     .gift-card-item:hover { border-color: var(--primary); background: #f0f3fa; }
 
-    /* STYLES UNTUK RUANG LIVE CHAT FULLSCREEN */
-    body.is-in-live {
-      padding-bottom: 0;
-      overflow: hidden;
-    }
+    /* STYLES RUANG LIVE CHAT FULLSCREEN */
+    body.is-in-live { padding-bottom: 0; overflow: hidden; }
+    body.is-in-live .cuit-banner-container, body.is-in-live .top-bar { display: none !important; }
 
-    body.is-in-live .cuit-banner-container,
-    body.is-in-live .top-bar {
-      display: none !important;
-    }
-
-    .live-chat-fullscreen {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 125px);
-      position: relative;
-    }
-
-    .live-chat-messages-area {
-      flex: 1;
-      overflow-y: auto;
-      background: #f8f9fe;
-      border: 1px solid #eef1f8;
-      border-radius: 12px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 6px;
-      min-height: 140px;
-    }
-
-    .live-chat-controls-sticky {
-      background: #ffffff;
-      padding: 6px 0;
-      border-top: 1px solid #f0f2f8;
-      z-index: 25;
-      margin-bottom: 8px;
-    }
-
-    /* LEADERBOARD ACCORDION TOGGLE */
-    .leaderboard-toggle-header {
-      font-size: 11px;
-      font-weight: 800;
-      color: #d35400;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-    }
+    .live-chat-fullscreen { display: flex; flex-direction: column; height: calc(100vh - 125px); position: relative; }
+    .live-chat-messages-area { flex: 1; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; min-height: 140px; }
+    .live-chat-controls-sticky { background: #ffffff; padding: 6px 0; border-top: 1px solid #f0f2f8; z-index: 25; margin-bottom: 8px; }
+    .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
 
     /* ANIMASI POP-UP GIFT OVERLAY ALA TIKTOK */
-    #giftOverlayContainer {
-      position: fixed;
-      top: 22%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      width: 90%;
-      max-width: 400px;
-    }
+    #giftOverlayContainer { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 90%; max-width: 400px; }
+    .gift-banner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 30px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, giftPopOut 0.5s ease-in 3.5s forwards; opacity: 0; width: fit-content; max-width: 100%; }
+    .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
+    .gift-banner.medium { background: linear-gradient(135deg, #fdcb6e, #e17055); border: 2px solid #ffeaa7; transform: scale(1.15); animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, shimmer 1.5s infinite alternate, giftPopOut 0.5s ease-in 4.5s forwards; }
+    .gift-banner.large { background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); background-size: 200% 200%; animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate, giftPopOut 0.5s ease-in 6s forwards; border: 3px solid #ffeaa7; box-shadow: 0 0 30px rgba(253, 203, 110, 0.9); padding: 14px 22px; transform: scale(1.25); }
+    .gift-banner .icon { font-size: 32px; animation: bounceIcon 0.8s infinite alternate; }
+    .gift-banner.large .icon { font-size: 52px; animation: zoomPulsate 0.6s infinite alternate; }
+    .gift-banner .text-group { display: flex; flex-direction: column; }
+    .gift-banner .sender { font-weight: 900; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .gift-banner.large .sender { font-size: 15px; color: #ffeaa7; text-shadow: 0 0 8px rgba(255, 234, 167, 0.8); }
+    .gift-banner .action { font-size: 11px; opacity: 0.95; }
 
-    .gift-banner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 16px;
-      border-radius: 30px;
-      color: #fff;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, giftPopOut 0.5s ease-in 3.5s forwards;
-      opacity: 0;
-      width: fit-content;
-      max-width: 100%;
-    }
+    @keyframes giftPopIn { 0% { opacity: 0; transform: translateY(30px) scale(0.5); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes giftPopOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-30px) scale(0.6); } }
+    @keyframes bounceIcon { 0% { transform: scale(1); } 100% { transform: scale(1.3) rotate(12deg); } }
+    @keyframes zoomPulsate { 0% { transform: scale(1); } 100% { transform: scale(1.4) rotate(-8deg); } }
+    @keyframes gradientBg { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+    @keyframes shimmer { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
 
-    .gift-banner.small {
-      background: linear-gradient(135deg, #ff7675, #d63031);
-      border: 2px solid #ffbe76;
-    }
-
-    .gift-banner.medium {
-      background: linear-gradient(135deg, #fdcb6e, #e17055);
-      border: 2px solid #ffeaa7;
-      transform: scale(1.15);
-      animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, shimmer 1.5s infinite alternate, giftPopOut 0.5s ease-in 4.5s forwards;
-    }
-
-    .gift-banner.large {
-      background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8);
-      background-size: 200% 200%;
-      animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate, giftPopOut 0.5s ease-in 6s forwards;
-      border: 3px solid #ffeaa7;
-      box-shadow: 0 0 30px rgba(253, 203, 110, 0.9);
-      padding: 14px 22px;
-      transform: scale(1.25);
-    }
-
-    .gift-banner .icon {
-      font-size: 32px;
-      animation: bounceIcon 0.8s infinite alternate;
-    }
-
-    .gift-banner.large .icon {
-      font-size: 52px;
-      animation: zoomPulsate 0.6s infinite alternate;
-    }
-
-    .gift-banner .text-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .gift-banner .sender {
-      font-weight: 900;
-      font-size: 13px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    }
-
-    .gift-banner.large .sender {
-      font-size: 15px;
-      color: #ffeaa7;
-      text-shadow: 0 0 8px rgba(255, 234, 167, 0.8);
-    }
-
-    .gift-banner .action {
-      font-size: 11px;
-      opacity: 0.95;
-    }
-
-    @keyframes giftPopIn {
-      0% { opacity: 0; transform: translateY(30px) scale(0.5); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    @keyframes giftPopOut {
-      0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-30px) scale(0.6); }
-    }
-
-    @keyframes bounceIcon {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.3) rotate(12deg); }
-    }
-
-    @keyframes zoomPulsate {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.4) rotate(-8deg); }
-    }
-
-    @keyframes gradientBg {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
-    }
-
-    @keyframes shimmer {
-      0% { filter: brightness(1); }
-      100% { filter: brightness(1.3); }
-    }
-
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background-color: #f00;
-      z-index: 998;
-      pointer-events: none;
-      top: -10px;
-      animation: confettiFall 3s linear forwards;
-    }
-
-    @keyframes confettiFall {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
+    .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 998; pointer-events: none; top: -10px; animation: confettiFall 3s linear forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   </style>
 </head>
 <body>
 
-  <!-- CONTAINER ANIMASI POP-UP GIFT REAL-TIME -->
   <div id="giftOverlayContainer"></div>
 
   <!-- Top Stats Bar Compact -->
@@ -350,7 +198,6 @@
       <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
     </div>
 
-    <!-- Tags Pilihan 16 Perasaan -->
     <div class="feelings-card">
       <h3>Mulai dari perasaanmu</h3>
       <div class="tags-grid">
@@ -461,7 +308,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN DENGAN PADDING AMAN -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
   <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -471,16 +318,12 @@
       <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live</button>
     </div>
 
-    <!-- Tampilan Utama Sesi Live -->
     <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
       <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
         Belum ada sesi Live Teks aktif.
       </div>
 
-      <!-- Area Pesan Chat Live Fullscreen Layout -->
       <div id="liveChatBox" class="live-chat-fullscreen" style="display: none;">
-        
-        <!-- Leaderboard Top Supporter Buka-Tutup (Accordion) -->
         <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 6px 10px; margin-bottom: 6px;">
           <div class="leaderboard-toggle-header" onclick="toggleLeaderboard()">
             <span>🏆 TOP SUPPORTER (Gift Terbanyak)</span>
@@ -491,12 +334,9 @@
           </div>
         </div>
 
-        <!-- Area Pesan Chat yang Mengisi Sisa Layar dengan Scroll Mandiri -->
         <div id="liveMessagesList" class="live-chat-messages-area"></div>
 
-        <!-- Kolom Kontrol Sticky Melayang di Atas Nav Bar -->
         <div class="live-chat-controls-sticky">
-          <!-- Template Kata Cepat (Quick Chat) -->
           <div class="quick-chat-container">
             <div class="quick-chip" onclick="applyQuickChat('Assalamu\'alaikum')">👋 Assalamu'alaikum</div>
             <div class="quick-chip" onclick="applyQuickChat('Wa\'alaikumsalam')">🤝 Wa'alaikumsalam</div>
@@ -514,7 +354,6 @@
             <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -526,15 +365,14 @@
 
     <div class="profile-card">
       <div class="profile-header-flex">
-        <div class="user-info">
+        <div class="user-info" style="cursor:default;">
           <div class="avatar-container">
             <div class="avatar-circle">🤍</div>
             <div class="level-badge-icon" id="profBadgeIcon">🌱</div>
           </div>
           <div>
             <div style="font-size: 16px; font-weight: 900;" id="profName">Tamu CUIT</div>
-            <div style="font-size: 11px; color: var(--text-sub);" id="profHandle">@belum_login</div>
-            <span class="btn-sm-badge badge-pemula" id="profLevelTitle" style="margin-top: 2px;">🌱 PEMULA</span>
+            <span class="btn-sm-badge badge-pemula" id="profLevelTitle" style="margin-top: 4px;">🌱 PEMULA</span>
           </div>
         </div>
         <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
@@ -568,7 +406,6 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
-    <!-- MENU GRID PROFIL -->
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
       <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
@@ -604,7 +441,44 @@
     </div>
   </div>
 
-  <!-- MODAL TENTANG APLIKASI CUIT DENGAN BRANDING LENGKAP -->
+  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN (SAAT FOTO/NAMA DIKETUK) -->
+  <div id="userProfileModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">Profil Anggota</h3>
+        <button onclick="document.getElementById('userProfileModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 12px;">
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: #ece8ff; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 6px auto; border: 2px solid var(--primary);">🤍</div>
+        <div style="font-size: 16px; font-weight: 900;" id="mName">Nama Pengguna</div>
+        <span class="btn-sm-badge badge-pemula" id="mBadge" style="margin-top: 4px;">🌱 PEMULA</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; text-align: center;">
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mExp">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Poin Jam Terbang</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mFollowers">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Pengikut</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mFollowing">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Mengikuti</div>
+        </div>
+      </div>
+
+      <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 12px; border: 1px solid #eef1f8;">
+        <b>👥 Komunitas:</b> <span id="mCommunity">Belum bergabung dengan komunitas spesifik</span>
+      </div>
+
+      <div id="mFollowActionContainer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL TENTANG APLIKASI CUIT -->
   <div id="aboutModal" class="modal">
     <div class="modal-content" style="max-height: 85vh;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
@@ -965,6 +839,43 @@
       return { title: '🌱 PEMULA', icon: '🌱', next: '💧 PENDENGAR', target: 50, prev: 0 };
     }
 
+    /* BUKA MODAL DETAIL PROFIL ANGGOTA LAIN */
+    async function openUserProfileModal(email, name, poin) {
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const isSelf = (email === myEmail);
+      
+      const lvl = getUserLevel(poin);
+      
+      document.getElementById('mName').innerText = name;
+      document.getElementById('mBadge').innerText = lvl.title;
+      document.getElementById('mExp').innerText = `${poin} Poin`;
+
+      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email);
+      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', email);
+
+      document.getElementById('mFollowers').innerText = followersCount || 0;
+      document.getElementById('mFollowing').innerText = followingCount || 0;
+
+      const followContainer = document.getElementById('mFollowActionContainer');
+      if (!isSelf) {
+        const isFollowing = followingSet.has(email);
+        followContainer.innerHTML = `
+          <button class="btn-primary" style="width:100%; ${isFollowing ? 'background:#eef1f8; color:#555;' : ''}" onclick="toggleFollowFromModal('${email}', '${name}', ${poin})">
+            ${isFollowing ? '✓ Sudah Mengikuti (Klik untuk Batal)' : '+ Ikuti Anggota Ini'}
+          </button>
+        `;
+      } else {
+        followContainer.innerHTML = `<button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('userProfileModal').style.display='none'">Tutup (Ini Akun Kamu)</button>`;
+      }
+
+      document.getElementById('userProfileModal').style.display = 'flex';
+    }
+
+    async function toggleFollowFromModal(email, name, poin) {
+      await toggleFollow(email, null);
+      openUserProfileModal(email, name, poin);
+    }
+
     function openEditProfileModal() {
       const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
       document.getElementById('editDisplayName').value = currentName;
@@ -1195,11 +1106,11 @@
       loadPosts();
     }
 
+    /* KARTU POSTINGAN DENGAN PROFIL YANG BISA DIKETUK DAN TANPA USERNAME @ */
     function renderCardHTML(p) {
       let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
       let feelingTag = p.feeling || 'Bahagia';
       const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
-      const handle = p.user_email ? `@${p.user_email.split('@')[0]}` : '@yayan.hadiyanto1';
       
       const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
       const commentsCount = p.comments_count ?? 0;
@@ -1222,7 +1133,7 @@
       return `
         <div class="post-card">
           <div class="post-header">
-            <div class="user-info">
+            <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
               <div class="avatar-container">
                 <div class="avatar-circle">🤍</div>
                 <div class="level-badge-icon">${userLvl.icon}</div>
@@ -1230,9 +1141,8 @@
               <div class="user-details">
                 <div class="user-name-row">
                   <span class="user-name">${rawName}</span>
-                  ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+                  ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
                 </div>
-                <div class="user-handle">${handle}</div>
                 <div class="badge-row">
                   <span class="btn-sm-badge badge-pemula">${userLvl.title}</span>
                   <span class="btn-sm-badge tag-${cleanTag}">${feelingTag}</span>
@@ -1386,7 +1296,6 @@
       }
     }
 
-    /* FITUR GIFT DENGAN VALIDASI TIDAK BISA KIRIM KE DIRI SENDIRI */
     function openGiftModal(postId) {
       activeTargetPostId = postId;
       isLiveGiftContext = false;
@@ -1529,7 +1438,6 @@
       selectedLiveRecipient = null;
     }
 
-    /* ANIMASI POP-UP GIFT DENGAN SCALE & VISUAL TIKTOK */
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
       const banner = document.createElement('div');
@@ -1575,7 +1483,6 @@
       }
     }
 
-    /* FITUR LIVE TEKS REAL-TIME INSTAN & ACCORDION LEADERBOARD */
     function toggleLeaderboard() {
       isLeaderboardOpen = !isLeaderboardOpen;
       const lbList = document.getElementById('liveLeaderboardList');
@@ -1938,11 +1845,9 @@
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
-      const handleName = currentUser ? `@${currentUser.email.split('@')[0]}` : '@yayan.hadiyanto1';
       const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       document.getElementById('profName').innerText = displayName;
-      document.getElementById('profHandle').innerText = handleName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
