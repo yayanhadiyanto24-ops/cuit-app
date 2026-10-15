@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- KODE ANTI-CACHE: Memaksa WebView APK selalu mengunduh versi terbaru -->
+  <!-- KODE ANTI-CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -23,7 +23,7 @@
       --border-color: #f0f2f8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
     /* Top Stats Bar Compact */
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 6px 12px; background: #e8f0fe; }
@@ -107,8 +107,6 @@
 
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
 
-    .info-box-yellow { background: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 14px; font-size: 11px; color: #7f6000; line-height: 1.4; margin-bottom: 12px; }
-
     .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
     .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 12px 0; }
@@ -116,7 +114,6 @@
     .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
     .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
 
-    /* Progress Bar Level */
     .level-progress-container { background: #f0f3fa; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
     .progress-bar-bg { width: 100%; height: 8px; background: #e2e7f5; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
     .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
@@ -124,7 +121,7 @@
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
-    /* CSS Bilah Bawah Navigasi */
+    /* Navigasi Bawah */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
@@ -134,15 +131,126 @@
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
-    /* Gift Grid Layout */
     .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; }
     .gift-card-item:hover { border-color: var(--primary); background: #f0f3fa; }
 
-    .config-list-item { font-size: 12px; line-height: 1.6; color: #333; margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px; }
+    /* ANIMASI POP-UP GIFT OVERLAY */
+    #giftOverlayContainer {
+      position: fixed;
+      top: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .gift-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 30px;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, giftPopOut 0.5s ease-in 3.5s forwards;
+      opacity: 0;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .gift-banner.small {
+      background: linear-gradient(135deg, #ff7675, #d63031);
+      border: 2px solid #ffbe76;
+    }
+
+    .gift-banner.medium {
+      background: linear-gradient(135deg, #fdcb6e, #e17055);
+      border: 2px solid #ffeaa7;
+      transform: scale(1.1);
+    }
+
+    .gift-banner.large {
+      background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8);
+      background-size: 200% 200%;
+      animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate, giftPopOut 0.5s ease-in 5.5s forwards;
+      border: 3px solid #ffeaa7;
+      box-shadow: 0 0 25px rgba(253, 203, 110, 0.8);
+      padding: 14px 22px;
+    }
+
+    .gift-banner .icon {
+      font-size: 32px;
+      animation: bounceIcon 0.8s infinite alternate;
+    }
+
+    .gift-banner.large .icon {
+      font-size: 48px;
+    }
+
+    .gift-banner .text-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gift-banner .sender {
+      font-weight: 900;
+      font-size: 13px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .gift-banner .action {
+      font-size: 11px;
+      opacity: 0.95;
+    }
+
+    @keyframes giftPopIn {
+      0% { opacity: 0; transform: translateY(30px) scale(0.6); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes giftPopOut {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(0.7); }
+    }
+
+    @keyframes bounceIcon {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.3) rotate(12deg); }
+    }
+
+    @keyframes gradientBg {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      z-index: 998;
+      pointer-events: none;
+      top: -10px;
+      animation: confettiFall 3s linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- CONTAINER ANIMASI POP-UP GIFT REAL-TIME -->
+  <div id="giftOverlayContainer"></div>
 
   <!-- Top Stats Bar Compact -->
   <div class="top-bar">
@@ -194,14 +302,11 @@
       </div>
     </div>
 
-    <!-- CAROUSEL POSTINGAN PROMOSI / SOROTAN RAMPING POTRET -->
     <div id="promotedSection" style="display: none; margin-top: 12px; margin-bottom: 4px;">
       <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
         🚀 SOROTAN HARI INI
       </div>
-      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;">
-        <!-- Card promosi potret ramping berjejer di sini -->
-      </div>
+      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
     </div>
 
     <div class="feed-container" id="postsList" style="margin-top: 10px;">
@@ -209,7 +314,7 @@
     </div>
   </div>
 
-  <!-- 2. HALAMAN CARI (JELAJAHI CUIT) -->
+  <!-- 2. HALAMAN CARI -->
   <div id="pageSearch" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title">Jelajahi CUIT</h2>
@@ -235,13 +340,6 @@
       <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
       <option value="Ragu">❓ Ragu</option>
     </select>
-
-    <div class="pills-group" style="margin-top: 6px;">
-      <button class="pill-btn active">Semua</button>
-      <button class="pill-btn">Curhatan</button>
-      <button class="pill-btn">Anggota</button>
-      <button class="pill-btn">Komunitas</button>
-    </div>
 
     <div class="feed-container" id="searchResults">
       <p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tulis kata kunci untuk mencari curhatan.</p>
@@ -309,10 +407,10 @@
         Belum ada sesi Live Teks aktif.
       </div>
 
-      <!-- Area Pesan Chat Live (Muncul Jika Live Aktif) -->
+      <!-- Area Pesan Chat Live -->
       <div id="liveChatBox" style="display: none;">
         
-        <!-- Leaderboard Top Supporter -->
+        <!-- Leaderboard Top Supporter Realtime -->
         <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;">
           <div style="font-size: 11px; font-weight: 800; color: #d35400; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
             <span>🏆 TOP SUPPORTER (Pengirim Gift Terbanyak)</span>
@@ -325,7 +423,6 @@
 
         <!-- Chat Area -->
         <div id="liveMessagesList" style="height: 220px; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
-          <!-- Pesan chat live bertambah di sini -->
         </div>
 
         <!-- Template Kata Cepat (Quick Chat) -->
@@ -385,7 +482,6 @@
         </div>
       </div>
 
-      <!-- Level Progress Box -->
       <div class="level-progress-container">
         <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
           <span>Kemajuan Level</span>
@@ -441,12 +537,10 @@
         <button onclick="document.getElementById('commentsModal').style.display='none'" style="border: none; background: none; font-size: 16px; cursor: pointer;">✕</button>
       </div>
       
-      <!-- List Komentar -->
       <div id="commentsList" style="flex: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; max-height: 300px;">
         <p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>
       </div>
 
-      <!-- Form Input Komentar -->
       <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
         <textarea id="commentInputText" rows="2" placeholder="Tulis komentar kamu..." style="margin-bottom: 6px;"></textarea>
         <button class="btn-primary" style="width: 100%;" onclick="submitCommentAction()">Kirim Komentar</button>
@@ -459,9 +553,7 @@
     <div class="modal-content">
       <h3 style="margin-bottom: 6px;">Pilih Penerima Gift 🎁</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Pilih Host atau Penonton di Live Chat yang ingin kamu beri gift:</div>
-      <div id="liveRecipientsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 12px;">
-        <!-- Daftar penonton muncul di sini -->
-      </div>
+      <div id="liveRecipientsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 12px;"></div>
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('selectLiveRecipientModal').style.display='none'">Batal</button>
     </div>
   </div>
@@ -502,24 +594,13 @@
   <div id="configModal" class="modal">
     <div class="modal-content">
       <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">Konfigurasi prototipe</h3>
-      <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 12px;">Nilai ini dapat diubah di objek CONFIG pada kode.</div>
-
       <div class="config-list-item"><b>Jatah gratis harian:</b> 20 koin</div>
-      <div class="config-list-item"><b>Skema Koin:</b> 1 koin per 1.200 karakter (Berlaku Gratis & Berbayar)</div>
-      <div class="config-list-item"><b>Promosikan Postingan:</b> 1 Koin Berbayar / jam</div>
-      <div class="config-list-item"><b>Paket:</b> 100 koin/Rp1.000 · 600 koin/Rp5.000 · 1300 koin/Rp10.000</div>
-      <div class="config-list-item"><b>Biaya Live:</b> mulai 10, masuk 1, absen 1 koin berbayar</div>
-      <div class="config-list-item"><b>Ambang level:</b> 🌱 PEMULA 0 · 💧 PENDENGAR 50 · 🤝 SAHABAT 200 · 🔥 ACTIVE CUITER 500 · 👑 SULTAN CURHAT 1200</div>
-
-      <div style="background: #fffde7; border: 1px solid #fff59d; padding: 10px; border-radius: 12px; font-size: 10.5px; color: #7f6000; margin-top: 10px;">
-        <b>Aturan koin yang disepakati:</b> 1 koin = Rp5. Gift Live tanpa potongan; host menerima 100% koin gift. Penarikan DANA minimum Rp10.000 dengan biaya layanan Rp500.
-      </div>
-
+      <div class="config-list-item"><b>Skema Koin:</b> 1 koin per 1.200 karakter</div>
       <button class="btn-primary" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('configModal').style.display='none'">Oke</button>
     </div>
   </div>
 
-  <!-- MODAL LOGIN/DAFTAR REAL -->
+  <!-- MODAL LOGIN/DAFTAR -->
   <div id="authModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
@@ -578,16 +659,15 @@
         📱 <b>085624189461</b> (a.n CUIT Official)
       </div>
 
-      <label style="font-size: 12px; font-weight: 800; display: block; margin-top: 8px;">Pilih Paket Top-Up Koin Berbayar:</label>
       <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 100)">💰 Paket Rp 1.000 (100 Koin)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 600)">🎁 Paket Rp 5.000 (600 Koin - Bonus 100)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 10px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 600)">🎁 Paket Rp 5.000 (600 Koin)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin)</button>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
-  <!-- MODAL PENARIKAN DANA (CASHOUT) -->
+  <!-- MODAL PENARIKAN DANA -->
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
       <h3>💸 Penarikan Saldo Bank Koin</h3>
@@ -648,6 +728,7 @@
     let followingSet = new Set();
     let currentFeedFilter = 'semua';
     let currentActiveLive = null;
+    let liveRealtimeChannel = null;
 
     let freeCoins = 20;
     let paidCoins = 0;
@@ -681,7 +762,6 @@
       
       if (currentUser) {
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
-        
         if (profile) {
           freeCoins = profile.free_coins ?? 20;
           paidCoins = profile.paid_coins ?? 0;
@@ -702,7 +782,7 @@
       await loadFollows();
       updateCoinUI();
       loadPosts();
-      initRealtime();
+      initGlobalRealtime();
     }
 
     async function loadFollows() {
@@ -866,7 +946,6 @@
 
       if (activePromotions.length > 0) {
         let cardsHTML = '';
-        
         activePromotions.forEach(post => {
           let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
           let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
@@ -878,8 +957,6 @@
             authorPoin = profilesMap[post.user_email];
           } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
             authorPoin = usedPaidCoins;
-          } else {
-            authorPoin = post.author_exp ?? 0;
           }
 
           const userLvl = getUserLevel(authorPoin);
@@ -887,10 +964,10 @@
           cardsHTML += `
             <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
               <div style="position: relative; width: 26px; height: 26px;">
-                <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
                   🤍
                 </div>
-                <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
                   ${userLvl.icon}
                 </div>
               </div>
@@ -899,7 +976,7 @@
                 ${snippet}
               </div>
 
-              <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+              <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 ${rawName}
               </div>
             </div>
@@ -999,8 +1076,6 @@
         authorPoin = profilesMap[p.user_email];
       } else if (currentUser && (currentUser.id === p.user_id || currentUser.email === p.user_email)) {
         authorPoin = usedPaidCoins;
-      } else {
-        authorPoin = p.author_exp ?? 0;
       }
 
       const userLvl = getUserLevel(authorPoin);
@@ -1070,15 +1145,10 @@
       await supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail);
     }
 
-    function initRealtime() {
+    function initGlobalRealtime() {
       supabaseClient.channel('realtime_curhat')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'curhat' }, () => {
           loadPosts();
-        }).subscribe();
-
-      supabaseClient.channel('realtime_live_chats')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'live_messages' }, () => {
-          if (currentActiveLive) loadLiveMessages(currentActiveLive.id);
         }).subscribe();
     }
 
@@ -1102,14 +1172,7 @@
       if (currentPost) currentPost.likes_count = newLikeCount;
       loadPosts();
 
-      const { error } = await supabaseClient
-        .from('curhat')
-        .update({ likes_count: newLikeCount })
-        .eq('id', postId);
-
-      if (error) {
-        console.warn("Update Supabase dialihkan:", error.message);
-      }
+      await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
     }
 
     /* FITUR KOMENTAR */
@@ -1119,13 +1182,13 @@
       document.getElementById('commentsModal').style.display = 'flex';
       listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>';
 
-      const { data: comments, error } = await supabaseClient
+      const { data: comments } = await supabaseClient
         .from('comments')
         .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
-      if (error || !comments || comments.length === 0) {
+      if (!comments || comments.length === 0) {
         listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 20px;">Belum ada komentar. Jadi yang pertama berkomentar!</p>';
         return;
       }
@@ -1187,7 +1250,7 @@
       }
     }
 
-    /* FITUR GIFT DENGAN PILIHAN PENERIMA & KONFIRMASI SAWER */
+    /* FITUR GIFT DENGAN ANIMASI POP-UP REAL-TIME */
     function openGiftModal(postId) {
       activeTargetPostId = postId;
       isLiveGiftContext = false;
@@ -1265,7 +1328,6 @@
         const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
         const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
 
-        // Tulis log gift di chat
         await supabaseClient.from('live_messages').insert([
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
@@ -1288,8 +1350,6 @@
               .eq('email', targetIdentifier);
           }
         }
-        loadLiveMessages(currentActiveLive.id);
-        alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙) untuk ${targetName}!`);
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
 
@@ -1326,14 +1386,59 @@
           }
         }
         loadPosts();
-        alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! 100% koin gift telah masuk ke Bank Koin milik pembuat postingan.`);
+        triggerGiftAnimation(myName, giftName, cost, "Penulis");
       }
 
       pendingGiftData = null;
       selectedLiveRecipient = null;
     }
 
-    /* FITUR LIVE TEKS REAL-TIME & LEADERBOARD */
+    function triggerGiftAnimation(senderName, giftName, coins, targetName) {
+      const container = document.getElementById('giftOverlayContainer');
+      const banner = document.createElement('div');
+      
+      let sizeClass = 'small';
+      let icon = '🎁';
+
+      if (coins >= 50) {
+        sizeClass = 'large';
+        icon = '👑';
+        spawnConfetti();
+      } else if (coins >= 5) {
+        sizeClass = 'medium';
+        icon = '🌟';
+      }
+
+      banner.className = `gift-banner ${sizeClass}`;
+      banner.innerHTML = `
+        <div class="icon">${icon}</div>
+        <div class="text-group">
+          <div class="sender">${senderName}</div>
+          <div class="action">Mengirimkan <b>${giftName}</b> (${coins} 🪙) untuk <b>@${targetName}</b></div>
+        </div>
+      `;
+
+      container.appendChild(banner);
+
+      setTimeout(() => {
+        banner.remove();
+      }, coins >= 50 ? 6000 : 4000);
+    }
+
+    function spawnConfetti() {
+      const colors = ['#f1c40f', '#e74c3c', '#9b59b6', '#2ecc71', '#3498db', '#e67e22'];
+      for (let i = 0; i < 40; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
+
+    /* FITUR LIVE TEKS REAL-TIME & KELUAR LIVE PENONTON */
     async function loadActiveLiveSession() {
       const { data: activeLive } = await supabaseClient
         .from('lives')
@@ -1355,18 +1460,56 @@
         statusBox.innerHTML = `
           <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 4px;">🔴 LIVE TEKS BERJALAN</div>
           <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
-          ${isHost ? `<button class="btn-primary" style="background:#ff7675; margin-top:8px; padding:4px 12px;" onclick="stopLiveSession('${activeLive.id}')">Akhiri Live</button>` : ''}
+          <div style="display: flex; gap: 6px; justify-content: center; margin-top: 8px;">
+            ${isHost ? `<button class="btn-primary" style="background:#ff7675; padding:4px 12px;" onclick="stopLiveSession('${activeLive.id}')">Akhiri Live</button>` : ''}
+            <button class="btn-secondary" style="background:#e0e0e0; color:#333; padding:4px 12px;" onclick="leaveLiveSession()">🚪 Keluar Live</button>
+          </div>
         `;
 
         chatBox.style.display = 'block';
         btnHeader.style.display = 'none';
+        
         loadLiveMessages(activeLive.id);
+        subscribeToLiveRealtime(activeLive.id);
       } else {
+        if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
         currentActiveLive = null;
         statusBox.innerHTML = `Belum ada Live aktif. Kamu bisa mencoba memulai jika level dan saldo memenuhi syarat.`;
         chatBox.style.display = 'none';
         btnHeader.style.display = 'block';
       }
+    }
+
+    function leaveLiveSession() {
+      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
+      currentActiveLive = null;
+      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      alert('Kamu telah keluar dari ruang Live Chat.');
+    }
+
+    function subscribeToLiveRealtime(liveId) {
+      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
+
+      liveRealtimeChannel = supabaseClient
+        .channel(`live_room_${liveId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_messages', filter: `live_id=eq.${liveId}` }, payload => {
+          const newMsg = payload.new;
+          
+          if (newMsg.content.includes('🎁 Mengirimkan Gift')) {
+            const matchCoins = newMsg.content.match(/\((\d+)\s*🪙\)/);
+            const matchGiftName = newMsg.content.match(/Gift\s+([^(]+)/);
+            const matchTarget = newMsg.content.match(/untuk\s+@(.+)/);
+
+            const coins = matchCoins ? parseInt(matchCoins[1]) : 1;
+            const giftName = matchGiftName ? matchGiftName[1].trim() : 'Gift';
+            const targetName = matchTarget ? matchTarget[1].trim() : 'Host';
+
+            triggerGiftAnimation(newMsg.username, giftName, coins, targetName);
+          }
+
+          loadLiveMessages(liveId);
+        })
+        .subscribe();
     }
 
     async function startLiveTeks() {
@@ -1420,7 +1563,6 @@
         return;
       }
 
-      // Hitung Peringkat Supporter (Dari Tertinggi ke Terendah)
       let supporterMap = {};
       messages.forEach(m => {
         if (m.content.includes('🎁 Mengirimkan Gift')) {
@@ -1432,7 +1574,6 @@
         }
       });
 
-      // Urutkan Map dari Koin Tertinggi ke Terendah
       let sortedSupporters = Object.keys(supporterMap)
         .map(user => ({ user, coins: supporterMap[user] }))
         .sort((a, b) => b.coins - a.coins);
@@ -1449,7 +1590,6 @@
         leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
       }
 
-      // Render Chat List
       messagesList.innerHTML = messages.map(m => {
         const isGiftMsg = m.content.includes('🎁 Mengirimkan Gift');
         return `
@@ -1480,7 +1620,6 @@
       ]);
 
       input.value = '';
-      loadLiveMessages(currentActiveLive.id);
     }
 
     function filterByTag(tagName) {
@@ -1572,7 +1711,7 @@
       const netAmount = Math.max(0, gross - fee);
 
       try {
-        const { error } = await supabaseClient.from('payouts').insert([
+        await supabaseClient.from('payouts').insert([
           {
             user_id: currentUser ? currentUser.id : 'demo_id',
             user_email: currentUser ? currentUser.email : 'guest@cuit.app',
@@ -1584,10 +1723,6 @@
             status: 'pending'
           }
         ]);
-
-        if (error) {
-          console.warn("Tabel Supabase belum dipasang, memproses secara lokal:", error.message);
-        }
 
         paidCoins -= coins;
         updateCoinUI();
