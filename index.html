@@ -1,530 +1,3 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CUIT – Curhat dapat Duit</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root {
-      --bg: #f4f6fc;
-      --card-bg: #ffffff;
-      --primary: #6c5ce7;
-      --primary-light: #ece8ff;
-      --primary-gradient: linear-gradient(135deg, #7451f8, #513cd8);
-      --text-main: #1c1d36;
-      --text-sub: #828599;
-      --border-color: #f0f2f8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
-
-    /* Top Stats Bar Compact */
-    .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 6px 12px; background: #e8f0fe; }
-    .stat-badge { background: #ffffff; padding: 3px 10px; border-radius: 16px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-
-    /* Banner Image Container */
-    .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; }
-    .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
-
-    /* Page Visibility & Sections */
-    .page-section { display: none; padding: 10px 14px; }
-    .page-section.active { display: block; }
-
-    .back-btn { width: 32px; height: 32px; background: #ece8ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 14px; margin-bottom: 8px; border: none; cursor: pointer; }
-
-    .section-title { font-size: 20px; font-weight: 900; color: #1c1d36; margin-bottom: 2px; }
-    .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; }
-
-    /* Buttons */
-    .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2); }
-    .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
-    .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
-
-    /* Filter Pills */
-    .pills-group { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
-    .pill-btn { padding: 6px 14px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
-    .pill-btn.active { background: var(--primary); color: #ffffff; }
-
-    /* Dynamic Tag Colors */
-    .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
-    .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
-    .tag-Semangat { background: #FFF3E0; color: #E67E22; }
-    .tag-Cinta { background: #FCE4EC; color: #E91E63; }
-    .tag-Lega { background: #E8EAF6; color: #3F51B5; }
-    .tag-Humor { background: #FFFDE7; color: #F1C40F; }
-    .tag-Sedih { background: #EAF2FF; color: #3498DB; }
-    .tag-Cemas { background: #F3E5F5; color: #9B59B6; }
-    .tag-Marah { background: #FFEBEE; color: #E74C3C; }
-    .tag-Kecewa { background: #ECEFF1; color: #607D8B; }
-    .tag-Kesepian { background: #EDE7F6; color: #5E35B1; }
-    .tag-PatahHati { background: #FBE9E7; color: #D84315; }
-    .tag-Bingung { background: #FFF8E1; color: #F39C12; }
-    .tag-Rindu { background: #F3E5F5; color: #9C27B0; }
-    .tag-Lelah { background: #EFEBE9; color: #4E342E; }
-    .tag-Ragu { background: #E0F7FA; color: #00838F; }
-
-    /* Tags Grid */
-    .feelings-card { background: #ffffff; padding: 12px 10px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 8px; }
-    .feelings-card h3 { font-size: 13px; font-weight: 800; color: #1e1e38; margin-bottom: 8px; }
-    .tags-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-    .tag-item { padding: 5px 10px; border-radius: 14px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
-
-    /* Post Cards Feed */
-    .feed-container { display: flex; flex-direction: column; gap: 10px; }
-    .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .user-info { display: flex; align-items: center; gap: 8px; }
-    .avatar-container { position: relative; width: 40px; height: 40px; }
-    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e7f5; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #d0d7ea; }
-    .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
-    
-    .user-details { display: flex; flex-direction: column; gap: 1px; }
-    .user-name-row { display: flex; align-items: center; gap: 4px; }
-    .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
-    .user-handle { font-size: 11px; color: var(--text-sub); font-weight: 500; }
-    .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
-    .post-time { font-size: 10px; color: var(--text-sub); }
-
-    .post-body { font-size: 13px; line-height: 1.45; color: #2c2e43; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
-    .badge-publik { background: #eaf2ff; color: #3498db; margin-bottom: 10px; display: inline-flex; }
-
-    .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
-    .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
-
-    input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
-
-    .info-box-yellow { background: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 14px; font-size: 11px; color: #7f6000; line-height: 1.4; margin-bottom: 12px; }
-
-    .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
-    .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 12px 0; }
-    .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
-    .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
-    .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
-
-    /* Progress Bar Level */
-    .level-progress-container { background: #f0f3fa; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
-    .progress-bar-bg { width: 100%; height: 8px; background: #e2e7f5; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
-    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
-
-    .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
-
-    /* CSS Bilah Bawah Navigasi Sempurna */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
-    .nav-item.active { color: var(--primary); font-weight: 800; }
-    .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
-    .nav-icon { font-size: 15px; }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
-    .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
-
-    /* Gift Grid Layout */
-    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
-    .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; }
-    .gift-card-item:hover { border-color: var(--primary); background: #f0f3fa; }
-
-    .config-list-item { font-size: 12px; line-height: 1.6; color: #333; margin-bottom: 6px; border-bottom: 1px dashed #eee; padding-bottom: 4px; }
-  </style>
-</head>
-<body>
-
-  <!-- Top Stats Bar -->
-  <div class="top-bar">
-    <div class="stat-badge" title="Koin Gratisan (Reset 24.00)">🆓 <span id="freeCoinCount">20</span></div>
-    <div class="stat-badge" title="Koin Berbayar (Bisa Diuangkan)">🪙 <span id="paidCoinCount">120</span></div>
-  </div>
-
-  <!-- Hero Banner Bergambar Resmi CUIT -->
-  <div class="cuit-banner-container">
-    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
-  </div>
-
-  <!-- 1. HALAMAN BERANDA -->
-  <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-      <h2 class="section-title">Beranda</h2>
-      <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
-    </div>
-    <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
-
-    <div class="pills-group">
-      <button class="pill-btn active" onclick="filterPosts('semua', this)">Semua</button>
-      <button class="pill-btn" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
-    </div>
-
-    <!-- Tags Pilihan 16 Perasaan -->
-    <div class="feelings-card">
-      <h3>Mulai dari perasaanmu</h3>
-      <div class="tags-grid">
-        <button class="tag-item tag-Bahagia" onclick="filterByTag('Bahagia')">🌱 Bahagia</button>
-        <button class="tag-item tag-Bersyukur" onclick="filterByTag('Bersyukur')">🤲 Bersyukur</button>
-        <button class="tag-item tag-Semangat" onclick="filterByTag('Semangat')">🔥 Semangat</button>
-        <button class="tag-item tag-Cinta" onclick="filterByTag('Cinta')">🌸 Cinta</button>
-        <button class="tag-item tag-Lega" onclick="filterByTag('Lega')">😌 Lega</button>
-        <button class="tag-item tag-Humor" onclick="filterByTag('Humor')">😄 Humor</button>
-        <button class="tag-item tag-Sedih" onclick="filterByTag('Sedih')">🌧️ Sedih</button>
-        <button class="tag-item tag-Cemas" onclick="filterByTag('Cemas')">☁️ Cemas</button>
-        <button class="tag-item tag-Marah" onclick="filterByTag('Marah')">🌶️ Marah</button>
-        <button class="tag-item tag-Kecewa" onclick="filterByTag('Kecewa')">🌊 Kecewa</button>
-        <button class="tag-item tag-Kesepian" onclick="filterByTag('Kesepian')">🌙 Kesepian</button>
-        <button class="tag-item tag-PatahHati" onclick="filterByTag('Patah Hati')">🥀 Patah Hati</button>
-        <button class="tag-item tag-Bingung" onclick="filterByTag('Bingung')">🌀 Bingung</button>
-        <button class="tag-item tag-Rindu" onclick="filterByTag('Rindu')">💜 Rindu</button>
-        <button class="tag-item tag-Lelah" onclick="filterByTag('Lelah / Burnout')">🕯️ Lelah / Burnout</button>
-        <button class="tag-item tag-Ragu" onclick="filterByTag('Ragu')">❓ Ragu</button>
-      </div>
-    </div>
-
-    <!-- CAROUSEL POSTINGAN PROMOSI / SOROTAN RAMPING -->
-    <div id="promotedSection" style="display: none; margin-top: 12px; margin-bottom: 4px;">
-      <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-        🚀 SOROTAN HARI INI
-      </div>
-      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;">
-        <!-- Card promosi ramping berjejer di sini -->
-      </div>
-    </div>
-
-    <div class="feed-container" id="postsList" style="margin-top: 10px;">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
-    </div>
-  </div>
-
-  <!-- 2. HALAMAN CARI (JELAJAHI CUIT) -->
-  <div id="pageSearch" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Jelajahi CUIT</h2>
-    <input type="text" id="searchInput" placeholder="Cari curhatan, anggota, komunitas..." onkeyup="searchPosts()" style="margin-top: 8px;">
-    
-    <label style="font-size: 11px; font-weight: 700; color: #333; margin-top: 4px; display: block;">Filter perasaan</label>
-    <select id="feelingFilter" onchange="searchPosts()">
-      <option value="">Semua perasaan</option>
-      <option value="Bahagia">🌱 Bahagia</option>
-      <option value="Bersyukur">🤲 Bersyukur</option>
-      <option value="Semangat">🔥 Semangat</option>
-      <option value="Cinta">🌸 Cinta</option>
-      <option value="Lega">😌 Lega</option>
-      <option value="Humor">😄 Humor</option>
-      <option value="Sedih">🌧️ Sedih</option>
-      <option value="Cemas">☁️ Cemas</option>
-      <option value="Marah">🌶️ Marah</option>
-      <option value="Kecewa">🌊 Kecewa</option>
-      <option value="Kesepian">🌙 Kesepian</option>
-      <option value="Patah Hati">🥀 Patah Hati</option>
-      <option value="Bingung">🌀 Bingung</option>
-      <option value="Rindu">💜 Rindu</option>
-      <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
-      <option value="Ragu">❓ Ragu</option>
-    </select>
-
-    <div class="pills-group" style="margin-top: 6px;">
-      <button class="pill-btn active">Semua</button>
-      <button class="pill-btn">Curhatan</button>
-      <button class="pill-btn">Anggota</button>
-      <button class="pill-btn">Komunitas</button>
-    </div>
-
-    <div class="feed-container" id="searchResults">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tulis kata kunci untuk mencari curhatan.</p>
-    </div>
-  </div>
-
-  <!-- 3. HALAMAN BUAT CURHATAN -->
-  <div id="pageCreate" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Buat curhatan</h2>
-    <div class="section-sub">Tulis dengan nyaman. Koin berbayar dinamis 1 koin per 1.200 karakter!</div>
-
-    <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 6px;">Opsi Pembayaran / Curhat:</label>
-      <select id="curhatCoinType" onchange="toggleCurhatLimit()">
-        <option value="free">Pakai Koin Gratisan (5 Koin - Maks 20 Karakter)</option>
-        <option value="paid">Pakai Koin Berbayar (1 Koin / 1.200 Karakter)</option>
-      </select>
-
-      <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
-      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0/20 karakter</div>
-
-      <label style="font-size: 12px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
-      <select id="postFeeling">
-        <option value="Bahagia">🌱 Bahagia</option>
-        <option value="Bersyukur">🤲 Bersyukur</option>
-        <option value="Semangat">🔥 Semangat</option>
-        <option value="Cinta">🌸 Cinta</option>
-        <option value="Lega">😌 Lega</option>
-        <option value="Humor">😄 Humor</option>
-        <option value="Sedih">🌧️ Sedih</option>
-        <option value="Cemas">☁️ Cemas</option>
-        <option value="Marah">🌶️ Marah</option>
-        <option value="Kecewa">🌊 Kecewa</option>
-        <option value="Kesepian">🌙 Kesepian</option>
-        <option value="Patah Hati">🥀 Patah Hati</option>
-        <option value="Bingung">🌀 Bingung</option>
-        <option value="Rindu">💜 Rindu</option>
-        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
-        <option value="Ragu">❓ Ragu</option>
-      </select>
-
-      <div style="display: flex; gap: 6px; margin-top: 12px;">
-        <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
-        <button class="btn-secondary" style="flex: 1.2;" onclick="alert('Cerita disimpan sebagai draf!')">Simpan sebagai Draf</button>
-        <button class="btn-secondary" style="background: #f4f6fc;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. HALAMAN LIVE TEKS -->
-  <div id="pageLive" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-      <div>
-        <h2 class="section-title">Live Teks</h2>
-        <div class="section-sub" style="margin-bottom: 0;">Ngobrol lewat tulisan (Min. Level 💧 PENDENGAR & Saldo 10 Koin Berbayar).</div>
-      </div>
-      <button class="btn-primary" onclick="startLiveTeks()">+ Mulai Live</button>
-    </div>
-
-    <div class="info-box-yellow">
-      Simulasi lokal: komentar tidak tersinkron antarperangkat. Biaya mulai 10 koin berbayar; masuk dan absen masing-masing 1 koin berbayar.
-    </div>
-
-    <div style="background: #fff; padding: 16px; border-radius: 18px; text-align: center; color: var(--text-sub); font-size: 12px; border: 1px solid var(--border-color); margin-bottom: 12px;" id="liveStatusBox">
-      Belum ada Live aktif. Kamu bisa mencoba memulai jika level dan saldo memenuhi syarat.
-    </div>
-  </div>
-
-  <!-- 5. HALAMAN PROFIL -->
-  <div id="pageProfile" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
-
-    <div class="profile-card">
-      <div class="profile-header-flex">
-        <div class="user-info">
-          <div class="avatar-container">
-            <div class="avatar-circle">🤍</div>
-            <div class="level-badge-icon" id="profBadgeIcon">🌱</div>
-          </div>
-          <div>
-            <div style="font-size: 16px; font-weight: 900;" id="profName">Tamu CUIT</div>
-            <div style="font-size: 11px; color: var(--text-sub);" id="profHandle">@belum_login</div>
-            <span class="btn-sm-badge badge-pemula" id="profLevelTitle" style="margin-top: 2px;">🌱 PEMULA</span>
-          </div>
-        </div>
-        <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
-      </div>
-
-      <div class="profile-stats-grid">
-        <div class="stat-card-item">
-          <div class="val" id="profExp">0 Poin</div>
-          <div class="lbl">Poin Jam Terbang</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profFollowers">0</div>
-          <div class="lbl">Pengikut</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profFollowing">0</div>
-          <div class="lbl">Mengikuti</div>
-        </div>
-      </div>
-
-      <!-- Level Progress Box -->
-      <div class="level-progress-container">
-        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
-          <span>Kemajuan Level</span>
-          <span id="levelNextInfo">50 Poin Jam Terbang lagi menuju 💧 PENDENGAR</span>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="levelProgressBar"></div>
-        </div>
-      </div>
-
-      <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
-    </div>
-
-    <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Dompet / Top-up</div>
-      <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
-      <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
-      <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan</div>
-    </div>
-
-    <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
-  </div>
-
-  <!-- Bottom Navigation Bar -->
-  <div class="nav-bar">
-    <div class="nav-item active" onclick="switchTab('pageHome', this)">
-      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
-      <span>Beranda</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)">
-      <span class="nav-icon">🔍</span>
-      <span>Cari</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageCreate', this)">
-      <span class="nav-icon">➕</span>
-      <span>Buat</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageLive', this)">
-      <span class="nav-icon">📄</span>
-      <span>Live</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon">🙂</span>
-      <span>Profil</span>
-    </div>
-  </div>
-
-  <!-- MODAL EDIT PROFIL -->
-  <div id="editProfileModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 8px;">Edit Profil Kamu</h3>
-      <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">Nama Tampilan Baru:</label>
-      <input type="text" id="editDisplayName" placeholder="Masukkan nama tampilan...">
-      <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex:1;" onclick="saveProfileChanges()">Simpan</button>
-        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('editProfileModal').style.display='none'">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DETAIL POSTINGAN PROMOSI/SOROTAN -->
-  <div id="promotedDetailModal" class="modal">
-    <div class="modal-content" id="promotedDetailContent">
-      <!-- Isi postingan sorotan utuh akan di-render dinamis -->
-    </div>
-  </div>
-
-  <!-- MODAL PENGATURAN -->
-  <div id="configModal" class="modal">
-    <div class="modal-content">
-      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">Konfigurasi prototipe</h3>
-      <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 12px;">Nilai ini dapat diubah di objek CONFIG pada kode.</div>
-
-      <div class="config-list-item"><b>Jatah gratis harian:</b> 20 koin</div>
-      <div class="config-list-item"><b>Batas gratisan:</b> Curhat maks. 20 karakter · Komentar maks. 12 karakter</div>
-      <div class="config-list-item"><b>Skema Berbayar:</b> 1 koin per 1.200 karakter (Kelipatan otomatis)</div>
-      <div class="config-list-item"><b>Promosikan Postingan:</b> 1 Koin Berbayar / jam</div>
-      <div class="config-list-item"><b>Paket:</b> 100 koin/Rp1.000 · 600 koin/Rp5.000 · 1300 koin/Rp10.000</div>
-      <div class="config-list-item"><b>Biaya Live:</b> mulai 10, masuk 1, absen 1 koin berbayar</div>
-      <div class="config-list-item"><b>Ambang level:</b> 🌱 PEMULA 0 · 💧 PENDENGAR 50 · 🤝 SAHABAT 200 · 🔥 ACTIVE CUITER 500 · 👑 SULTAN CURHAT 1200</div>
-
-      <div style="background: #fffde7; border: 1px solid #fff59d; padding: 10px; border-radius: 12px; font-size: 10.5px; color: #7f6000; margin-top: 10px;">
-        <b>Aturan koin yang disepakati:</b> 1 koin = Rp5. Gift Live tanpa potongan; host menerima 100% koin gift. Penarikan DANA minimum Rp10.000 dengan biaya layanan Rp500.
-      </div>
-
-      <button class="btn-primary" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('configModal').style.display='none'">Oke</button>
-    </div>
-  </div>
-
-  <!-- MODAL LOGIN/DAFTAR REAL -->
-  <div id="authModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
-      <input type="email" id="email" placeholder="Alamat Email">
-      <input type="password" id="password" placeholder="Kata Sandi">
-      <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex:1;" onclick="submitLogin()">Masuk</button>
-        <button class="btn-secondary" style="flex:1;" onclick="submitSignUp()">Daftar</button>
-        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('authModal').style.display='none'">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL GIFT -->
-  <div id="giftModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar untuk Penulis</div>
-      
-      <div class="gift-grid">
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat!')">🤍 Semangat (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk Hangat (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin Dulu (2 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Kamu Hebat (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga Empati (3 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Karya Indah (5 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang Cerita (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Karya Agung (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
-      </div>
-
-      <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL DOMPET & TOP-UP -->
-  <div id="walletModal" class="modal">
-    <div class="modal-content">
-      <h3>🪙 Dompet & Top-Up Koin</h3>
-      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
-        <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">120</span> Koin</div>
-        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">600</span></div>
-      </div>
-      
-      <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
-        <b>Tujuan Pembayaran e-Wallet DANA:</b><br>
-        📱 <b>085624189461</b> (a.n CUIT Official)
-      </div>
-
-      <label style="font-size: 12px; font-weight: 800; display: block; margin-top: 8px;">Pilih Paket Top-Up Koin Berbayar:</label>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 100)">💰 Paket Rp 1.000 (100 Koin)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 600)">🎁 Paket Rp 5.000 (600 Koin - Bonus 100)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(10000, 1300)">🚀 Paket Rp 10.000 (1.300 Koin - Bonus 300)</button>
-
-      <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL PENARIKAN DANA (CASHOUT) DENGAN FIELD NAMA LENGKAP -->
-  <div id="cashoutModal" class="modal">
-    <div class="modal-content">
-      <h3>💸 Penarikan Saldo CUIT</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Koin Berbayar = Rp 5</div>
-
-      <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan:</label>
-      <select id="cashoutType" onchange="calcCashoutFee()">
-        <option value="dana">DANA (Admin Rp 500)</option>
-        <option value="bank">Transfer Bank (Biaya Transfer Rp 2.500 + Admin Rp 500)</option>
-      </select>
-
-      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Koin Berbayar Dicairkan:</label>
-      <input type="number" id="cashoutCoins" value="2000" oninput="calcCashoutFee()">
-
-      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-        <div>Gross Tunai: Rp <span id="coGross">10.000</span></div>
-        <div>Total Biaya Admin: Rp <span id="coFee">500</span></div>
-        <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
-        <div><b>Bersih Diterima:</b> Rp <span id="coNet">9.500</span></div>
-      </div>
-
-      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
-      <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
-
-      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
-      <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
-
-      <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
-        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     const CONFIG = {
       FREE_COINS_DAILY: 20,
@@ -610,30 +83,21 @@
     }
 
     function toggleCurhatLimit() {
-      const type = document.getElementById('curhatCoinType').value;
       const textarea = document.getElementById('postContent');
-      if (type === 'free') {
-        document.getElementById('charCount').innerText = `${textarea.value.length}/20 karakter`;
-      } else {
-        const coins = Math.ceil((textarea.value.length || 1) / 1200);
-        document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} Koin Berbayar)`;
-      }
+      const coins = Math.ceil((textarea.value.length || 1) / 1200);
+      const type = document.getElementById('curhatCoinType').value;
+      const label = type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar';
+      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
     }
 
     function updateCharCount(textarea) {
+      const coins = Math.ceil(textarea.value.length / 1200) || 1;
       const type = document.getElementById('curhatCoinType').value;
-      if (type === 'free') {
-        if (textarea.value.length > CONFIG.MAX_CHAR_FREE_CURHAT) {
-          textarea.value = textarea.value.substring(0, CONFIG.MAX_CHAR_FREE_CURHAT);
-        }
-        document.getElementById('charCount').innerText = `${textarea.value.length}/20 karakter`;
-      } else {
-        const coins = Math.ceil(textarea.value.length / 1200) || 1;
-        document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} Koin Berbayar)`;
-      }
+      const label = type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar';
+      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
     }
 
-    // SUBMIT POST DENGAN LOGIKA KELIPATAN KOIN BERBAYAR
+    // SUBMIT POSTINGAN KONSISTEN (1 KOIN PER 1.200 KARAKTER BERLAKU SAMA UNTUK GRATIS/PAID)
     async function submitNewPost() {
       const type = document.getElementById('curhatCoinType').value;
       const content = document.getElementById('postContent').value.trim();
@@ -641,31 +105,19 @@
 
       if (!content) return alert('Isi cerita tidak boleh kosong!');
 
-      let coinsNeeded = 1;
+      const coinsNeeded = Math.ceil(content.length / 1200);
 
       if (type === 'free') {
-        if (content.length > CONFIG.MAX_CHAR_FREE_CURHAT) {
-          return alert(`Maksimal curhat koin gratisan adalah ${CONFIG.MAX_CHAR_FREE_CURHAT} karakter!`);
+        if (freeCoins < coinsNeeded) {
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
         }
-        
-        if (freeCoins >= 5) {
-          freeCoins -= 5;
-        } else if (paidCoins >= 1) {
-          paidCoins -= 1;
-          usedPaidCoins += 1;
-        } else {
-          return alert('Koin gratisan dan koin berbayar kamu tidak cukup!');
-        }
+        freeCoins -= coinsNeeded;
       } else {
-        // Kelipatan 1 koin per 1200 karakter
-        coinsNeeded = Math.ceil(content.length / 1200);
-
         if (paidCoins < coinsNeeded) {
           return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo koin kamu tidak cukup!`);
         }
-
         paidCoins -= coinsNeeded;
-        usedPaidCoins += coinsNeeded; // Tambah Poin Jam Terbang
+        usedPaidCoins += coinsNeeded; // Poin Jam Terbang
       }
 
       updateCoinUI();
@@ -678,7 +130,7 @@
       ]);
 
       if (!error) {
-        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${type === 'free' ? '5 Koin Gratis' : coinsNeeded + ' Koin Berbayar'})`);
+        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
         document.getElementById('postContent').value = '';
         switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
       } else {
@@ -686,6 +138,7 @@
       }
     }
 
+    // PERBAIKAN LOADPOSTS: PENCOCOKAN ID DENGAN STRING() AGAR CAROUSEL MUNCUL
     async function loadPosts() {
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
@@ -705,24 +158,33 @@
       const activePromotions = promotedPostsStore.filter(p => p.promotedUntil > Date.now());
       localStorage.setItem('cuit_promoted_posts', JSON.stringify(activePromotions));
 
-      // Render Carousel Promosi Ramping jika ada
+      // Render Carousel Promosi Ramping
       if (activePromotions.length > 0) {
-        promotedSection.style.display = 'block';
-        promotedCarousel.innerHTML = activePromotions.map(item => {
-          const post = allPostsCache.find(p => p.id === item.id);
-          if (!post) return '';
-          
-          let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
-          let snippet = post.content.length > 35 ? post.content.substring(0, 35) + '...' : post.content;
-          
-          return `
-            <div onclick="openPromotedDetail('${post.id}')" style="min-width: 140px; max-width: 150px; background: linear-gradient(135deg, #ffffff, #fff8f0); border: 1.5px solid #f39c12; border-radius: 14px; padding: 10px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(230,126,34,0.12);">
-              <div style="font-size: 10px; font-weight: 800; color: #e67e22; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📌 ${rawName}</div>
-              <div style="font-size: 11px; color: #2c2e43; line-height: 1.3; height: 28px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${snippet}</div>
-              <div style="font-size: 9px; color: #d35400; font-weight: 700; margin-top: 6px; text-align: right;">Ketuk & Baca →</div>
-            </div>
-          `;
-        }).join('');
+        let cardsHTML = '';
+        
+        activePromotions.forEach(item => {
+          // Pencocokan ID fleksibel (String)
+          const post = allPostsCache.find(p => String(p.id) === String(item.id));
+          if (post) {
+            let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
+            let snippet = post.content.length > 35 ? post.content.substring(0, 35) + '...' : post.content;
+            
+            cardsHTML += `
+              <div onclick="openPromotedDetail('${post.id}')" style="min-width: 140px; max-width: 150px; background: linear-gradient(135deg, #ffffff, #fff8f0); border: 1.5px solid #f39c12; border-radius: 14px; padding: 10px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(230,126,34,0.12);">
+                <div style="font-size: 10px; font-weight: 800; color: #e67e22; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">📌 ${rawName}</div>
+                <div style="font-size: 11px; color: #2c2e43; line-height: 1.3; height: 28px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${snippet}</div>
+                <div style="font-size: 9px; color: #d35400; font-weight: 700; margin-top: 6px; text-align: right;">Ketuk & Baca →</div>
+              </div>
+            `;
+          }
+        });
+
+        if (cardsHTML !== '') {
+          promotedSection.style.display = 'block';
+          promotedCarousel.innerHTML = cardsHTML;
+        } else {
+          promotedSection.style.display = 'none';
+        }
       } else {
         promotedSection.style.display = 'none';
       }
@@ -731,7 +193,7 @@
     }
 
     function openPromotedDetail(postId) {
-      const post = allPostsCache.find(p => p.id === postId);
+      const post = allPostsCache.find(p => String(p.id) === String(postId));
       if (!post) return;
 
       const modalContent = document.getElementById('promotedDetailContent');
@@ -760,8 +222,9 @@
 
       const promotedUntil = Date.now() + (hours * 3600 * 1000);
       
-      promotedPostsStore = promotedPostsStore.filter(p => p.id !== postId);
-      promotedPostsStore.unshift({ id: postId, promotedUntil });
+      // Simpan ID sebagai String
+      promotedPostsStore = promotedPostsStore.filter(p => String(p.id) !== String(postId));
+      promotedPostsStore.unshift({ id: String(postId), promotedUntil });
       
       localStorage.setItem('cuit_promoted_posts', JSON.stringify(promotedPostsStore));
 
@@ -821,13 +284,13 @@
     }
 
     function toggleLike(postId) {
-      if (freeCoins > 0) {
+      if (freeCoins >= 1) {
         freeCoins -= 1;
-      } else if (paidCoins > 0) {
+      } else if (paidCoins >= 1) {
         paidCoins -= 1;
         usedPaidCoins += 1;
       } else {
-        return alert('Koin gratisan dan koin berbayar kamu habis untuk memberi Like!');
+        return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis!');
       }
 
       updateCoinUI();
@@ -836,16 +299,22 @@
     }
 
     function addComment(postId) {
-      if (freeCoins < 2) return alert('Koin gratisan kurang (butuh 2 koin gratisan)!');
-      const comm = prompt(`Tulis komentar Anda (Maks. ${CONFIG.MAX_CHAR_FREE_COMMENT} Karakter):`);
-      if (comm) {
-        if (comm.length > CONFIG.MAX_CHAR_FREE_COMMENT) {
-          return alert(`Komentar gratisan maksimal ${CONFIG.MAX_CHAR_FREE_COMMENT} karakter!`);
-        }
-        freeCoins -= 2;
-        updateCoinUI();
-        alert('Komentar berhasil dikirim!');
+      const comm = prompt("Tulis komentar Anda (1 Koin per 1.200 Karakter):");
+      if (!comm) return;
+
+      const coinsNeeded = Math.ceil(comm.length / 1200);
+
+      if (freeCoins >= coinsNeeded) {
+        freeCoins -= coinsNeeded;
+      } else if (paidCoins >= coinsNeeded) {
+        paidCoins -= coinsNeeded;
+        usedPaidCoins += coinsNeeded;
+      } else {
+        return alert(`Komentar membutuhkan ${coinsNeeded} Koin. Saldo koin kamu tidak cukup!`);
       }
+
+      updateCoinUI();
+      alert('Komentar berhasil dikirim!');
     }
 
     function openGiftModal(postId) {
@@ -1071,5 +540,3 @@
 
     checkUser();
   </script>
-</body>
-</html>
