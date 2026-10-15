@@ -1446,75 +1446,85 @@
     }
 
     async function executeSendGift() {
-      if (!pendingGiftData) return;
+  if (!pendingGiftData) return;
 
-      const { cost, giftName } = pendingGiftData;
-      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
+  const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+  const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
 
-      paidCoins -= cost;
-      usedPaidCoins += cost;
-      updateCoinUI();
+  // KHUSUS POSTINGAN BERANDA: MENCEGAH SAWER KE POSTINGAN SENDIRI
+  if (!isLiveGiftContext && activeTargetPostId) {
+    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+    if (currentPost && currentPost.user_email === myEmail) {
       document.getElementById('confirmGiftModal').style.display = 'none';
-
-      if (isLiveGiftContext && currentActiveLive) {
-        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
-        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
-
-        await supabaseClient.from('live_messages').insert([
-          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
-        ]);
-
-        const { data: targetProfile } = await supabaseClient
-          .from('profiles')
-          .select('paid_coins')
-          .eq('email', targetIdentifier)
-          .single();
-
-        if (targetProfile) {
-          const currentTargetCoins = targetProfile.paid_coins || 0;
-          await supabaseClient
-            .from('profiles')
-            .update({ paid_coins: currentTargetCoins + cost })
-            .eq('email', targetIdentifier);
-        }
-      } else if (activeTargetPostId) {
-        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-
-        if (currentPost) {
-          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
-          currentPost.gifts_count = newGiftCoinsCount;
-
-          await supabaseClient
-            .from('curhat')
-            .update({ gifts_count: newGiftCoinsCount })
-            .eq('id', activeTargetPostId);
-
-          const targetIdentifier = currentPost.user_id || currentPost.user_email;
-
-          if (targetIdentifier && currentPost.user_email !== myEmail) {
-            const { data: targetProfile } = await supabaseClient
-              .from('profiles')
-              .select('paid_coins')
-              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-              .single();
-
-            if (targetProfile) {
-              const currentTargetCoins = targetProfile.paid_coins || 0;
-              await supabaseClient
-                .from('profiles')
-                .update({ paid_coins: currentTargetCoins + cost })
-                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
-            }
-          }
-        }
-        loadPosts();
-        triggerGiftAnimation(myName, giftName, cost, "Penulis");
-      }
-
       pendingGiftData = null;
-      selectedLiveRecipient = null;
+      return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
     }
+  }
+
+  const { cost, giftName } = pendingGiftData;
+
+  paidCoins -= cost;
+  usedPaidCoins += cost;
+  updateCoinUI();
+  document.getElementById('confirmGiftModal').style.display = 'none';
+
+  if (isLiveGiftContext && currentActiveLive) {
+    const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+    const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+
+    await supabaseClient.from('live_messages').insert([
+      { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+    ]);
+
+    const { data: targetProfile } = await supabaseClient
+      .from('profiles')
+      .select('paid_coins')
+      .eq('email', targetIdentifier)
+      .single();
+
+    if (targetProfile) {
+      const currentTargetCoins = targetProfile.paid_coins || 0;
+      await supabaseClient
+        .from('profiles')
+        .update({ paid_coins: currentTargetCoins + cost })
+        .eq('email', targetIdentifier);
+    }
+  } else if (activeTargetPostId) {
+    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+
+    if (currentPost) {
+      const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+      currentPost.gifts_count = newGiftCoinsCount;
+
+      await supabaseClient
+        .from('curhat')
+        .update({ gifts_count: newGiftCoinsCount })
+        .eq('id', activeTargetPostId);
+
+      const targetIdentifier = currentPost.user_id || currentPost.user_email;
+
+      const { data: targetProfile } = await supabaseClient
+        .from('profiles')
+        .select('paid_coins')
+        .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+        .single();
+
+      if (targetProfile) {
+        const currentTargetCoins = targetProfile.paid_coins || 0;
+        await supabaseClient
+          .from('profiles')
+          .update({ paid_coins: currentTargetCoins + cost })
+          .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+      }
+    }
+    loadPosts();
+    triggerGiftAnimation(myName, giftName, cost, "Penulis");
+  }
+
+  pendingGiftData = null;
+  selectedLiveRecipient = null;
+}
+
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
