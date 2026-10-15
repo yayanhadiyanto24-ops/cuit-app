@@ -1004,6 +1004,13 @@
       searchPosts();
     }
 
+    function filterByTag(tagName) {
+      document.getElementById('searchInput').value = tagName;
+      switchTab('pageSearch', document.querySelectorAll('.nav-item')[1]);
+      document.getElementById('feelingFilter').value = tagName;
+      searchPosts();
+    }
+
     function filterPosts(type, btn) {
       document.querySelectorAll('.pills-group .pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
