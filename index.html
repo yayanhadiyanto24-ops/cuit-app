@@ -135,7 +135,7 @@
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; }
     .gift-card-item:hover { border-color: var(--primary); background: #f0f3fa; }
 
-    /* PERBAIKAN STYLES UNTUK RUANG LIVE CHAT FULLSCREEN */
+    /* STYLES UNTUK RUANG LIVE CHAT FULLSCREEN */
     body.is-in-live {
       padding-bottom: 0;
       overflow: hidden;
@@ -568,11 +568,13 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
+    <!-- MENU GRID PROFIL -->
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
       <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
       <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
-      <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan</div>
+      <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
+      <div class="menu-btn-item" style="grid-column: span 2;" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
     </div>
 
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
@@ -599,6 +601,54 @@
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
       <span class="nav-icon">🙂</span>
       <span>Profil</span>
+    </div>
+  </div>
+
+  <!-- MODAL TENTANG APLIKASI CUIT DENGAN BRANDING LENGKAP -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content" style="max-height: 85vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:900;">ℹ️ Tentang CUIT</h3>
+        <button onclick="document.getElementById('aboutModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 14px;">
+        <div style="font-size: 24px; font-weight: 900; color: var(--primary);">CUIT</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-sub);">Curhat dapat Duit • v1.2.0</div>
+      </div>
+
+      <div style="font-size: 11.5px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: #ece8ff; padding: 10px; border-radius: 12px; border: 1px solid #dcd6ff;">
+          <b style="color: var(--primary); font-size: 12px;">👨‍💻 Pengembang & Kreator Aplikasi:</b><br>
+          <div style="font-size: 13px; font-weight: 900; color: #1c1d36; margin-top: 2px;">Yan Kasmaran</div>
+          <div style="font-size: 11px; font-weight: 700; color: #4a4d65;">(Yayan Hadiyanto, S.Pd.-MT.)</div>
+          <div style="margin-top: 6px; font-size: 10.5px; color: #555; border-top: 1px dashed #c0b6ff; padding-top: 4px;">
+            <b>Naungan Ekosistem:</b><br>
+            🏛️ Yayasan Rancagé Al-Batukasuri<br>
+            🎭 Sanggar Seni Rancagé Al-Batukasuri<br>
+            ⚜️ Kedai Pramuka Rancagé Al-Batukasuri
+          </div>
+        </div>
+
+        <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <b style="color: var(--primary);">🌟 Visi Platform CUIT</b><br>
+          CUIT adalah wadah curhat dan ekspresi rasa berbasis empati. Di sini setiap gagasan, cerita, dan dukungan sosial diapresiasi secara langsung melalui sistem reward koin yang adil dan transparan.
+        </div>
+
+        <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <b style="color: var(--primary);">🪙 Ekonomi Koin & Pencairan</b><br>
+          • <b>Koin Gratisan:</b> Jatah harian menulis & berinteraksi.<br>
+          • <b>Bank Koin Berbayar:</b> Digunakan untuk Gift & Sorotan.<br>
+          • <b>Skema Curhat:</b> 1 Koin / 1.200 Karakter.<br>
+          • <b>Pencairan Tunai:</b> 1 Koin Berbayar = Rp 5 (DANA/Bank).
+        </div>
+
+        <div style="text-align: center; font-size: 10px; color: var(--text-sub); margin-top: 6px;">
+          © 2026 Yayasan Rancagé Al-Batukasuri. All Rights Reserved.
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%; margin-top:14px;" onclick="document.getElementById('aboutModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -1782,6 +1832,10 @@
       document.getElementById('wPaidCoin').innerText = paidCoins;
       document.getElementById('wPaidValue').innerText = (paidCoins * CONFIG.COIN_RATE_RP).toLocaleString('id-ID');
       document.getElementById('walletModal').style.display = 'flex';
+    }
+
+    function openAboutModal() {
+      document.getElementById('aboutModal').style.display = 'flex';
     }
 
     function buyPackageDANA(price, coins) {
