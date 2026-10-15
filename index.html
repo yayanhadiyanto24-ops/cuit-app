@@ -541,6 +541,7 @@
     let customDisplayName = localStorage.getItem('cuit_user_name') || null;
     let allPostsCache = [];
     let likesStore = {};
+    let activeTargetPostId = null;
 
     let freeCoins = 20;
     let paidCoins = 0;
@@ -571,7 +572,6 @@
       currentUser = data.user;
       
       if (currentUser) {
-        // Ambil data profil real dari Supabase
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
         
         if (profile) {
@@ -580,14 +580,12 @@
           usedPaidCoins = profile.used_paid_coins ?? 0;
           if (profile.username) customDisplayName = profile.username;
         } else {
-          // Akun baru: Inisialisasi data di Supabase
           freeCoins = 20;
           paidCoins = 0;
           usedPaidCoins = 0;
           await syncCoinsToSupabase();
         }
       } else {
-        // Mode Tamu / Tanpa Login
         freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
         paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
         usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
@@ -684,7 +682,7 @@
           return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo koin kamu tidak cukup!`);
         }
         paidCoins -= coinsNeeded;
-        usedPaidCoins += coinsNeeded; // Poin Jam Terbang
+        usedPaidCoins += coinsNeeded;
       }
 
       updateCoinUI();
@@ -693,7 +691,7 @@
       const authorEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
 
       const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling }
+        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
       ]);
 
       if (!error) {
@@ -705,7 +703,6 @@
       }
     }
 
-    // DIMODIFIKASI: Mengambil data Sorotan langsung dari database Supabase
     async function loadPosts() {
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
@@ -721,11 +718,9 @@
 
       allPostsCache = data;
 
-      // Filter promosi aktif secara global dari database Supabase
       const now = new Date().toISOString();
       const activePromotions = data.filter(p => p.is_promoted && p.promoted_until && p.promoted_until > now);
 
-      // Render Carousel Promosi POTRET (Gaya Facebook Story) di SEMUA HP
       if (activePromotions.length > 0) {
         let cardsHTML = '';
         
@@ -735,17 +730,12 @@
           
           cardsHTML += `
             <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-              <!-- Avatar Lingkaran Atas -->
               <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                 🤍
               </div>
-
-              <!-- Cuplikan Teks Curhatan di Tengah -->
               <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
                 ${snippet}
               </div>
-
-              <!-- Nama Pengguna di Bawah -->
               <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
                 ${rawName}
               </div>
@@ -782,7 +772,6 @@
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
 
-    // DIMODIFIKASI: Menyimpan status promosi langsung ke database Supabase
     async function promotePost(postId) {
       const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
       if (hours <= 0) return;
@@ -794,7 +783,6 @@
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + hours);
 
-      // Simpan status promosi ke Supabase
       const { error } = await supabaseClient
         .from('curhat')
         .update({
@@ -808,7 +796,7 @@
       }
 
       paidCoins -= hours;
-      usedPaidCoins += hours; // Poin Jam Terbang
+      usedPaidCoins += hours;
       updateCoinUI();
 
       alert(`Postingan berhasil dipromosikan ke barisan Sorotan secara GLOBAL selama ${hours} jam! (+${hours} Poin Jam Terbang)`);
@@ -820,7 +808,11 @@
       let feelingTag = p.feeling || 'Bahagia';
       const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
       const handle = p.user_email ? `@${p.user_email.split('@')[0]}` : '@yayan.hadiyanto1';
-      const likesCount = likesStore[p.id] || 0;
+      
+      const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
+      const commentsCount = p.comments_count ?? 0;
+      const giftsCount = p.gifts_count ?? 0;
+      
       const userLvl = getUserLevel();
 
       return `
@@ -851,8 +843,8 @@
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
           <div class="post-footer-actions">
             <div class="action-chip" onclick="toggleLike('${p.id}')">♡ Suka (${likesCount})</div>
-            <div class="action-chip" onclick="addComment('${p.id}')">💬 Komentar (0)</div>
-            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (0)</div>
+            <div class="action-chip" onclick="addComment('${p.id}')">💬 Komentar (${commentsCount})</div>
+            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCount})</div>
             <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
           </div>
         </div>
@@ -866,7 +858,7 @@
         }).subscribe();
     }
 
-    function toggleLike(postId) {
+    async function toggleLike(postId) {
       if (freeCoins >= 1) {
         freeCoins -= 1;
       } else if (paidCoins >= 1) {
@@ -877,11 +869,20 @@
       }
 
       updateCoinUI();
-      likesStore[postId] = (likesStore[postId] || 0) + 1;
+
+      const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
+      const newLikeCount = ((currentPost && currentPost.likes_count) ? currentPost.likes_count : (likesStore[postId] || 0)) + 1;
+      likesStore[postId] = newLikeCount;
+
+      await supabaseClient
+        .from('curhat')
+        .update({ likes_count: newLikeCount })
+        .eq('id', postId);
+
       loadPosts();
     }
 
-    function addComment(postId) {
+    async function addComment(postId) {
       const comm = prompt("Tulis komentar Anda (1 Koin per 1.200 Karakter):");
       if (!comm) return;
 
@@ -897,19 +898,41 @@
       }
 
       updateCoinUI();
+
+      const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
+      const newCommentCount = (currentPost && currentPost.comments_count ? currentPost.comments_count : 0) + 1;
+
+      await supabaseClient
+        .from('curhat')
+        .update({ comments_count: newCommentCount })
+        .eq('id', postId);
+
       alert('Komentar berhasil dikirim!');
+      loadPosts();
     }
 
     function openGiftModal(postId) {
+      activeTargetPostId = postId;
       document.getElementById('giftModal').style.display = 'flex';
     }
 
-    function sendGiftAction(cost, giftName) {
+    async function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Koin Berbayar tidak mencukupi!');
       paidCoins -= cost;
       usedPaidCoins += cost;
       updateCoinUI();
       document.getElementById('giftModal').style.display = 'none';
+
+      if (activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+        const newGiftCount = (currentPost && currentPost.gifts_count ? currentPost.gifts_count : 0) + 1;
+
+        await supabaseClient
+          .from('curhat')
+          .update({ gifts_count: newGiftCount })
+          .eq('id', activeTargetPostId);
+      }
+
       alert(`Berhasil mengirimkan Gift ${giftName} (${cost} Koin Berbayar)! +${cost} Poin Jam Terbang.`);
       loadPosts();
     }
