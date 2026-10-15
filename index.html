@@ -54,6 +54,11 @@
     .pill-btn { padding: 6px 14px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
+    /* Quick Chat Templates Pills */
+    .quick-chat-container { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; padding-bottom: 4px; scrollbar-width: none; }
+    .quick-chip { background: #ece8ff; color: var(--primary); border: 1px solid #dcd6ff; padding: 4px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .quick-chip:hover { background: var(--primary); color: #fff; }
+
     /* Dynamic Tag Colors */
     .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
     .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
@@ -293,7 +298,7 @@
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
       <div>
         <h2 class="section-title">Live Teks Real-Time</h2>
-        <div class="section-sub" style="margin-bottom: 0;">Ngobrol lewat tulisan (Min. Level 💧 PENDENGAR & Saldo 10 Koin Berbayar).</div>
+        <div class="section-sub" style="margin-bottom: 0;">Ngobrol gratis lewat tulisan (Min. Level 💧 PENDENGAR & Saldo 10 Koin Berbayar untuk buat room).</div>
       </div>
       <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live</button>
     </div>
@@ -306,13 +311,39 @@
 
       <!-- Area Pesan Chat Live (Muncul Jika Live Aktif) -->
       <div id="liveChatBox" style="display: none;">
-        <div id="liveMessagesList" style="height: 250px; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+        
+        <!-- Leaderboard Top Supporter -->
+        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;">
+          <div style="font-size: 11px; font-weight: 800; color: #d35400; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <span>🏆 TOP SUPPORTER (Pengirim Gift Terbanyak)</span>
+            <span style="font-size: 9px; font-weight: 600; color: #7f6000;">Tertinggi → Terendah</span>
+          </div>
+          <div id="liveLeaderboardList" style="font-size: 10.5px; color: #333; display: flex; flex-direction: column; gap: 3px;">
+            <i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="liveMessagesList" style="height: 220px; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
           <!-- Pesan chat live bertambah di sini -->
         </div>
 
-        <div style="display: flex; gap: 6px;">
-          <input type="text" id="liveInputMessage" placeholder="Tulis pesan live... (1 Koin/pesan)" style="margin-bottom: 0;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
-          <button class="btn-primary" style="padding: 0 16px;" onclick="sendLiveMessage()">Kirim</button>
+        <!-- Template Kata Cepat (Quick Chat) -->
+        <div class="quick-chat-container">
+          <div class="quick-chip" onclick="applyQuickChat('Assalamu\'alaikum')">👋 Assalamu'alaikum</div>
+          <div class="quick-chip" onclick="applyQuickChat('Wa\'alaikumsalam')">🤝 Wa'alaikumsalam</div>
+          <div class="quick-chip" onclick="applyQuickChat('Selamat bergabung!')">🎉 Selamat bergabung!</div>
+          <div class="quick-chip" onclick="applyQuickChat('Jangan lupa absen dulu ya')">📌 Jangan lupa absen dulu</div>
+          <div class="quick-chip" onclick="applyQuickChat('Apa kabar semuanya?')">💬 Apa kabar?</div>
+          <div class="quick-chip" onclick="applyQuickChat('Hai!')">✨ Hai!</div>
+          <div class="quick-chip" onclick="applyQuickChat('Setuju banget!')">👍 Setuju banget!</div>
+          <div class="quick-chip" onclick="applyQuickChat('Semangat terus ya!')">🔥 Semangat terus!</div>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <input type="text" id="liveInputMessage" placeholder="Tulis pesan live... (Gratis)" style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
+          <button class="btn-primary" style="padding: 0 12px;" onclick="sendLiveMessage()">Kirim</button>
+          <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
         </div>
       </div>
     </div>
@@ -423,6 +454,18 @@
     </div>
   </div>
 
+  <!-- MODAL PILIH PENERIMA GIFT LIVE -->
+  <div id="selectLiveRecipientModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 6px;">Pilih Penerima Gift 🎁</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Pilih Host atau Penonton di Live Chat yang ingin kamu beri gift:</div>
+      <div id="liveRecipientsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 12px;">
+        <!-- Daftar penonton muncul di sini -->
+      </div>
+      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('selectLiveRecipientModal').style.display='none'">Batal</button>
+    </div>
+  </div>
+
   <!-- MODAL KONFIRMASI SAWER GIFT -->
   <div id="confirmGiftModal" class="modal">
     <div class="modal-content" style="text-align: center;">
@@ -494,7 +537,7 @@
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar untuk Penulis</div>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar untuk Penulis/Host</div>
       
       <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
@@ -599,6 +642,8 @@
     let likesStore = {};
     let activeTargetPostId = null;
     let activeCommentPostId = null;
+    let isLiveGiftContext = false;
+    let selectedLiveRecipient = null;
     let pendingGiftData = null;
     let followingSet = new Set();
     let currentFeedFilter = 'semua';
@@ -1142,9 +1187,52 @@
       }
     }
 
-    /* FITUR GIFT KONFIRMASI */
+    /* FITUR GIFT DENGAN PILIHAN PENERIMA & KONFIRMASI SAWER */
     function openGiftModal(postId) {
       activeTargetPostId = postId;
+      isLiveGiftContext = false;
+      document.getElementById('giftModal').style.display = 'flex';
+    }
+
+    async function openLiveGiftModal() {
+      if (!currentActiveLive) return alert('Tidak ada Live aktif!');
+      
+      const { data: messages } = await supabaseClient
+        .from('live_messages')
+        .select('username')
+        .eq('live_id', currentActiveLive.id);
+
+      const container = document.getElementById('liveRecipientsList');
+      let recipientsMap = new Map();
+      recipientsMap.set(currentActiveLive.host_name, currentActiveLive.host_email);
+
+      if (messages) {
+        messages.forEach(m => {
+          if (!recipientsMap.has(m.username)) {
+            recipientsMap.set(m.username, m.username);
+          }
+        });
+      }
+
+      let html = '';
+      recipientsMap.forEach((emailOrName, name) => {
+        const isHost = (name === currentActiveLive.host_name);
+        html += `
+          <button class="btn-secondary" style="width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; padding:8px 12px;" onclick="chooseLiveRecipient('${name}', '${emailOrName}')">
+            <span><b>${name}</b> ${isHost ? '👑 (Host)' : '👤 (Penonton)'}</span>
+            <span style="font-size:10px; color:var(--primary);">Pilih →</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('selectLiveRecipientModal').style.display = 'flex';
+    }
+
+    function chooseLiveRecipient(name, emailOrName) {
+      selectedLiveRecipient = { name, emailOrName };
+      document.getElementById('selectLiveRecipientModal').style.display = 'none';
+      isLiveGiftContext = true;
       document.getElementById('giftModal').style.display = 'flex';
     }
 
@@ -1162,56 +1250,90 @@
     }
 
     async function executeSendGift() {
-      if (!pendingGiftData || !activeTargetPostId) return;
+      if (!pendingGiftData) return;
 
       const { cost, giftName } = pendingGiftData;
-      const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+      const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
 
       paidCoins -= cost;
       usedPaidCoins += cost;
       updateCoinUI();
       document.getElementById('confirmGiftModal').style.display = 'none';
 
-      if (currentPost) {
-        const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
-        currentPost.gifts_count = newGiftCoinsCount;
+      if (isLiveGiftContext && currentActiveLive) {
+        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
 
-        await supabaseClient
-          .from('curhat')
-          .update({ gifts_count: newGiftCoinsCount })
-          .eq('id', activeTargetPostId);
+        // Tulis log gift di chat
+        await supabaseClient.from('live_messages').insert([
+          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+        ]);
 
-        const targetIdentifier = currentPost.user_id || currentPost.user_email;
-        const myEmail = currentUser ? currentUser.email : 'yayan.hadiyanto1@cuit.app';
+        if (targetIdentifier === myEmail || targetName === myName) {
+          paidCoins += cost;
+          updateCoinUI();
+        } else {
+          const { data: targetProfile } = await supabaseClient
+            .from('profiles')
+            .select('paid_coins')
+            .eq('email', targetIdentifier)
+            .single();
 
-        if (targetIdentifier) {
-          if (currentPost.user_email === myEmail) {
-            paidCoins += cost;
-            updateCoinUI();
-          } else {
-            const { data: targetProfile } = await supabaseClient
+          if (targetProfile) {
+            const currentTargetCoins = targetProfile.paid_coins || 0;
+            await supabaseClient
               .from('profiles')
-              .select('paid_coins')
-              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-              .single();
+              .update({ paid_coins: currentTargetCoins + cost })
+              .eq('email', targetIdentifier);
+          }
+        }
+        loadLiveMessages(currentActiveLive.id);
+        alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙) untuk ${targetName}!`);
+      } else if (activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
 
-            if (targetProfile) {
-              const currentTargetCoins = targetProfile.paid_coins || 0;
-              await supabaseClient
+        if (currentPost) {
+          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+          currentPost.gifts_count = newGiftCoinsCount;
+
+          await supabaseClient
+            .from('curhat')
+            .update({ gifts_count: newGiftCoinsCount })
+            .eq('id', activeTargetPostId);
+
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+
+          if (targetIdentifier) {
+            if (currentPost.user_email === myEmail) {
+              paidCoins += cost;
+              updateCoinUI();
+            } else {
+              const { data: targetProfile } = await supabaseClient
                 .from('profiles')
-                .update({ paid_coins: currentTargetCoins + cost })
-                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+                .select('paid_coins')
+                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+                .single();
+
+              if (targetProfile) {
+                const currentTargetCoins = targetProfile.paid_coins || 0;
+                await supabaseClient
+                  .from('profiles')
+                  .update({ paid_coins: currentTargetCoins + cost })
+                  .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+              }
             }
           }
         }
+        loadPosts();
+        alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! 100% koin gift telah masuk ke Bank Koin milik pembuat postingan.`);
       }
 
-      alert(`Berhasil mengirimkan Gift ${giftName} (${cost} 🪙)! 100% koin gift telah masuk ke Bank Koin milik pembuat postingan.`);
       pendingGiftData = null;
-      loadPosts();
+      selectedLiveRecipient = null;
     }
 
-    /* FITUR LIVE TEKS REAL-TIME */
+    /* FITUR LIVE TEKS REAL-TIME & LEADERBOARD */
     async function loadActiveLiveSession() {
       const { data: activeLive } = await supabaseClient
         .from('lives')
@@ -1284,6 +1406,8 @@
 
     async function loadLiveMessages(liveId) {
       const messagesList = document.getElementById('liveMessagesList');
+      const leaderboardList = document.getElementById('liveLeaderboardList');
+
       const { data: messages } = await supabaseClient
         .from('live_messages')
         .select('*')
@@ -1292,33 +1416,62 @@
 
       if (!messages || messages.length === 0) {
         messagesList.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Belum ada pesan di ruang Live.</p>';
+        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
         return;
       }
 
-      messagesList.innerHTML = messages.map(m => `
-        <div style="background: #ffffff; padding: 6px 10px; border-radius: 10px; border: 1px solid #e2e7f5; font-size: 11px;">
-          <b style="color: var(--primary);">${m.username}:</b> <span>${m.content}</span>
-        </div>
-      `).join('');
+      // Hitung Peringkat Supporter (Dari Tertinggi ke Terendah)
+      let supporterMap = {};
+      messages.forEach(m => {
+        if (m.content.includes('🎁 Mengirimkan Gift')) {
+          const match = m.content.match(/\((\d+)\s*🪙\)/);
+          if (match) {
+            const coins = parseInt(match[1]) || 0;
+            supporterMap[m.username] = (supporterMap[m.username] || 0) + coins;
+          }
+        }
+      });
+
+      // Urutkan Map dari Koin Tertinggi ke Terendah
+      let sortedSupporters = Object.keys(supporterMap)
+        .map(user => ({ user, coins: supporterMap[user] }))
+        .sort((a, b) => b.coins - a.coins);
+
+      if (sortedSupporters.length > 0) {
+        const medals = ['🥇', '🥈', '🥉'];
+        leaderboardList.innerHTML = sortedSupporters.map((s, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ffe082; padding-bottom: 2px;">
+            <span><b>${medals[idx] || '🏅'} ${s.user}</b></span>
+            <span style="font-weight: 800; color: #d35400;">${s.coins} 🪙</span>
+          </div>
+        `).join('');
+      } else {
+        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
+      }
+
+      // Render Chat List
+      messagesList.innerHTML = messages.map(m => {
+        const isGiftMsg = m.content.includes('🎁 Mengirimkan Gift');
+        return `
+          <div style="background: ${isGiftMsg ? '#fff8e1' : '#ffffff'}; padding: 6px 10px; border-radius: 10px; border: 1px solid ${isGiftMsg ? '#ffe082' : '#e2e7f5'}; font-size: 11px;">
+            <b style="color: var(--primary);">${m.username}:</b> <span style="${isGiftMsg ? 'font-weight: 800; color: #d35400;' : ''}">${m.content}</span>
+          </div>
+        `;
+      }).join('');
 
       messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    function applyQuickChat(text) {
+      const input = document.getElementById('liveInputMessage');
+      input.value = text;
+      sendLiveMessage();
     }
 
     async function sendLiveMessage() {
       const input = document.getElementById('liveInputMessage');
       const msg = input.value.trim();
       if (!msg || !currentActiveLive) return;
-
-      if (freeCoins >= 1) {
-        freeCoins -= 1;
-      } else if (paidCoins >= 1) {
-        paidCoins -= 1;
-        usedPaidCoins += 1;
-      } else {
-        return alert('Saldo Koin kamu habis!');
-      }
-
-      updateCoinUI();
 
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'yayan.hadiyanto1');
 
