@@ -1290,7 +1290,7 @@
           <div class="post-body">${p.content}</div>
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
           <div class="post-footer-actions">
-            <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#6c5ce7; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+            <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#1d4ed8; border:1px solid #93c5fd; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '❤️ Menyukai' : '♡ Suka'} (${likesCount})</div>
             <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
             <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
             <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
@@ -1331,7 +1331,7 @@
         }).subscribe();
     }
 
-    /* PERBAIKAN LIKE HANYA BISA 1 KALI / DIBATALKAN */
+    /* LIKE HANYA 1 KALI, TANDA HATI MERAH & WARNA BIRU, BERBIAYA 1 KOIN (GRATISAN / BERBAYAR) */
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1340,40 +1340,45 @@
       }
 
       const strPostId = String(postId);
-      const isLiked = userLikedPostsSet.has(strPostId);
+
+      // CEK JIKA SUDAH DIPERNAN KAN LIKE (BLOKIR JIKA SUDAH)
+      if (userLikedPostsSet.has(strPostId)) {
+        return alert('❤️ Kamu sudah menyukai postingan ini!');
+      }
+
+      // CEK KECUKUPAN KOIN (UTAMAKAN KOIN GRATISAN, LALU KOIN BERBAYAR)
+      let coinTypeUsed = '';
+      if (freeCoins >= 1) {
+        freeCoins -= 1;
+        coinTypeUsed = 'Koin Gratisan';
+      } else if (paidCoins >= 1) {
+        paidCoins -= 1;
+        usedPaidCoins += 1;
+        coinTypeUsed = 'Bank Koin Berbayar';
+      } else {
+        return alert('Saldo Koin kamu tidak mencukupi untuk menyukai postingan ini (Membutuhkan 1 Koin)!');
+      }
+
+      updateCoinUI();
+
       const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
       let currentLikes = (currentPost && currentPost.likes_count) || 0;
+      const newLikeCount = currentLikes + 1;
 
-      if (isLiked) {
-        // UNLIKE / BATAL SUKA
-        userLikedPostsSet.delete(strPostId);
-        const newLikeCount = Math.max(0, currentLikes - 1);
-        if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
-        
-        loadPosts();
+      userLikedPostsSet.add(strPostId);
+      if (currentPost) currentPost.likes_count = newLikeCount;
+      likesStore[strPostId] = newLikeCount;
 
-        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
-        if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
-        else delQuery = delQuery.eq('guest_token', guestToken);
-        
-        await delQuery;
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+      loadPosts();
 
-      } else {
-        // LIKE
-        userLikedPostsSet.add(strPostId);
-        const newLikeCount = currentLikes + 1;
-        if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
-        
-        loadPosts();
-
+      try {
         await supabaseClient.from('post_likes').insert([
           { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
         ]);
 
         await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+      } catch (err) {
+        console.error('Gagal menyimpan Like ke database:', err);
       }
     }
 
