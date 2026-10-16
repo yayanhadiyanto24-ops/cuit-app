@@ -1189,82 +1189,87 @@
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
 
-      const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins');
-      if (profilesData) {
-        profilesMap = {};
-        profilesData.forEach(pr => {
-          if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
-          if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+      try {
+        const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins');
+        if (profilesData) {
+          profilesMap = {};
+          profilesData.forEach(pr => {
+            if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
+            if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+          });
+        }
+
+        const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
+
+        if (error || !data || data.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
+          allPostsCache = [];
+          return;
+        }
+
+        allPostsCache = data;
+
+        const nowMs = Date.now();
+        const activePromotions = data.filter(p => {
+          if (!p.is_promoted || !p.promoted_until) return false;
+          const expiryMs = new Date(p.promoted_until).getTime();
+          return expiryMs > nowMs;
         });
-      }
 
-      const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
+        if (activePromotions.length > 0) {
+          let cardsHTML = '';
+          activePromotions.forEach(post => {
+            let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
+            let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
+            
+            let authorPoin = 0;
+            if (post.user_id && profilesMap[post.user_id] !== undefined) {
+              authorPoin = profilesMap[post.user_id];
+            } else if (post.user_email && profilesMap[post.user_email] !== undefined) {
+              authorPoin = profilesMap[post.user_email];
+            } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
+              authorPoin = usedPaidCoins;
+            }
 
-      if (error || !data || data.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
-        allPostsCache = [];
-        return;
-      }
+            const userLvl = getUserLevel(authorPoin);
 
-      allPostsCache = data;
+            cardsHTML += `
+              <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
+                <div style="position: relative; width: 26px; height: 26px;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
+                    🤍
+                  </div>
+                  <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
+                    ${userLvl.icon}
+                  </div>
+                </div>
 
-      const nowMs = Date.now();
-      const activePromotions = data.filter(p => {
-        if (!p.is_promoted || !p.promoted_until) return false;
-        const expiryMs = new Date(p.promoted_until).getTime();
-        return expiryMs > nowMs;
-      });
+                <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
+                  ${snippet}
+                </div>
 
-      if (activePromotions.length > 0) {
-        let cardsHTML = '';
-        activePromotions.forEach(post => {
-          let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
-          let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
-          
-          let authorPoin = 0;
-          if (post.user_id && profilesMap[post.user_id] !== undefined) {
-            authorPoin = profilesMap[post.user_id];
-          } else if (post.user_email && profilesMap[post.user_email] !== undefined) {
-            authorPoin = profilesMap[post.user_email];
-          } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
-            authorPoin = usedPaidCoins;
+                <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${rawName}
+                </div>
+              </div>
+            `;
+          });
+
+          if (cardsHTML !== '') {
+            promotedSection.style.display = 'block';
+            promotedCarousel.innerHTML = cardsHTML;
+          } else {
+            promotedSection.style.display = 'none';
           }
-
-          const userLvl = getUserLevel(authorPoin);
-
-          cardsHTML += `
-            <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-              <div style="position: relative; width: 26px; height: 26px;">
-                <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
-                  🤍
-                </div>
-                <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
-                  ${userLvl.icon}
-                </div>
-              </div>
-
-              <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
-                ${snippet}
-              </div>
-
-              <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                ${rawName}
-              </div>
-            </div>
-          `;
-        });
-
-        if (cardsHTML !== '') {
-          promotedSection.style.display = 'block';
-          promotedCarousel.innerHTML = cardsHTML;
         } else {
           promotedSection.style.display = 'none';
         }
-      } else {
-        promotedSection.style.display = 'none';
-      }
 
-      renderFilteredFeed();
+        renderFilteredFeed();
+      } catch (err) {
+        console.error("Error loading posts:", err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan tekan tombol Refresh.</p>';
+      }
     }
 
     function renderFilteredFeed() {
@@ -2282,78 +2287,76 @@
     }
 
     function playEmbeddedVideo(targetUrl, slot) {
-    function playEmbeddedVideo(targetUrl, slot) {
-  if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
-    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
-  }
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
+        return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
+      }
 
-  activeVideoSlot = slot;
-  document.getElementById('reelsModal').style.display = 'none';
+      activeVideoSlot = slot;
+      document.getElementById('reelsModal').style.display = 'none';
 
-  let rawUrl = normalizeFbUrl(targetUrl);
-  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
-    rawUrl = 'https://' + rawUrl;
-  }
+      let rawUrl = normalizeFbUrl(targetUrl);
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = 'https://' + rawUrl;
+      }
 
-  const frameContainer = document.getElementById('videoFrameContainer');
-  const encodedUrl = encodeURIComponent(rawUrl);
-  const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+      const frameContainer = document.getElementById('videoFrameContainer');
+      const encodedUrl = encodeURIComponent(rawUrl);
+      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
 
-  // Tampilkan iframe dan tombol aktivasi timer
-  frameContainer.innerHTML = `
-    <div style="width:100%; height:100%; position:relative; display:flex; flex-direction:column;">
-      <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none;overflow:hidden;border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-      <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; gap:8px; padding:4px;">
-        <button id="btnStartWatching" onclick="startVideoTimer('${rawUrl}')" style="background:#2ecc71; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer;">
-          ▶️ Mulai Tonton Video
-        </button>
-      </div>
-    </div>
-  `;
+      // Tampilkan iframe dan tombol aktivasi timer
+      frameContainer.innerHTML = `
+        <div style="width:100%; height:100%; position:relative; display:flex; flex-direction:column;">
+          <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none;overflow:hidden;border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+          <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; gap:8px; padding:4px;">
+            <button id="btnStartWatching" onclick="startVideoTimer('${rawUrl}')" style="background:#2ecc71; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer;">
+              ▶️ Mulai Tonton Video
+            </button>
+          </div>
+        </div>
+      `;
 
-  const btnClose = document.getElementById('btnCloseVideo');
-  btnClose.disabled = true;
-  btnClose.style.opacity = '0.5';
-  btnClose.style.cursor = 'not-allowed';
-  btnClose.innerText = `⏳ Tunggu (10s)`;
+      const btnClose = document.getElementById('btnCloseVideo');
+      btnClose.disabled = true;
+      btnClose.style.opacity = '0.5';
+      btnClose.style.cursor = 'not-allowed';
+      btnClose.innerText = `⏳ Tunggu (10s)`;
 
-  // Hentikan interval timer lama jika masih ada
-  if (videoTimerInterval) clearInterval(videoTimerInterval);
+      // Hentikan interval timer lama jika masih ada
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
 
-  document.getElementById('videoPlayerModal').style.display = 'flex';
-}
-
-// FUNGSI KHUSUS UNTUK MEMULAI HITUNG MUNDUR SAAT TOMBOL DITEKAN
-function startVideoTimer(rawUrl) {
-  const btnStart = document.getElementById('btnStartWatching');
-  if (btnStart) {
-    btnStart.innerText = '🎬 Video Sedang Diputar...';
-    btnStart.style.background = '#34495e';
-    btnStart.disabled = true;
-  }
-
-  // Jika iframe diblokir, buka juga link ke tab baru sebagai opsi cadangan
-  window.open(rawUrl, '_blank');
-
-  let secondsLeft = 10;
-  const btnClose = document.getElementById('btnCloseVideo');
-
-  if (videoTimerInterval) clearInterval(videoTimerInterval);
-  videoTimerInterval = setInterval(() => {
-    secondsLeft--;
-    if (secondsLeft > 0) {
-      btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
-    } else {
-      clearInterval(videoTimerInterval);
-      btnClose.disabled = false;
-      btnClose.style.opacity = '1';
-      btnClose.style.cursor = 'pointer';
-      btnClose.style.background = '#2ecc71';
-      btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+      document.getElementById('videoPlayerModal').style.display = 'flex';
     }
-  }, 1000);
-}
 
+    // FUNGSI KHUSUS UNTUK MEMULAI HITUNG MUNDUR SAAT TOMBOL DITEKAN
+    function startVideoTimer(rawUrl) {
+      const btnStart = document.getElementById('btnStartWatching');
+      if (btnStart) {
+        btnStart.innerText = '🎬 Video Sedang Diputar...';
+        btnStart.style.background = '#34495e';
+        btnStart.disabled = true;
+      }
+
+      // Jika iframe diblokir, buka juga link ke tab baru sebagai opsi cadangan
+      window.open(rawUrl, '_blank');
+
+      let secondsLeft = 10;
+      const btnClose = document.getElementById('btnCloseVideo');
+
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
+      videoTimerInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+          btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+        } else {
+          clearInterval(videoTimerInterval);
+          btnClose.disabled = false;
+          btnClose.style.opacity = '1';
+          btnClose.style.cursor = 'pointer';
+          btnClose.style.background = '#2ecc71';
+          btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+        }
+      }, 1000);
+    }
 
     function claimVideoRewardAndClose() {
       const btnClose = document.getElementById('btnCloseVideo');
