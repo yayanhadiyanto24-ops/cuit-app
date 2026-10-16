@@ -189,9 +189,8 @@
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- 1. HALAMAN BERANDA (TATA LETAK REVISI PRESISI) -->
+  <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <!-- BARIS 1: JUDUL BERANDA DI ATAS & TOMBOL 10 KOIN GRATIS TAJAM -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
       <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
       <button 
@@ -202,10 +201,8 @@
       </button>
     </div>
 
-    <!-- BARIS 2: KALIMAT DESKRIPSI CUKUP 1 BARIS -->
     <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
 
-    <!-- BARIS 3: TOMBOL SEMUA, MENGIKUTI SEJAJAR DENGAN TOMBOL + CURHAT -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <div class="pills-group">
         <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
@@ -214,7 +211,6 @@
       <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
-    <!-- BARIS 4: AREA PERASAAN TERANGKAT NAIK (HEMAT TEMPAT) -->
     <div class="feelings-card">
       <h3>Mulai dari perasaanmu</h3>
       <div class="tags-grid">
@@ -249,7 +245,7 @@
     </div>
   </div>
 
-  <!-- MODAL MISI REELS FB (DAFTAR 10 MISI) -->
+  <!-- MODAL MISI REELS FB -->
   <div id="reelsModal" class="modal">
     <div class="modal-content" style="text-align: center;">
       <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah (10 Video)</h3>
@@ -257,15 +253,13 @@
         Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!
       </p>
 
-      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;">
-        <!-- Diisi otomatis oleh JS (10 Video Slot) -->
-      </div>
+      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;"></div>
 
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED MENGAMBANG DENGAN TOMBOL X (10 DETIK TIMER) -->
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -275,9 +269,7 @@
         </button>
       </div>
 
-      <div id="videoFrameContainer" style="width: 100%; height: 420px; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
-        <!-- iframe video dimasukkan dari JS -->
-      </div>
+      <div id="videoFrameContainer" style="width: 100%; height: 420px; background: #000; border-radius: 12px; overflow: hidden; position: relative;"></div>
 
       <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;">
         Tonton selama 10 detik. Poin +10 Koin Gratisan diberikan saat menekan tombol X di atas.
@@ -417,7 +409,7 @@
     </div>
   </div>
 
-  <!-- 5. HALAMAN PROFIL (DENGAN SPONSOR LINK & UNDUH APK) -->
+  <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
@@ -462,7 +454,6 @@
         </div>
       </div>
 
-      <!-- LINK SPONSOR & UNDUH APK DIRECT BUTTONS -->
       <div style="background: #f8f9fe; padding: 12px; border-radius: 14px; border: 1px solid #e2e7f5; margin-top: 10px;">
         <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
         <div style="font-size: 10px; color: #828599; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
@@ -476,7 +467,6 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
-    <!-- AREA KHUSUS PANEL ADMIN RAHASIA (KUNCI KHUSUS MANTANPERAMAL) -->
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
       <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
       <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
@@ -703,7 +693,7 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN/DAFTAR (DENGAN INPUT SPONSOR REFERRAL AUTO) -->
+  <!-- MODAL LOGIN/DAFTAR -->
   <div id="authModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
@@ -721,56 +711,48 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT (4 VARIATION BARU PER NOMINAL KOIN) -->
+  <!-- MODAL GIFT -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
       
       <div class="gift-grid">
-        <!-- 1 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
 
-        <!-- 2 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk Hangat (2 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin Dulu (2 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Cokelat Empati')">🍫 Cokelat Empati (2 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Permen Manis')">🍬 Permen Manis (2 🪙)</div>
 
-        <!-- 3 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Kamu Hebat (3 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga Empati (3 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Donat Hangat')">🍩 Donat Hangat (3 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(3, 'Jus Segar')">🧃 Jus Segar (3 🪙)</div>
 
-        <!-- 5 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Karya Indah (5 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Traktir Pizza')">🍕 Traktir Pizza (5 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Kue Apresiasi')">🍰 Kue Apresiasi (5 🪙)</div>
 
-        <!-- 10 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang Cerita (10 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Nobar Seru')">🍿 Nobar Seru (10 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Kotak Kejutan')">🎁 Kotak Kejutan (10 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Taman Bunga')">🌸 Taman Bunga (10 🪙)</div>
 
-        <!-- 20 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Karya Agung (20 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Pesta Burger (20 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon Harapan (20 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Suara Emas')">🎙️ Suara Emas (20 🪙)</div>
 
-        <!-- 50 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser Mini (50 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala Utama (50 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Istana Cerita')">🏰 Istana Cerita (50 🪙)</div>
 
-        <!-- 100 KOIN BERBAYAR -->
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Kembang Api')">🎆 Kembang Api (100 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil Balap (100 🪙)</div>
@@ -803,7 +785,7 @@
     </div>
   </div>
 
-  <!-- MODAL PENARIKAN DANA (PERMATA CUIT CASH OUT) -->
+  <!-- MODAL PENARIKAN DANA -->
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
       <h3>💸 Penarikan Permata CUIT</h3>
@@ -872,15 +854,14 @@
     let isLeaderboardOpen = true;
     let userHasLeftLive = false;
 
-    let freeCoins = 20;
-    let paidCoins = 0;
-    let gems = 0;
-    let usedPaidCoins = 0;
+    let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+    let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
+    let gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
+    let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
 
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
-    // LOGIKA PENANGKAPAN KODE SPONSOR REFERRAL DARI URL
     function initSponsorFromURL() {
       const urlParams = new URLSearchParams(window.location.search);
       const refParam = urlParams.get('ref');
@@ -932,16 +913,22 @@
       }
     }
 
+    // FUNGSI CHECKUSER DENGAN PROTEKSI SALDO ANTI-RESET
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
 
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
-      
-      const myIdentifier = currentUser ? currentUser.email : (localStorage.getItem('cuit_guest_email') || 'mantanperamal@gmail.com');
 
-      // Ambil data profil terbaru dari Supabase
+      let guestId = localStorage.getItem('cuit_guest_identifier');
+      if (!guestId) {
+        guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
+        localStorage.setItem('cuit_guest_identifier', guestId);
+      }
+      
+      const myIdentifier = currentUser ? currentUser.email : guestId;
+
       const { data: profile } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -949,23 +936,23 @@
         .maybeSingle();
       
       if (profile) {
-        freeCoins = profile.free_coins ?? parseInt(localStorage.getItem('cuit_free_coins')) ?? 20;
-        paidCoins = profile.paid_coins ?? parseInt(localStorage.getItem('cuit_paid_coins')) ?? 0;
-        gems = profile.gems ?? parseInt(localStorage.getItem('cuit_gems')) ?? 0;
-        usedPaidCoins = profile.used_paid_coins ?? parseInt(localStorage.getItem('cuit_user_exp')) ?? 0;
+        const localFree = parseInt(localStorage.getItem('cuit_free_coins')) || 0;
+        const localPaid = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
+        const localGems = parseInt(localStorage.getItem('cuit_gems')) || 0;
+        const localExp = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+
+        freeCoins = Math.max(profile.free_coins ?? 0, localFree);
+        paidCoins = Math.max(profile.paid_coins ?? 0, localPaid);
+        gems = Math.max(profile.gems ?? 0, localGems);
+        usedPaidCoins = Math.max(profile.used_paid_coins ?? 0, localExp);
+
         if (profile.username) customDisplayName = profile.username;
         if (profile.sponsor) mySponsorCode = profile.sponsor;
-      } else {
-        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
-        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
-        gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
-        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
       }
 
-      await syncCoinsToSupabase();
+      updateCoinUI();
       await loadUserLikes();
       await loadFollows();
-      updateCoinUI();
       loadPosts();
       initGlobalRealtime();
 
@@ -996,7 +983,8 @@
     }
 
     async function loadFollows() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
       if (data) {
         followingSet = new Set(data.map(f => f.following_email));
@@ -1009,7 +997,8 @@
       localStorage.setItem('cuit_gems', gems);
       localStorage.setItem('cuit_user_exp', usedPaidCoins);
 
-      const myEmail = currentUser ? currentUser.email : (localStorage.getItem('cuit_guest_email') || 'mantanperamal@gmail.com');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       const codeToSave = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
 
@@ -1041,7 +1030,6 @@
       }
     }
 
-    // TINGKATAN LEVEL CUITER SESUAI RASIO KOIN BARU (1:1)
     function getUserLevel(expPoints = null) {
       const pts = (expPoints !== null) ? parseInt(expPoints) : usedPaidCoins;
       if (pts >= 100000) return { title: '💎 Cuiter Maestro', icon: '💎', next: null, target: 100000, color: '#5856d6' };
@@ -1052,7 +1040,8 @@
     }
 
     async function openUserProfileModal(email, name, poin) {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const isSelf = (email === myEmail);
       
       const lvl = getUserLevel(poin);
@@ -1105,7 +1094,8 @@
       customDisplayName = newName;
       localStorage.setItem('cuit_user_name', newName);
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
       
@@ -1122,7 +1112,8 @@
     }
 
     function copyMySponsorLink() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       
       const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
@@ -1195,7 +1186,8 @@
       updateCoinUI();
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const authorEmail = currentUser ? currentUser.email : guestId;
 
       const { error } = await supabaseClient.from('curhat').insert([
         { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
@@ -1383,7 +1375,8 @@
       }
 
       const userLvl = getUserLevel(authorPoin);
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const isSelf = (p.user_email === myEmail);
       const isFollowing = followingSet.has(p.user_email);
 
@@ -1424,7 +1417,8 @@
     }
 
     async function toggleFollow(targetEmail, btn) {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       if (!targetEmail || targetEmail === myEmail) return;
 
       if (followingSet.has(targetEmail)) {
@@ -1545,7 +1539,8 @@
       updateCoinUI();
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const authorEmail = currentUser ? currentUser.email : guestId;
 
       const { error } = await supabaseClient.from('comments').insert([
         {
@@ -1582,7 +1577,8 @@
       if (!currentActiveLive) return alert('Tidak ada Live aktif!');
       
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
 
       const { data: messages } = await supabaseClient
         .from('live_messages')
@@ -1643,11 +1639,11 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    // LOGIKA PEMBAGIAN REVENUE 50 / 10 / 40 DENGAN NOMINAL PERMATA 1:1
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
 
       if (!isLiveGiftContext && activeTargetPostId) {
@@ -1661,13 +1657,11 @@
 
       const { cost, giftName } = pendingGiftData;
 
-      // 1. POTONG KOIN BERBAYAR & TAMBAH EXP PENGIRIM (APRESIASI PENUH)
       paidCoins -= cost;
       usedPaidCoins += cost;
       updateCoinUI();
       document.getElementById('confirmGiftModal').style.display = 'none';
 
-      // 2. HITUNG BAGI HASIL 50 / 10 / 40
       const creatorGems = Math.floor(cost * 0.50);
       const sponsorGems = Math.floor(cost * 0.10);
 
@@ -1679,12 +1673,10 @@
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
 
-        // ALOKASI PERMATA KREATOR (50%)
         const { data: creatorProfile } = await supabaseClient.from('profiles').select('gems, sponsor').eq('email', targetIdentifier).single();
         if (creatorProfile) {
           await supabaseClient.from('profiles').update({ gems: (creatorProfile.gems || 0) + creatorGems }).eq('email', targetIdentifier);
 
-          // ALOKASI PERMATA SPONSOR (10%)
           const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
           const { data: sponsorProfile } = await supabaseClient.from('profiles').select('gems').eq('username', sponsorCode).single();
           if (sponsorProfile) {
@@ -1702,12 +1694,10 @@
 
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
 
-          // ALOKASI PERMATA KREATOR (50%)
           const { data: creatorProfile } = await supabaseClient.from('profiles').select('gems, sponsor').eq(currentPost.user_id ? 'id' : 'email', targetIdentifier).single();
           if (creatorProfile) {
             await supabaseClient.from('profiles').update({ gems: (creatorProfile.gems || 0) + creatorGems }).eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
 
-            // ALOKASI PERMATA SPONSOR (10%)
             const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
             const { data: sponsorProfile } = await supabaseClient.from('profiles').select('gems').eq('username', sponsorCode).single();
             if (sponsorProfile) {
@@ -1824,7 +1814,8 @@
         localStorage.setItem('cuit_active_live_id', activeLive.id);
 
         const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
-        const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
         const isHost = activeLive.host_email === myEmail;
 
         if (userHasLeftLive && !isHost) {
@@ -1911,7 +1902,6 @@
         .subscribe();
     }
 
-    // MEMULAI LIVE TEKS: SYARAT DIBALIKKAN KE 10 KOIN BERBAYAR (+10 EXP)
     async function startLiveTeks() {
       const userLvl = getUserLevel();
       if (userLvl.title === '🌱 Cuiter Baru') return alert('Syarat membuat Live Teks minimal level 💙 Cuiter Setia!');
@@ -1925,7 +1915,8 @@
       updateCoinUI();
 
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
 
       const nowMs = Date.now();
       const maxLiveMs = nowMs + (60 * 60 * 1000);
@@ -2127,7 +2118,6 @@
       document.getElementById('aboutModal').style.display = 'flex';
     }
 
-    // TOP-UP DANA: DAPATKAN 100% KOIN BERBAYAR, BONUS EXP 10%
     function buyPackageDANA(price, coins) {
       const intentUrl = `intent://qr/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}#Intent;scheme=dana;package=id.dana;end`;
       window.location.href = intentUrl;
@@ -2156,7 +2146,7 @@
     function calcCashoutFee() {
       const type = document.getElementById('cashoutType').value;
       const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-      const gross = coins * 1; // 1 Permata = 1 IDR
+      const gross = coins * 1;
       const fee = type === 'bank' ? 3000 : 500;
       const net = Math.max(0, gross - fee);
 
@@ -2182,10 +2172,13 @@
       const netAmount = Math.max(0, gross - fee);
 
       try {
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
+
         await supabaseClient.from('payouts').insert([
           {
             user_id: currentUser ? currentUser.id : 'demo_id',
-            user_email: currentUser ? currentUser.email : 'mantanperamal@gmail.com',
+            user_email: myEmail,
             payout_type: type,
             account_name: accountName,
             account_number: account,
@@ -2228,11 +2221,11 @@
       document.getElementById('configModal').style.display = 'flex';
     }
 
-    // PROFIL & RENDERING SPONSOR LINK LENGKAP
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || 'mantanperamal';
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
 
       document.getElementById('profName').innerText = displayName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
@@ -2241,14 +2234,12 @@
       document.getElementById('profLevelTitle').style.color = '#fff';
       document.getElementById('profExp').innerText = `${usedPaidCoins} EXP`;
 
-      // LINK SPONSOR DIKUNCI KHUSUS ADMINCUIT ATAU NAMA OTOMATIS TANPA SPASI
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (displayName.replace(/\s+/g, '').toUpperCase());
 
       const fullSponsorLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
       document.getElementById('displaySponsorLink').innerText = fullSponsorLink;
 
-      // HAK AKSES PANEL ADMIN DIKUNCI KHUSUS MANTANPERAMAL@GMAIL.COM
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
@@ -2280,7 +2271,6 @@
       }
     }
 
-    // FUNGSI PEMBERSIH LINK FACEBOOK OTOMATIS
     function normalizeFbUrl(url) {
       if (!url) return '';
       let clean = url.trim();
@@ -2289,7 +2279,6 @@
       return clean;
     }
 
-    // MISI REELS FB 10 SLOT (BISA DIPUTAR BERULANG)
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
@@ -2324,7 +2313,6 @@
       container.innerHTML = html;
     }
 
-    // FUNGSI PEMUTAR VIDEO DI DALAM APLIKASI (TANPA BUKA TAB BARU)
     function playEmbeddedVideo(targetUrl, slot) {
       if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
@@ -2375,7 +2363,6 @@
       if (playerModal) playerModal.style.display = 'flex';
     }
 
-    // FUNGSI TIMER BERJALAN DI DALAM MODAL APLIKASI
     function startVideoTimer() {
       const btnStart = document.getElementById('btnStartWatching');
       if (btnStart) {
