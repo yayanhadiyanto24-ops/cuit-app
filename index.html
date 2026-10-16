@@ -915,52 +915,62 @@
 
     /* FUNGSI CHECKUSER DENGAN PROTEKSI SALDO ANTI-RESET */
     async function checkUser() {
-      initSponsorFromURL();
-      checkDailyCoinReset();
+  initSponsorFromURL();
+  checkDailyCoinReset();
 
-      const { data } = await supabaseClient.auth.getUser();
-      currentUser = data.user;
+  const { data } = await supabaseClient.auth.getUser();
+  currentUser = data.user;
 
-      let guestId = localStorage.getItem('cuit_guest_identifier');
-      if (!guestId) {
-        guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
-        localStorage.setItem('cuit_guest_identifier', guestId);
-      }
-      
-      const myIdentifier = currentUser ? currentUser.email : guestId;
+  // 1. Jika pengguna SUDAH LOGIN akun Supabase resmi
+  if (currentUser) {
+    const myIdentifier = currentUser.email;
 
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('email', myIdentifier)
-        .maybeSingle();
-      
-      if (profile) {
-        const localFree = parseInt(localStorage.getItem('cuit_free_coins')) || 0;
-        const localPaid = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
-        const localGems = parseInt(localStorage.getItem('cuit_gems')) || 0;
-        const localExp = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('email', myIdentifier)
+      .maybeSingle();
 
-        freeCoins = Math.max(profile.free_coins ?? 0, localFree);
-        paidCoins = Math.max(profile.paid_coins ?? 0, localPaid);
-        gems = Math.max(profile.gems ?? 0, localGems);
-        usedPaidCoins = Math.max(profile.used_paid_coins ?? 0, localExp);
-
-        if (profile.username) customDisplayName = profile.username;
-        if (profile.sponsor) mySponsorCode = profile.sponsor;
-      }
-
-      updateCoinUI();
-      await loadUserLikes();
-      await loadFollows();
-      loadPosts();
-      initGlobalRealtime();
-
-      const savedLiveId = localStorage.getItem('cuit_active_live_id');
-      if (savedLiveId) {
-        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
-      }
+    if (profile) {
+      freeCoins = profile.free_coins ?? freeCoins;
+      paidCoins = profile.paid_coins ?? paidCoins;
+      gems = profile.gems ?? gems;
+      usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
+      if (profile.username) customDisplayName = profile.username;
+      if (profile.sponsor) mySponsorCode = profile.sponsor;
     }
+  } 
+  // 2. Jika pengguna MENGGUNAKAN TAB SAMARAN / GUEST (Belum Login)
+  else {
+    let guestId = localStorage.getItem('cuit_guest_identifier');
+    if (!guestId) {
+      // Buat ID Guest acak unik, BUKAN mantanperamal@gmail.com
+      guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
+      localStorage.setItem('cuit_guest_identifier', guestId);
+    }
+
+    // Berikan nama tampilan bawaan sebagai Pengguna Guest
+    const savedName = localStorage.getItem('cuit_user_name');
+    if (!savedName || savedName === 'mantanperamal') {
+      customDisplayName = 'TemanCUIT_' + Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem('cuit_user_name', customDisplayName);
+    } else {
+      customDisplayName = savedName;
+    }
+  }
+
+  updateCoinUI();
+  await loadUserLikes();
+  await loadFollows();
+  loadPosts();
+  initGlobalRealtime();
+
+  const savedLiveId = localStorage.getItem('cuit_active_live_id');
+  if (savedLiveId) {
+    switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+  }
+}
+
 
     async function loadUserLikes() {
       let guestToken = localStorage.getItem('cuit_guest_token');
