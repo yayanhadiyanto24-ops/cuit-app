@@ -24,7 +24,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
-    /* Top Stats Bar Compact */
+    /* Top Stats Bar */
     .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #e8f0fe; }
     .stat-group { display: flex; align-items: center; gap: 4px; }
     .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -32,9 +32,9 @@
     .noti-btn { position: relative; background: #fff; border: none; padding: 4px 8px; border-radius: 12px; cursor: pointer; font-size: 13px; }
     .noti-badge { position: absolute; top: -2px; right: -2px; background: #e74c3c; color: #fff; border-radius: 50%; font-size: 9px; font-weight: 900; padding: 1px 4px; display: none; }
 
-    /* Banner Image Container */
-    .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; transition: all 0.3s ease; }
-    .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
+    /* Banner Optimised Container */
+    .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; background: #fff; aspect-ratio: 3 / 1; overflow: hidden; }
+    .cuit-banner-img { width: 100%; height: 100%; display: block; object-fit: cover; content-visibility: auto; }
 
     /* Page Visibility & Sections */
     .page-section { display: none; padding: 10px 14px; }
@@ -48,8 +48,6 @@
     /* Buttons */
     .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2); }
     .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
-    .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
-    .btn-follow.following { background: #eef1f8; color: var(--text-sub); }
     .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
 
     /* Filter Pills */
@@ -66,14 +64,6 @@
     .tag-Humor { background: #FFFDE7; color: #F1C40F; }
     .tag-Sedih { background: #EAF2FF; color: #3498DB; }
     .tag-Cemas { background: #F3E5F5; color: #9B59B6; }
-    .tag-Marah { background: #FFEBEE; color: #E74C3C; }
-    .tag-Kecewa { background: #ECEFF1; color: #607D8B; }
-    .tag-Kesepian { background: #EDE7F6; color: #5E35B1; }
-    .tag-PatahHati { background: #FBE9E7; color: #D84315; }
-    .tag-Bingung { background: #FFF8E1; color: #F39C12; }
-    .tag-Rindu { background: #F3E5F5; color: #9C27B0; }
-    .tag-Lelah { background: #EFEBE9; color: #4E342E; }
-    .tag-Ragu { background: #E0F7FA; color: #00838F; }
 
     .feelings-card { background: #ffffff; padding: 12px 10px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 8px; }
     .feelings-card h3 { font-size: 13px; font-weight: 800; color: #1e1e38; margin-bottom: 8px; }
@@ -90,13 +80,10 @@
     .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
     
     .user-details { display: flex; flex-direction: column; gap: 1px; }
-    .user-name-row { display: flex; align-items: center; gap: 6px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
-    .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
     .post-time { font-size: 10px; color: var(--text-sub); }
 
     .post-body { font-size: 13px; line-height: 1.45; color: #2c2e43; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
-    .badge-publik { background: #eaf2ff; color: #3498db; margin-bottom: 10px; display: inline-flex; }
 
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
@@ -124,7 +111,7 @@
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 420px; max-height: 85vh; overflow-y: auto; }
 
     /* Grid 28 Gift */
-    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; }
+    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; max-height: 280px; overflow-y: auto; }
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 700; }
     .gift-card-item:hover { border-color: var(--primary); background: #ece8ff; }
   </style>
@@ -134,8 +121,8 @@
   <!-- Top Bar Stats -->
   <div class="top-bar" id="topBarNav">
     <div class="stat-group">
-      <div class="stat-badge" title="Koin Gratisan">🆓 <span id="freeCoinCount">20</span></div>
-      <div class="stat-badge" title="Koin CUIT Berbayar">🪙 <span id="paidCoinCount">0</span></div>
+      <div class="stat-badge" title="Koin Gratis">🆓 <span id="freeCoinCount">20</span></div>
+      <div class="stat-badge" title="Koin CUIT">🪙 <span id="paidCoinCount">0</span></div>
       <div class="stat-badge" title="Permata CUIT" style="background:#fff3e0; color:#d35400;">💎 <span id="permataCount">0</span></div>
     </div>
     <div style="display: flex; gap: 6px; align-items: center;">
@@ -148,9 +135,9 @@
     </div>
   </div>
 
-  <!-- Hero Banner -->
+  <!-- Hero Banner Kompresif Ringan -->
   <div class="cuit-banner-container" id="cuitMainBanner">
-    <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
+    <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" loading="lazy" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
   </div>
 
   <!-- 1. BERANDA -->
@@ -166,18 +153,6 @@
           🎁 10 Video Reels FB (+10 Koin)
         </button>
       </div>
-    </div>
-
-    <!-- Feed Statis 4 Jendela Promo Spesial -->
-    <div id="specialPromoStaticContainer" style="margin-top: 10px; display: none;">
-      <div style="font-size: 11px; font-weight: 800; color: #d35400; margin-bottom: 6px;">⭐ PROMO SPESIAL (Jendela Statis)</div>
-      <div id="specialPromoGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
-    </div>
-
-    <!-- Carousel Promo Reguler -->
-    <div id="promotedSection" style="display: none; margin-top: 12px; margin-bottom: 4px;">
-      <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px;">🚀 FEED REGULER PROMO</div>
-      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px;"></div>
     </div>
 
     <div class="pills-group" style="margin-top: 10px;">
@@ -273,10 +248,11 @@
             <div class="level-badge-icon">🌱</div>
           </div>
           <div>
-            <div style="font-size: 15px; font-weight: 900;" id="profName">Member CUIT</div>
-            <div style="font-size: 10px; color: var(--text-sub);" id="profReferralCode">Kode Referral: -</div>
+            <div style="font-size: 15px; font-weight: 900;" id="profName">Mantan Peramal</div>
+            <div style="font-size: 10px; color: var(--text-sub);" id="profReferralCode">Kode Referral: CUITADMIN</div>
           </div>
         </div>
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="openEditProfileModal()">Edit Nama</button>
       </div>
 
       <div class="profile-stats-grid">
@@ -295,21 +271,55 @@
       </div>
     </div>
 
-    <!-- PANEL KHUSUS ADMIN HAK AKSES -->
+    <!-- PANEL ADMIN HAK AKSES -->
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 12px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
       <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 12.5px;">⚙️ Hak Tambahan Admin</h4>
       <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
         <button class="btn-primary" style="background: #1877f2;" onclick="openAdminReelsModal()">⚙️ Kelola 10 Video Reels FB</button>
-        <button class="btn-primary" style="background: #e74c3c;" onclick="openAdminUserMgmtModal()">🛑 Kelola / Pembekuan / Penghapusan Akun Member</button>
       </div>
     </div>
 
     <div class="profile-menu-grid">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Pembelian Koin CUIT</div>
+      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Pencairan Permata CUIT</div>
     </div>
 
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 14px;" onclick="handleAuthAction()">Masuk / Daftar</button>
+  </div>
+
+  <!-- MODAL EDIT NAMA PANGGULAN MEMBER -->
+  <div id="editProfileModal" class="modal">
+    <div class="modal-content">
+      <h3>Ubah Nama Panggilan</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Nama panggilan ini akan tampil publik di profil dan postingan kamu:</div>
+      <input type="text" id="editNicknameInput" placeholder="Masukkan nama panggilan baru...">
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex:1;" onclick="saveProfileNickname()">Simpan Nama</button>
+        <button class="btn-secondary" onclick="document.getElementById('editProfileModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DOMPET & TOP-UP DANA (1:1 PAS) -->
+  <div id="walletModal" class="modal">
+    <div class="modal-content">
+      <h3>🪙 Bank Koin & Top-Up Koin</h3>
+      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
+        <div><b>Saldo Koin CUIT:</b> <span id="wPaidCoin">0</span> Koin</div>
+        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">0</span></div>
+      </div>
+      
+      <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
+        <b>Tujuan Pembayaran e-Wallet DANA:</b><br>
+        📱 <b>085624189461</b> (a.n CUIT Official)
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 1000)">💰 Paket Rp 1.000 = 1.000 Koin CUIT</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 5000)">🎁 Paket Rp 5.000 = 5.000 Koin CUIT</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(10000, 10000)">🚀 Paket Rp 10.000 = 10.000 Koin CUIT</button>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
+    </div>
   </div>
 
   <!-- MODAL MISI 10 REELS FB YAN KASMARAN -->
@@ -479,6 +489,10 @@
   </div>
 
   <script>
+    const CONFIG = {
+      DANA_NUMBER: '085624189461'
+    };
+
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -487,37 +501,30 @@
 
     // DAFTAR 28 GIFT RESMI CUIT
     const GIFTS_28 = [
-      // 1 Koin CUIT
       { id: 1, name: 'Hati Kecil', cost: 1, icon: '❤️' },
       { id: 2, name: 'Senyum', cost: 1, icon: '😊' },
       { id: 3, name: 'Bunga', cost: 1, icon: '🌸' },
       { id: 4, name: 'Jempol', cost: 1, icon: '👍' },
-      // 3 Koin CUIT
       { id: 5, name: 'Hati Bersinar', cost: 3, icon: '💖' },
       { id: 6, name: 'Bintang', cost: 3, icon: '⭐' },
       { id: 7, name: 'Hadiah Mini', cost: 3, icon: '🎁' },
       { id: 8, name: 'Peluk Hangat', cost: 3, icon: '🫂' },
-      // 5 Koin CUIT
       { id: 9, name: 'Mawar', cost: 5, icon: '🌹' },
       { id: 10, name: 'Balon Hati', cost: 5, icon: '🎈' },
       { id: 11, name: 'Lilin Harapan', cost: 5, icon: '🕯️' },
       { id: 12, name: 'Pelangi', cost: 5, icon: '🌈' },
-      // 10 Koin CUIT
       { id: 13, name: 'Buket Bunga', cost: 10, icon: '💐' },
       { id: 14, name: 'Piala Apresiasi', cost: 10, icon: '🏆' },
       { id: 15, name: 'Mahkota', cost: 10, icon: '👑' },
       { id: 16, name: 'Hati Istimewa', cost: 10, icon: '💝' },
-      // 20 Koin CUIT
       { id: 17, name: 'Permata Hati', cost: 20, icon: '💎' },
       { id: 18, name: 'Medali Emas', cost: 20, icon: '🥇' },
       { id: 19, name: 'Tongkat Ajaib', cost: 20, icon: '🪄' },
       { id: 20, name: 'Kotak Kasih', cost: 20, icon: '📦' },
-      // 50 Koin CUIT
       { id: 21, name: 'Mawar Emas', cost: 50, icon: '✨🌹' },
       { id: 22, name: 'Berlian Kilau', cost: 50, icon: '❇️💎' },
       { id: 23, name: 'Piala Juara', cost: 50, icon: '🏆✨' },
       { id: 24, name: 'Hati Bersayap', cost: 50, icon: '🪽💖' },
-      // 100 Koin CUIT
       { id: 25, name: 'Mahkota Raja', cost: 100, icon: '👑✨' },
       { id: 26, name: 'Phoenix Harapan', cost: 100, icon: '🔥🦅' },
       { id: 27, name: 'Bintang Kejora', cost: 100, icon: '🌟✨' },
@@ -528,7 +535,8 @@
     let freeCoins = 20;
     let paidCoins = 0;
     let permataCoins = 0;
-    let userReferralCode = '';
+    let userReferralCode = 'CUITADMIN';
+    let userNickname = 'Mantan Peramal';
     let sponsorEmail = ADMIN_EMAIL;
     let activeTargetPostId = null;
 
@@ -537,9 +545,7 @@
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
-        nav.classList.remove('active');
-      });
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
 
       document.getElementById(pageId).classList.add('active');
       if (navElement) navElement.classList.add('active');
@@ -563,19 +569,19 @@
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
 
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('email', myEmail).single();
 
       if (profile) {
-        if (profile.is_frozen) {
-          alert("Akun Anda sedang dibekukan oleh Admin. Beberapa fitur tidak dapat diakses.");
-        }
         freeCoins = profile.free_coins ?? 20;
         paidCoins = profile.paid_coins ?? 0;
         permataCoins = profile.permata_cuit ?? 0;
         sponsorEmail = profile.sponsor_email || ADMIN_EMAIL;
-        userReferralCode = profile.referral_code || '';
+        userReferralCode = profile.referral_code || (myEmail === ADMIN_EMAIL ? 'CUITADMIN' : '');
+        userNickname = profile.username || localStorage.getItem('cuit_nickname') || (myEmail === ADMIN_EMAIL ? 'Mantan Peramal' : 'Member CUIT');
+      } else {
+        userNickname = localStorage.getItem('cuit_nickname') || (myEmail === ADMIN_EMAIL ? 'Mantan Peramal' : 'Member CUIT');
       }
 
       updateCoinUI();
@@ -597,27 +603,65 @@
     }
 
     async function syncCoinsToSupabase() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
       await supabaseClient.from('profiles').upsert({
         email: myEmail,
+        username: userNickname,
         free_coins: freeCoins,
         paid_coins: paidCoins,
-        permata_cuit: permataCoins
+        permata_cuit: permataCoins,
+        referral_code: myEmail === ADMIN_EMAIL ? 'CUITADMIN' : userReferralCode
       }, { onConflict: 'email' });
     }
 
-    /* REVENUE SHARING 50% - 10% - 40% */
-    async function distributeRevenue(netAmountRp, cuiterEmail) {
-      const shareCuiter = netAmountRp * 0.50; // 50% -> Permata CUIT
-      const shareSponsor = netAmountRp * 0.10; // 10% -> Permata CUIT Sponsor
-      const sharePlatform = netAmountRp * 0.40; // 40% -> Platform CUIT
+    function openEditProfileModal() {
+      document.getElementById('editNicknameInput').value = userNickname;
+      document.getElementById('editProfileModal').style.display = 'flex';
+    }
 
-      // 1. Tambah Permata ke Cuiter
+    function saveProfileNickname() {
+      const newNick = document.getElementById('editNicknameInput').value.trim();
+      if (!newNick) return alert('Nama panggilan tidak boleh kosong!');
+
+      userNickname = newNick;
+      localStorage.setItem('cuit_nickname', newNick);
+      document.getElementById('editProfileModal').style.display = 'none';
+
+      renderProfileData();
+      syncCoinsToSupabase();
+      alert('Nama panggilan berhasil diperbarui!');
+    }
+
+    function openWalletModal() {
+      document.getElementById('wPaidCoin').innerText = paidCoins;
+      document.getElementById('wPaidValue').innerText = paidCoins.toLocaleString('id-ID');
+      document.getElementById('walletModal').style.display = 'flex';
+    }
+
+    function buyPackageDANA(price, coins) {
+      const note = encodeURIComponent(`Topup CUIT ${coins} Koin CUIT`);
+      const danaUrl = `https://link.dana.id/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}&notes=${note}`;
+      
+      window.open(danaUrl, '_blank');
+
+      setTimeout(() => {
+        if (confirm(`Anda diarahkan untuk membayar Rp ${price.toLocaleString('id-ID')} ke e-Wallet DANA (${CONFIG.DANA_NUMBER}).\n\nKlik "OK" jika Anda telah menyelesaikan transfer untuk menambahkan ${coins} Koin CUIT.`)) {
+          paidCoins += coins;
+          updateCoinUI();
+          openWalletModal();
+          alert(`Top-Up Berhasil! +${coins} Koin CUIT telah ditambahkan.`);
+        }
+      }, 800);
+    }
+
+    async function distributeRevenue(netAmountRp, cuiterEmail) {
+      const shareCuiter = netAmountRp * 0.50; 
+      const shareSponsor = netAmountRp * 0.10; 
+
       const { data: cProfile } = await supabaseClient.from('profiles').select('permata_cuit').eq('email', cuiterEmail).single();
       const currentCPermata = (cProfile && cProfile.permata_cuit) || 0;
       await supabaseClient.from('profiles').update({ permata_cuit: currentCPermata + shareCuiter }).eq('email', cuiterEmail);
 
-      // 2. Tambah Permata ke Sponsor Direct
       const { data: cuiterData } = await supabaseClient.from('profiles').select('sponsor_email').eq('email', cuiterEmail).single();
       const directSponsor = (cuiterData && cuiterData.sponsor_email) ? cuiterData.sponsor_email : ADMIN_EMAIL;
 
@@ -625,11 +669,9 @@
       const currentSPermata = (sProfile && sProfile.permata_cuit) || 0;
       await supabaseClient.from('profiles').update({ permata_cuit: currentSPermata + shareSponsor }).eq('email', directSponsor);
 
-      // Notifikasi Permata Masuk
-      createInAppNotification(cuiterEmail, 'Permata CUIT Masuk! 💎', `Anda menerima ${shareCuiter} Permata CUIT dari aktivitas berbayar.`);
+      createInAppNotification(cuiterEmail, 'Permata CUIT Masuk! 💎', `Anda menerima ${shareCuiter} Permata CUIT.`);
     }
 
-    /* KARTU 28 GIFT */
     function render28GiftsUI() {
       const container = document.getElementById('giftGrid28Container');
       container.innerHTML = GIFTS_28.map(g => `
@@ -646,7 +688,7 @@
       if (!activeTargetPostId) return;
 
       const { data: post } = await supabaseClient.from('curhat').select('user_email').eq('id', activeTargetPostId).single();
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
 
       if (post && post.user_email === myEmail) {
         return alert('Tidak dapat mengirimkan gift ke postingan sendiri!');
@@ -655,7 +697,6 @@
       paidCoins -= cost;
       updateCoinUI();
 
-      // Distribusi Pendapatan
       await distributeRevenue(cost, post.user_email);
 
       document.getElementById('giftModal').style.display = 'none';
@@ -663,7 +704,6 @@
       loadPosts();
     }
 
-    /* MISI 10 REELS FB */
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
@@ -735,7 +775,6 @@
       openReelsModal();
     }
 
-    /* PENCAIRAN PERMATA CUIT */
     function openCashoutModal() {
       calcCashoutDetails();
       document.getElementById('cashoutModal').style.display = 'flex';
@@ -744,7 +783,7 @@
     function calcCashoutDetails() {
       const method = document.getElementById('cashoutMethod').value;
       const amount = parseInt(document.getElementById('cashoutAmount').value) || 0;
-      const bruto = amount; // 1 Permata = Rp1
+      const bruto = amount; 
       const fee = method === 'bank' ? 3000 : 500;
       const net = Math.max(0, bruto - fee);
 
@@ -773,7 +812,6 @@
       alert('Pengajuan pencairan berhasil dikirim dan sedang diverifikasi!');
     }
 
-    /* NOTIFIKASI IN-APP */
     async function createInAppNotification(userEmail, title, message) {
       await supabaseClient.from('notifications').insert([
         { user_email: userEmail, title, message, is_read: false }
@@ -781,7 +819,7 @@
     }
 
     async function loadNotifications() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
       const { data: notis } = await supabaseClient.from('notifications').select('*').eq('user_email', myEmail).order('created_at', { ascending: false });
 
       const badge = document.getElementById('notiUnreadBadge');
@@ -812,7 +850,6 @@
       document.getElementById('notificationsModal').style.display = 'flex';
     }
 
-    /* ADMIN REELS EDITING */
     function openAdminReelsModal() {
       const container = document.getElementById('adminReelsInputsContainer');
       let html = '';
@@ -838,9 +875,13 @@
     }
 
     async function renderProfileData() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      document.getElementById('profName').innerText = myEmail.split('@')[0];
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
       
+      document.getElementById('profName').innerText = userNickname;
+      
+      const displayRef = (myEmail === ADMIN_EMAIL) ? 'CUITADMIN' : (userReferralCode || 'CUIT' + Math.random().toString(36).substring(2, 7).toUpperCase());
+      document.getElementById('profReferralCode').innerText = `Kode Referral: ${displayRef}`;
+
       const isAdmin = (myEmail === ADMIN_EMAIL);
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
     }
@@ -860,7 +901,7 @@
             <div class="user-info">
               <div class="avatar-container"><div class="avatar-circle">🤍</div></div>
               <div class="user-details">
-                <span class="user-name">${p.username || 'Member'}</span>
+                <span class="user-name">${p.username || 'Member CUIT'}</span>
                 <span class="btn-sm-badge tag-${(p.feeling || 'Bahagia').replace(/[^a-zA-Z]/g, '')}">${p.feeling || 'Bahagia'}</span>
               </div>
             </div>
@@ -915,9 +956,9 @@
 
       updateCoinUI();
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
       await supabaseClient.from('curhat').insert([
-        { content, user_email: myEmail, username: myEmail.split('@')[0], feeling, likes_count: 0 }
+        { content, user_email: myEmail, username: userNickname, feeling, likes_count: 0 }
       ]);
 
       document.getElementById('postContent').value = '';
@@ -951,7 +992,7 @@
       const password = document.getElementById('password').value;
       const referral = document.getElementById('referralInput').value.trim();
 
-      const { error, data } = await supabaseClient.auth.signUp({ email, password });
+      const { error } = await supabaseClient.auth.signUp({ email, password });
       if (!error) {
         let sponsor = ADMIN_EMAIL;
         if (referral) {
@@ -960,9 +1001,11 @@
           else return alert('Kode Referral tidak valid! Pendaftaran ditolak.');
         }
 
-        const newRefCode = 'CUIT' + Math.random().toString(36).substring(2, 7).toUpperCase();
+        const newRefCode = (email === ADMIN_EMAIL) ? 'CUITADMIN' : ('CUIT' + Math.random().toString(36).substring(2, 7).toUpperCase());
+        const initialNickname = 'Member CUIT';
+
         await supabaseClient.from('profiles').insert([
-          { email, sponsor_email: sponsor, referral_code: newRefCode, free_coins: 20, paid_coins: 0, permata_cuit: 0 }
+          { email, username: initialNickname, sponsor_email: sponsor, referral_code: newRefCode, free_coins: 20, paid_coins: 0, permata_cuit: 0 }
         ]);
 
         alert('Pendaftaran berhasil! Silakan login.');
