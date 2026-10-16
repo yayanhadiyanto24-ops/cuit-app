@@ -941,7 +941,7 @@
       
       const myIdentifier = currentUser ? currentUser.email : (localStorage.getItem('cuit_guest_email') || 'mantanperamal@gmail.com');
 
-      // Ambil data profil terbaru langsung dari Supabase (Pencarian Akurat Anti Reset)
+      // Ambil data profil terbaru dari Supabase
       const { data: profile } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -949,20 +949,20 @@
         .maybeSingle();
       
       if (profile) {
-        freeCoins = profile.free_coins ?? 20;
-        paidCoins = profile.paid_coins ?? 0;
-        gems = profile.gems ?? 0;
-        usedPaidCoins = profile.used_paid_coins ?? 0;
+        freeCoins = profile.free_coins ?? parseInt(localStorage.getItem('cuit_free_coins')) ?? 20;
+        paidCoins = profile.paid_coins ?? parseInt(localStorage.getItem('cuit_paid_coins')) ?? 0;
+        gems = profile.gems ?? parseInt(localStorage.getItem('cuit_gems')) ?? 0;
+        usedPaidCoins = profile.used_paid_coins ?? parseInt(localStorage.getItem('cuit_user_exp')) ?? 0;
         if (profile.username) customDisplayName = profile.username;
         if (profile.sponsor) mySponsorCode = profile.sponsor;
       } else {
-        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) ?? 20;
-        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) ?? 0;
-        gems = parseInt(localStorage.getItem('cuit_gems')) ?? 0;
-        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) ?? 0;
-        await syncCoinsToSupabase();
+        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
+        gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
+        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
       }
 
+      await syncCoinsToSupabase();
       await loadUserLikes();
       await loadFollows();
       updateCoinUI();
