@@ -913,7 +913,7 @@
       }
     }
 
-    // FUNGSI CHECKUSER DENGAN PROTEKSI SALDO ANTI-RESET
+    /* FUNGSI CHECKUSER DENGAN PROTEKSI SALDO ANTI-RESET */
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
@@ -2459,7 +2459,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
       }
     }
 
