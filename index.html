@@ -1172,46 +1172,64 @@
     }
 
     async function submitNewPost() {
-      const type = document.getElementById('curhatCoinType').value;
-      const content = document.getElementById('postContent').value.trim();
-      const feeling = document.getElementById('postFeeling').value;
+  // Cek apakah pengguna adalah Guest (belum login akun Supabase resmi)
+  if (!currentUser) {
+    const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+    document.getElementById('referralCodeInput').value = activeSponsor;
+    document.getElementById('authModal').style.display = 'flex';
+    
+    alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
+    return;
+  }
 
-      if (!content) return alert('Isi cerita tidak boleh kosong!');
+  const type = document.getElementById('curhatCoinType').value;
+  const content = document.getElementById('postContent').value.trim();
+  const feeling = document.getElementById('postFeeling').value;
 
-      const coinsNeeded = Math.ceil(content.length / 1200);
+  if (!content) return alert('Isi cerita tidak boleh kosong!');
 
-      if (type === 'free') {
-        if (freeCoins < coinsNeeded) {
-          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
-        }
-        freeCoins -= coinsNeeded;
-      } else {
-        if (paidCoins < coinsNeeded) {
-          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
-        }
-        paidCoins -= coinsNeeded;
-        usedPaidCoins += coinsNeeded;
-      }
+  const coinsNeeded = Math.ceil(content.length / 1200);
 
-      updateCoinUI();
-
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const authorEmail = currentUser ? currentUser.email : guestId;
-
-      const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
-      ]);
-
-      if (!error) {
-        localStorage.removeItem('cuit_draft_content');
-        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
-        document.getElementById('postContent').value = '';
-        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
-      } else {
-        alert('Gagal mengirim: ' + error.message);
-      }
+  if (type === 'free') {
+    if (freeCoins < coinsNeeded) {
+      return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
     }
+    freeCoins -= coinsNeeded;
+  } else {
+    if (paidCoins < coinsNeeded) {
+      return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
+    }
+    paidCoins -= coinsNeeded;
+    usedPaidCoins += coinsNeeded;
+  }
+
+  updateCoinUI();
+
+  const authorName = customDisplayName || currentUser.email.split('@')[0];
+
+  const { error } = await supabaseClient.from('curhat').insert([
+    { 
+      content, 
+      user_id: currentUser.id, 
+      user_email: currentUser.email, 
+      username: authorName, 
+      feeling, 
+      likes_count: 0, 
+      comments_count: 0, 
+      gifts_count: 0 
+    }
+  ]);
+
+  if (!error) {
+    localStorage.removeItem('cuit_draft_content');
+    alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
+    document.getElementById('postContent').value = '';
+    switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+  } else {
+    alert('Gagal mengirim: ' + error.message);
+  }
+}
+
 
     async function loadPosts() {
       const container = document.getElementById('postsList');
