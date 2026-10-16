@@ -256,7 +256,7 @@
       </p>
 
       <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-        <!-- Akan diisi otomatis oleh JavaScript -->
+        <!-- Diisi otomatis via JS dari Supabase -->
       </div>
 
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
@@ -834,7 +834,7 @@
       if (pageId === 'pageLive') loadActiveLiveSession();
     }
 
-    /* SISTEM CHECK RESET KOIN HARIAN (SETIAP HARI SETELAH JAM 00:00 WIB) */
+    /* RESET KOIN HARIAN SETIAP JAM 00:00 WIB */
     function checkDailyCoinReset() {
       const todayDate = new Date().toISOString().split('T')[0];
       const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
@@ -891,8 +891,8 @@
     }
 
     async function loadFollows() {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
+      if (!currentUser) return;
+      const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', currentUser.email);
       if (data) {
         followingSet = new Set(data.map(f => f.following_email));
       }
@@ -935,8 +935,8 @@
     }
 
     async function openUserProfileModal(email, name, poin) {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      const isSelf = (email === myEmail);
+      const myEmail = currentUser ? currentUser.email : null;
+      const isSelf = myEmail && (email === myEmail);
       
       const lvl = getUserLevel(poin);
       
@@ -971,7 +971,7 @@
     }
 
     function openEditProfileModal() {
-      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
       document.getElementById('editDisplayName').value = currentName;
       document.getElementById('editProfileModal').style.display = 'flex';
     }
@@ -1041,11 +1041,17 @@
 
       updateCoinUI();
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
+
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
+      const authorEmail = currentUser ? currentUser.email : null;
 
       const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser ? currentUser.id : 'demo_id', user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
+        { content, user_id: currentUser ? currentUser.id : null, user_email: authorEmail, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
       ]);
 
       if (!error) {
@@ -1146,7 +1152,7 @@
       let filteredData = allPostsCache;
 
       if (currentFeedFilter === 'mengikuti') {
-        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
+        filteredData = allPostsCache.filter(p => p.user_email && followingSet.has(p.user_email));
       }
 
       if (filteredData.length === 0) {
@@ -1224,14 +1230,14 @@
       }
 
       const userLvl = getUserLevel(authorPoin);
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      const isSelf = (p.user_email === myEmail);
-      const isFollowing = followingSet.has(p.user_email);
+      const myEmail = currentUser ? currentUser.email : null;
+      const isSelf = myEmail && (p.user_email === myEmail);
+      const isFollowing = p.user_email && followingSet.has(p.user_email);
 
       return `
         <div class="post-card">
           <div class="post-header">
-            <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
+            <div class="user-info" onclick="openUserProfileModal('${p.user_email || ''}', '${rawName}', ${authorPoin})">
               <div class="avatar-container">
                 <div class="avatar-circle">🤍</div>
                 <div class="level-badge-icon">${userLvl.icon}</div>
@@ -1239,7 +1245,7 @@
               <div class="user-details">
                 <div class="user-name-row">
                   <span class="user-name">${rawName}</span>
-                  ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+                  ${(!isSelf && p.user_email) ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
                 </div>
                 <div class="badge-row">
                   <span class="btn-sm-badge badge-pemula">${userLvl.title}</span>
@@ -1265,7 +1271,8 @@
     }
 
     async function toggleFollow(targetEmail, btn) {
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      if (!currentUser) return alert('Silakan Masuk/Daftar akun terlebih dahulu untuk mengikuti anggota!');
+      const myEmail = currentUser.email;
       if (!targetEmail || targetEmail === myEmail) return;
 
       if (followingSet.has(targetEmail)) {
@@ -1296,77 +1303,69 @@
         }).subscribe();
     }
 
+    /* === FUNGSI PERBAIKAN LIKE UNTUK MENCEGAH LIKE BERKALI-KALI (TOGGLE) === */
     async function toggleLike(postId) {
-  // 1. Buat/Ambil Token Tamu Unik jika user belum login
-  let guestToken = localStorage.getItem('cuit_guest_token');
-  if (!guestToken) {
-    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-    localStorage.setItem('cuit_guest_token', guestToken);
-  }
-
-  const userId = currentUser ? currentUser.id : null;
-
-  // 2. Cek ke tabel post_likes di Supabase apakah user/guest ini sudah pernah like
-  let query = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
-  if (userId) {
-    query = query.eq('user_id', userId);
-  } else {
-    query = query.eq('guest_token', guestToken);
-  }
-
-  const { data: existingLike, error: checkError } = await query.maybeSingle();
-
-  if (checkError) {
-    console.error('Gagal mengecek status like:', checkError);
-    return;
-  }
-
-  const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
-  let currentLikes = (currentPost && currentPost.likes_count) || 0;
-
-  if (existingLike) {
-    // A. JIKA SUDAH LIKE -> BATALKAN (UNLIKE)
-    let deleteQuery = supabaseClient.from('post_likes').delete().eq('id', existingLike.id);
-    await deleteQuery;
-
-    const newLikeCount = Math.max(0, currentLikes - 1);
-    if (currentPost) currentPost.likes_count = newLikeCount;
-    loadPosts();
-
-    // Update jumlah di tabel curhat
-    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-
-  } else {
-    // B. JIKA BELUM LIKE -> POTONG KOIN & TAMBAH LIKE
-    if (freeCoins >= 1) {
-      freeCoins -= 1;
-    } else if (paidCoins >= 1) {
-      paidCoins -= 1;
-      usedPaidCoins += 1;
-    } else {
-      return alert('Saldo Koin Gratisan dan Bank Koin Berbayar kamu habis!');
-    }
-
-    updateCoinUI();
-
-    // Catat ke tabel post_likes agar tidak bisa diklik lagi
-    await supabaseClient.from('post_likes').insert([
-      {
-        post_id: postId,
-        user_id: userId,
-        guest_token: userId ? null : guestToken
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
       }
-    ]);
 
-    const newLikeCount = currentLikes + 1;
-    if (currentPost) currentPost.likes_count = newLikeCount;
-    loadPosts();
+      const userId = currentUser ? currentUser.id : null;
 
-    // Update jumlah di tabel curhat
-    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-  }
-}
+      // Cek apakah user/guest sudah pernah like postingan ini
+      let query = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
+      if (userId) {
+        query = query.eq('user_id', userId);
+      } else {
+        query = query.eq('guest_token', guestToken);
+      }
 
+      const { data: existingLike } = await query.maybeSingle();
+
+      const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
+      let currentLikes = (currentPost && currentPost.likes_count) || 0;
+
+      if (existingLike) {
+        // BATAL LIKE (UNLIKE)
+        await supabaseClient.from('post_likes').delete().eq('id', existingLike.id);
+
+        const newLikeCount = Math.max(0, currentLikes - 1);
+        if (currentPost) currentPost.likes_count = newLikeCount;
+        likesStore[postId] = newLikeCount;
+        loadPosts();
+
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+
+      } else {
+        // TAMBAH LIKE
+        if (freeCoins >= 1) {
+          freeCoins -= 1;
+        } else if (paidCoins >= 1) {
+          paidCoins -= 1;
+          usedPaidCoins += 1;
+        } else {
+          return alert('Saldo Koin Gratisan dan Bank Koin Berbayar kamu habis!');
+        }
+
+        updateCoinUI();
+
+        await supabaseClient.from('post_likes').insert([
+          {
+            post_id: postId,
+            user_id: userId,
+            guest_token: userId ? null : guestToken
+          }
+        ]);
+
+        const newLikeCount = currentLikes + 1;
+        if (currentPost) currentPost.likes_count = newLikeCount;
+        likesStore[postId] = newLikeCount;
+        loadPosts();
+
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+      }
+    }
 
     /* FITUR KOMENTAR */
     async function openCommentsModal(postId) {
@@ -1415,14 +1414,14 @@
 
       updateCoinUI();
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const authorEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
+      const authorEmail = currentUser ? currentUser.email : null;
 
       const { error } = await supabaseClient.from('comments').insert([
         {
           post_id: activeCommentPostId,
           content: comm,
-          user_id: currentUser ? currentUser.id : 'demo_id',
+          user_id: currentUser ? currentUser.id : null,
           user_email: authorEmail,
           username: authorName
         }
@@ -1452,8 +1451,8 @@
     async function openLiveGiftModal() {
       if (!currentActiveLive) return alert('Tidak ada Live aktif!');
       
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
+      const myEmail = currentUser ? currentUser.email : null;
 
       const { data: messages } = await supabaseClient
         .from('live_messages')
@@ -1517,12 +1516,12 @@
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myEmail = currentUser ? currentUser.email : null;
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
 
       if (!isLiveGiftContext && activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-        if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+        if (currentPost && ((myEmail && currentPost.user_email === myEmail) || currentPost.username === myName)) {
           document.getElementById('confirmGiftModal').style.display = 'none';
           pendingGiftData = null;
           return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
@@ -1544,18 +1543,20 @@
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
 
-        const { data: targetProfile } = await supabaseClient
-          .from('profiles')
-          .select('paid_coins')
-          .eq('email', targetIdentifier)
-          .single();
-
-        if (targetProfile) {
-          const currentTargetCoins = targetProfile.paid_coins || 0;
-          await supabaseClient
+        if (targetIdentifier && targetIdentifier.includes('@')) {
+          const { data: targetProfile } = await supabaseClient
             .from('profiles')
-            .update({ paid_coins: currentTargetCoins + cost })
-            .eq('email', targetIdentifier);
+            .select('paid_coins')
+            .eq('email', targetIdentifier)
+            .single();
+
+          if (targetProfile) {
+            const currentTargetCoins = targetProfile.paid_coins || 0;
+            await supabaseClient
+              .from('profiles')
+              .update({ paid_coins: currentTargetCoins + cost })
+              .eq('email', targetIdentifier);
+          }
         }
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
@@ -1571,18 +1572,20 @@
 
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
 
-          const { data: targetProfile } = await supabaseClient
-            .from('profiles')
-            .select('paid_coins')
-            .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-            .single();
-
-          if (targetProfile) {
-            const currentTargetCoins = targetProfile.paid_coins || 0;
-            await supabaseClient
+          if (targetIdentifier) {
+            const { data: targetProfile } = await supabaseClient
               .from('profiles')
-              .update({ paid_coins: currentTargetCoins + cost })
-              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+              .select('paid_coins')
+              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+              .single();
+
+            if (targetProfile) {
+              const currentTargetCoins = targetProfile.paid_coins || 0;
+              await supabaseClient
+                .from('profiles')
+                .update({ paid_coins: currentTargetCoins + cost })
+                .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+            }
           }
         }
         loadPosts();
@@ -1694,8 +1697,8 @@
         localStorage.setItem('cuit_active_live_id', activeLive.id);
 
         const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
-        const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-        const isHost = activeLive.host_email === myEmail;
+        const myEmail = currentUser ? currentUser.email : null;
+        const isHost = myEmail && (activeLive.host_email === myEmail);
 
         if (userHasLeftLive && !isHost) {
           statusBox.innerHTML = `
@@ -1793,16 +1796,16 @@
       usedPaidCoins += 10;
       updateCoinUI();
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
+      const myEmail = currentUser ? currentUser.email : null;
 
       const nowMs = Date.now();
       const maxLiveMs = nowMs + (60 * 60 * 1000);
       const endedAtISO = new Date(maxLiveMs).toISOString();
 
-      const { data, error } = await supabaseClient.from('lives').insert([
+      const { error } = await supabaseClient.from('lives').insert([
         { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO }
-      ]).select().single();
+      ]);
 
       if (!error) {
         userHasLeftLive = false;
@@ -1888,7 +1891,7 @@
       const msg = input.value.trim();
       if (!msg || !currentActiveLive) return;
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
 
       await supabaseClient.from('live_messages').insert([
         { live_id: currentActiveLive.id, username: myName, content: msg }
@@ -1930,7 +1933,7 @@
           const lvl = getUserLevel(u.used_paid_coins || 0);
           const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
           return `
-            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.email || ''}', '${name}', ${u.used_paid_coins || 0})">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 16px;">${rankIcons[idx]}</span>
                 <div>
@@ -1958,7 +1961,7 @@
         container.innerHTML = topFollowed.map((u, idx) => {
           const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
           return `
-            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.email || ''}', '${name}', ${u.used_paid_coins || 0})">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 16px;">${rankIcons[idx]}</span>
                 <div>
@@ -2049,7 +2052,7 @@
       try {
         await supabaseClient.from('payouts').insert([
           {
-            user_id: currentUser ? currentUser.id : 'demo_id',
+            user_id: currentUser ? currentUser.id : null,
             user_email: currentUser ? currentUser.email : 'guest@cuit.app',
             payout_type: type,
             account_name: accountName,
@@ -2093,21 +2096,22 @@
       document.getElementById('configModal').style.display = 'flex';
     }
 
+    /* === PROFIL & PENGECEKAN HAK AKSES ADMIN YANG KETAT === */
     async function renderProfileData() {
       const userLvl = getUserLevel();
-      const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const displayName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Tamu CUIT');
+      const myEmail = currentUser ? currentUser.email : null;
 
       document.getElementById('profName').innerText = displayName;
       document.getElementById('profBadgeIcon').innerText = userLvl.icon;
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
-      const isYanKasmaran = (
-        displayName === 'Yan Kasmaran' || 
-        myEmail.includes('yan.kasmaran') || 
-        myEmail.includes('yayan.hadiyanto') ||
-        myEmail.includes('mantanperamal')
+      // HANYA MUNCULKAN PANEL ADMIN UNTUK USER LOGIN DENGAN EMAIL ADMIN SANGAT SPESIFIK
+      const isYanKasmaran = currentUser && (
+        currentUser.email === 'yan.kasmaran@gmail.com' || 
+        currentUser.email === 'yayan.hadiyanto@gmail.com' ||
+        currentUser.email === 'mantanperamal@gmail.com'
       );
       
       const adminSection = document.getElementById('adminPanelSection');
@@ -2115,11 +2119,18 @@
         adminSection.style.display = isYanKasmaran ? 'block' : 'none';
       }
 
-      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
-      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+      let followersCount = 0;
+      let followingCount = 0;
 
-      document.getElementById('profFollowers').innerText = followersCount || 0;
-      document.getElementById('profFollowing').innerText = followingCount || 0;
+      if (myEmail) {
+        const { count: fCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
+        const { count: fgCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+        followersCount = fCount || 0;
+        followingCount = fgCount || 0;
+      }
+
+      document.getElementById('profFollowers').innerText = followersCount;
+      document.getElementById('profFollowing').innerText = followingCount;
 
       const progressBar = document.getElementById('levelProgressBar');
       const nextInfo = document.getElementById('levelNextInfo');
@@ -2144,48 +2155,82 @@
       }
     }
 
-    /* LOGIKA FITUR MISI REELS FB & PANEL ADMIN (PEMBARUAN LOGIKA LOCAL STORAGE) */
+    /* === REELS FB INTEGRASI LANGSUNG DATABASE SUPABASE === */
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
+      container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat misi video...</p>';
 
-      const localV1 = localStorage.getItem('cuit_reels_v1') || 'https://facebook.com';
-      const localV2 = localStorage.getItem('cuit_reels_v2') || 'https://facebook.com';
-      const localV3 = localStorage.getItem('cuit_reels_v3') || 'https://facebook.com';
+      const today = new Date().toISOString().split('T')[0];
+      const claimedV1 = localStorage.getItem(`cuit_claimed_v1_${today}`);
+      const claimedV2 = localStorage.getItem(`cuit_claimed_v2_${today}`);
+      const claimedV3 = localStorage.getItem(`cuit_claimed_v3_${today}`);
+
+      // Ambil link terbaru dari database Supabase
+      const { data: missions } = await supabaseClient.from('reels_missions').select('*');
+      let links = { v1: '', v2: '', v3: '' };
+
+      if (missions && missions.length > 0) {
+        missions.forEach(m => {
+          if (m.id === 1) links.v1 = m.facebook_url || '';
+          if (m.id === 2) links.v2 = m.facebook_url || '';
+          if (m.id === 3) links.v3 = m.facebook_url || '';
+        });
+      }
 
       container.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
-          <button onclick="watchReelsVideo('${localV1}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+          ${claimedV1 
+            ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+            : `<button onclick="watchReelsVideo('${links.v1}', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+          }
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
-          <button onclick="watchReelsVideo('${localV2}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+          ${claimedV2 
+            ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+            : `<button onclick="watchReelsVideo('${links.v2}', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+          }
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
-          <button onclick="watchReelsVideo('${localV3}')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Komen</button>
+          ${claimedV3 
+            ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
+            : `<button onclick="watchReelsVideo('${links.v3}', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+          }
         </div>
       `;
     }
 
-    function watchReelsVideo(url) {
-      if (url && url !== 'https://facebook.com' && url.trim() !== '' && url !== 'null') {
-        window.open(url, '_blank');
-      } else {
-        alert('Belum ada link video yang dipasang oleh Admin.');
+    function watchReelsVideo(targetUrl, videoSlot) {
+      if (!targetUrl || targetUrl === 'https://facebook.com' || targetUrl.trim() === '' || targetUrl === 'null') {
+        return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
       }
+
+      targetUrl = targetUrl.trim();
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        targetUrl = 'https://' + targetUrl;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const isClaimed = localStorage.getItem(`cuit_claimed_${videoSlot}_${today}`);
+
+      if (isClaimed) {
+        return alert('Video ini sudah diklaim koinnya hari ini!');
+      }
+
+      freeCoins += 10;
+      localStorage.setItem(`cuit_claimed_${videoSlot}_${today}`, 'true');
+      updateCoinUI();
+
+      alert('🎉 Selamat! 10 Koin Gratisan berhasil ditambahkan ke akun kamu.\n\nKlik OK untuk langsung menonton video.');
+
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      openReelsModal();
     }
 
     async function openAdminModal() {
-      const localV1 = localStorage.getItem('cuit_reels_v1');
-      const localV2 = localStorage.getItem('cuit_reels_v2');
-      const localV3 = localStorage.getItem('cuit_reels_v3');
-
-      document.getElementById('adminVideo1').value = localV1 !== null ? localV1 : 'https://facebook.com';
-      document.getElementById('adminVideo2').value = localV2 !== null ? localV2 : 'https://facebook.com';
-      document.getElementById('adminVideo3').value = localV3 !== null ? localV3 : 'https://facebook.com';
-
       try {
         const { data } = await supabaseClient
           .from('reels_missions')
@@ -2194,9 +2239,9 @@
 
         if (data && data.length > 0) {
           data.forEach(item => {
-            if (item.id === 1 && !localV1 && item.facebook_url) document.getElementById('adminVideo1').value = item.facebook_url;
-            if (item.id === 2 && !localV2 && item.facebook_url) document.getElementById('adminVideo2').value = item.facebook_url;
-            if (item.id === 3 && !localV3 && item.facebook_url) document.getElementById('adminVideo3').value = item.facebook_url;
+            if (item.id === 1) document.getElementById('adminVideo1').value = item.facebook_url || '';
+            if (item.id === 2) document.getElementById('adminVideo2').value = item.facebook_url || '';
+            if (item.id === 3) document.getElementById('adminVideo3').value = item.facebook_url || '';
           });
         }
       } catch (err) {
@@ -2210,11 +2255,6 @@
       const v2 = document.getElementById('adminVideo2').value.trim();
       const v3 = document.getElementById('adminVideo3').value.trim();
 
-      // Simpan selalu ke LocalStorage sebagai sumber data utama
-      localStorage.setItem('cuit_reels_v1', v1);
-      localStorage.setItem('cuit_reels_v2', v2);
-      localStorage.setItem('cuit_reels_v3', v3);
-
       try {
         const upsertData = [
           { id: 1, slot_name: 'Video 1', facebook_url: v1, reward_coins: 10, updated_at: new Date().toISOString() },
@@ -2227,13 +2267,15 @@
           .upsert(upsertData, { onConflict: 'id' });
 
         if (error) {
-          console.warn('Peringatan Supabase:', error.message);
+          alert('Gagal menyimpan ke Supabase: ' + error.message);
+          return;
         }
       } catch (err) {
-        console.warn('Peringatan simpan Supabase:', err.message);
+        alert('Terjadi kesalahan: ' + err.message);
+        return;
       }
 
-      alert('✅ Link Video Reels FB berhasil disimpan!');
+      alert('✅ Link Video Reels FB berhasil disimpan ke Database Supabase!');
       document.getElementById('adminReelsModal').style.display = 'none';
     }
 
@@ -2274,131 +2316,6 @@
       if (!error) alert('Pendaftaran berhasil! Silakan masuk.');
       else alert('Error: ' + error.message);
     }
-/* === FUNGSI MISI REELS FB === */
-async function openReelsModal() {
-  const container = document.getElementById('reelsListContainer');
-  document.getElementById('reelsModal').style.display = 'flex';
-
-  const today = new Date().toISOString().split('T')[0];
-  const claimedV1 = localStorage.getItem(`cuit_claimed_v1_${today}`);
-  const claimedV2 = localStorage.getItem(`cuit_claimed_v2_${today}`);
-  const claimedV3 = localStorage.getItem(`cuit_claimed_v3_${today}`);
-
-  container.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
-      ${claimedV1 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v1', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
-      ${claimedV2 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v2', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
-      ${claimedV3 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v3', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-  `;
-}
-
-function watchReelsVideo(storageKey, videoSlot) {
-  let targetUrl = localStorage.getItem(storageKey);
-
-  if (!targetUrl || targetUrl === 'https://facebook.com' || targetUrl.trim() === '' || targetUrl === 'null') {
-    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
-  }
-
-  targetUrl = targetUrl.trim();
-
-  if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-    targetUrl = 'https://' + targetUrl;
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-  const isClaimed = localStorage.getItem(`cuit_claimed_${videoSlot}_${today}`);
-
-  if (isClaimed) {
-    return alert('Video ini sudah diklaim koinnya hari ini!');
-  }
-
-  freeCoins += 10;
-  localStorage.setItem(`cuit_claimed_${videoSlot}_${today}`, 'true');
-  updateCoinUI();
-
-  alert('🎉 Selamat! 10 Koin Gratisan berhasil ditambahkan ke akun kamu.\n\nKlik OK untuk langsung menonton video.');
-
-  window.open(targetUrl, '_blank');
-  openReelsModal();
-}
-/* === FUNGSI MISI REELS FB === */
-async function openReelsModal() {
-  const container = document.getElementById('reelsListContainer');
-  document.getElementById('reelsModal').style.display = 'flex';
-
-  const today = new Date().toISOString().split('T')[0];
-  const claimedV1 = localStorage.getItem(`cuit_claimed_v1_${today}`);
-  const claimedV2 = localStorage.getItem(`cuit_claimed_v2_${today}`);
-  const claimedV3 = localStorage.getItem(`cuit_claimed_v3_${today}`);
-
-  container.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
-      ${claimedV1 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v1', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
-      ${claimedV2 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v2', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-      <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
-      ${claimedV3 
-        ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-        : `<button onclick="watchReelsVideo('cuit_reels_v3', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
-      }
-    </div>
-  `;
-}
-
-function watchReelsVideo(storageKey, videoSlot) {
-  let targetUrl = localStorage.getItem(storageKey);
-
-  if (!targetUrl || targetUrl === 'https://facebook.com' || targetUrl.trim() === '' || targetUrl === 'null') {
-    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
-  }
-
-  targetUrl = targetUrl.trim();
-  if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-    targetUrl = 'https://' + targetUrl;
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-  const isClaimed = localStorage.getItem(`cuit_claimed_${videoSlot}_${today}`);
-
-  if (isClaimed) {
-    return alert('Video ini sudah diklaim koinnya hari ini!');
-  }
-
-  freeCoins += 10;
-  localStorage.setItem(`cuit_claimed_${videoSlot}_${today}`, 'true');
-  updateCoinUI();
-
-  window.open(targetUrl, '_blank', 'noopener,noreferrer');
-  openReelsModal();
-}
 
     checkUser();
   </script>
