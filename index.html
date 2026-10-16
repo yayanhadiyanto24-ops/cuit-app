@@ -886,7 +886,8 @@
       const refParam = urlParams.get('ref');
 
       if (refParam) {
-        localStorage.setItem('cuit_active_sponsor_ref', refParam.toUpperCase());
+        const cleanRef = refParam.trim().replace(/\s+/g, '').toUpperCase();
+        localStorage.setItem('cuit_active_sponsor_ref', cleanRef);
       } else if (!localStorage.getItem('cuit_active_sponsor_ref')) {
         localStorage.setItem('cuit_active_sponsor_ref', CONFIG.DEFAULT_SPONSOR);
       }
@@ -940,7 +941,12 @@
       
       const myIdentifier = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
-      const { data: profile } = await supabaseClient.from('profiles').select('*').or(`email.eq.${myIdentifier},username.eq.mantanperamal`).single();
+      // Ambil data profil terbaru langsung dari Supabase (Anti Reset Refresh)
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .or(`email.eq.${myIdentifier},username.eq.mantanperamal`)
+        .maybeSingle();
       
       if (profile) {
         freeCoins = profile.free_coins ?? 20;
@@ -954,6 +960,7 @@
         paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
         gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
         usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+        await syncCoinsToSupabase();
       }
 
       await loadUserLikes();
@@ -1055,7 +1062,7 @@
       document.getElementById('mSponsorName').innerText = (profile && profile.sponsor) ? profile.sponsor : CONFIG.DEFAULT_SPONSOR;
 
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email);
-      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', email);
+      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
 
       document.getElementById('mFollowers').innerText = followersCount || 0;
       document.getElementById('mFollowing').innerText = followingCount || 0;
@@ -1089,20 +1096,35 @@
     function saveProfileChanges() {
       const newName = document.getElementById('editDisplayName').value.trim();
       if (!newName) return alert('Nama tidak boleh kosong!');
+      
       customDisplayName = newName;
       localStorage.setItem('cuit_user_name', newName);
+
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
+      
+      mySponsorCode = myNewReferralCode;
+      localStorage.setItem('cuit_my_sponsor', myNewReferralCode);
+
       document.getElementById('editProfileModal').style.display = 'none';
+      
       updateCoinUI();
+      syncCoinsToSupabase();
       loadPosts();
-      alert('Profil berhasil diperbarui!');
+      
+      alert(`Profil berhasil diperbarui!\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
     }
 
     function copyMySponsorLink() {
-      const myCode = customDisplayName || 'ADMINCUIT';
-      const myLink = `${window.location.origin}${window.location.pathname}?ref=${myCode}`;
+      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      
+      const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
+      const myLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
       
       navigator.clipboard.writeText(myLink).then(() => {
-        alert(`Link sponsor kamu berhasil disalin:\n${myLink}`);
+        alert(`Link sponsor resmi kamu berhasil disalin:\n${myLink}`);
       }).catch(() => {
         prompt('Salin link sponsor kamu di bawah ini:', myLink);
       });
@@ -1305,7 +1327,7 @@
     }
 
     async function promotePost(postId) {
-      const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "100")) || 0;
+      const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
       if (hours <= 0) return;
 
       if (paidCoins < hours) {
@@ -1634,7 +1656,7 @@
 
       const { cost, giftName } = pendingGiftData;
 
-      // 1. POTONG KOIN BERBAYAR & TAMBAH EXP PENGIRIM
+      // 1. POTONG KOIN BERBAYAR & TAMBAH EXP PENGIRIM (APRESIASI PENUH)
       paidCoins -= cost;
       usedPaidCoins += cost;
       updateCoinUI();
@@ -1884,16 +1906,17 @@
         .subscribe();
     }
 
+    // MEMULAI LIVE TEKS: SYARAT DIBALIKKAN KE 10 KOIN BERBAYAR (+10 EXP)
     async function startLiveTeks() {
       const userLvl = getUserLevel();
       if (userLvl.title === '🌱 Cuiter Baru') return alert('Syarat membuat Live Teks minimal level 💙 Cuiter Setia!');
-      if (paidCoins < 100) return alert('Minimal saldo 100 Koin Berbayar untuk siaran Live Teks!');
+      if (paidCoins < 10) return alert('Minimal saldo 10 Koin Berbayar untuk siaran Live Teks!');
 
       const title = prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
       if (!title) return;
 
-      paidCoins -= 100;
-      usedPaidCoins += 100;
+      paidCoins -= 10;
+      usedPaidCoins += 10;
       updateCoinUI();
 
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
@@ -1909,7 +1932,7 @@
 
       if (!error) {
         userHasLeftLive = false;
-        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit.');
+        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit. (Terpakai 10 Koin Berbayar & +10 EXP)');
         loadActiveLiveSession();
       } else {
         alert('Gagal memulai Live: ' + error.message);
@@ -2099,17 +2122,23 @@
       document.getElementById('aboutModal').style.display = 'flex';
     }
 
+    // TOP-UP DANA: DAPATKAN 100% KOIN BERBAYAR, BONUS EXP 10%
     function buyPackageDANA(price, coins) {
       const intentUrl = `intent://qr/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}#Intent;scheme=dana;package=id.dana;end`;
       window.location.href = intentUrl;
 
-      setTimeout(() => {
+      setTimeout(async () => {
         if (confirm(`Apakah Anda telah menyelesaikan pembayaran sebesar Rp ${price.toLocaleString('id-ID')} di aplikasi DANA?\n\nKlik "OK" untuk menambahkan ${coins} Koin Berbayar ke akun Anda.`)) {
           paidCoins += coins;
-          usedPaidCoins += coins;
+          
+          const expBonus = Math.floor(coins * 0.10);
+          usedPaidCoins += expBonus;
+
           updateCoinUI();
+          await syncCoinsToSupabase();
+
           openWalletModal();
-          alert(`Top-Up Berhasil! +${coins} Koin Berbayar telah masuk ke Bank Koin kamu.`);
+          alert(`Top-Up Berhasil!\n+${coins.toLocaleString('id-ID')} Koin Berbayar ditambahkan.\n+${expBonus.toLocaleString('id-ID')} EXP diperoleh (10% Bonus Top-Up).`);
         }
       }, 1000);
     }
@@ -2194,6 +2223,7 @@
       document.getElementById('configModal').style.display = 'flex';
     }
 
+    // PROFIL & RENDERING SPONSOR LINK LENGKAP
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || 'mantanperamal';
@@ -2206,11 +2236,14 @@
       document.getElementById('profLevelTitle').style.color = '#fff';
       document.getElementById('profExp').innerText = `${usedPaidCoins} EXP`;
 
-      // LINK SPONSOR DISPLAY
-      document.getElementById('displaySponsorLink').innerText = `${window.location.origin}${window.location.pathname}?ref=${displayName}`;
+      // LINK SPONSOR DIKUNCI KHUSUS ADMINCUIT ATAU NAMA OTOMATIS TANPA SPASI
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (displayName.replace(/\s+/g, '').toUpperCase());
+
+      const fullSponsorLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
+      document.getElementById('displaySponsorLink').innerText = fullSponsorLink;
 
       // HAK AKSES PANEL ADMIN DIKUNCI KHUSUS MANTANPERAMAL@GMAIL.COM
-      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
@@ -2287,88 +2320,87 @@
     }
 
     // FUNGSI PEMUTAR VIDEO DI DALAM APLIKASI (TANPA BUKA TAB BARU)
-function playEmbeddedVideo(targetUrl, slot) {
-  if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
-    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
-  }
-
-  activeVideoSlot = slot;
-
-  const reelsModal = document.getElementById('reelsModal');
-  if (reelsModal) reelsModal.style.display = 'none';
-
-  let rawUrl = normalizeFbUrl(targetUrl);
-  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
-    rawUrl = 'https://' + rawUrl;
-  }
-
-  const frameContainer = document.getElementById('videoFrameContainer');
-  const encodedUrl = encodeURIComponent(rawUrl);
-  const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
-
-  if (frameContainer) {
-    frameContainer.innerHTML = `
-      <div style="width:100%; height:100%; display:flex; flex-direction:column;">
-        <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none; overflow:hidden; border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-        <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; padding:6px;">
-          <button id="btnStartWatching" onclick="startVideoTimer()" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
-            ▶️ Mulai Putar & Jalankan Timer
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  const btnClose = document.getElementById('btnCloseVideo');
-  if (btnClose) {
-    btnClose.disabled = true;
-    btnClose.style.opacity = '0.5';
-    btnClose.style.cursor = 'not-allowed';
-    btnClose.style.background = '#e74c3c';
-    btnClose.innerText = '⏳ Tunggu (10s)';
-  }
-
-  if (videoTimerInterval) {
-    clearInterval(videoTimerInterval);
-    videoTimerInterval = null;
-  }
-
-  const playerModal = document.getElementById('videoPlayerModal');
-  if (playerModal) playerModal.style.display = 'flex';
-}
-
-// FUNGSI TIMER BERJALAN DI DALAM MODAL APLIKASI
-function startVideoTimer() {
-  const btnStart = document.getElementById('btnStartWatching');
-  if (btnStart) {
-    btnStart.innerText = '🎬 Video Sedang Diputar...';
-    btnStart.style.background = '#34495e';
-    btnStart.disabled = true;
-  }
-
-  let secondsLeft = 10;
-  const btnClose = document.getElementById('btnCloseVideo');
-
-  if (videoTimerInterval) clearInterval(videoTimerInterval);
-
-  videoTimerInterval = setInterval(() => {
-    secondsLeft--;
-    if (btnClose && secondsLeft > 0) {
-      btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
-    } else {
-      clearInterval(videoTimerInterval);
-      videoTimerInterval = null;
-      if (btnClose) {
-        btnClose.disabled = false;
-        btnClose.style.opacity = '1';
-        btnClose.style.cursor = 'pointer';
-        btnClose.style.background = '#2ecc71';
-        btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+    function playEmbeddedVideo(targetUrl, slot) {
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
+        return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
       }
-    }
-  }, 1000);
-}
 
+      activeVideoSlot = slot;
+
+      const reelsModal = document.getElementById('reelsModal');
+      if (reelsModal) reelsModal.style.display = 'none';
+
+      let rawUrl = normalizeFbUrl(targetUrl);
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = 'https://' + rawUrl;
+      }
+
+      const frameContainer = document.getElementById('videoFrameContainer');
+      const encodedUrl = encodeURIComponent(rawUrl);
+      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+
+      if (frameContainer) {
+        frameContainer.innerHTML = `
+          <div style="width:100%; height:100%; display:flex; flex-direction:column;">
+            <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none; overflow:hidden; border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; padding:6px;">
+              <button id="btnStartWatching" onclick="startVideoTimer()" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
+                ▶️ Mulai Putar & Jalankan Timer
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose) {
+        btnClose.disabled = true;
+        btnClose.style.opacity = '0.5';
+        btnClose.style.cursor = 'not-allowed';
+        btnClose.style.background = '#e74c3c';
+        btnClose.innerText = '⏳ Tunggu (10s)';
+      }
+
+      if (videoTimerInterval) {
+        clearInterval(videoTimerInterval);
+        videoTimerInterval = null;
+      }
+
+      const playerModal = document.getElementById('videoPlayerModal');
+      if (playerModal) playerModal.style.display = 'flex';
+    }
+
+    // FUNGSI TIMER BERJALAN DI DALAM MODAL APLIKASI
+    function startVideoTimer() {
+      const btnStart = document.getElementById('btnStartWatching');
+      if (btnStart) {
+        btnStart.innerText = '🎬 Video Sedang Diputar...';
+        btnStart.style.background = '#34495e';
+        btnStart.disabled = true;
+      }
+
+      let secondsLeft = 10;
+      const btnClose = document.getElementById('btnCloseVideo');
+
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
+
+      videoTimerInterval = setInterval(() => {
+        secondsLeft--;
+        if (btnClose && secondsLeft > 0) {
+          btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+        } else {
+          clearInterval(videoTimerInterval);
+          videoTimerInterval = null;
+          if (btnClose) {
+            btnClose.disabled = false;
+            btnClose.style.opacity = '1';
+            btnClose.style.cursor = 'pointer';
+            btnClose.style.background = '#2ecc71';
+            btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+          }
+        }
+      }, 1000);
+    }
 
     function claimVideoRewardAndClose() {
       const btnClose = document.getElementById('btnCloseVideo');
