@@ -2230,25 +2230,39 @@
       openReelsModal();
     }
 
-    async function openAdminModal() {
-      try {
-        const { data } = await supabaseClient
-          .from('reels_missions')
-          .select('*')
-          .order('id', { ascending: true });
+    async function saveAdminReelsLinks() {
+  const v1 = document.getElementById('adminVideo1').value.trim();
+  const v2 = document.getElementById('adminVideo2').value.trim();
+  const v3 = document.getElementById('adminVideo3').value.trim();
 
-        if (data && data.length > 0) {
-          data.forEach(item => {
-            if (item.id === 1) document.getElementById('adminVideo1').value = item.facebook_url || '';
-            if (item.id === 2) document.getElementById('adminVideo2').value = item.facebook_url || '';
-            if (item.id === 3) document.getElementById('adminVideo3').value = item.facebook_url || '';
-          });
-        }
-      } catch (err) {
-        console.error("Gagal mengambil reels_missions:", err);
+  try {
+    // Jalankan pembaruan langsung per item berdasarkan ID
+    const updates = [
+      { id: 1, facebook_url: v1 },
+      { id: 2, facebook_url: v2 },
+      { id: 3, facebook_url: v3 }
+    ];
+
+    for (const item of updates) {
+      const { error } = await supabaseClient
+        .from('reels_missions')
+        .update({ facebook_url: item.facebook_url })
+        .eq('id', item.id);
+
+      if (error) {
+        alert('Gagal menyimpan ke Supabase: ' + error.message);
+        return;
       }
-      document.getElementById('adminReelsModal').style.display = 'flex';
     }
+
+    alert('✅ Link Video Reels FB berhasil disimpan ke Database Supabase!');
+    document.getElementById('adminReelsModal').style.display = 'none';
+
+  } catch (err) {
+    alert('Terjadi kesalahan: ' + err.message);
+  }
+}
+
 
     async function saveAdminReelsLinks() {
       const v1 = document.getElementById('adminVideo1').value.trim();
