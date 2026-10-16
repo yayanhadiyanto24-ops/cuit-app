@@ -443,8 +443,8 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
-    <!-- AREA KHUSUS PANEL ADMIN RAHASIA YAN KASMARAN -->
-    <div id="adminPanelSection" style="display: block; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
+    <!-- AREA KHUSUS PANEL ADMIN RAHASIA YAN KASMARAN (KUNCI KHUSUS MANTANPERAMAL) -->
+    <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
       <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
       <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola link Facebook Reels harian untuk Misi Koin Gratisan.</p>
       <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola Reels FB</button>
@@ -2076,8 +2076,9 @@
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
-      // HAK AKSES PANEL ADMIN KEMBALI NORMAL UNTUK KAMU
-      document.getElementById('adminPanelSection').style.display = 'block';
+      // HAK AKSES PANEL ADMIN DIKUNCI HANYA UNTUK mantanperamal@gmail.com
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
       const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
