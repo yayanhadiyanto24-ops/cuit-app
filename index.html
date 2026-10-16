@@ -186,7 +186,7 @@
 
   <!-- Hero Banner Bergambar Resmi CUIT -->
   <div class="cuit-banner-container" id="cuitMainBanner">
-    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
+    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
   <!-- 1. HALAMAN BERANDA (TATA LETAK REVISI PRESISI) -->
@@ -939,13 +939,13 @@
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
       
-      const myIdentifier = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
+      const myIdentifier = currentUser ? currentUser.email : (localStorage.getItem('cuit_guest_email') || 'mantanperamal@gmail.com');
 
-      // Ambil data profil terbaru langsung dari Supabase (Anti Reset Refresh)
+      // Ambil data profil terbaru langsung dari Supabase (Pencarian Akurat Anti Reset)
       const { data: profile } = await supabaseClient
         .from('profiles')
         .select('*')
-        .or(`email.eq.${myIdentifier},username.eq.mantanperamal`)
+        .eq('email', myIdentifier)
         .maybeSingle();
       
       if (profile) {
@@ -956,10 +956,10 @@
         if (profile.username) customDisplayName = profile.username;
         if (profile.sponsor) mySponsorCode = profile.sponsor;
       } else {
-        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
-        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
-        gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
-        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) ?? 20;
+        paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) ?? 0;
+        gems = parseInt(localStorage.getItem('cuit_gems')) ?? 0;
+        usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) ?? 0;
         await syncCoinsToSupabase();
       }
 
@@ -1009,20 +1009,25 @@
       localStorage.setItem('cuit_gems', gems);
       localStorage.setItem('cuit_user_exp', usedPaidCoins);
 
-      const myEmail = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
-      
-      if (currentUser || myEmail) {
-        await supabaseClient.from('profiles').upsert({
-          id: currentUser ? currentUser.id : undefined,
-          email: myEmail,
-          username: customDisplayName || 'mantanperamal',
-          free_coins: freeCoins,
-          paid_coins: paidCoins,
-          gems: gems,
-          used_paid_coins: usedPaidCoins,
-          sponsor: mySponsorCode
-        }, { onConflict: 'email' });
+      const myEmail = currentUser ? currentUser.email : (localStorage.getItem('cuit_guest_email') || 'mantanperamal@gmail.com');
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      const codeToSave = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
+
+      const profilePayload = {
+        email: myEmail,
+        username: customDisplayName || 'mantanperamal',
+        free_coins: freeCoins,
+        paid_coins: paidCoins,
+        gems: gems,
+        used_paid_coins: usedPaidCoins,
+        sponsor: codeToSave
+      };
+
+      if (currentUser && currentUser.id) {
+        profilePayload.id = currentUser.id;
       }
+
+      await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
     }
 
     function updateCoinUI() {
@@ -1131,7 +1136,7 @@
     }
 
     function downloadAPK() {
-      const apkUrl = 'https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/cuit.apk';
+      const apkUrl = 'https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/cuit.apk';
       window.open(apkUrl, '_blank');
     }
 
