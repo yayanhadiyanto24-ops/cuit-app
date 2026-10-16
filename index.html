@@ -130,7 +130,7 @@
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
     .nav-icon { font-size: 15px; }
 
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
     .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
@@ -247,19 +247,39 @@
     </div>
   </div>
 
-  <!-- MODAL POP-UP MISI REELS FB BERHADIAH KOIN -->
+  <!-- MODAL MISI REELS FB (DAFTAR MISI) -->
   <div id="reelsModal" class="modal">
     <div class="modal-content" style="text-align: center;">
       <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah</h3>
       <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.4;">
-        Pilih video, berikan <b>Like & Komentar</b> di Facebook untuk klaim koin gratisan!
+        Tonton video minimal <b>10 detik</b> langsung di aplikasi untuk klaim koin gratisan!
       </p>
 
       <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-        <!-- Diisi otomatis oleh JavaScript -->
+        <!-- Diisi otomatis oleh JS -->
       </div>
 
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED DI ATAS CUIT DENGAN TOMBOL X (10 DETIK TIMER) -->
+  <div id="videoPlayerModal" class="modal" style="z-index: 200;">
+    <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi</span>
+        <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed;">
+          ⏳ Tunggu (10s)
+        </button>
+      </div>
+
+      <div id="videoFrameContainer" style="width: 100%; height: 420px; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
+        <!-- iframe video dimasukkan dari JS -->
+      </div>
+
+      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;">
+        Tonton selama 10 detik. Poin +10 Koin akan diberikan saat kamu menekan tombol Tutup di atas.
+      </div>
     </div>
   </div>
 
@@ -443,7 +463,7 @@
       <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
-    <!-- AREA KHUSUS PANEL ADMIN RAHASIA YAN KASMARAN (KUNCI KHUSUS MANTANPERAMAL) -->
+    <!-- AREA KHUSUS PANEL ADMIN RAHASIA (KUNCI KHUSUS MANTANPERAMAL) -->
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
       <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
       <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola link Facebook Reels harian untuk Misi Koin Gratisan.</p>
@@ -789,6 +809,7 @@
     let allPostsCache = [];
     let profilesMap = {};
     let likesStore = {};
+    let userLikedPostsSet = new Set();
     let activeTargetPostId = null;
     let activeCommentPostId = null;
     let isLiveGiftContext = false;
@@ -805,6 +826,9 @@
     let freeCoins = 20;
     let paidCoins = 0;
     let usedPaidCoins = 0;
+
+    let activeVideoSlot = null;
+    let videoTimerInterval = null;
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -834,7 +858,6 @@
       if (pageId === 'pageLive') loadActiveLiveSession();
     }
 
-    /* RESET KOIN HARIAN SETIAP JAM 00:00 WIB */
     function checkDailyCoinReset() {
       const todayDate = new Date().toISOString().split('T')[0];
       const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
@@ -854,7 +877,6 @@
       
       const myIdentifier = currentUser ? currentUser.email : 'mantanperamal@gmail.com';
 
-      // Ambil data profil berdasarkan email
       const { data: profile } = await supabaseClient.from('profiles').select('*').or(`email.eq.${myIdentifier},username.eq.mantanperamal`).single();
       
       if (profile) {
@@ -868,6 +890,7 @@
         usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
       }
 
+      await loadUserLikes();
       await loadFollows();
       updateCoinUI();
       loadPosts();
@@ -876,6 +899,26 @@
       const savedLiveId = localStorage.getItem('cuit_active_live_id');
       if (savedLiveId) {
         switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+      }
+    }
+
+    async function loadUserLikes() {
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
+
+      let query = supabaseClient.from('post_likes').select('post_id');
+      if (currentUser) {
+        query = query.eq('user_id', currentUser.id);
+      } else {
+        query = query.eq('guest_token', guestToken);
+      }
+
+      const { data: likesData } = await query;
+      if (likesData) {
+        userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
       }
     }
 
@@ -1204,6 +1247,7 @@
       const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
       const commentsCount = p.comments_count ?? 0;
       const giftsCoinsCount = p.gifts_count ?? 0;
+      const isLiked = userLikedPostsSet.has(String(p.id));
       
       let authorPoin = 0;
       if (p.user_id && profilesMap[p.user_id] !== undefined) {
@@ -1246,7 +1290,7 @@
           <div class="post-body">${p.content}</div>
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
           <div class="post-footer-actions">
-            <div class="action-chip" onclick="toggleLike('${p.id}')">♡ Suka (${likesCount})</div>
+            <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#6c5ce7; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
             <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
             <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
             <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
@@ -1287,7 +1331,7 @@
         }).subscribe();
     }
 
-    /* === FUNGSI PERBAIKAN TOGGLE LIKE UNIK PERANGKAT === */
+    /* PERBAIKAN LIKE HANYA BISA 1 KALI / DIBATALKAN */
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1295,48 +1339,40 @@
         localStorage.setItem('cuit_guest_token', guestToken);
       }
 
-      const userId = currentUser ? currentUser.id : null;
-
-      let query = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
-      if (userId) {
-        query = query.eq('user_id', userId);
-      } else {
-        query = query.eq('guest_token', guestToken);
-      }
-
-      const { data: existingLike } = await query.maybeSingle();
-      const currentPost = allPostsCache.find(p => String(p.id) === String(postId));
+      const strPostId = String(postId);
+      const isLiked = userLikedPostsSet.has(strPostId);
+      const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
       let currentLikes = (currentPost && currentPost.likes_count) || 0;
 
-      if (existingLike) {
-        // UNLIKE (BATAL SUKA)
-        await supabaseClient.from('post_likes').delete().eq('id', existingLike.id);
+      if (isLiked) {
+        // UNLIKE / BATAL SUKA
+        userLikedPostsSet.delete(strPostId);
         const newLikeCount = Math.max(0, currentLikes - 1);
         if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[postId] = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+        
         loadPosts();
+
+        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
+        if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
+        else delQuery = delQuery.eq('guest_token', guestToken);
+        
+        await delQuery;
         await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+
       } else {
         // LIKE
-        if (freeCoins >= 1) {
-          freeCoins -= 1;
-        } else if (paidCoins >= 1) {
-          paidCoins -= 1;
-          usedPaidCoins += 1;
-        } else {
-          return alert('Saldo Koin Gratisan dan Bank Koin Berbayar kamu habis!');
-        }
-
-        updateCoinUI();
-
-        await supabaseClient.from('post_likes').insert([
-          { post_id: postId, user_id: userId, guest_token: userId ? null : guestToken }
-        ]);
-
+        userLikedPostsSet.add(strPostId);
         const newLikeCount = currentLikes + 1;
         if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[postId] = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+        
         loadPosts();
+
+        await supabaseClient.from('post_likes').insert([
+          { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
+        ]);
+
         await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
       }
     }
@@ -2076,7 +2112,7 @@
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profExp').innerText = `${usedPaidCoins} Poin`;
 
-      // HAK AKSES PANEL ADMIN DIKUNCI HANYA UNTUK mantanperamal@gmail.com
+      // HAK AKSES PANEL ADMIN DIKUNCI KHUSUS MANTANPERAMAL@GMAIL.COM
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
@@ -2109,7 +2145,7 @@
       }
     }
 
-    /* === REELS FB INTEGRASI DATABASE === */
+    /* === MISI REELS FB DENGAN EMBEDDED PLAYER & COUNTDOWN 10 DETIK === */
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
@@ -2136,50 +2172,87 @@
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 1</span>
           ${claimedV1 
             ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-            : `<button onclick="watchReelsVideo('${links.v1}', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+            : `<button onclick="playEmbeddedVideo('${links.v1}', 'v1')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
           }
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 2</span>
           ${claimedV2 
             ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-            : `<button onclick="watchReelsVideo('${links.v2}', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+            : `<button onclick="playEmbeddedVideo('${links.v2}', 'v2')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
           }
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
           <span style="font-weight: 800; font-size: 13px; color: #333;">🎬 Video 3</span>
           ${claimedV3 
             ? `<span style="color: #2ecc71; font-size: 11px; font-weight: 800;">✓ Sudah Diklaim</span>`
-            : `<button onclick="watchReelsVideo('${links.v3}', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
+            : `<button onclick="playEmbeddedVideo('${links.v3}', 'v3')" style="background: #1877f2; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">Tonton & Klaim +10 🪙</button>`
           }
         </div>
       `;
     }
 
-    function watchReelsVideo(targetUrl, videoSlot) {
-      if (!targetUrl || targetUrl === 'https://facebook.com' || targetUrl.trim() === '' || targetUrl === 'null') {
+    function playEmbeddedVideo(targetUrl, slot) {
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
       }
 
-      targetUrl = targetUrl.trim();
-      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-        targetUrl = 'https://' + targetUrl;
+      activeVideoSlot = slot;
+      document.getElementById('reelsModal').style.display = 'none';
+
+      let embedUrl = targetUrl.trim();
+      if (!embedUrl.startsWith('http://') && !embedUrl.startsWith('https://')) {
+        embedUrl = 'https://' + embedUrl;
       }
 
-      const today = new Date().toISOString().split('T')[0];
-      const isClaimed = localStorage.getItem(`cuit_claimed_${videoSlot}_${today}`);
+      const encodedUrl = encodeURIComponent(embedUrl);
+      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
 
-      if (isClaimed) {
-        return alert('Video ini sudah diklaim koinnya hari ini!');
+      const frameContainer = document.getElementById('videoFrameContainer');
+      frameContainer.innerHTML = `<iframe src="${fbEmbedSrc}" width="100%" height="100%" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
+
+      const btnClose = document.getElementById('btnCloseVideo');
+      btnClose.disabled = true;
+      btnClose.style.opacity = '0.5';
+      btnClose.style.cursor = 'not-allowed';
+
+      let secondsLeft = 10;
+      btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+
+      document.getElementById('videoPlayerModal').style.display = 'flex';
+
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
+      videoTimerInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft > 0) {
+          btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+        } else {
+          clearInterval(videoTimerInterval);
+          btnClose.disabled = false;
+          btnClose.style.opacity = '1';
+          btnClose.style.cursor = 'pointer';
+          btnClose.style.background = '#2ecc71';
+          btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+        }
+      }, 1000);
+    }
+
+    function claimVideoRewardAndClose() {
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose.disabled) return;
+
+      document.getElementById('videoPlayerModal').style.display = 'none';
+      document.getElementById('videoFrameContainer').innerHTML = '';
+
+      const today = new Date().toISOString().split('T')[0];
+      if (activeVideoSlot) {
+        localStorage.setItem(`cuit_claimed_${activeVideoSlot}_${today}`, 'true');
       }
 
       freeCoins += 10;
-      localStorage.setItem(`cuit_claimed_${videoSlot}_${today}`, 'true');
       updateCoinUI();
 
-      alert('🎉 Selamat! 10 Koin Gratisan berhasil ditambahkan ke akun kamu.\n\nKlik OK untuk langsung menonton video.');
-
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
       openReelsModal();
     }
 
