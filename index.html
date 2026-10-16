@@ -124,7 +124,7 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
@@ -2237,6 +2237,15 @@
       }
     }
 
+    // FUNGSI PEMBERSIH LINK FACEBOOK OTOMATIS
+    function normalizeFbUrl(url) {
+      if (!url) return '';
+      let clean = url.trim();
+      clean = clean.replace('m.facebook.com', 'www.facebook.com')
+                   .replace('mobile.facebook.com', 'www.facebook.com');
+      return clean;
+    }
+
     // MISI REELS FB 10 SLOT (BISA DIPUTAR BERULANG)
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
@@ -2280,16 +2289,33 @@
       activeVideoSlot = slot;
       document.getElementById('reelsModal').style.display = 'none';
 
-      let embedUrl = targetUrl.trim();
-      if (!embedUrl.startsWith('http://') && !embedUrl.startsWith('https://')) {
-        embedUrl = 'https://' + embedUrl;
+      let rawUrl = normalizeFbUrl(targetUrl);
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = 'https://' + rawUrl;
       }
 
-      const encodedUrl = encodeURIComponent(embedUrl);
-      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
-
       const frameContainer = document.getElementById('videoFrameContainer');
-      frameContainer.innerHTML = `<iframe src="${fbEmbedSrc}" width="100%" height="100%" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
+      const isDirectVideo = rawUrl.match(/\.(mp4|webm|ogg)($|\?)/i);
+
+      if (isDirectVideo) {
+        frameContainer.innerHTML = `
+          <video src="${rawUrl}" autoplay controls playsinline style="width:100%; height:100%; object-fit:contain; border-radius:12px;"></video>
+        `;
+      } else {
+        const encodedUrl = encodeURIComponent(rawUrl);
+        const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+
+        frameContainer.innerHTML = `
+          <div style="width:100%; height:100%; position:relative; display:flex; flex-direction:column;">
+            <iframe src="${fbEmbedSrc}" width="100%" height="82%" style="border:none;overflow:hidden;border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            <div style="height:18%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; padding:4px;">
+              <button onclick="window.open('${rawUrl}', '_blank')" style="background:#1877f2; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer;">
+                🔗 Buka & Nonton Video di FB
+              </button>
+            </div>
+          </div>
+        `;
+      }
 
       const btnClose = document.getElementById('btnCloseVideo');
       btnClose.disabled = true;
@@ -2316,7 +2342,6 @@
         }
       }, 1000);
     }
-    
 
     function claimVideoRewardAndClose() {
       const btnClose = document.getElementById('btnCloseVideo');
@@ -2366,7 +2391,9 @@
       try {
         for (let i = 1; i <= 10; i++) {
           const inputElem = document.getElementById(`adminVideo${i}`);
-          const urlVal = inputElem ? inputElem.value.trim() : '';
+          let urlVal = inputElem ? inputElem.value.trim() : '';
+
+          urlVal = normalizeFbUrl(urlVal);
 
           await supabaseClient
             .from('reels_missions')
