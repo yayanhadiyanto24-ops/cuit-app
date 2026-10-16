@@ -2286,77 +2286,89 @@
       container.innerHTML = html;
     }
 
-    function playEmbeddedVideo(targetUrl, slot) {
-      if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
-        return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
-      }
+    // FUNGSI PEMUTAR VIDEO DI DALAM APLIKASI (TANPA BUKA TAB BARU)
+function playEmbeddedVideo(targetUrl, slot) {
+  if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
+    return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
+  }
 
-      activeVideoSlot = slot;
-      document.getElementById('reelsModal').style.display = 'none';
+  activeVideoSlot = slot;
 
-      let rawUrl = normalizeFbUrl(targetUrl);
-      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
-        rawUrl = 'https://' + rawUrl;
-      }
+  const reelsModal = document.getElementById('reelsModal');
+  if (reelsModal) reelsModal.style.display = 'none';
 
-      const frameContainer = document.getElementById('videoFrameContainer');
-      const encodedUrl = encodeURIComponent(rawUrl);
-      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+  let rawUrl = normalizeFbUrl(targetUrl);
+  if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+    rawUrl = 'https://' + rawUrl;
+  }
 
-      // Tampilkan iframe dan tombol aktivasi timer
-      frameContainer.innerHTML = `
-        <div style="width:100%; height:100%; position:relative; display:flex; flex-direction:column;">
-          <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none;overflow:hidden;border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-          <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; gap:8px; padding:4px;">
-            <button id="btnStartWatching" onclick="startVideoTimer('${rawUrl}')" style="background:#2ecc71; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer;">
-              ▶️ Mulai Tonton Video
-            </button>
-          </div>
+  const frameContainer = document.getElementById('videoFrameContainer');
+  const encodedUrl = encodeURIComponent(rawUrl);
+  const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+
+  if (frameContainer) {
+    frameContainer.innerHTML = `
+      <div style="width:100%; height:100%; display:flex; flex-direction:column;">
+        <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none; overflow:hidden; border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+        <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; padding:6px;">
+          <button id="btnStartWatching" onclick="startVideoTimer()" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
+            ▶️ Mulai Putar & Jalankan Timer
+          </button>
         </div>
-      `;
+      </div>
+    `;
+  }
 
-      const btnClose = document.getElementById('btnCloseVideo');
-      btnClose.disabled = true;
-      btnClose.style.opacity = '0.5';
-      btnClose.style.cursor = 'not-allowed';
-      btnClose.innerText = `⏳ Tunggu (10s)`;
+  const btnClose = document.getElementById('btnCloseVideo');
+  if (btnClose) {
+    btnClose.disabled = true;
+    btnClose.style.opacity = '0.5';
+    btnClose.style.cursor = 'not-allowed';
+    btnClose.style.background = '#e74c3c';
+    btnClose.innerText = '⏳ Tunggu (10s)';
+  }
 
-      // Hentikan interval timer lama jika masih ada
-      if (videoTimerInterval) clearInterval(videoTimerInterval);
+  if (videoTimerInterval) {
+    clearInterval(videoTimerInterval);
+    videoTimerInterval = null;
+  }
 
-      document.getElementById('videoPlayerModal').style.display = 'flex';
-    }
+  const playerModal = document.getElementById('videoPlayerModal');
+  if (playerModal) playerModal.style.display = 'flex';
+}
 
-    // FUNGSI KHUSUS UNTUK MEMULAI HITUNG MUNDUR SAAT TOMBOL DITEKAN
-    function startVideoTimer(rawUrl) {
-      const btnStart = document.getElementById('btnStartWatching');
-      if (btnStart) {
-        btnStart.innerText = '🎬 Video Sedang Diputar...';
-        btnStart.style.background = '#34495e';
-        btnStart.disabled = true;
+// FUNGSI TIMER BERJALAN DI DALAM MODAL APLIKASI
+function startVideoTimer() {
+  const btnStart = document.getElementById('btnStartWatching');
+  if (btnStart) {
+    btnStart.innerText = '🎬 Video Sedang Diputar...';
+    btnStart.style.background = '#34495e';
+    btnStart.disabled = true;
+  }
+
+  let secondsLeft = 10;
+  const btnClose = document.getElementById('btnCloseVideo');
+
+  if (videoTimerInterval) clearInterval(videoTimerInterval);
+
+  videoTimerInterval = setInterval(() => {
+    secondsLeft--;
+    if (btnClose && secondsLeft > 0) {
+      btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+    } else {
+      clearInterval(videoTimerInterval);
+      videoTimerInterval = null;
+      if (btnClose) {
+        btnClose.disabled = false;
+        btnClose.style.opacity = '1';
+        btnClose.style.cursor = 'pointer';
+        btnClose.style.background = '#2ecc71';
+        btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
       }
-
-      // Jika iframe diblokir, buka juga link ke tab baru sebagai opsi cadangan
-      window.open(rawUrl, '_blank');
-
-      let secondsLeft = 10;
-      const btnClose = document.getElementById('btnCloseVideo');
-
-      if (videoTimerInterval) clearInterval(videoTimerInterval);
-      videoTimerInterval = setInterval(() => {
-        secondsLeft--;
-        if (secondsLeft > 0) {
-          btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
-        } else {
-          clearInterval(videoTimerInterval);
-          btnClose.disabled = false;
-          btnClose.style.opacity = '1';
-          btnClose.style.cursor = 'pointer';
-          btnClose.style.background = '#2ecc71';
-          btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
-        }
-      }, 1000);
     }
+  }, 1000);
+}
+
 
     function claimVideoRewardAndClose() {
       const btnClose = document.getElementById('btnCloseVideo');
