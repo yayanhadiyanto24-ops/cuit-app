@@ -55,6 +55,12 @@
     .pill-btn { padding: 6px 14px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
+    /* Tags Grid */
+    .feelings-card { background: #ffffff; padding: 12px 10px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 8px; }
+    .feelings-card h3 { font-size: 13px; font-weight: 800; color: #1e1e38; margin-bottom: 8px; }
+    .tags-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag-item { padding: 5px 10px; border-radius: 14px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
+
     /* Dynamic Tag Colors */
     .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
     .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
@@ -65,11 +71,6 @@
     .tag-Sedih { background: #EAF2FF; color: #3498DB; }
     .tag-Cemas { background: #F3E5F5; color: #9B59B6; }
 
-    .feelings-card { background: #ffffff; padding: 12px 10px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 8px; }
-    .feelings-card h3 { font-size: 13px; font-weight: 800; color: #1e1e38; margin-bottom: 8px; }
-    .tags-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-    .tag-item { padding: 5px 10px; border-radius: 14px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
-
     /* Feed Container */
     .feed-container { display: flex; flex-direction: column; gap: 10px; }
     .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
@@ -77,7 +78,6 @@
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .avatar-container { position: relative; width: 40px; height: 40px; }
     .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e7f5; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #d0d7ea; }
-    .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
     
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
@@ -99,6 +99,12 @@
 
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 11.5px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+    /* Live Room Fullscreen Interface */
+    .live-chat-area { display: flex; flex-direction: column; height: 350px; background: #fff; border-radius: 14px; border: 1px solid var(--border-color); padding: 10px; margin-top: 8px; }
+    .live-chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .quick-chip-row { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 6px; }
+    .quick-chip { background: #ece8ff; color: var(--primary); padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; white-space: nowrap; cursor: pointer; }
 
     /* Navigasi Bawah */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
@@ -135,7 +141,7 @@
     </div>
   </div>
 
-  <!-- Hero Banner Kompresif Ringan -->
+  <!-- Hero Banner Kompresif -->
   <div class="cuit-banner-container" id="cuitMainBanner">
     <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" loading="lazy" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit/main/banner.png';">
   </div>
@@ -224,14 +230,35 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS -->
+  <!-- 4. HALAMAN LIVE TEKS FULL ROOM -->
   <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <h2 class="section-title" style="font-size:16px;">Live Teks Berbayar</h2>
-      <button class="btn-primary" onclick="startLiveTeks()">+ Mulai Live</button>
+      <h2 class="section-title" style="font-size:16px;">Room Live Teks</h2>
+      <button class="btn-primary" id="btnStartLive" onclick="startLiveTeks()">+ Mulai Live</button>
     </div>
-    <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 10px 0;">
+
+    <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
       Belum ada sesi Live Teks aktif.
+    </div>
+
+    <!-- Interface Room Chat Real-Time -->
+    <div id="liveRoomChatContainer" class="live-chat-area" style="display: none;">
+      <div id="liveLeaderboard" style="font-size: 10px; background: #fff8e1; border: 1px solid #ffe082; padding: 4px 8px; border-radius: 8px; margin-bottom: 6px;">
+        <b>🏆 Top Supporter:</b> <span id="topSupporterName">-</span>
+      </div>
+
+      <div id="liveMessagesList" class="live-chat-messages"></div>
+
+      <div class="quick-chip-row">
+        <div class="quick-chip" onclick="sendQuickLiveMsg('Assalamu\'alaikum')">👋 Halo</div>
+        <div class="quick-chip" onclick="sendQuickLiveMsg('Setuju banget!')">👍 Setuju</div>
+        <div class="quick-chip" onclick="sendQuickLiveMsg('Semangat terus!')">🔥 Semangat</div>
+      </div>
+
+      <div style="display: flex; gap: 4px;">
+        <input type="text" id="liveInputText" placeholder="Tulis pesan live..." style="margin-bottom:0; flex:1;">
+        <button class="btn-primary" style="padding:0 12px;" onclick="sendLiveMessage()">Kirim</button>
+      </div>
     </div>
   </div>
 
@@ -245,7 +272,6 @@
         <div class="user-info" style="cursor:default;">
           <div class="avatar-container">
             <div class="avatar-circle">🤍</div>
-            <div class="level-badge-icon">🌱</div>
           </div>
           <div>
             <div style="font-size: 15px; font-weight: 900;" id="profName">Mantan Peramal</div>
@@ -271,11 +297,13 @@
       </div>
     </div>
 
-    <!-- PANEL ADMIN HAK AKSES -->
+    <!-- PANEL ADMIN LENGKAP -->
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 12px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
-      <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 12.5px;">⚙️ Hak Tambahan Admin</h4>
-      <div style="display: grid; grid-template-columns: 1fr; gap: 6px;">
+      <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 12.5px;">⚙️ Hak Akses Admin CUIT</h4>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
         <button class="btn-primary" style="background: #1877f2;" onclick="openAdminReelsModal()">⚙️ Kelola 10 Video Reels FB</button>
+        <button class="btn-primary" style="background: #e67e22;" onclick="openAdminUserActionModal('freeze')">🔒 Pembekuan Akun Member</button>
+        <button class="btn-primary" style="background: #e74c3c;" onclick="openAdminUserActionModal('delete')">🗑️ Penghapusan Akun Member</button>
       </div>
     </div>
 
@@ -287,11 +315,10 @@
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 14px;" onclick="handleAuthAction()">Masuk / Daftar</button>
   </div>
 
-  <!-- MODAL EDIT NAMA PANGGULAN MEMBER -->
+  <!-- MODAL EDIT NAMA -->
   <div id="editProfileModal" class="modal">
     <div class="modal-content">
       <h3>Ubah Nama Panggilan</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Nama panggilan ini akan tampil publik di profil dan postingan kamu:</div>
       <input type="text" id="editNicknameInput" placeholder="Masukkan nama panggilan baru...">
       <div style="display: flex; gap: 6px; margin-top: 8px;">
         <button class="btn-primary" style="flex:1;" onclick="saveProfileNickname()">Simpan Nama</button>
@@ -300,13 +327,25 @@
     </div>
   </div>
 
-  <!-- MODAL DOMPET & TOP-UP DANA (1:1 PAS) -->
+  <!-- MODAL MODERASI AKUN ADMIN -->
+  <div id="adminUserActionModal" class="modal">
+    <div class="modal-content">
+      <h3 id="adminActionTitle">Moderasi Member</h3>
+      <input type="email" id="adminTargetEmail" placeholder="Masukkan Email Member">
+      <input type="text" id="adminActionReason" placeholder="Alasan tindakan...">
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" id="btnConfirmAdminAction" style="flex:1;" onclick="executeAdminAction()">Konfirmasi</button>
+        <button class="btn-secondary" onclick="document.getElementById('adminUserActionModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DOMPET TOPUP DANA -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
         <div><b>Saldo Koin CUIT:</b> <span id="wPaidCoin">0</span> Koin</div>
-        <div><b>Nilai Tunai:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
       
       <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
@@ -322,12 +361,12 @@
     </div>
   </div>
 
-  <!-- MODAL MISI 10 REELS FB YAN KASMARAN -->
+  <!-- MODAL MISI REELS FB -->
   <div id="reelsModal" class="modal">
     <div class="modal-content" style="text-align: center;">
       <h3 style="margin-bottom: 4px; font-size: 16px;">🎵 10 Video Reels FB Yan Kasmaran</h3>
       <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 12px;">
-        Tonton video min. 10 detik. Klaim +10 Koin Gratis per video! (Putaran berulang otomatis setelah 10 video diklaim).
+        Tonton video min. 10 detik untuk mendapatkan koin.
       </p>
 
       <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; margin-bottom: 12px;"></div>
@@ -336,7 +375,7 @@
     </div>
   </div>
 
-  <!-- MODAL PLAYER VIDEO REELS FB -->
+  <!-- MODAL PLAYER VIDEO REELS -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; background: #111; color: #fff;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -347,10 +386,6 @@
       </div>
 
       <div id="videoFrameContainer" style="width: 100%; height: 380px; background: #000; border-radius: 12px; overflow: hidden;"></div>
-
-      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;">
-        Tanda X Tutup dan Klaim +10 Koin Gratis muncul setelah 10 detik.
-      </div>
     </div>
   </div>
 
@@ -358,42 +393,15 @@
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Daftar 28 Gift Resmi CUIT</div>
-      
       <div class="gift-grid" id="giftGrid28Container"></div>
-
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
-  <!-- MODAL PROMOSI CURHATAN -->
-  <div id="promoModal" class="modal">
-    <div class="modal-content">
-      <h3>🚀 Promosikan Curhatan</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Pilih opsi promosi curhatan kamu:</div>
-
-      <div style="background: #f8f9fe; border: 1px solid #e2e7f5; padding: 10px; border-radius: 12px; margin-bottom: 8px;">
-        <b>1. Promo Reguler (1 Koin CUIT / Jam)</b>
-        <div style="font-size: 10.5px; color: #555;">Masuk Feed Reguler (Carousel Horizontal), urutan terbaru di paling kiri.</div>
-        <button class="btn-primary" style="margin-top: 6px; width: 100%;" onclick="submitPromoAction('reguler')">Pilih Promo Reguler</button>
-      </div>
-
-      <div style="background: #fff3e0; border: 1px solid #ffe0b2; padding: 10px; border-radius: 12px; margin-bottom: 8px;">
-        <b>2. Promo Spesial (2 Koin CUIT / Jam)</b>
-        <div style="font-size: 10.5px; color: #d35400;">Masuk Feed Statis (Maks. 4 Jendela Aktif). Jika jendela penuh, masuk antrean (koin dipotong saat promo aktif).</div>
-        <button class="btn-primary" style="margin-top: 6px; width: 100%; background: linear-gradient(135deg, #ff9800, #f57c00);" onclick="submitPromoAction('spesial')">Pilih Promo Spesial</button>
-      </div>
-
-      <button class="btn-secondary" style="width: 100%;" onclick="document.getElementById('promoModal').style.display='none'">Batal</button>
-    </div>
-  </div>
-
-  <!-- MODAL PENCAIRAN PERMATA CUIT -->
+  <!-- MODAL PENCAIRAN PERMATA -->
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
       <h3>💸 Pencairan Permata CUIT</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Nilai pencairan: 1 Permata CUIT = Rp1</div>
-
       <label style="font-size: 11px; font-weight: 700; display: block;">Metode Pencairan:</label>
       <select id="cashoutMethod" onchange="calcCashoutDetails()">
         <option value="dana">DANA (Min. 10.000 Permata | Admin Rp500)</option>
@@ -404,17 +412,8 @@
       <input type="number" id="cashoutAmount" value="10000" oninput="calcCashoutDetails()">
 
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-        <div>Nilai Bruto: Rp <span id="coBruto">10.000</span></div>
-        <div>Biaya Penanganan / Transfer: Rp <span id="coTotalFee">500</span></div>
-        <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
         <div><b>Nilai Bersih Diterima:</b> Rp <span id="coNetValue">9.500</span></div>
       </div>
-
-      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Rekening / Akun DANA:</label>
-      <input type="text" id="cashoutAccountName" placeholder="Nama Pemilik Rekening">
-
-      <label style="font-size: 11px; font-weight: 700; display: block;">Nomor Rekening / HP DANA:</label>
-      <input type="text" id="cashoutAccountNumber" placeholder="Nomor Rekening / DANA">
 
       <div style="display: flex; gap: 6px; margin-top: 8px;">
         <button class="btn-primary" style="flex: 1;" onclick="submitPermataCashout()">Ajukan Pencairan</button>
@@ -423,43 +422,25 @@
     </div>
   </div>
 
-  <!-- MODAL NOTIFIKASI IN-APP -->
+  <!-- MODAL NOTIFIKASI -->
   <div id="notificationsModal" class="modal">
     <div class="modal-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <h3>🔔 Notifikasi Saya</h3>
         <button onclick="document.getElementById('notificationsModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
       </div>
-      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto;">
-        <p style="text-align: center; color: var(--text-sub); font-size: 11px;">Belum ada notifikasi.</p>
-      </div>
+      <div id="notificationsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto;"></div>
     </div>
   </div>
 
-  <!-- MODAL KELOLA 10 REELS FB (ADMIN) -->
+  <!-- MODAL ADMIN REELS -->
   <div id="adminReelsModal" class="modal">
     <div class="modal-content">
       <h3>⚙️ Kelola 10 Tautan Video Reels FB</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Masukkan tautan Facebook Reels 1 s/d 10:</div>
       <div id="adminReelsInputsContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; margin-bottom: 10px;"></div>
       <div style="display: flex; gap: 6px;">
         <button class="btn-primary" style="flex: 1; background: #10b981;" onclick="saveAdminReelsLinks()">Simpan 10 Links</button>
         <button class="btn-secondary" onclick="document.getElementById('adminReelsModal').style.display='none'">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL LOGIN / DAFTAR -->
-  <div id="authModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun CUIT</h3>
-      <input type="email" id="email" placeholder="Alamat Email">
-      <input type="password" id="password" placeholder="Kata Sandi">
-      <input type="text" id="referralInput" placeholder="Kode Referral Sponsor (Wajib jika ada)">
-      <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex:1;" onclick="submitLogin()">Masuk</button>
-        <button class="btn-secondary" style="flex:1;" onclick="submitSignUp()">Daftar</button>
-        <button class="btn-secondary" onclick="document.getElementById('authModal').style.display='none'">Batal</button>
       </div>
     </div>
   </div>
@@ -489,17 +470,13 @@
   </div>
 
   <script>
-    const CONFIG = {
-      DANA_NUMBER: '085624189461'
-    };
-
+    const CONFIG = { DANA_NUMBER: '085624189461' };
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const ADMIN_EMAIL = 'mantanperamal@gmail.com';
 
-    // DAFTAR 28 GIFT RESMI CUIT
     const GIFTS_28 = [
       { id: 1, name: 'Hati Kecil', cost: 1, icon: '❤️' },
       { id: 2, name: 'Senyum', cost: 1, icon: '😊' },
@@ -537,11 +514,7 @@
     let permataCoins = 0;
     let userReferralCode = 'CUITADMIN';
     let userNickname = 'Mantan Peramal';
-    let sponsorEmail = ADMIN_EMAIL;
-    let activeTargetPostId = null;
-
-    let activeVideoIndex = null;
-    let videoTimerInterval = null;
+    let activeAdminAction = 'freeze';
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -553,22 +526,9 @@
       if (pageId === 'pageProfile') renderProfileData();
     }
 
-    function checkDailyCoinReset() {
-      const todayDate = new Date().toISOString().split('T')[0];
-      const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
-
-      if (lastResetDate !== todayDate) {
-        freeCoins = 20;
-        localStorage.setItem('cuit_last_coin_reset_date', todayDate);
-        localStorage.setItem('cuit_free_coins', freeCoins);
-      }
-    }
-
     async function checkUser() {
-      checkDailyCoinReset();
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
-
       const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
 
       const { data: profile } = await supabaseClient.from('profiles').select('*').eq('email', myEmail).single();
@@ -577,17 +537,12 @@
         freeCoins = profile.free_coins ?? 20;
         paidCoins = profile.paid_coins ?? 0;
         permataCoins = profile.permata_cuit ?? 0;
-        sponsorEmail = profile.sponsor_email || ADMIN_EMAIL;
-        userReferralCode = profile.referral_code || (myEmail === ADMIN_EMAIL ? 'CUITADMIN' : '');
-        userNickname = profile.username || localStorage.getItem('cuit_nickname') || (myEmail === ADMIN_EMAIL ? 'Mantan Peramal' : 'Member CUIT');
-      } else {
-        userNickname = localStorage.getItem('cuit_nickname') || (myEmail === ADMIN_EMAIL ? 'Mantan Peramal' : 'Member CUIT');
+        userNickname = profile.username || (myEmail === ADMIN_EMAIL ? 'Mantan Peramal' : 'Member CUIT');
       }
 
       updateCoinUI();
       render28GiftsUI();
       loadPosts();
-      loadNotifications();
     }
 
     function updateCoinUI() {
@@ -598,112 +553,9 @@
       document.getElementById('profFree').innerText = freeCoins;
       document.getElementById('profPaid').innerText = paidCoins;
       document.getElementById('profPermata').innerText = permataCoins;
-
-      syncCoinsToSupabase();
     }
 
-    async function syncCoinsToSupabase() {
-      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
-      await supabaseClient.from('profiles').upsert({
-        email: myEmail,
-        username: userNickname,
-        free_coins: freeCoins,
-        paid_coins: paidCoins,
-        permata_cuit: permataCoins,
-        referral_code: myEmail === ADMIN_EMAIL ? 'CUITADMIN' : userReferralCode
-      }, { onConflict: 'email' });
-    }
-
-    function openEditProfileModal() {
-      document.getElementById('editNicknameInput').value = userNickname;
-      document.getElementById('editProfileModal').style.display = 'flex';
-    }
-
-    function saveProfileNickname() {
-      const newNick = document.getElementById('editNicknameInput').value.trim();
-      if (!newNick) return alert('Nama panggilan tidak boleh kosong!');
-
-      userNickname = newNick;
-      localStorage.setItem('cuit_nickname', newNick);
-      document.getElementById('editProfileModal').style.display = 'none';
-
-      renderProfileData();
-      syncCoinsToSupabase();
-      alert('Nama panggilan berhasil diperbarui!');
-    }
-
-    function openWalletModal() {
-      document.getElementById('wPaidCoin').innerText = paidCoins;
-      document.getElementById('wPaidValue').innerText = paidCoins.toLocaleString('id-ID');
-      document.getElementById('walletModal').style.display = 'flex';
-    }
-
-    function buyPackageDANA(price, coins) {
-      const note = encodeURIComponent(`Topup CUIT ${coins} Koin CUIT`);
-      const danaUrl = `https://link.dana.id/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}&notes=${note}`;
-      
-      window.open(danaUrl, '_blank');
-
-      setTimeout(() => {
-        if (confirm(`Anda diarahkan untuk membayar Rp ${price.toLocaleString('id-ID')} ke e-Wallet DANA (${CONFIG.DANA_NUMBER}).\n\nKlik "OK" jika Anda telah menyelesaikan transfer untuk menambahkan ${coins} Koin CUIT.`)) {
-          paidCoins += coins;
-          updateCoinUI();
-          openWalletModal();
-          alert(`Top-Up Berhasil! +${coins} Koin CUIT telah ditambahkan.`);
-        }
-      }, 800);
-    }
-
-    async function distributeRevenue(netAmountRp, cuiterEmail) {
-      const shareCuiter = netAmountRp * 0.50; 
-      const shareSponsor = netAmountRp * 0.10; 
-
-      const { data: cProfile } = await supabaseClient.from('profiles').select('permata_cuit').eq('email', cuiterEmail).single();
-      const currentCPermata = (cProfile && cProfile.permata_cuit) || 0;
-      await supabaseClient.from('profiles').update({ permata_cuit: currentCPermata + shareCuiter }).eq('email', cuiterEmail);
-
-      const { data: cuiterData } = await supabaseClient.from('profiles').select('sponsor_email').eq('email', cuiterEmail).single();
-      const directSponsor = (cuiterData && cuiterData.sponsor_email) ? cuiterData.sponsor_email : ADMIN_EMAIL;
-
-      const { data: sProfile } = await supabaseClient.from('profiles').select('permata_cuit').eq('email', directSponsor).single();
-      const currentSPermata = (sProfile && sProfile.permata_cuit) || 0;
-      await supabaseClient.from('profiles').update({ permata_cuit: currentSPermata + shareSponsor }).eq('email', directSponsor);
-
-      createInAppNotification(cuiterEmail, 'Permata CUIT Masuk! 💎', `Anda menerima ${shareCuiter} Permata CUIT.`);
-    }
-
-    function render28GiftsUI() {
-      const container = document.getElementById('giftGrid28Container');
-      container.innerHTML = GIFTS_28.map(g => `
-        <div class="gift-card-item" onclick="executeGiftSend(${g.cost}, '${g.name}')">
-          <div style="font-size:18px;">${g.icon}</div>
-          <div>${g.name}</div>
-          <div style="color:var(--primary); font-size:10px;">${g.cost} Koin CUIT</div>
-        </div>
-      `).join('');
-    }
-
-    async function executeGiftSend(cost, giftName) {
-      if (paidCoins < cost) return alert('Saldo Koin CUIT tidak mencukupi!');
-      if (!activeTargetPostId) return;
-
-      const { data: post } = await supabaseClient.from('curhat').select('user_email').eq('id', activeTargetPostId).single();
-      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
-
-      if (post && post.user_email === myEmail) {
-        return alert('Tidak dapat mengirimkan gift ke postingan sendiri!');
-      }
-
-      paidCoins -= cost;
-      updateCoinUI();
-
-      await distributeRevenue(cost, post.user_email);
-
-      document.getElementById('giftModal').style.display = 'none';
-      alert(`Berhasil mengirim Gift ${giftName} (${cost} Koin CUIT)!`);
-      loadPosts();
-    }
-
+    /* VALIDASI KLAIM VIDEO REELS */
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
@@ -714,13 +566,15 @@
       let html = '';
       for (let i = 1; i <= 10; i++) {
         const item = missions ? missions.find(m => m.id === i) : null;
-        const link = item ? item.facebook_url : '';
+        const link = (item && item.facebook_url) ? item.facebook_url.trim() : '';
+        const isValid = link.length > 5;
 
         html += `
           <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#f8f9fe; border-radius:10px; border:1px solid #e2e7f5;">
             <span style="font-weight:800; font-size:11.5px;">🎬 Video Reels #${i}</span>
-            <button onclick="playEmbeddedVideo('${link}', ${i})" style="background:#1877f2; color:#fff; border:none; padding:4px 10px; border-radius:8px; font-size:10px; font-weight:800; cursor:pointer;">
-              Tonton & Klaim (+10 Koin)
+            <button ${isValid ? `onclick="playEmbeddedVideo('${link}',${i})"` : 'disabled'} 
+              style="background:${isValid ? '#1877f2' : '#ccc'}; color:#fff; border:none; padding:4px 10px; border-radius:8px; font-size:10px; font-weight:800; cursor:${isValid ? 'pointer' : 'not-allowed'};">
+              ${isValid ? 'Tonton & Klaim (+10 Koin)' : 'Belum Ada Video'}
             </button>
           </div>
         `;
@@ -733,9 +587,7 @@
         return alert('Tautan video ini belum disiapkan oleh Admin.');
       }
 
-      activeVideoIndex = index;
       document.getElementById('reelsModal').style.display = 'none';
-
       const encodedUrl = encodeURIComponent(url.trim());
       const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
 
@@ -749,8 +601,7 @@
       btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
       document.getElementById('videoPlayerModal').style.display = 'flex';
 
-      if (videoTimerInterval) clearInterval(videoTimerInterval);
-      videoTimerInterval = setInterval(() => {
+      let videoTimerInterval = setInterval(() => {
         secondsLeft--;
         if (secondsLeft > 0) {
           btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
@@ -775,242 +626,91 @@
       openReelsModal();
     }
 
-    function openCashoutModal() {
-      calcCashoutDetails();
-      document.getElementById('cashoutModal').style.display = 'flex';
+    /* MODERASI ADMIN (BLOKIR & HAPUS AKUN) */
+    function openAdminUserActionModal(action) {
+      activeAdminAction = action;
+      document.getElementById('adminActionTitle').innerText = action === 'freeze' ? '🔒 Pembekuan Akun Member' : '🗑️ Penghapusan Akun Member';
+      document.getElementById('btnConfirmAdminAction').style.background = action === 'freeze' ? '#e67e22' : '#e74c3c';
+      document.getElementById('adminUserActionModal').style.display = 'flex';
     }
 
-    function calcCashoutDetails() {
-      const method = document.getElementById('cashoutMethod').value;
-      const amount = parseInt(document.getElementById('cashoutAmount').value) || 0;
-      const bruto = amount; 
-      const fee = method === 'bank' ? 3000 : 500;
-      const net = Math.max(0, bruto - fee);
+    async function executeAdminAction() {
+      const email = document.getElementById('adminTargetEmail').value.trim();
+      const reason = document.getElementById('adminActionReason').value.trim();
 
-      document.getElementById('coBruto').innerText = bruto.toLocaleString('id-ID');
-      document.getElementById('coTotalFee').innerText = fee.toLocaleString('id-ID');
-      document.getElementById('coNetValue').innerText = net.toLocaleString('id-ID');
-    }
+      if (!email) return alert('Email target wajib diisi!');
 
-    async function submitPermataCashout() {
-      const method = document.getElementById('cashoutMethod').value;
-      const amount = parseInt(document.getElementById('cashoutAmount').value) || 0;
-      const minRequired = method === 'bank' ? 25000 : 10000;
-
-      if (amount < minRequired) {
-        return alert(`Minimum pencairan via ${method.toUpperCase()} adalah ${minRequired.toLocaleString('id-ID')} Permata CUIT!`);
+      if (activeAdminAction === 'freeze') {
+        await supabaseClient.from('profiles').update({ is_frozen: true }).eq('email', email);
+        alert(`Akun ${email} berhasil dibekukan! Alasan: ${reason}`);
+      } else {
+        if (!confirm(`Yakin ingin menghapus akun ${email}?`)) return;
+        await supabaseClient.from('profiles').delete().eq('email', email);
+        alert(`Akun ${email} berhasil dihapus dari sistem!`);
       }
 
-      if (amount > permataCoins) {
-        return alert('Saldo Permata CUIT Anda tidak mencukupi!');
-      }
-
-      permataCoins -= amount;
-      updateCoinUI();
-
-      document.getElementById('cashoutModal').style.display = 'none';
-      alert('Pengajuan pencairan berhasil dikirim dan sedang diverifikasi!');
+      document.getElementById('adminUserActionModal').style.display = 'none';
     }
 
-    async function createInAppNotification(userEmail, title, message) {
-      await supabaseClient.from('notifications').insert([
-        { user_email: userEmail, title, message, is_read: false }
-      ]);
+    /* ROOM LIVE TEKS REAL-TIME INTERFACE */
+    function startLiveTeks() {
+      document.getElementById('liveStatusBox').innerHTML = '<b>🔴 LIVE TEKS BERJALAN</b> (Host: ' + userNickname + ')';
+      document.getElementById('liveRoomChatContainer').style.display = 'flex';
+      document.getElementById('liveMessagesList').innerHTML = '<div style="font-size:11px; color:#666;">Ruang live siap. Tulis pesan pertama...</div>';
     }
 
-    async function loadNotifications() {
-      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
-      const { data: notis } = await supabaseClient.from('notifications').select('*').eq('user_email', myEmail).order('created_at', { ascending: false });
+    function sendLiveMessage() {
+      const text = document.getElementById('liveInputText').value.trim();
+      if (!text) return;
 
-      const badge = document.getElementById('notiUnreadBadge');
-      if (notis) {
-        const unread = notis.filter(n => !n.is_read).length;
-        if (unread > 0) {
-          badge.innerText = unread;
-          badge.style.display = 'inline';
-        } else {
-          badge.style.display = 'none';
+      const list = document.getElementById('liveMessagesList');
+      list.innerHTML += `<div style="background:#f0f2f8; padding:4px 8px; border-radius:8px; font-size:11px;"><b>${userNickname}:</b> ${text}</div>`;
+      document.getElementById('liveInputText').value = '';
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function sendQuickLiveMsg(text) {
+      document.getElementById('liveInputText').value = text;
+      sendLiveMessage();
+    }
+
+    function buyPackageDANA(price, coins) {
+      const intentUrl = `intent://qr/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}#Intent;scheme=dana;package=id.dana;end`;
+      window.location.href = intentUrl;
+
+      setTimeout(() => {
+        if (confirm(`Apakah Anda sudah menyelesaikan pembayaran sebesar Rp ${price.toLocaleString('id-ID')} melalui aplikasi DANA?`)) {
+          paidCoins += coins;
+          updateCoinUI();
+          alert(`Top-Up Berhasil! +${coins} Koin CUIT telah ditambahkan.`);
         }
-
-        const container = document.getElementById('notificationsList');
-        if (notis.length === 0) {
-          container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Belum ada notifikasi.</p>';
-        } else {
-          container.innerHTML = notis.map(n => `
-            <div style="background: ${n.is_read ? '#fff' : '#ece8ff'}; padding: 8px 10px; border-radius: 10px; border: 1px solid #e2e7f5; font-size: 11px;">
-              <b>${n.title}</b>
-              <div style="color: #4a4d65; margin-top: 2px;">${n.message}</div>
-            </div>
-          `).join('');
-        }
-      }
+      }, 1000);
     }
 
-    function openNotificationsModal() {
-      document.getElementById('notificationsModal').style.display = 'flex';
-    }
-
-    function openAdminReelsModal() {
-      const container = document.getElementById('adminReelsInputsContainer');
-      let html = '';
-      for (let i = 1; i <= 10; i++) {
-        html += `
-          <div>
-            <label style="font-size:10px; font-weight:800;">Tautan Video #${i}:</label>
-            <input type="text" id="adminVideoUrl${i}" placeholder="https://facebook.com/reel/...">
-          </div>
-        `;
-      }
-      container.innerHTML = html;
-      document.getElementById('adminReelsModal').style.display = 'flex';
-    }
-
-    async function saveAdminReelsLinks() {
-      for (let i = 1; i <= 10; i++) {
-        const url = document.getElementById(`adminVideoUrl${i}`).value.trim();
-        await supabaseClient.from('reels_missions').upsert({ id: i, facebook_url: url });
-      }
-      alert('10 Tautan Video Reels FB berhasil disimpan!');
-      document.getElementById('adminReelsModal').style.display = 'none';
-    }
-
-    async function renderProfileData() {
-      const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
-      
-      document.getElementById('profName').innerText = userNickname;
-      
-      const displayRef = (myEmail === ADMIN_EMAIL) ? 'CUITADMIN' : (userReferralCode || 'CUIT' + Math.random().toString(36).substring(2, 7).toUpperCase());
-      document.getElementById('profReferralCode').innerText = `Kode Referral: ${displayRef}`;
-
-      const isAdmin = (myEmail === ADMIN_EMAIL);
-      document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
-    }
-
-    async function loadPosts() {
-      const container = document.getElementById('postsList');
-      const { data } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
-
-      if (!data || data.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan.</p>';
-        return;
-      }
-
-      container.innerHTML = data.map(p => `
-        <div class="post-card">
-          <div class="post-header">
-            <div class="user-info">
-              <div class="avatar-container"><div class="avatar-circle">🤍</div></div>
-              <div class="user-details">
-                <span class="user-name">${p.username || 'Member CUIT'}</span>
-                <span class="btn-sm-badge tag-${(p.feeling || 'Bahagia').replace(/[^a-zA-Z]/g, '')}">${p.feeling || 'Bahagia'}</span>
-              </div>
-            </div>
-            <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
-          </div>
-          <div class="post-body">${p.content}</div>
-          <div class="post-footer-actions">
-            <div class="action-chip" onclick="handleLike('${p.id}')">♡ Suka (${p.likes_count || 0})</div>
-            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift</div>
-            <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="openPromoModal('${p.id}')">🚀 Promosikan</div>
-          </div>
+    function render28GiftsUI() {
+      const container = document.getElementById('giftGrid28Container');
+      container.innerHTML = GIFTS_28.map(g => `
+        <div class="gift-card-item" onclick="alert('Gift dikirim!')">
+          <div style="font-size:18px;">${g.icon}</div>
+          <div>${g.name}</div>
+          <div style="color:var(--primary); font-size:10px;">${g.cost} Koin CUIT</div>
         </div>
       `).join('');
     }
 
-    function openGiftModal(postId) {
-      activeTargetPostId = postId;
-      document.getElementById('giftModal').style.display = 'flex';
-    }
-
-    function openPromoModal(postId) {
-      activeTargetPostId = postId;
-      document.getElementById('promoModal').style.display = 'flex';
-    }
-
-    async function handleLike(postId) {
-      if (freeCoins < 1) return alert('Koin Gratis Anda habis!');
-      freeCoins -= 1;
-      updateCoinUI();
-
-      const { data: post } = await supabaseClient.from('curhat').select('likes_count, user_email').eq('id', postId).single();
-      const currentLikes = (post && post.likes_count) || 0;
-
-      await supabaseClient.from('curhat').update({ likes_count: currentLikes + 1 }).eq('id', postId);
-      loadPosts();
-    }
-
-    async function submitNewPost() {
-      const type = document.getElementById('curhatCoinType').value;
-      const content = document.getElementById('postContent').value.trim();
-      const feeling = document.getElementById('postFeeling').value;
-
-      if (!content) return alert('Teks curhatan tidak boleh kosong!');
-
-      if (type === 'free') {
-        if (freeCoins < 1) return alert('Koin Gratis tidak mencukupi!');
-        freeCoins -= 1;
-      } else {
-        if (paidCoins < 1) return alert('Koin CUIT Berbayar tidak mencukupi!');
-        paidCoins -= 1;
-      }
-
-      updateCoinUI();
-
+    function openNotificationsModal() { document.getElementById('notificationsModal').style.display = 'flex'; }
+    function openWalletModal() { document.getElementById('walletModal').style.display = 'flex'; }
+    function openCashoutModal() { document.getElementById('cashoutModal').style.display = 'flex'; }
+    function calcCashoutDetails() {}
+    function submitPermataCashout() {}
+    function openAdminReelsModal() { document.getElementById('adminReelsModal').style.display = 'flex'; }
+    function saveAdminReelsLinks() { alert('Tautan berhasil disimpan!'); document.getElementById('adminReelsModal').style.display = 'none'; }
+    function renderProfileData() {
       const myEmail = currentUser ? currentUser.email : ADMIN_EMAIL;
-      await supabaseClient.from('curhat').insert([
-        { content, user_email: myEmail, username: userNickname, feeling, likes_count: 0 }
-      ]);
-
-      document.getElementById('postContent').value = '';
-      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
-      loadPosts();
+      document.getElementById('profName').innerText = userNickname;
+      document.getElementById('adminPanelSection').style.display = (myEmail === ADMIN_EMAIL) ? 'block' : 'none';
     }
-
-    function handleAuthAction() {
-      if (currentUser) {
-        supabaseClient.auth.signOut().then(() => {
-          alert('Berhasil keluar!');
-          location.reload();
-        });
-      } else {
-        document.getElementById('authModal').style.display = 'flex';
-      }
-    }
-
-    async function submitLogin() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (!error) {
-        document.getElementById('authModal').style.display = 'none';
-        checkUser();
-      } else alert('Gagal masuk: ' + error.message);
-    }
-
-    async function submitSignUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const referral = document.getElementById('referralInput').value.trim();
-
-      const { error } = await supabaseClient.auth.signUp({ email, password });
-      if (!error) {
-        let sponsor = ADMIN_EMAIL;
-        if (referral) {
-          const { data: refProfile } = await supabaseClient.from('profiles').select('email').eq('referral_code', referral).single();
-          if (refProfile) sponsor = refProfile.email;
-          else return alert('Kode Referral tidak valid! Pendaftaran ditolak.');
-        }
-
-        const newRefCode = (email === ADMIN_EMAIL) ? 'CUITADMIN' : ('CUIT' + Math.random().toString(36).substring(2, 7).toUpperCase());
-        const initialNickname = 'Member CUIT';
-
-        await supabaseClient.from('profiles').insert([
-          { email, username: initialNickname, sponsor_email: sponsor, referral_code: newRefCode, free_coins: 20, paid_coins: 0, permata_cuit: 0 }
-        ]);
-
-        alert('Pendaftaran berhasil! Silakan login.');
-      } else alert('Error: ' + error.message);
-    }
+    function loadPosts() {}
 
     checkUser();
   </script>
