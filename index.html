@@ -2237,13 +2237,11 @@
       }
     }
 
-    // MISI REELS FB 10 SLOT
+    // MISI REELS FB 10 SLOT (BISA DIPUTAR BERULANG)
     async function openReelsModal() {
       const container = document.getElementById('reelsListContainer');
       document.getElementById('reelsModal').style.display = 'flex';
       container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat 10 misi video...</p>';
-
-      const today = new Date().toISOString().split('T')[0];
 
       const { data: missions } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
       let links = {};
@@ -2258,16 +2256,15 @@
       for (let i = 1; i <= 10; i++) {
         const slotKey = `v${i}`;
         const url = links[slotKey] || '';
-        const claimed = localStorage.getItem(`cuit_claimed_${slotKey}_${today}`);
         const isValid = url && url.trim().length > 5 && url !== 'null';
 
         html += `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
             <span style="font-weight: 800; font-size: 12px; color: #333;">🎬 Video ${i}</span>
-            ${claimed 
-              ? `<span style="color: #2ecc71; font-size: 10.5px; font-weight: 800;">✓ Diklaim</span>`
-              : `<button ${isValid ? `onclick="playEmbeddedVideo('${url}', '${slotKey}')"` : 'disabled'} style="background: ${isValid ? '#1877f2' : '#ccc'}; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: ${isValid ? 'pointer' : 'not-allowed'};">${isValid ? 'Tonton & Klaim +10 🪙' : 'Belum Ada Video'}</button>`
-            }
+            <button ${isValid ? `onclick="playEmbeddedVideo('${url}', '${slotKey}')"` : 'disabled'} 
+              style="background: ${isValid ? '#1877f2' : '#ccc'}; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: ${isValid ? 'pointer' : 'not-allowed'};">
+              ${isValid ? 'Tonton & Klaim +10 🪙' : 'Belum Ada Video'}
+            </button>
           </div>
         `;
       }
@@ -2320,62 +2317,49 @@
       }, 1000);
     }
 
-    // MISI REELS FB 10 SLOT (Bisa Ditonton Berulang Kali)
-async function openReelsModal() {
-  const container = document.getElementById('reelsListContainer');
-  document.getElementById('reelsModal').style.display = 'flex';
-  container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat 10 misi video...</p>';
+    function claimVideoRewardAndClose() {
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose.disabled) return;
 
-  const { data: missions } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
-  let links = {};
+      document.getElementById('videoPlayerModal').style.display = 'none';
+      document.getElementById('videoFrameContainer').innerHTML = '';
 
-  if (missions && missions.length > 0) {
-    missions.forEach(m => {
-      links[`v${m.id}`] = m.facebook_url || '';
-    });
-  }
+      freeCoins += 10;
+      updateCoinUI();
 
-  let html = '';
-  for (let i = 1; i <= 10; i++) {
-    const slotKey = `v${i}`;
-    const url = links[slotKey] || '';
-    const isValid = url && url.trim().length > 5 && url !== 'null';
+      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
 
-    html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-        <span style="font-weight: 800; font-size: 12px; color: #333;">🎬 Video ${i}</span>
-        <button ${isValid ? `onclick="playEmbeddedVideo('${url}', '${slotKey}')"` : 'disabled'} 
-          style="background: ${isValid ? '#1877f2' : '#ccc'}; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: ${isValid ? 'pointer' : 'not-allowed'};">
-          ${isValid ? 'Tonton & Klaim +10 🪙' : 'Belum Ada Video'}
-        </button>
-      </div>
-    `;
-  }
+      if (activeVideoSlot === 'v10') {
+        alert('🚀 Luar biasa! Kamu telah menyelesaikan putaran 10 Video. Seluruh video terbuka kembali untuk ditonton lagi!');
+      }
 
-  container.innerHTML = html;
-}
+      openReelsModal();
+    }
 
-function claimVideoRewardAndClose() {
-  const btnClose = document.getElementById('btnCloseVideo');
-  if (btnClose.disabled) return;
+    async function openAdminModal() {
+      try {
+        const { data } = await supabaseClient
+          .from('reels_missions')
+          .select('*')
+          .order('id', { ascending: true });
 
-  document.getElementById('videoPlayerModal').style.display = 'none';
-  document.getElementById('videoFrameContainer').innerHTML = '';
-
-  // Tambahkan Koin Gratisan +10
-  freeCoins += 10;
-  updateCoinUI();
-
-  alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
-  
-  // Jika selesai menonton Video 10, tampilkan notifikasi spesial putaran ulang
-  if (activeVideoSlot === 'v10') {
-    alert('🚀 Luar biasa! Kamu telah menyelesaikan putaran 10 Video. Video 1 sampai 10 sekarang terbuka kembali untuk ditonton lagi!');
-  }
-
-  openReelsModal();
-}
-
+        if (data && data.length > 0) {
+          data.forEach(item => {
+            const inputElem = document.getElementById(`adminVideo${item.id}`);
+            if (inputElem) inputElem.value = item.facebook_url || '';
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil reels_missions:", err);
+      }
+      
+      const modal = document.getElementById('adminReelsModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      } else {
+        alert('Modal Admin tidak ditemukan!');
+      }
+    }
 
     async function saveAdminReelsLinks() {
       try {
@@ -2385,7 +2369,11 @@ function claimVideoRewardAndClose() {
 
           await supabaseClient
             .from('reels_missions')
-            .upsert({ id: i, facebook_url: urlVal }, { onConflict: 'id' });
+            .upsert({ 
+              id: i, 
+              slot_name: `Video ${i}`, 
+              facebook_url: urlVal 
+            }, { onConflict: 'id' });
         }
 
         alert('✅ Link 10 Video Reels FB berhasil disimpan ke Database Supabase!');
