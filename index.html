@@ -1014,15 +1014,6 @@
       }
     }
 
-    async function loadFollows() {
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const { data } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
-      if (data) {
-        followingSet = new Set(data.map(f => f.following_email));
-      }
-    }
-
     async function syncCoinsToSupabase() {
   localStorage.setItem('cuit_free_coins', freeCoins);
   localStorage.setItem('cuit_paid_coins', paidCoins);
@@ -1032,10 +1023,13 @@
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
   const myEmail = currentUser ? currentUser.email : guestId;
 
-  // HANYA update saldo dan profil, JANGAN timpa kolom sponsor jika sudah ada
+  // Kode referral unik milik user sendiri (Downline link)
+  const myOwnReferralCode = customDisplayName.replace(/\s+/g, '').toUpperCase();
+
   const profilePayload = {
     email: myEmail,
     username: customDisplayName || 'mantanperamal',
+    referral_code: myOwnReferralCode, // Kode referral milik sendiri
     free_coins: freeCoins,
     paid_coins: paidCoins,
     gems: gems,
@@ -1046,15 +1040,17 @@
     profilePayload.id = currentUser.id;
   }
 
-  // Hanya isi sponsor jika pengguna belum memiliki sponsor terdaftar
-  if (!mySponsorCode) {
-    const activeRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
-    profilePayload.sponsor = activeRef;
+  // Cari sponsor asli dari penampung pendaftaran/URL
+  const activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+  
+  // Jika sponsor di database belum ada atau tidak valid, gunakan activeSponsorRef
+  if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
+    profilePayload.sponsor = activeSponsorRef;
+    mySponsorCode = activeSponsorRef;
   }
 
   await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
 }
-
 
     function updateCoinUI() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
