@@ -1024,32 +1024,38 @@
     }
 
     async function syncCoinsToSupabase() {
-      localStorage.setItem('cuit_free_coins', freeCoins);
-      localStorage.setItem('cuit_paid_coins', paidCoins);
-      localStorage.setItem('cuit_gems', gems);
-      localStorage.setItem('cuit_user_exp', usedPaidCoins);
+    async function syncCoinsToSupabase() {
+  localStorage.setItem('cuit_free_coins', freeCoins);
+  localStorage.setItem('cuit_paid_coins', paidCoins);
+  localStorage.setItem('cuit_gems', gems);
+  localStorage.setItem('cuit_user_exp', usedPaidCoins);
 
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
-      const codeToSave = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
 
-      const profilePayload = {
-        email: myEmail,
-        username: customDisplayName || 'mantanperamal',
-        free_coins: freeCoins,
-        paid_coins: paidCoins,
-        gems: gems,
-        used_paid_coins: usedPaidCoins,
-        sponsor: codeToSave
-      };
+  // HANYA update saldo dan profil, JANGAN timpa kolom sponsor jika sudah ada
+  const profilePayload = {
+    email: myEmail,
+    username: customDisplayName || 'mantanperamal',
+    free_coins: freeCoins,
+    paid_coins: paidCoins,
+    gems: gems,
+    used_paid_coins: usedPaidCoins
+  };
 
-      if (currentUser && currentUser.id) {
-        profilePayload.id = currentUser.id;
-      }
+  if (currentUser && currentUser.id) {
+    profilePayload.id = currentUser.id;
+  }
 
-      await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
-    }
+  // Hanya isi sponsor jika pengguna belum memiliki sponsor terdaftar
+  if (!mySponsorCode) {
+    const activeRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+    profilePayload.sponsor = activeRef;
+  }
+
+  await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
+}
+
 
     function updateCoinUI() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
