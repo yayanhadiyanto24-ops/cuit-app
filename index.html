@@ -1165,24 +1165,29 @@
     }
 
     async function loadUserLikes() {
-      let guestToken = localStorage.getItem('cuit_guest_token');
-      if (!guestToken) {
-        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-        localStorage.setItem('cuit_guest_token', guestToken);
-      }
+  let guestToken = localStorage.getItem('cuit_guest_token');
+  if (!guestToken) {
+    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+    localStorage.setItem('cuit_guest_token', guestToken);
+  }
 
-      let query = supabaseClient.from('post_likes').select('post_id');
-      if (currentUser) {
-        query = query.eq('user_id', currentUser.id);
-      } else {
-        query = query.eq('guest_token', guestToken);
-      }
+  let query = supabaseClient.from('post_likes').select('post_id');
+  
+  if (currentUser && currentUser.id) {
+    query = query.eq('user_id', currentUser.id);
+  } else {
+    query = query.eq('guest_token', guestToken);
+  }
 
-      const { data: likesData } = await query;
-      if (likesData) {
-        userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
-      }
-    }
+  const { data: likesData, error } = await query;
+  
+  if (!error && likesData) {
+    userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
+  } else {
+    userLikedPostsSet = new Set();
+  }
+}
+
 
     async function syncCoinsToSupabase() {
       try {
@@ -1770,28 +1775,23 @@
   const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
   if (!currentPost) return;
 
-  // Cek apakah pengguna sudah pernah Like di database Supabase
-  let checkQuery = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
-  if (currentUser) {
-    checkQuery = checkQuery.eq('user_id', currentUser.id);
-  } else {
-    checkQuery = checkQuery.eq('guest_token', guestToken);
-  }
+  const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
-  const { data: existingLike } = await checkQuery.maybeSingle();
-
-  if (existingLike || userLikedPostsSet.has(strPostId)) {
+  if (isAlreadyLiked) {
     // --- PROSES UNLIKE (BATAL SUKA) ---
     userLikedPostsSet.delete(strPostId);
     const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
     currentPost.likes_count = newLikeCount;
     likesStore[strPostId] = newLikeCount;
     
-    renderFilteredFeed(); // Langsung perbarui UI
+    renderFilteredFeed();
 
     let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
-    if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
-    else delQuery = delQuery.eq('guest_token', guestToken);
+    if (currentUser && currentUser.id) {
+      delQuery = delQuery.eq('user_id', currentUser.id);
+    } else {
+      delQuery = delQuery.eq('guest_token', guestToken);
+    }
     
     await delQuery;
     await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
@@ -1803,23 +1803,30 @@
     currentPost.likes_count = newLikeCount;
     likesStore[strPostId] = newLikeCount;
 
-    renderFilteredFeed(); // Langsung perbarui UI
+    renderFilteredFeed();
 
-    const { error } = await supabaseClient.from('post_likes').insert([
-      { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
-    ]);
+    const payload = { post_id: postId };
+    if (currentUser && currentUser.id) {
+      payload.user_id = currentUser.id;
+    } else {
+      payload.guest_token = guestToken;
+    }
 
-    // Jika ditolak database (karena duplikasi/spam), batalkan perubahan lokal
+    const { error } = await supabaseClient.from('post_likes').insert([payload]);
+
     if (error) {
+      // Jika ditolak database, kembalikan tampilan ke semula
       userLikedPostsSet.delete(strPostId);
       currentPost.likes_count = Math.max(0, newLikeCount - 1);
       renderFilteredFeed();
+      console.error("Gagal Like:", error.message);
       return;
     }
 
     await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
   }
 }
+
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
