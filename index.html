@@ -157,12 +157,35 @@
     .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
     .gift-banner.medium { background: linear-gradient(135deg, #fdcb6e, #e17055); border: 2px solid #ffeaa7; transform: scale(1.15); animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, shimmer 1.5s infinite alternate, giftPopOut 0.5s ease-in 4.5s forwards; }
     .gift-banner.large { background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); background-size: 200% 200%; animation: giftPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate, giftPopOut 0.5s ease-in 6s forwards; border: 3px solid #ffeaa7; box-shadow: 0 0 30px rgba(253, 203, 110, 0.9); padding: 14px 22px; transform: scale(1.25); }
+    .gift-banner.ultimate { background: linear-gradient(135deg, #000000, #4a00e0, #ff007f); background-size: 200% 200%; border: 3px solid #ffd700; box-shadow: 0 0 40px rgba(255, 215, 0, 0.95); padding: 16px 24px; transform: scale(1.35); animation: ultimatePop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 1.5s infinite alternate, giftPopOut 0.5s ease-in 7s forwards; }
+    
     .gift-banner .icon { font-size: 32px; animation: bounceIcon 0.8s infinite alternate; }
     .gift-banner.large .icon { font-size: 52px; animation: zoomPulsate 0.6s infinite alternate; }
+    .gift-banner.ultimate .icon { font-size: 64px; animation: zoomPulsate 0.4s infinite alternate; }
     .gift-banner .text-group { display: flex; flex-direction: column; }
     .gift-banner .sender { font-weight: 900; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .gift-banner.large .sender { font-size: 15px; color: #ffeaa7; text-shadow: 0 0 8px rgba(255, 234, 167, 0.8); }
+    .gift-banner.ultimate .sender { font-size: 17px; color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 1); }
     .gift-banner .action { font-size: 11px; opacity: 0.95; }
+
+    @keyframes ultimatePop {
+      0% { transform: scale(0.2) rotate(-10deg); opacity: 0; filter: drop-shadow(0 0 0 rgba(255,215,0,0)); }
+      50% { transform: scale(1.4) rotate(5deg); opacity: 1; filter: drop-shadow(0 0 35px rgba(255,215,0,0.95)); }
+      70% { transform: scale(0.95) rotate(-2deg); }
+      100% { transform: scale(1.35) rotate(0deg); filter: drop-shadow(0 0 20px rgba(255,215,0,0.8)); }
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-8px, 5px); }
+      40% { transform: translate(8px, -5px); }
+      60% { transform: translate(-5px, 8px); }
+      80% { transform: translate(5px, -8px); }
+    }
+
+    .shake-effect {
+      animation: screenShake 0.4s ease-in-out;
+    }
 
     @keyframes giftPopIn { 0% { opacity: 0; transform: translateY(30px) scale(0.5); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes giftPopOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-30px) scale(0.6); } }
@@ -775,6 +798,12 @@
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Kembang Api')">🎆 Kembang Api (100 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil Balap (100 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal Pesiar (100 🪙)</div>
+
+        <!-- GIFT SULTAN BARU (200 - 500 KOIN) -->
+        <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai Petir (200 🪙)</div>
+        <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung Meletus (300 🪙)</div>
+        <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet Raksasa (400 🪙)</div>
+        <div class="gift-card-item" style="background:#e8eaf6; border:1px solid #c5cae9;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
       </div>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
@@ -1177,11 +1206,10 @@
       });
     }
 
-            function downloadAPK() {
+    function downloadAPK() {
       const apkUrl = 'https://github.com/yayanhadiyanto24-ops/cuit-app/raw/refs/heads/main/cuit.apk';
       window.open(apkUrl, '_blank');
     }
-
 
     function saveDraftLocally() {
       const content = document.getElementById('postContent').value.trim();
@@ -1724,7 +1752,7 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* FUNGSI SAWER / GIFT DENGAN DATABASE RPC (100% PASTI LANCAR) */
+    /* FUNGSI SAWER / GIFT DENGAN DATABASE RPC & EFEK SULTAN */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -1742,6 +1770,12 @@
       }
 
       const { cost, giftName } = pendingGiftData;
+
+      // Efek Getar Layar untuk Gift Sultan (>= 200 koin)
+      if (cost >= 200) {
+        document.body.classList.add('shake-effect');
+        setTimeout(() => document.body.classList.remove('shake-effect'), 400);
+      }
 
       paidCoins -= cost;
       usedPaidCoins += cost;
@@ -1792,7 +1826,18 @@
       let sizeClass = 'small';
       let icon = '🎁';
 
-      if (coins >= 50) {
+      const iconsMap = {
+        'Badai Petir': '⚡',
+        'Gunung Meletus': '🌋',
+        'Komet Raksasa': '☄️',
+        'Supernova': '🌌'
+      };
+
+      if (coins >= 200) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '🌌';
+        spawnConfetti();
+      } else if (coins >= 50) {
         sizeClass = 'large';
         icon = '👑';
         spawnConfetti();
@@ -1814,12 +1859,12 @@
 
       setTimeout(() => {
         banner.remove();
-      }, coins >= 50 ? 6000 : (coins >= 5 ? 4500 : 3500));
+      }, coins >= 200 ? 7500 : (coins >= 50 ? 6000 : (coins >= 5 ? 4500 : 3500)));
     }
 
     function spawnConfetti() {
-      const colors = ['#f1c40f', '#e74c3c', '#9b59b6', '#2ecc71', '#3498db', '#e67e22'];
-      for (let i = 0; i < 40; i++) {
+      const colors = ['#f1c40f', '#e74c3c', '#9b59b6', '#2ecc71', '#3498db', '#e67e22', '#ff007f', '#ffd700'];
+      for (let i = 0; i < 50; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + 'vw';
