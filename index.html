@@ -1778,7 +1778,7 @@
   const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
   if (isAlreadyLiked) {
-    // --- PROSES UNLIKE (BATAL SUKA) ---
+    // --- UNLIKE (BATAL SUKA) ---
     userLikedPostsSet.delete(strPostId);
     const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
     currentPost.likes_count = newLikeCount;
@@ -1797,7 +1797,7 @@
     await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
 
   } else {
-    // --- PROSES LIKE (TAMBAH SUKA) ---
+    // --- LIKE (TAMBAH SUKA) ---
     userLikedPostsSet.add(strPostId);
     const newLikeCount = (currentPost.likes_count || 0) + 1;
     currentPost.likes_count = newLikeCount;
@@ -1805,28 +1805,27 @@
 
     renderFilteredFeed();
 
-    const payload = { post_id: postId };
-    if (currentUser && currentUser.id) {
-      payload.user_id = currentUser.id;
-    } else {
-      payload.guest_token = guestToken;
-    }
+    const payload = { 
+      post_id: postId,
+      user_id: (currentUser && currentUser.id) ? currentUser.id : null,
+      guest_token: (currentUser && currentUser.id) ? null : guestToken
+    };
 
     const { error } = await supabaseClient.from('post_likes').insert([payload]);
 
     if (error) {
-      // Jika ditolak database, kembalikan tampilan ke semula
+      // Jika Supabase menolak, kembalikan tampilan & tampilkan alert pesan error resminya
       userLikedPostsSet.delete(strPostId);
       currentPost.likes_count = Math.max(0, newLikeCount - 1);
+      likesStore[strPostId] = currentPost.likes_count;
       renderFilteredFeed();
-      console.error("Gagal Like:", error.message);
+      alert("Gagal menyimpan Like ke database: " + error.message);
       return;
     }
 
     await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
   }
 }
-
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
