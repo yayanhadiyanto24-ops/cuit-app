@@ -114,7 +114,9 @@
 
     .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
     .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 12px 0; }
+    
+    /* GRID PROFIL 3 KOLOM */
+    .profile-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
     .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
     .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
     .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
@@ -432,7 +434,8 @@
         <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
       </div>
 
-      <div class="profile-stats-grid">
+      <!-- GRID STATISTIK DILENGKAPI (DOWNLINE, POSTINGAN, TOTAL MEMBER ADMIN) -->
+      <div class="profile-stats-grid" id="mainProfileStatsGrid">
         <div class="stat-card-item">
           <div class="val" id="profExp">0 EXP</div>
           <div class="lbl">Jam Terbang</div>
@@ -444,6 +447,18 @@
         <div class="stat-card-item">
           <div class="val" id="profFollowing">0</div>
           <div class="lbl">Mengikuti</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profDownlines">0</div>
+          <div class="lbl">Downline</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profPostsCount">0</div>
+          <div class="lbl">Postingan</div>
+        </div>
+        <div class="stat-card-item" id="adminTotalMemberCard" style="display: none; background: #eef2ff; border: 1px solid #c7d2fe;">
+          <div class="val" id="profTotalMembers" style="color: #1e40af;">0</div>
+          <div class="lbl" style="color: #1e40af; font-weight: 800;">Total Member</div>
         </div>
       </div>
 
@@ -2277,6 +2292,7 @@
       document.getElementById('configModal').style.display = 'flex';
     }
 
+    /* FUNGSI RENDER DATA PROFIL DENGAN STATISTIK LENGKAP */
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || 'mantanperamal';
@@ -2298,12 +2314,38 @@
 
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
+      // 1. Ambil data Pengikut & Mengikuti
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
       const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
 
       document.getElementById('profFollowers').innerText = followersCount || 0;
       document.getElementById('profFollowing').innerText = followingCount || 0;
 
+      // 2. Ambil data Downline Langsung
+      const { count: downlinesCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`);
+      document.getElementById('profDownlines').innerText = downlinesCount || 0;
+
+      // 3. Ambil data Jumlah Postingan
+      let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
+      if (currentUser) {
+        postQuery = postQuery.eq('user_id', currentUser.id);
+      } else {
+        postQuery = postQuery.eq('user_email', myEmail);
+      }
+      const { count: postsCount } = await postQuery;
+      document.getElementById('profPostsCount').innerText = postsCount || 0;
+
+      // 4. Khusus Admin: Ambil Total Seluruh Member
+      const adminMemberCard = document.getElementById('adminTotalMemberCard');
+      if (isAdmin) {
+        adminMemberCard.style.display = 'block';
+        const { count: totalMembers } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true });
+        document.getElementById('profTotalMembers').innerText = totalMembers || 0;
+      } else {
+        adminMemberCard.style.display = 'none';
+      }
+
+      // Progress bar level
       const progressBar = document.getElementById('levelProgressBar');
       const nextInfo = document.getElementById('levelNextInfo');
 
@@ -2525,7 +2567,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
       }
     }
 
