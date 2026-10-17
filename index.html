@@ -1760,55 +1760,66 @@
     }
 
     async function toggleLike(postId) {
-      let guestToken = localStorage.getItem('cuit_guest_token');
-      if (!guestToken) {
-        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-        localStorage.setItem('cuit_guest_token', guestToken);
-      }
+  let guestToken = localStorage.getItem('cuit_guest_token');
+  if (!guestToken) {
+    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+    localStorage.setItem('cuit_guest_token', guestToken);
+  }
 
-      const strPostId = String(postId);
+  const strPostId = String(postId);
+  const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
+  if (!currentPost) return;
 
-      let checkQuery = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
-      if (currentUser) {
-        checkQuery = checkQuery.eq('user_id', currentUser.id);
-      } else {
-        checkQuery = checkQuery.eq('guest_token', guestToken);
-      }
+  // Cek apakah pengguna sudah pernah Like di database Supabase
+  let checkQuery = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
+  if (currentUser) {
+    checkQuery = checkQuery.eq('user_id', currentUser.id);
+  } else {
+    checkQuery = checkQuery.eq('guest_token', guestToken);
+  }
 
-      const { data: existingLike } = await checkQuery.maybeSingle();
-      const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
-      let currentLikes = (currentPost && currentPost.likes_count) || 0;
+  const { data: existingLike } = await checkQuery.maybeSingle();
 
-      if (existingLike || userLikedPostsSet.has(strPostId)) {
-        userLikedPostsSet.delete(strPostId);
-        const newLikeCount = Math.max(0, currentLikes - 1);
-        if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
-        
-        loadPosts();
+  if (existingLike || userLikedPostsSet.has(strPostId)) {
+    // --- PROSES UNLIKE (BATAL SUKA) ---
+    userLikedPostsSet.delete(strPostId);
+    const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
+    currentPost.likes_count = newLikeCount;
+    likesStore[strPostId] = newLikeCount;
+    
+    renderFilteredFeed(); // Langsung perbarui UI
 
-        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
-        if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
-        else delQuery = delQuery.eq('guest_token', guestToken);
-        
-        await delQuery;
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+    let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
+    if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
+    else delQuery = delQuery.eq('guest_token', guestToken);
+    
+    await delQuery;
+    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
 
-      } else {
-        userLikedPostsSet.add(strPostId);
-        const newLikeCount = currentLikes + 1;
-        if (currentPost) currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
-        
-        loadPosts();
+  } else {
+    // --- PROSES LIKE (TAMBAH SUKA) ---
+    userLikedPostsSet.add(strPostId);
+    const newLikeCount = (currentPost.likes_count || 0) + 1;
+    currentPost.likes_count = newLikeCount;
+    likesStore[strPostId] = newLikeCount;
 
-        await supabaseClient.from('post_likes').insert([
-          { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
-        ]);
+    renderFilteredFeed(); // Langsung perbarui UI
 
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-      }
+    const { error } = await supabaseClient.from('post_likes').insert([
+      { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
+    ]);
+
+    // Jika ditolak database (karena duplikasi/spam), batalkan perubahan lokal
+    if (error) {
+      userLikedPostsSet.delete(strPostId);
+      currentPost.likes_count = Math.max(0, newLikeCount - 1);
+      renderFilteredFeed();
+      return;
     }
+
+    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+  }
+}
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
