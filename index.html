@@ -104,9 +104,15 @@
     .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    
+    /* AVATAR DENGAN WARNA DASAR UNGU CUIT & BORDER TEGAS */
     .avatar-container { position: relative; width: 40px; height: 40px; }
-    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e7f5; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #d0d7ea; }
-    .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #513cd8; box-shadow: 0 2px 5px rgba(108, 92, 231, 0.25); }
+    .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1.5px solid #ffffff; }
+
+    /* NAV PROFILE ICON IKUTI WARNA UNGU UTAMA */
+    .nav-profile-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #513cd8; }
+    .nav-item.active .nav-profile-avatar { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
     
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name-row { display: flex; align-items: center; gap: 6px; }
@@ -247,7 +253,7 @@
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 9px; font-weight: 800; color: #fde047; margin-bottom: 4px; white-space: nowrap;">👑 Raja Sawer</div>
         <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
-          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fde047;">🤍</div>
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fde047;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">👑</div>
         </div>
         <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">Belum Ada</div>
@@ -258,7 +264,7 @@
       <div style="min-width: 100px; background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 9px; font-weight: 800; color: #93c5fd; margin-bottom: 4px; white-space: nowrap;">🌟 Bintang Curhat</div>
         <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
-          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #60a5fa;">🤍</div>
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #60a5fa;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">🔥</div>
         </div>
         <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
@@ -269,7 +275,7 @@
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 9px; font-weight: 800; color: #86efac; margin-bottom: 4px; white-space: nowrap;">✍️ Pujangga Utama</div>
         <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
-          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #4ade80;">🤍</div>
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #4ade80;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💙</div>
         </div>
         <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
@@ -280,7 +286,7 @@
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 9px; font-weight: 800; color: #fbcfe8; margin-bottom: 4px; white-space: nowrap;">🧲 Magnet Sponsor</div>
         <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
-          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #f472b6;">🤍</div>
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #f472b6;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💎</div>
         </div>
         <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
@@ -651,7 +657,7 @@
       <span>Live</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon">🙂</span>
+      <span class="nav-icon"><div class="nav-profile-avatar">🤍</div></span>
       <span>Profil</span>
     </div>
   </div>
@@ -665,7 +671,7 @@
       </div>
 
       <div style="text-align: center; margin-bottom: 12px;">
-        <div style="width: 54px; height: 54px; border-radius: 50%; background: #ece8ff; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 6px auto; border: 2px solid var(--primary);">🤍</div>
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 6px auto; border: 2px solid var(--primary);">🤍</div>
         <div style="font-size: 16px; font-weight: 900;" id="mName">Nama Pengguna</div>
         <span class="btn-sm-badge" id="mBadge" style="margin-top: 4px; background:#e2e7f5; color:#333;">🌱 Cuiter Baru</span>
       </div>
@@ -1165,29 +1171,28 @@
     }
 
     async function loadUserLikes() {
-  let guestToken = localStorage.getItem('cuit_guest_token');
-  if (!guestToken) {
-    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-    localStorage.setItem('cuit_guest_token', guestToken);
-  }
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
 
-  let query = supabaseClient.from('post_likes').select('post_id');
-  
-  if (currentUser && currentUser.id) {
-    query = query.eq('user_id', currentUser.id);
-  } else {
-    query = query.eq('guest_token', guestToken);
-  }
+      let query = supabaseClient.from('post_likes').select('post_id');
+      
+      if (currentUser && currentUser.id) {
+        query = query.eq('user_id', currentUser.id);
+      } else {
+        query = query.eq('guest_token', guestToken);
+      }
 
-  const { data: likesData, error } = await query;
-  
-  if (!error && likesData) {
-    userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
-  } else {
-    userLikedPostsSet = new Set();
-  }
-}
-
+      const { data: likesData, error } = await query;
+      
+      if (!error && likesData) {
+        userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
+      } else {
+        userLikedPostsSet = new Set();
+      }
+    }
 
     async function syncCoinsToSupabase() {
       try {
@@ -1533,13 +1538,12 @@
 
         const nowMs = Date.now();
         const activePromotions = data
-  .filter(p => {
-    if (!p.is_promoted || !p.promoted_until) return false;
-    const expiryMs = new Date(p.promoted_until).getTime();
-    return expiryMs > nowMs;
-  })
-  .sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
-
+          .filter(p => {
+            if (!p.is_promoted || !p.promoted_until) return false;
+            const expiryMs = new Date(p.promoted_until).getTime();
+            return expiryMs > nowMs;
+          })
+          .sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
 
         if (activePromotions.length > 0) {
           let cardsHTML = '';
@@ -1561,7 +1565,7 @@
             cardsHTML += `
               <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
                 <div style="position: relative; width: 26px; height: 26px;">
-                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
                     🤍
                   </div>
                   <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
@@ -1765,67 +1769,66 @@
     }
 
     async function toggleLike(postId) {
-  let guestToken = localStorage.getItem('cuit_guest_token');
-  if (!guestToken) {
-    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-    localStorage.setItem('cuit_guest_token', guestToken);
-  }
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
 
-  const strPostId = String(postId);
-  const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
-  if (!currentPost) return;
+      const strPostId = String(postId);
+      const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
+      if (!currentPost) return;
 
-  const isAlreadyLiked = userLikedPostsSet.has(strPostId);
+      const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
-  if (isAlreadyLiked) {
-    // --- UNLIKE (BATAL SUKA) ---
-    userLikedPostsSet.delete(strPostId);
-    const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
-    currentPost.likes_count = newLikeCount;
-    likesStore[strPostId] = newLikeCount;
-    
-    renderFilteredFeed();
+      if (isAlreadyLiked) {
+        // --- UNLIKE (BATAL SUKA) ---
+        userLikedPostsSet.delete(strPostId);
+        const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
+        currentPost.likes_count = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+        
+        renderFilteredFeed();
 
-    let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
-    if (currentUser && currentUser.id) {
-      delQuery = delQuery.eq('user_id', currentUser.id);
-    } else {
-      delQuery = delQuery.eq('guest_token', guestToken);
+        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
+        if (currentUser && currentUser.id) {
+          delQuery = delQuery.eq('user_id', currentUser.id);
+        } else {
+          delQuery = delQuery.eq('guest_token', guestToken);
+        }
+        
+        await delQuery;
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+
+      } else {
+        // --- LIKE (TAMBAH SUKA) ---
+        userLikedPostsSet.add(strPostId);
+        const newLikeCount = (currentPost.likes_count || 0) + 1;
+        currentPost.likes_count = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+
+        renderFilteredFeed();
+
+        const payload = { 
+          post_id: postId,
+          user_id: (currentUser && currentUser.id) ? currentUser.id : null,
+          guest_token: (currentUser && currentUser.id) ? null : guestToken
+        };
+
+        const { error } = await supabaseClient.from('post_likes').insert([payload]);
+
+        if (error) {
+          userLikedPostsSet.delete(strPostId);
+          currentPost.likes_count = Math.max(0, newLikeCount - 1);
+          likesStore[strPostId] = currentPost.likes_count;
+          renderFilteredFeed();
+          alert("Gagal menyimpan Like ke database: " + error.message);
+          return;
+        }
+
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+      }
     }
-    
-    await delQuery;
-    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-
-  } else {
-    // --- LIKE (TAMBAH SUKA) ---
-    userLikedPostsSet.add(strPostId);
-    const newLikeCount = (currentPost.likes_count || 0) + 1;
-    currentPost.likes_count = newLikeCount;
-    likesStore[strPostId] = newLikeCount;
-
-    renderFilteredFeed();
-
-    const payload = { 
-      post_id: postId,
-      user_id: (currentUser && currentUser.id) ? currentUser.id : null,
-      guest_token: (currentUser && currentUser.id) ? null : guestToken
-    };
-
-    const { error } = await supabaseClient.from('post_likes').insert([payload]);
-
-    if (error) {
-      // Jika Supabase menolak, kembalikan tampilan & tampilkan alert pesan error resminya
-      userLikedPostsSet.delete(strPostId);
-      currentPost.likes_count = Math.max(0, newLikeCount - 1);
-      likesStore[strPostId] = currentPost.likes_count;
-      renderFilteredFeed();
-      alert("Gagal menyimpan Like ke database: " + error.message);
-      return;
-    }
-
-    await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-  }
-}
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
