@@ -186,18 +186,6 @@
       100% { transform: scale(1.25) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); }
     }
 
-    @keyframes screenShake {
-      0%, 100% { transform: translate(0, 0); }
-      20% { transform: translate(-8px, 5px); }
-      40% { transform: translate(8px, -5px); }
-      60% { transform: translate(-5px, 8px); }
-      80% { transform: translate(5px, -8px); }
-    }
-
-    .shake-effect {
-      animation: screenShake 0.4s ease-in-out;
-    }
-
     @keyframes giftPopIn { 0% { opacity: 0; transform: translateY(30px) scale(0.5); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes bounceIcon { 0% { transform: scale(1); } 100% { transform: scale(1.3) rotate(12deg); } }
     @keyframes zoomPulsate { 0% { transform: scale(1); } 100% { transform: scale(1.4) rotate(-8deg); } }
@@ -342,9 +330,13 @@
         <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
         <option value="Ragu">❓ Ragu</option>
       </optgroup>
-      <optgroup label="Rangking Anggota">
-        <option value="top_level">🏆 Top 10 Jam Terbang (Level Tertinggi)</option>
-        <option value="top_followers">👥 Top 10 Populer (Pengikut Terbanyak)</option>
+      <optgroup label="🏆 Liga Prestasi 7 Hari">
+        <option value="top_sawer">👑 Raja Sawer</option>
+        <option value="top_curhat">🌟 Bintang Curhat</option>
+        <option value="top_pujangga">✍️ Pujangga Utama</option>
+        <option value="top_sponsor">🧲 Magnet Sponsor</option>
+        <option value="top_level">🏆 Jam Terbang (Level)</option>
+        <option value="top_followers">👥 Top Popularitas</option>
       </optgroup>
     </select>
 
@@ -919,6 +911,23 @@
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
+    /* LOGIKA SIKLUS MINGGUAN (7 HARI) */
+    function checkWeeklyLeagueReset() {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const pastDaysOfYear = (now - startOfYear) / 86400000;
+      const currentWeekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+      
+      const lastWeekEvaluated = localStorage.getItem('cuit_last_league_week');
+
+      if (lastWeekEvaluated && parseInt(lastWeekEvaluated) !== currentWeekNumber) {
+        alert(`🏆 [LIGA 7 HARI BERAKHIR!]\n\nSiklus kompetisi mingguan telah di-reset! Para pemenang kategori Raja Sawer, Bintang Curhat, Pujangga Utama, dan Magnet Sponsor berhasil meraih Mahkota Kehormatan minggu ini! ✨\n\nRebut tahtamu di siklus baru sekarang!`);
+        localStorage.setItem('cuit_last_league_week', currentWeekNumber);
+      } else if (!lastWeekEvaluated) {
+        localStorage.setItem('cuit_last_league_week', currentWeekNumber);
+      }
+    }
+
     /* INISIALISASI SDK FACEBOOK */
     window.fbAsyncInit = function() {
       FB.init({
@@ -995,6 +1004,7 @@
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
+      checkWeeklyLeagueReset();
 
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
@@ -1762,7 +1772,7 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* FUNGSI SAWER / GIFT DENGAN DATABASE RPC & EFEK SULTAN */
+    /* FUNGSI SAWER / GIFT TANPA EFEK GETAR */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -1780,12 +1790,6 @@
       }
 
       const { cost, giftName } = pendingGiftData;
-
-      // Efek Getar Layar untuk Gift Sultan (>= 200 koin)
-      if (cost >= 200) {
-        document.body.classList.add('shake-effect');
-        setTimeout(() => document.body.classList.remove('shake-effect'), 400);
-      }
 
       paidCoins -= cost;
       usedPaidCoins += cost;
@@ -1843,8 +1847,7 @@
         'Supernova': '🌌'
       };
 
-      // Tentukan durasi TAMPIL DIAM di layar (dalam milidetik)
-      let stayDuration = 3000; // Default gift kecil: 3 detik
+      let stayDuration = 3000;
 
       if (coins >= 500) {
         sizeClass = 'ultimate';
@@ -1854,32 +1857,31 @@
       } else if (coins >= 400) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '☄️';
-        stayDuration = 12000; // 12 Detik
+        stayDuration = 12000;
         spawnConfetti(80, stayDuration);
       } else if (coins >= 300) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '🌋';
-        stayDuration = 10000; // 10 Detik
+        stayDuration = 10000;
         spawnConfetti(70, stayDuration);
       } else if (coins >= 200) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '⚡';
-        stayDuration = 8000;  // 8 Detik
+        stayDuration = 8000;
         spawnConfetti(50, stayDuration);
       } else if (coins >= 50) {
         sizeClass = 'large';
         icon = '👑';
-        stayDuration = 6000;  // 6 Detik
+        stayDuration = 6000;
         spawnConfetti(30, stayDuration);
       } else if (coins >= 5) {
         sizeClass = 'medium';
         icon = '🌟';
-        stayDuration = 4500;  // 4.5 Detik
+        stayDuration = 4500;
       }
 
       banner.className = `gift-banner ${sizeClass}`;
       
-      // Jalankan animasi pop-in dan pertahankan style melayang
       if (sizeClass === 'ultimate') {
         banner.style.animation = 'ultimatePopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate';
       } else {
@@ -1898,7 +1900,6 @@
 
       container.appendChild(banner);
 
-      // Hilangkan perlahan setelah durasi diam selesai
       setTimeout(() => {
         banner.style.opacity = '0';
         banner.style.transform = 'translateY(-30px) scale(0.6)';
@@ -1928,7 +1929,7 @@
       document.getElementById('btnStartLiveHeader').style.display = 'block';
       document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
       
-      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
@@ -2186,8 +2187,8 @@
       const filterType = document.getElementById('mainSearchFilter').value;
       const container = document.getElementById('searchResults');
 
-      if (filterType === 'top_level') {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Top 10 Anggota Teraktif...</p>';
+      if (filterType === 'top_level' || filterType === 'top_sawer') {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
         const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
         
         if (!topUsers || topUsers.length === 0) {
@@ -2215,12 +2216,12 @@
         return;
       }
 
-      if (filterType === 'top_followers') {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Top 10 Anggota Terpopuler...</p>';
+      if (filterType === 'top_followers' || filterType === 'top_sponsor') {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Data Rangking...</p>';
         const { data: topFollowed } = await supabaseClient.from('profiles').select('*').order('followers_count', { ascending: false }).limit(10);
         
         if (!topFollowed || topFollowed.length === 0) {
-          container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking pengikut.</p>';
+          container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
           return;
         }
 
