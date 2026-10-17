@@ -4,12 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- KODE ANTI-CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
   <title>CUIT – Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- INTEGRASI FACEBOOK JS SDK UNTUK PENGAWASAN TIMER VIDEO -->
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
 
   <style>
@@ -26,12 +28,15 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
+    /* Top Stats Bar Compact - Indikator 3 Saldo */
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 6px 10px; background: #e8f0fe; }
     .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
+    /* Banner Image Container */
     .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; transition: all 0.3s ease; }
     .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
 
+    /* Page Visibility & Sections */
     .page-section { display: none; padding: 10px 14px; }
     .page-section.active { display: block; }
 
@@ -40,19 +45,24 @@
     .section-title { font-size: 20px; font-weight: 900; color: #1c1d36; margin-bottom: 2px; }
     .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    /* Buttons */
     .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2); }
     .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
     .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
     .btn-follow.following { background: #eef1f8; color: var(--text-sub); }
     .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
 
+    /* Filter Pills */
     .pills-group { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
     .pill-btn { padding: 6px 14px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
+    /* Quick Chat Templates Pills */
     .quick-chat-container { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; padding-bottom: 4px; scrollbar-width: none; }
     .quick-chip { background: #ece8ff; color: var(--primary); border: 1px solid #dcd6ff; padding: 4px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .quick-chip:hover { background: var(--primary); color: #fff; }
 
+    /* Dynamic Tag Colors */
     .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
     .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
     .tag-Semangat { background: #FFF3E0; color: #E67E22; }
@@ -63,12 +73,20 @@
     .tag-Cemas { background: #F3E5F5; color: #9B59B6; }
     .tag-Marah { background: #FFEBEE; color: #E74C3C; }
     .tag-Kecewa { background: #ECEFF1; color: #607D8B; }
+    .tag-Kesepian { background: #EDE7F6; color: #5E35B1; }
+    .tag-PatahHati { background: #FBE9E7; color: #D84315; }
+    .tag-Bingung { background: #FFF8E1; color: #F39C12; }
+    .tag-Rindu { background: #F3E5F5; color: #9C27B0; }
+    .tag-Lelah { background: #EFEBE9; color: #4E342E; }
+    .tag-Ragu { background: #E0F7FA; color: #00838F; }
 
+    /* Tags Grid */
     .feelings-card { background: #ffffff; padding: 10px 10px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 6px; }
     .feelings-card h3 { font-size: 12px; font-weight: 800; color: #1e1e38; margin-bottom: 6px; }
     .tags-grid { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag-item { padding: 4px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
 
+    /* Post Cards Feed */
     .feed-container { display: flex; flex-direction: column; gap: 10px; }
     .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
@@ -89,14 +107,28 @@
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
 
+    /* Kartu Ranking Anggota */
+    .user-rank-card { background: #ffffff; border-radius: 14px; padding: 10px 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; }
+
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
 
     .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
+    .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    
+    /* GRID PROFIL 3 KOLOM */
     .profile-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
     .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
     .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
     .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
 
+    .level-progress-container { background: #f0f3fa; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
+    .progress-bar-bg { width: 100%; height: 8px; background: #e2e7f5; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
+    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
+
+    .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+    /* Navigasi Bawah */
     .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
@@ -106,23 +138,61 @@
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
-    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 800; color: #1c1d36; }
+    .gift-card-item:hover { border-color: var(--primary); background: #ece8ff; }
 
+    /* STYLES RUANG LIVE CHAT FULLSCREEN */
+    body.is-in-live { padding-bottom: 0; overflow: hidden; }
+    body.is-in-live .cuit-banner-container, body.is-in-live .top-bar { display: none !important; }
+
+    .live-chat-fullscreen { display: flex; flex-direction: column; height: calc(100vh - 125px); position: relative; }
+    .live-chat-messages-area { flex: 1; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; min-height: 140px; }
+    .live-chat-controls-sticky { background: #ffffff; padding: 6px 0; border-top: 1px solid #f0f2f8; z-index: 25; margin-bottom: 8px; }
+    .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+
+    /* ANIMASI POP-UP GIFT OVERLAY HASIL REVISI HASIL KINERJA */
     #giftOverlayContainer { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 90%; max-width: 400px; }
     .gift-banner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 30px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); opacity: 0; width: fit-content; max-width: 100%; }
     .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
     .gift-banner.medium { background: linear-gradient(135deg, #fdcb6e, #e17055); border: 2px solid #ffeaa7; transform: scale(1.15); }
-    .gift-banner.large { background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); border: 3px solid #ffeaa7; transform: scale(1.25); }
-    .gift-banner.ultimate { background: linear-gradient(135deg, #0d0d0d, #4a00e0, #ff007f); border: 3px solid #ffd700; box-shadow: 0 0 35px rgba(255, 215, 0, 0.9); padding: 16px 24px; border-radius: 30px; color: #fff; }
-    .gift-banner .icon { font-size: 32px; }
-    .gift-banner.ultimate .icon { font-size: 65px !important; }
+    .gift-banner.large { background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); background-size: 200% 200%; border: 3px solid #ffeaa7; box-shadow: 0 0 30px rgba(253, 203, 110, 0.9); padding: 14px 22px; transform: scale(1.25); }
+    .gift-banner.ultimate {
+      background: linear-gradient(135deg, #0d0d0d, #4a00e0, #ff007f);
+      background-size: 200% 200%;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 35px rgba(255, 215, 0, 0.9);
+      padding: 16px 24px;
+      border-radius: 30px;
+      color: #fff;
+    }
+    
+    .gift-banner .icon { font-size: 32px; animation: bounceIcon 0.8s infinite alternate; }
+    .gift-banner.large .icon { font-size: 52px; animation: zoomPulsate 0.6s infinite alternate; }
+    .gift-banner.ultimate .icon {
+      font-size: 65px !important;
+      animation: zoomPulsate 0.5s infinite alternate;
+    }
     .gift-banner .text-group { display: flex; flex-direction: column; }
-    .gift-banner .sender { font-weight: 900; font-size: 13px; }
-    .gift-banner.ultimate .sender { font-size: 17px; color: #ffd700; }
+    .gift-banner .sender { font-weight: 900; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .gift-banner.large .sender { font-size: 15px; color: #ffeaa7; text-shadow: 0 0 8px rgba(255, 234, 167, 0.8); }
+    .gift-banner.ultimate .sender { font-size: 17px; color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 1); }
     .gift-banner .action { font-size: 11px; opacity: 0.95; }
 
-    .confetti { position: fixed; width: 10px; height: 10px; z-index: 998; pointer-events: none; top: -10px; animation: confettiFall 3s linear forwards; }
+    @keyframes ultimatePopIn {
+      0% { transform: scale(0.1) rotate(-15deg); opacity: 0; filter: drop-shadow(0 0 0 rgba(255, 215, 0, 0)); }
+      50% { transform: scale(1.4) rotate(5deg); opacity: 1; filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); }
+      70% { transform: scale(0.95) rotate(-2deg); }
+      100% { transform: scale(1.25) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); }
+    }
+
+    @keyframes giftPopIn { 0% { opacity: 0; transform: translateY(30px) scale(0.5); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes bounceIcon { 0% { transform: scale(1); } 100% { transform: scale(1.3) rotate(12deg); } }
+    @keyframes zoomPulsate { 0% { transform: scale(1); } 100% { transform: scale(1.4) rotate(-8deg); } }
+    @keyframes gradientBg { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+    @keyframes shimmer { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
+
+    .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 998; pointer-events: none; top: -10px; animation: confettiFall 3s linear forwards; }
     @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   </style>
 </head>
@@ -130,52 +200,102 @@
 
   <div id="giftOverlayContainer"></div>
 
+  <!-- Top Stats Bar Compact - INDIKATOR 3 SALDO -->
   <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7;">🔄 Refresh</button>
-    <div class="stat-badge">FREE <span id="freeCoinCount">20</span></div>
-    <div class="stat-badge">🪙 <span id="paidCoinCount">0</span></div>
-    <div class="stat-badge">💎 <span id="gemsCount">0</span></div>
+    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+      🔄 Refresh
+    </button>
+    <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">20</span></div>
+    <div class="stat-badge" title="Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
+    <div class="stat-badge" title="Permata CUIT Hasil Kerja">💎 <span id="gemsCount">0</span></div>
   </div>
 
+  <!-- Hero Banner Bergambar Resmi CUIT -->
   <div class="cuit-banner-container" id="cuitMainBanner">
-    <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
+    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- PANGGUNG JUARA LIGA 7 HARI -->
+  <!-- PANGGUNG JUARA LIGA 7 HARI (Di Bawah Banner Utama) -->
   <div style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <span style="font-size: 11px; font-weight: 900; color: #fde047;">🏆 PANGGUNG JUARA LIGA 7 HARI</span>
-      <span style="font-size: 9px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 8px; color: #cbd5e1;">Bergulir Mingguan</span>
+      <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
+        🏆 PANGGUNG JUARA LIGA 7 HARI
+      </span>
+      <span style="font-size: 9px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 8px; color: #cbd5e1;">
+        Bergulir Mingguan
+      </span>
     </div>
 
-    <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+    <!-- Carousel Para Pemenang -->
+    <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
+      
+      <!-- 1. JUARA RAJA SAWER -->
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center;">
-        <div style="font-size: 9px; font-weight: 800; color: #fde047;">👑 Raja Sawer</div>
-        <div style="font-size: 10px; font-weight: 800; color: #fff; margin-top:3px;" id="champSawerName">Belum Ada</div>
-        <div style="font-size: 8.5px; color: #fef08a;" id="champSawerScore">0 🪙</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fde047; margin-bottom: 4px; white-space: nowrap;">👑 Raja Sawer</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fde047;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">👑</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #fef08a; font-weight: 700; margin-top: 2px;" id="champSawerScore">0 🪙</div>
       </div>
+
+      <!-- 2. JUARA BINTANG CURHAT -->
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 12px; padding: 8px 6px; text-align: center;">
-        <div style="font-size: 9px; font-weight: 800; color: #93c5fd;">🌟 Bintang Curhat</div>
-        <div style="font-size: 10px; font-weight: 800; color: #fff; margin-top:3px;" id="champCurhatName">Belum Ada</div>
-        <div style="font-size: 8.5px; color: #bfdbfe;" id="champCurhatScore">0 Suka</div>
+        <div style="font-size: 9px; font-weight: 800; color: #93c5fd; margin-bottom: 4px; white-space: nowrap;">🌟 Bintang Curhat</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #60a5fa;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">🔥</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #bfdbfe; font-weight: 700; margin-top: 2px;" id="champCurhatScore">0 Suka</div>
       </div>
+
+      <!-- 3. JUARA PUJANGGA UTAMA -->
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 12px; padding: 8px 6px; text-align: center;">
-        <div style="font-size: 9px; font-weight: 800; color: #86efac;">✍️ Pujangga Utama</div>
-        <div style="font-size: 10px; font-weight: 800; color: #fff; margin-top:3px;" id="champPujanggaName">Belum Ada</div>
-        <div style="font-size: 8.5px; color: #bbf7d0;" id="champPujanggaScore">0 Post</div>
+        <div style="font-size: 9px; font-weight: 800; color: #86efac; margin-bottom: 4px; white-space: nowrap;">✍️ Pujangga Utama</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #4ade80;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💙</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #bbf7d0; font-weight: 700; margin-top: 2px;" id="champPujanggaScore">0 Post</div>
       </div>
+
+      <!-- 4. JUARA MAGNET SPONSOR -->
       <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 12px; padding: 8px 6px; text-align: center;">
-        <div style="font-size: 9px; font-weight: 800; color: #fbcfe8;">🧲 Magnet Sponsor</div>
-        <div style="font-size: 10px; font-weight: 800; color: #fff; margin-top:3px;">ADMINCUIT</div>
-        <div style="font-size: 8.5px; color: #fbcfe8;">Utama</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fbcfe8; margin-bottom: 4px; white-space: nowrap;">🧲 Magnet Sponsor</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #f472b6;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💎</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
+        <div style="font-size: 8.5px; color: #fbcfe8; font-weight: 700; margin-top: 2px;" id="champSponsorScore">Utama</div>
       </div>
+
     </div>
   </div>
 
+  <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <h2 class="section-title">Beranda</h2>
-      <button onclick="openReelsModal()" style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #fff; border: none; padding: 6px 12px; border-radius: 16px; font-weight: 800; font-size: 11px; cursor: pointer;">🎁 +10 Koin Gratis</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+      <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
+      <button 
+        onclick="openReelsModal()" 
+        style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #3e2723; border: 1px solid #ffe082; padding: 6px 12px; border-radius: 16px; font-weight: 900; font-size: 11px; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 143, 0, 0.4); display: flex; align-items: center; gap: 4px; white-space: nowrap;"
+      >
+        🎁 +10 Koin Gratis
+      </button>
+    </div>
+
+    <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div class="pills-group">
+        <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
+        <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+      </div>
+      <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
     <div class="feelings-card">
@@ -188,78 +308,672 @@
         <button class="tag-item tag-Lega" onclick="filterByTag('Lega')">😌 Lega</button>
         <button class="tag-item tag-Humor" onclick="filterByTag('Humor')">😄 Humor</button>
         <button class="tag-item tag-Sedih" onclick="filterByTag('Sedih')">🌧️ Sedih</button>
+        <button class="tag-item tag-Cemas" onclick="filterByTag('Cemas')">☁️ Cemas</button>
+        <button class="tag-item tag-Marah" onclick="filterByTag('Marah')">🌶️ Marah</button>
+        <button class="tag-item tag-Kecewa" onclick="filterByTag('Kecewa')">🌊 Kecewa</button>
+        <button class="tag-item tag-Kesepian" onclick="filterByTag('Kesepian')">🌙 Kesepian</button>
+        <button class="tag-item tag-PatahHati" onclick="filterByTag('Patah Hati')">🥀 Patah Hati</button>
+        <button class="tag-item tag-Bingung" onclick="filterByTag('Bingung')">🌀 Bingung</button>
+        <button class="tag-item tag-Rindu" onclick="filterByTag('Rindu')">💜 Rindu</button>
+        <button class="tag-item tag-Lelah" onclick="filterByTag('Lelah / Burnout')">🕯️ Lelah / Burnout</button>
+        <button class="tag-item tag-Ragu" onclick="filterByTag('Ragu')">❓ Ragu</button>
       </div>
     </div>
 
-    <div class="feed-container" id="postsList" style="margin-top: 10px;">
-      <p style="text-align: center; color: var(--text-sub);">Memuat cerita real-time...</p>
+    <div id="promotedSection" style="display: none; margin-top: 10px; margin-bottom: 4px;">
+      <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+        🚀 SOROTAN HARI INI
+      </div>
+      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
+    </div>
+
+    <div class="feed-container" id="postsList" style="margin-top: 8px;">
+      <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
     </div>
   </div>
 
+  <!-- MODAL MISI REELS FB -->
+  <div id="reelsModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah (10 Video)</h3>
+      <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.4;">
+        Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!
+      </p>
+
+      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;"></div>
+
+      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED DENGAN SDK FACEBOOK AUTOMATIC DETECT -->
+  <div id="videoPlayerModal" class="modal" style="z-index: 200;">
+    <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi CUIT</span>
+        <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed;">
+          ⏳ Tekan Play di Video
+        </button>
+      </div>
+
+      <div id="videoFrameContainer" style="width: 100%; height: 400px; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;"></div>
+
+      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;" id="videoTimerStatusText">
+        Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HALAMAN CARI -->
   <div id="pageSearch" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title">Jelajahi CUIT</h2>
-    <input type="text" id="searchInput" placeholder="Cari curhatan..." onkeyup="searchPosts()">
-    <div class="feed-container" id="searchResults"></div>
+    <input type="text" id="searchInput" placeholder="Cari curhatan, anggota, komunitas..." onkeyup="searchPosts()" style="margin-top: 8px;">
+    
+    <label style="font-size: 11px; font-weight: 700; color: #333; margin-top: 4px; display: block;">Filter Kategori & Rangking</label>
+    <select id="mainSearchFilter" onchange="searchPosts()">
+      <optgroup label="Filter Perasaan">
+        <option value="all">Semua Perasaan</option>
+        <option value="Bahagia">🌱 Bahagia</option>
+        <option value="Bersyukur">🤲 Bersyukur</option>
+        <option value="Semangat">🔥 Semangat</option>
+        <option value="Cinta">🌸 Cinta</option>
+        <option value="Lega">😌 Lega</option>
+        <option value="Humor">😄 Humor</option>
+        <option value="Sedih">🌧️ Sedih</option>
+        <option value="Cemas">☁️ Cemas</option>
+        <option value="Marah">🌶️ Marah</option>
+        <option value="Kecewa">🌊 Kecewa</option>
+        <option value="Kesepian">🌙 Kesepian</option>
+        <option value="Patah Hati">🥀 Patah Hati</option>
+        <option value="Bingung">🌀 Bingung</option>
+        <option value="Rindu">💜 Rindu</option>
+        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
+        <option value="Ragu">❓ Ragu</option>
+      </optgroup>
+      <optgroup label="🏆 Liga Prestasi 7 Hari">
+        <option value="top_sawer">👑 Raja Sawer</option>
+        <option value="top_curhat">🌟 Bintang Curhat</option>
+        <option value="top_pujangga">✍️ Pujangga Utama</option>
+        <option value="top_sponsor">🧲 Magnet Sponsor</option>
+        <option value="top_level">🏆 Jam Terbang (Level)</option>
+        <option value="top_followers">👥 Top Popularitas</option>
+      </optgroup>
+    </select>
+
+    <div class="feed-container" id="searchResults">
+      <p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tulis kata kunci atau pilih filter di atas.</p>
+    </div>
   </div>
 
+  <!-- 3. HALAMAN BUAT CURHATAN -->
   <div id="pageCreate" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Buat Curhatan</h2>
-    <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..."></textarea>
-    <button class="btn-primary" style="width: 100%;" onclick="submitNewPost()">Terbitkan</button>
+    <h2 class="section-title">Buat curhatan</h2>
+    <div class="section-sub">Tulis dengan nyaman. Tarif koin dinamis 1 koin per 1.200 karakter!</div>
+
+    <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
+      <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 6px;">Opsi Pembayaran / Curhat:</label>
+      <select id="curhatCoinType" onchange="toggleCurhatLimit()">
+        <option value="free">Pakai Koin Gratisan (1 Koin / 1.200 Karakter)</option>
+        <option value="paid">Pakai Bank Koin Berbayar (1 Koin / 1.200 Karakter)</option>
+      </select>
+
+      <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
+      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin Gratisan)</div>
+
+      <label style="font-size: 12px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
+      <select id="postFeeling">
+        <option value="Bahagia">🌱 Bahagia</option>
+        <option value="Bersyukur">🤲 Bersyukur</option>
+        <option value="Semangat">🔥 Semangat</option>
+        <option value="Cinta">🌸 Cinta</option>
+        <option value="Lega">😌 Lega</option>
+        <option value="Humor">😄 Humor</option>
+        <option value="Sedih">🌧️ Sedih</option>
+        <option value="Cemas">☁️ Cemas</option>
+        <option value="Marah">🌶️ Marah</option>
+        <option value="Kecewa">🌊 Kecewa</option>
+        <option value="Kesepian">🌙 Kesepian</option>
+        <option value="Patah Hati">🥀 Patah Hati</option>
+        <option value="Bingung">🌀 Bingung</option>
+        <option value="Rindu">💜 Rindu</option>
+        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
+        <option value="Ragu">❓ Ragu</option>
+      </select>
+
+      <div style="display: flex; gap: 6px; margin-top: 12px;">
+        <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
+        <button class="btn-secondary" style="flex: 1.2;" onclick="saveDraftLocally()">Simpan Draf</button>
+        <button class="btn-secondary" style="background: #f4f6fc;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
+      </div>
+    </div>
   </div>
 
-  <div id="pageLive" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Live Teks</h2>
-    <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); margin-top: 20px;">Belum ada sesi Live aktif.</div>
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
+  <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="back-btn" style="margin-bottom:0;" onclick="leaveLiveSession()">←</button>
+        <h2 class="section-title" style="font-size:16px;">Live Teks</h2>
+      </div>
+      <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live</button>
+    </div>
+
+    <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
+      <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
+        Belum ada sesi Live Teks aktif.
+      </div>
+
+      <div id="liveChatBox" class="live-chat-fullscreen" style="display: none;">
+        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 6px 10px; margin-bottom: 6px;">
+          <div class="leaderboard-toggle-header" onclick="toggleLeaderboard()">
+            <span>🏆 TOP SUPPORTER (Gift Terbanyak)</span>
+            <span id="lbToggleIcon" style="font-size:11px; font-weight:800; color:#d35400;">▲ Sembunyikan</span>
+          </div>
+          <div id="liveLeaderboardList" style="font-size: 10.5px; color: #333; display: flex; flex-direction: column; gap: 3px; margin-top: 4px;">
+            <i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>
+          </div>
+        </div>
+
+        <div id="liveMessagesList" class="live-chat-messages-area"></div>
+
+        <div class="live-chat-controls-sticky">
+          <div class="quick-chat-container">
+            <div class="quick-chip" onclick="applyQuickChat('Assalamu\'alaikum')">👋 Assalamu'alaikum</div>
+            <div class="quick-chip" onclick="applyQuickChat('Wa\'alaikumsalam')">🤝 Wa'alaikumsalam</div>
+            <div class="quick-chip" onclick="applyQuickChat('Selamat bergabung!')">🎉 Selamat bergabung!</div>
+            <div class="quick-chip" onclick="applyQuickChat('Jangan lupa absen dulu ya')">📌 Jangan lupa absen dulu</div>
+            <div class="quick-chip" onclick="applyQuickChat('Apa kabar semuanya?')">💬 Apa kabar?</div>
+            <div class="quick-chip" onclick="applyQuickChat('Hai!')">✨ Hai!</div>
+            <div class="quick-chip" onclick="applyQuickChat('Setuju banget!')">👍 Setuju banget!</div>
+            <div class="quick-chip" onclick="applyQuickChat('Semangat terus ya!')">🔥 Semangat terus!</div>
+          </div>
+
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="liveInputMessage" placeholder="Tulis pesan live... (Gratis)" style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
+            <button class="btn-primary" style="padding: 0 12px;" onclick="sendLiveMessage()">Kirim</button>
+            <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Profil Kamu</h2>
+    <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
+
     <div class="profile-card">
-      <div style="font-size: 16px; font-weight: 900;" id="profName">mantanperamal</div>
-      <div class="profile-stats-grid">
-        <div class="stat-card-item"><div class="val" id="profExp">0 EXP</div><div class="lbl">Jam Terbang</div></div>
-        <div class="stat-card-item"><div class="val" id="profFollowers">0</div><div class="lbl">Pengikut</div></div>
-        <div class="stat-card-item"><div class="val" id="profPostsCount">0</div><div class="lbl">Postingan</div></div>
+      <div class="profile-header-flex">
+        <div class="user-info" style="cursor:default;">
+          <div class="avatar-container">
+            <div class="avatar-circle">🤍</div>
+            <div class="level-badge-icon" id="profBadgeIcon">🌱</div>
+          </div>
+          <div>
+            <div style="font-size: 16px; font-weight: 900;" id="profName">mantanperamal</div>
+            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #e2e7f5; color: #333;">🌱 Cuiter Baru</span>
+          </div>
+        </div>
+        <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
       </div>
-      <button class="btn-primary" style="width:100%; background:#ff7675; margin-top:10px;" onclick="handleAuthAction()">Masuk / Keluar Akun</button>
+
+      <!-- GRID STATISTIK DILENGKAPI (DOWNLINE, POSTINGAN, TOTAL MEMBER ADMIN) -->
+      <div class="profile-stats-grid" id="mainProfileStatsGrid">
+        <div class="stat-card-item">
+          <div class="val" id="profExp">0 EXP</div>
+          <div class="lbl">Jam Terbang</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profFollowers">0</div>
+          <div class="lbl">Pengikut</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profFollowing">0</div>
+          <div class="lbl">Mengikuti</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profDownlines">0</div>
+          <div class="lbl">Downline</div>
+        </div>
+        <div class="stat-card-item">
+          <div class="val" id="profPostsCount">0</div>
+          <div class="lbl">Postingan</div>
+        </div>
+        <div class="stat-card-item" id="adminTotalMemberCard" style="display: none; background: #eef2ff; border: 1px solid #c7d2fe;">
+          <div class="val" id="profTotalMembers" style="color: #1e40af;">0</div>
+          <div class="lbl" style="color: #1e40af; font-weight: 800;">Total Member</div>
+        </div>
+      </div>
+
+      <div class="level-progress-container">
+        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
+          <span>Kemajuan Level Cuiter</span>
+          <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="levelProgressBar"></div>
+        </div>
+      </div>
+
+      <div style="background: #f8f9fe; padding: 12px; border-radius: 14px; border: 1px solid #e2e7f5; margin-top: 10px;">
+        <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
+        <div style="font-size: 10px; color: #828599; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
+        
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
+          <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
+        </div>
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
+    </div>
+
+    <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
+      <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
+      <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
+      <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
+    </div>
+
+    <div class="profile-menu-grid" style="margin-bottom: 12px;">
+      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
+      <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
+      <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
+      <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
+      <div class="menu-btn-item" style="grid-column: span 2;" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
+    </div>
+
+    <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
+  </div>
+
+  <!-- MODAL ADMIN EDIT 10 LINK REELS -->
+  <div id="adminReelsModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola 10 Link Reels FB</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Tempelkan tautan FB Reels harian untuk 10 slot video:</div>
+
+      <div style="max-height: 300px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 1:</label><input type="text" id="adminVideo1" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 2:</label><input type="text" id="adminVideo2" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 3:</label><input type="text" id="adminVideo3" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 4:</label><input type="text" id="adminVideo4" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 5:</label><input type="text" id="adminVideo5" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 6:</label><input type="text" id="adminVideo6" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 7:</label><input type="text" id="adminVideo7" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 8:</label><input type="text" id="adminVideo8" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 9:</label><input type="text" id="adminVideo9" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 10:</label><input type="text" id="adminVideo10" placeholder="https://facebook.com/reel/..."></div>
+      </div>
+
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-primary" style="flex: 1; background: #10b981;" onclick="saveAdminReelsLinks()">💾 Simpan Semua</button>
+        <button class="btn-secondary" style="background: #eee;" onclick="document.getElementById('adminReelsModal').style.display='none'">Batal</button>
+      </div>
     </div>
   </div>
 
+  <!-- Bottom Navigation Bar -->
+  <div class="nav-bar">
+    <div class="nav-item active" onclick="switchTab('pageHome', this)">
+      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
+      <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageSearch', this)">
+      <span class="nav-icon">🔍</span>
+      <span>Cari</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageCreate', this)">
+      <span class="nav-icon">➕</span>
+      <span>Buat</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageLive', this)">
+      <span class="nav-icon">📄</span>
+      <span>Live</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageProfile', this)">
+      <span class="nav-icon">🙂</span>
+      <span>Profil</span>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN -->
+  <div id="userProfileModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">Profil Anggota</h3>
+        <button onclick="document.getElementById('userProfileModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 12px;">
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: #ece8ff; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 6px auto; border: 2px solid var(--primary);">🤍</div>
+        <div style="font-size: 16px; font-weight: 900;" id="mName">Nama Pengguna</div>
+        <span class="btn-sm-badge" id="mBadge" style="margin-top: 4px; background:#e2e7f5; color:#333;">🌱 Cuiter Baru</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; text-align: center;">
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mExp">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Jam Terbang (EXP)</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mFollowers">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Pengikut</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
+          <div style="font-size:13px; font-weight:900;" id="mFollowing">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Mengikuti</div>
+        </div>
+      </div>
+
+      <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 12px; border: 1px solid #eef1f8;">
+        <b>👥 Sponsor:</b> <span id="mSponsorName">ADMINCUIT</span>
+      </div>
+
+      <div id="mFollowActionContainer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL TENTANG APLIKASI CUIT -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content" style="max-height: 85vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:900;">ℹ️ Tentang CUIT</h3>
+        <button onclick="document.getElementById('aboutModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 14px;">
+        <div style="font-size: 24px; font-weight: 900; color: var(--primary);">CUIT</div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-sub);">Curhat dapat Duit • v2.0 (1:1 Ratio)</div>
+      </div>
+
+      <div style="font-size: 11.5px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: #ece8ff; padding: 10px; border-radius: 12px; border: 1px solid #dcd6ff;">
+          <b style="color: var(--primary); font-size: 12px;">👨‍💻 Pengembang & Kreator Aplikasi:</b><br>
+          <div style="font-size: 13px; font-weight: 900; color: #1c1d36; margin-top: 2px;">Yan Kasmaran</div>
+          <div style="font-size: 11px; font-weight: 700; color: #4a4d65;">(Yayan Hadiyanto, S.Pd.-MT.)</div>
+          <div style="margin-top: 6px; font-size: 10.5px; color: #555; border-top: 1px dashed #c0b6ff; padding-top: 4px;">
+            <b>Naungan Ekosistem:</b><br>
+            🏛️ Yayasan Rancagé Al-Batukasuri<br>
+            🎭 Sanggar Seni Rancagé Al-Batukasuri<br>
+            ⚜️ Kedai Pramuka Rancagé Al-Batukasuri
+          </div>
+        </div>
+
+        <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <b style="color: var(--primary);">🌟 Visi & Ekonomi CUIT</b><br>
+          CUIT adalah platform curhat berbasis empati. Setiap dukungan diapresiasi secara terbuka dengan skema 1 IDR = 1 Koin Berbayar = 1 Permata CUIT.
+        </div>
+
+        <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <b style="color: var(--primary);">💰 Skema Bagi Hasil (50 / 10 / 40)</b><br>
+          • <b>50%</b> Kreator Penerima (Permata CUIT)<br>
+          • <b>10%</b> Sponsor Referral (Permata CUIT)<br>
+          • <b>40%</b> Kas Platform CUIT
+        </div>
+
+        <div style="text-align: center; font-size: 10px; color: var(--text-sub); margin-top: 6px;">
+          © 2026 Yayasan Rancagé Al-Batukasuri. All Rights Reserved.
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%; margin-top:14px;" onclick="document.getElementById('aboutModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL BACA & TULIS KOMENTAR -->
+  <div id="commentsModal" class="modal">
+    <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <h3 style="font-size: 15px; font-weight: 800;">💬 Komentar</h3>
+        <button onclick="document.getElementById('commentsModal').style.display='none'" style="border: none; background: none; font-size: 16px; cursor: pointer;">✕</button>
+      </div>
+      
+      <div id="commentsList" style="flex: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; max-height: 300px;">
+        <p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>
+      </div>
+
+      <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+        <textarea id="commentInputText" rows="2" placeholder="Tulis komentar kamu..." style="margin-bottom: 6px;"></textarea>
+        <button class="btn-primary" style="width: 100%;" onclick="submitCommentAction()">Kirim Komentar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PILIH PENERIMA GIFT LIVE -->
+  <div id="selectLiveRecipientModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 6px;">Pilih Penerima Gift 🎁</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Pilih Host atau Penonton lain di Live Chat yang ingin kamu beri gift:</div>
+      <div id="liveRecipientsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 12px;"></div>
+      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('selectLiveRecipientModal').style.display='none'">Batal</button>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI SAWER GIFT -->
+  <div id="confirmGiftModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-bottom: 6px;">Konfirmasi Sawer 🎁</h3>
+      <div id="confirmGiftText" style="font-size: 12px; color: var(--text-main); margin-bottom: 14px; line-height: 1.5;">
+        Kamu yakin ingin mengirimkan gift ini?
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669);" onclick="executeSendGift()">SAWER</button>
+        <button class="btn-secondary" style="flex: 1; background: #eee;" onclick="document.getElementById('confirmGiftModal').style.display='none'">BATAL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT PROFIL -->
+  <div id="editProfileModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 8px;">Edit Profil Kamu</h3>
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px;">Nama Tampilan Baru:</label>
+      <input type="text" id="editDisplayName" placeholder="Masukkan nama tampilan...">
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex:1;" onclick="saveProfileChanges()">Simpan</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('editProfileModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL POSTINGAN PROMOSI/SOROTAN -->
+  <div id="promotedDetailModal" class="modal">
+    <div class="modal-content" id="promotedDetailContent"></div>
+  </div>
+
+  <!-- MODAL PENGATURAN -->
+  <div id="configModal" class="modal">
+    <div class="modal-content">
+      <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">Konfigurasi Prototipe CUIT</h3>
+      <div style="font-size:11.5px; line-height:1.6; color:#333;">
+        • <b>Jatah gratis harian:</b> 20 Koin Gratisan<br>
+        • <b>Skema Curhat:</b> 1 Koin / 1.200 Karakter<br>
+        • <b>Nilai Ekonomi:</b> 1 IDR = 1 Koin Berbayar = 1 Permata CUIT<br>
+        • <b>Sponsor Referral:</b> Default ADMINCUIT
+      </div>
+      <button class="btn-primary" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('configModal').style.display='none'">Oke</button>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN/DAFTAR -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
+      <input type="email" id="email" placeholder="Alamat Email">
+      <input type="password" id="password" placeholder="Kata Sandi">
+      
+      <label style="font-size: 10.5px; font-weight: 800; color: var(--primary); display: block; margin-top: 2px;">Kode Sponsor Referral (Otomatis):</label>
+      <input type="text" id="referralCodeInput" readonly style="background: #f0f3fa; font-weight: 800; color: #333;">
+
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex:1;" onclick="submitLogin()">Masuk</button>
+        <button class="btn-secondary" style="flex:1;" onclick="submitSignUp()">Daftar</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('authModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL GIFT REVISI URUTAN DITAMPILKAN SULTAN ATAS -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
-      <h3>Pilih Gift Apresiasi 🎁</h3>
+      <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
+      
       <div class="gift-grid">
+        <!-- GIFT SULTAN UTAMA (DITAMPILKAN DI PUSAT ATAS REVISI) -->
+        <div class="gift-card-item" style="background:#e8eaf6; border:1px solid #c5cae9; font-weight:900;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
+        <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9; font-weight:900;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet Raksasa (400 🪙)</div>
+        <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung Meletus (300 🪙)</div>
+        <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2; font-weight:900;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai Petir (200 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
+
+        <!-- GIFT REGULER LAINNYA -->
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
+
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk Hangat (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
-        <div class="gift-card-item" style="background:#e8eaf6;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin Dulu (2 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Cokelat Empati')">🍫 Cokelat Empati (2 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Permen Manis')">🍬 Permen Manis (2 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Kamu Hebat (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga Empati (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Donat Hangat')">🍩 Donat Hangat (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Jus Segar')">🧃 Jus Segar (3 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Karya Indah (5 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Traktir Pizza')">🍕 Traktir Pizza (5 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Kue Apresiasi')">🍰 Kue Apresiasi (5 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang Cerita (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Nobar Seru')">🍿 Nobar Seru (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Kotak Kejutan')">🎁 Kotak Kejutan (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Taman Bunga')">🌸 Taman Bunga (10 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Karya Agung (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Pesta Burger (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon Harapan (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Suara Emas')">🎙️ Suara Emas (20 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser Mini (50 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala Utama (50 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(50, 'Istana Cerita')">🏰 Istana Cerita (50 🪙)</div>
+
+        <div class="gift-card-item" onclick="sendGiftAction(100, 'Kembang Api')">🎆 Kembang Api (100 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil Balap (100 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal Pesiar (100 🪙)</div>
       </div>
-      <button class="btn-secondary" style="width:100%; margin-top:10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
-  <div class="nav-bar">
-    <div class="nav-item active" onclick="switchTab('pageHome', this)"><span class="nav-icon">🏠</span><span>Beranda</span></div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)"><span class="nav-icon">🔍</span><span>Cari</span></div>
-    <div class="nav-item" onclick="switchTab('pageCreate', this)"><span class="nav-icon">➕</span><span>Buat</span></div>
-    <div class="nav-item" onclick="switchTab('pageLive', this)"><span class="nav-icon">📄</span><span>Live</span></div>
-    <div class="nav-item" onclick="switchTab('pageProfile', this)"><span class="nav-icon">🙂</span><span>Profil</span></div>
+  <!-- MODAL DOMPET & TOP-UP DANA -->
+  <div id="walletModal" class="modal">
+    <div class="modal-content">
+      <h3>🪙 Bank Koin & Top-Up Koin</h3>
+      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
+        <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">0</span> Koin</div>
+        <div><b>Nilai Setara:</b> Rp <span id="wPaidValue">0</span></div>
+      </div>
+      
+      <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
+        <b>Tujuan Pembayaran e-Wallet DANA:</b><br>
+        📱 <b>085624189461</b> (a.n CUIT Official)
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 1000)">💰 Paket Rp 1.000 (1.000 Koin)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 5000)">🎁 Paket Rp 5.000 (5.000 Koin)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px; text-align: left;" onclick="buyPackageDANA(10000, 10000)">🚀 Paket Rp 10.000 (10.000 Koin)</button>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL PENARIKAN DANA -->
+  <div id="cashoutModal" class="modal">
+    <div class="modal-content">
+      <h3>💸 Penarikan Permata CUIT</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
+
+      <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan:</label>
+      <select id="cashoutType" onchange="calcCashoutFee()">
+        <option value="dana">DANA (Biaya Admin Rp 500)</option>
+        <option value="bank">Transfer Bank (Biaya Rp 2.500 + Admin Rp 500)</option>
+      </select>
+
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
+      <input type="number" id="cashoutCoins" value="2000" oninput="calcCashoutFee()">
+
+      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
+        <div>Gross Tunai: Rp <span id="coGross">2.000</span></div>
+        <div>Total Biaya Admin: Rp <span id="coFee">500</span></div>
+        <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
+        <div><b>Bersih Diterima:</b> Rp <span id="coNet">1.500</span></div>
+      </div>
+
+      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
+      <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
+
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
+      <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
+
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
+      </div>
+    </div>
   </div>
 
   <script>
+    const CONFIG = {
+      FREE_COINS_DAILY: 20,
+      MAX_CHAR_FREE_CURHAT: 1200,
+      COIN_RATE_RP: 1,
+      DANA_NUMBER: '085624189461',
+      DEFAULT_SPONSOR: 'ADMINCUIT'
+    };
+
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let freeCoins = 20, paidCoins = 0, gems = 0, usedPaidCoins = 0;
     let currentUser = null;
+    let customDisplayName = localStorage.getItem('cuit_user_name') || 'mantanperamal';
+    let mySponsorCode = localStorage.getItem('cuit_my_sponsor') || CONFIG.DEFAULT_SPONSOR;
+    
+    let allPostsCache = [];
+    let profilesMap = {};
+    let likesStore = {};
+    let userLikedPostsSet = new Set();
+    let activeTargetPostId = null;
+    let activeCommentPostId = null;
+    let isLiveGiftContext = false;
+    let selectedLiveRecipient = null;
+    let pendingGiftData = null;
+    let followingSet = new Set();
+    let currentFeedFilter = 'semua';
+    let currentActiveLive = null;
+    let liveRealtimeChannel = null;
+    let livePollingTimer = null;
+    let isLeaderboardOpen = true;
+    let userHasLeftLive = false;
 
+    let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+    let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
+    let gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
+    let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+
+    let activeVideoSlot = null;
+    let videoTimerInterval = null;
+
+    /* FUNGSI EFEK KONFETI LEPASAN UNTUK GIFT SULTAN */
     function spawnConfetti(count, duration) {
       const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#ffd700'];
       for (let i = 0; i < count; i++) {
@@ -270,51 +984,1828 @@
           confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
           confetti.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
           document.body.appendChild(confetti);
+
           setTimeout(() => confetti.remove(), 3000);
         }, Math.random() * (duration / 2));
       }
     }
 
-    function triggerGiftAnimation(senderName, giftName, coins, targetName) {
-      const container = document.getElementById('giftOverlayContainer');
-      const banner = document.createElement('div');
-      banner.className = 'gift-banner ultimate';
-      banner.innerHTML = `<div class="icon">🌌</div><div class="text-group"><div class="sender">${senderName}</div><div class="action">Mengirimkan <b>${giftName}</b> (${coins} 🪙) untuk <b>@${targetName}</b></div></div>`;
-      container.appendChild(banner);
-      if (coins >= 50) spawnConfetti(60, 4000);
-      setTimeout(() => banner.remove(), 4000);
+    /* LOGIKA SIKLUS MINGGUAN (7 HARI) */
+    function checkWeeklyLeagueReset() {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const pastDaysOfYear = (now - startOfYear) / 86400000;
+      const currentWeekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+      
+      const lastWeekEvaluated = localStorage.getItem('cuit_last_league_week');
+
+      if (lastWeekEvaluated && parseInt(lastWeekEvaluated) !== currentWeekNumber) {
+        alert(`🏆 [LIGA 7 HARI BERAKHIR!]\n\nSiklus kompetisi mingguan telah di-reset! Para pemenang kategori Raja Sawer, Bintang Curhat, Pujangga Utama, dan Magnet Sponsor berhasil meraih Mahkota Kehormatan minggu ini! ✨\n\nRebut tahtamu di siklus baru sekarang!`);
+        localStorage.setItem('cuit_last_league_week', currentWeekNumber);
+      } else if (!lastWeekEvaluated) {
+        localStorage.setItem('cuit_last_league_week', currentWeekNumber);
+      }
+    }
+
+    /* INISIALISASI SDK FACEBOOK */
+    window.fbAsyncInit = function() {
+      FB.init({
+        xfbml: true,
+        version: 'v18.0'
+      });
+
+      FB.Event.subscribe('xfbml.ready', function(msg) {
+        if (msg.type === 'video') {
+          const fbVideoPlayer = msg.instance;
+
+          fbVideoPlayer.subscribe('startedPlaying', function() {
+            startVideoTimerAuto();
+          });
+
+          fbVideoPlayer.subscribe('paused', function() {
+            pauseVideoTimerAuto();
+          });
+        }
+      });
+    };
+
+    function initSponsorFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refParam = urlParams.get('ref');
+
+      if (refParam) {
+        const cleanRef = refParam.trim().replace(/\s+/g, '').toUpperCase();
+        localStorage.setItem('cuit_active_sponsor_ref', cleanRef);
+      } else if (!localStorage.getItem('cuit_active_sponsor_ref')) {
+        localStorage.setItem('cuit_active_sponsor_ref', CONFIG.DEFAULT_SPONSOR);
+      }
     }
 
     function switchTab(pageId, navElement) {
-      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-bar .nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
+        nav.classList.remove('active');
+        const iconBg = nav.querySelector('.nav-icon-bg');
+        if (iconBg) nav.innerHTML = nav.innerHTML.replace('<div class="nav-icon-bg">', '').replace('</div>', '');
+      });
+
+      if (pageId === 'pageLive' && currentActiveLive && !userHasLeftLive) {
+        document.body.classList.add('is-in-live');
+      } else {
+        document.body.classList.remove('is-in-live');
+      }
+
       document.getElementById(pageId).classList.add('active');
-      if (navElement) navElement.classList.add('active');
+      if (navElement) {
+        navElement.classList.add('active');
+        if (!navElement.querySelector('.nav-icon-bg')) {
+          const iconSpan = navElement.querySelector('.nav-icon');
+          if (iconSpan) iconSpan.outerHTML = `<div class="nav-icon-bg">${iconSpan.outerHTML}</div>`;
+        }
+      }
+
+      if (pageId === 'pageProfile') renderProfileData();
+      if (pageId === 'pageCreate') loadDraftLocally();
+      if (pageId === 'pageLive') loadActiveLiveSession();
+    }
+
+    function checkDailyCoinReset() {
+      const todayDate = new Date().toISOString().split('T')[0];
+      const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
+
+      if (lastResetDate !== todayDate) {
+        freeCoins = CONFIG.FREE_COINS_DAILY;
+        localStorage.setItem('cuit_last_coin_reset_date', todayDate);
+        localStorage.setItem('cuit_free_coins', freeCoins);
+      }
+    }
+
+    async function checkUser() {
+      initSponsorFromURL();
+      checkDailyCoinReset();
+      checkWeeklyLeagueReset();
+
+      const { data } = await supabaseClient.auth.getUser();
+      currentUser = data.user;
+
+      if (currentUser) {
+        const myIdentifier = currentUser.email;
+
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('email', myIdentifier)
+          .maybeSingle();
+
+        if (profile) {
+          freeCoins = profile.free_coins ?? freeCoins;
+          paidCoins = profile.paid_coins ?? paidCoins;
+          gems = profile.gems ?? gems;
+          usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
+          if (profile.username) customDisplayName = profile.username;
+          if (profile.sponsor) mySponsorCode = profile.sponsor;
+        }
+      } else {
+        let guestId = localStorage.getItem('cuit_guest_identifier');
+        if (!guestId) {
+          guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
+          localStorage.setItem('cuit_guest_identifier', guestId);
+        }
+
+        const savedName = localStorage.getItem('cuit_user_name');
+        if (!savedName || savedName === 'mantanperamal') {
+          customDisplayName = 'TemanCUIT_' + Math.floor(1000 + Math.random() * 9000);
+          localStorage.setItem('cuit_user_name', customDisplayName);
+        } else {
+          customDisplayName = savedName;
+        }
+      }
+
+      updateCoinUI();
+      
+      await loadUserLikes();
+      await loadFollows();
+      await loadPosts();
+      
+      initGlobalRealtime();
+
+      const savedLiveId = localStorage.getItem('cuit_active_live_id');
+      if (savedLiveId) {
+        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+      }
+    }
+
+    async function loadUserLikes() {
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
+
+      let query = supabaseClient.from('post_likes').select('post_id');
+      if (currentUser) {
+        query = query.eq('user_id', currentUser.id);
+      } else {
+        query = query.eq('guest_token', guestToken);
+      }
+
+      const { data: likesData } = await query;
+      if (likesData) {
+        userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
+      }
+    }
+
+    async function syncCoinsToSupabase() {
+      try {
+        localStorage.setItem('cuit_free_coins', freeCoins);
+        localStorage.setItem('cuit_paid_coins', paidCoins);
+        localStorage.setItem('cuit_gems', gems);
+        localStorage.setItem('cuit_user_exp', usedPaidCoins);
+
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
+
+        const myOwnReferralCode = (customDisplayName || 'TEMANCUIT').replace(/\s+/g, '').toUpperCase();
+
+        let activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
+          mySponsorCode = activeSponsorRef;
+        }
+
+        const profilePayload = {
+          email: myEmail,
+          username: customDisplayName || 'mantanperamal',
+          referral_code: myOwnReferralCode,
+          sponsor: mySponsorCode,
+          free_coins: freeCoins,
+          paid_coins: paidCoins,
+          gems: gems,
+          used_paid_coins: usedPaidCoins
+        };
+
+        if (currentUser && currentUser.id) {
+          profilePayload.id = currentUser.id;
+        }
+
+        await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
+      } catch (err) {
+        console.error("Gagal sync ke Supabase:", err);
+      }
+    }
+
+    function updateCoinUI() {
+      document.getElementById('freeCoinCount').innerText = freeCoins;
+      document.getElementById('paidCoinCount').innerText = paidCoins;
+      document.getElementById('gemsCount').innerText = gems;
+      syncCoinsToSupabase();
+      
+      if (document.getElementById('pageProfile').classList.contains('active')) {
+        renderProfileData();
+      }
+    }
+
+    function getUserLevel(expPoints = null) {
+      const pts = (expPoints !== null) ? parseInt(expPoints) : usedPaidCoins;
+      if (pts >= 100000) return { title: '💎 Cuiter Maestro', icon: '💎', next: null, target: 100000, color: '#5856d6' };
+      if (pts >= 25000) return { title: '👑 Cuiter Sultan', icon: '👑', next: '💎 Cuiter Maestro', target: 100000, prev: 25000, color: '#ffcc00' };
+      if (pts >= 5000) return { title: '🔥 Cuiter Aktif', icon: '🔥', next: '👑 Cuiter Sultan', target: 25000, prev: 5000, color: '#ff9500' };
+      if (pts >= 1000) return { title: '💙 Cuiter Setia', icon: '💙', next: '🔥 Cuiter Aktif', target: 5000, prev: 1000, color: '#007aff' };
+      return { title: '🌱 Cuiter Baru', icon: '🌱', next: '💙 Cuiter Setia', target: 1000, prev: 0, color: '#8e8e93' };
+    }
+
+    async function openUserProfileModal(email, name, poin) {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const isSelf = (email === myEmail);
+      
+      const lvl = getUserLevel(poin);
+      
+      document.getElementById('mName').innerText = name;
+      document.getElementById('mBadge').innerText = lvl.title;
+      document.getElementById('mBadge').style.background = lvl.color;
+      document.getElementById('mBadge').style.color = '#fff';
+      document.getElementById('mExp').innerText = `${poin} EXP`;
+
+      const { data: profile } = await supabaseClient.from('profiles').select('sponsor').eq('email', email).maybeSingle();
+      document.getElementById('mSponsorName').innerText = (profile && profile.sponsor) ? profile.sponsor : CONFIG.DEFAULT_SPONSOR;
+
+      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email);
+      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+
+      document.getElementById('mFollowers').innerText = followersCount || 0;
+      document.getElementById('mFollowing').innerText = followingCount || 0;
+
+      const followContainer = document.getElementById('mFollowActionContainer');
+      if (!isSelf) {
+        const isFollowing = followingSet.has(email);
+        followContainer.innerHTML = `
+          <button class="btn-primary" style="width:100%; ${isFollowing ? 'background:#eef1f8; color:#555;' : ''}" onclick="toggleFollowFromModal('${email}', '${name}', ${poin})">
+            ${isFollowing ? '✓ Sudah Mengikuti (Klik untuk Batal)' : '+ Ikuti Anggota Ini'}
+          </button>
+        `;
+      } else {
+        followContainer.innerHTML = `<button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('userProfileModal').style.display='none'">Tutup (Ini Akun Kamu)</button>`;
+      }
+
+      document.getElementById('userProfileModal').style.display = 'flex';
+    }
+
+    async function toggleFollowFromModal(email, name, poin) {
+      await toggleFollow(email, null);
+      openUserProfileModal(email, name, poin);
+    }
+
+    function openEditProfileModal() {
+      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      document.getElementById('editDisplayName').value = currentName;
+      document.getElementById('editProfileModal').style.display = 'flex';
+    }
+
+    async function saveProfileChanges() {
+      const newName = document.getElementById('editDisplayName').value.trim();
+      if (!newName) return alert('Nama tidak boleh kosong!');
+      
+      customDisplayName = newName;
+      localStorage.setItem('cuit_user_name', newName);
+
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
+
+      let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
+      if (currentUser) {
+        curhatUpdateQuery = curhatUpdateQuery.eq('user_id', currentUser.id);
+      } else {
+        curhatUpdateQuery = curhatUpdateQuery.eq('user_email', myEmail);
+      }
+      await curhatUpdateQuery;
+
+      document.getElementById('editProfileModal').style.display = 'none';
+      
+      updateCoinUI();
+      await syncCoinsToSupabase();
+      await loadPosts();
+      
+      alert(`Profil berhasil diperbarui!\nNama Tampilan & Postingan Lama Diperbarui ke: ${newName}\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
+    }
+
+    function copyMySponsorLink() {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      
+      const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
+      const myLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
+      
+      navigator.clipboard.writeText(myLink).then(() => {
+        alert(`Link sponsor resmi kamu berhasil disalin:\n${myLink}`);
+      }).catch(() => {
+        prompt('Salin link sponsor kamu di bawah ini:', myLink);
+      });
+    }
+
+    function downloadAPK() {
+      const apkUrl = 'https://github.com/yayanhadiyanto24-ops/cuit-app/raw/refs/heads/main/cuit.apk';
+      window.open(apkUrl, '_blank');
+    }
+
+    function saveDraftLocally() {
+      const content = document.getElementById('postContent').value.trim();
+      if (!content) return alert('Teks curhatan masih kosong!');
+      localStorage.setItem('cuit_draft_content', content);
+      alert('Draf berhasil disimpan di HP!');
+    }
+
+    function loadDraftLocally() {
+      const draft = localStorage.getItem('cuit_draft_content');
+      if (draft && !document.getElementById('postContent').value) {
+        document.getElementById('postContent').value = draft;
+        updateCharCount(document.getElementById('postContent'));
+      }
+    }
+
+    function toggleCurhatLimit() {
+      const textarea = document.getElementById('postContent');
+      const coins = Math.ceil((textarea.value.length || 1) / 1200);
+      const type = document.getElementById('curhatCoinType').value;
+      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
+      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
+    }
+
+    function updateCharCount(textarea) {
+      const coins = Math.ceil(textarea.value.length / 1200) || 1;
+      const type = document.getElementById('curhatCoinType').value;
+      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
+      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
+    }
+
+    async function submitNewPost() {
+      if (!currentUser) {
+        const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        document.getElementById('referralCodeInput').value = activeSponsor;
+        document.getElementById('authModal').style.display = 'flex';
+        
+        alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
+        return;
+      }
+
+      const type = document.getElementById('curhatCoinType').value;
+      const content = document.getElementById('postContent').value.trim();
+      const feeling = document.getElementById('postFeeling').value;
+
+      if (!content) return alert('Isi cerita tidak boleh kosong!');
+
+      const coinsNeeded = Math.ceil(content.length / 1200);
+
+      if (type === 'free') {
+        if (freeCoins < coinsNeeded) {
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
+        }
+        freeCoins -= coinsNeeded;
+      } else {
+        if (paidCoins < coinsNeeded) {
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
+        }
+        paidCoins -= coinsNeeded;
+        usedPaidCoins += coinsNeeded;
+      }
+
+      updateCoinUI();
+
+      const authorName = customDisplayName || currentUser.email.split('@')[0];
+
+      const { error } = await supabaseClient.from('curhat').insert([
+        { 
+          content, 
+          user_id: currentUser.id, 
+          user_email: currentUser.email, 
+          username: authorName, 
+          feeling, 
+          likes_count: 0, 
+          comments_count: 0, 
+          gifts_count: 0 
+        }
+      ]);
+
+      if (!error) {
+        localStorage.removeItem('cuit_draft_content');
+        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
+        document.getElementById('postContent').value = '';
+        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      } else {
+        alert('Gagal mengirim: ' + error.message);
+      }
     }
 
     async function loadPosts() {
       const container = document.getElementById('postsList');
-      const { data } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
-      
-      if (data && data.length > 0) {
-        container.innerHTML = data.map(p => `
-          <div class="post-card">
-            <div style="font-weight:800; font-size:13px; margin-bottom:4px;">${p.username || 'Pengguna CUIT'}</div>
-            <div style="font-size:12px; line-height:1.4;">${p.content}</div>
-          </div>
-        `).join('');
+      const promotedCarousel = document.getElementById('promotedCarousel');
+      const promotedSection = document.getElementById('promotedSection');
 
-        const sorted = [...data].sort((a,b) => (b.likes_count||0) - (a.likes_count||0));
-        if (sorted[0]) {
-          document.getElementById('champCurhatName').innerText = sorted[0].username || 'Penulis';
-          document.getElementById('champCurhatScore').innerText = `${sorted[0].likes_count||0} Suka`;
+      try {
+        const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins, username');
+        if (profilesData) {
+          profilesMap = {};
+          profilesData.forEach(pr => {
+            if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
+            if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+          });
+
+          // UPDATE OTOMATIS TAMPILAN CHAMPION DI PANGGUNG
+          if (profilesData.length > 0) {
+            const sortedByCoins = [...profilesData].sort((a,b) => (b.used_paid_coins||0) - (a.used_paid_coins||0));
+            if (sortedByCoins[0]) {
+              document.getElementById('champSawerName').innerText = sortedByCoins[0].username || 'Sultan';
+              document.getElementById('champSawerScore').innerText = `${sortedByCoins[0].used_paid_coins||0} 🪙`;
+            }
+          }
         }
-      } else {
-        container.innerHTML = '<p style="text-align:center; font-size:12px;">Belum ada curhatan di beranda.</p>';
+
+        const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
+
+        if (error || !data || data.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
+          allPostsCache = [];
+          return;
+        }
+
+        allPostsCache = data;
+
+        // Peringkat Bintang Curhat Paling Banyak Disukai
+        const sortedPostsByLikes = [...data].sort((a,b) => (b.likes_count||0) - (a.likes_count||0));
+        if (sortedPostsByLikes[0]) {
+          document.getElementById('champCurhatName').innerText = sortedPostsByLikes[0].username || 'Penulis';
+          document.getElementById('champCurhatScore').innerText = `${sortedPostsByLikes[0].likes_count||0} Suka`;
+        }
+
+        const nowMs = Date.now();
+        const activePromotions = data.filter(p => {
+          if (!p.is_promoted || !p.promoted_until) return false;
+          const expiryMs = new Date(p.promoted_until).getTime();
+          return expiryMs > nowMs;
+        });
+
+        if (activePromotions.length > 0) {
+          let cardsHTML = '';
+          activePromotions.forEach(post => {
+            let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
+            let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
+            
+            let authorPoin = 0;
+            if (post.user_id && profilesMap[post.user_id] !== undefined) {
+              authorPoin = profilesMap[post.user_id];
+            } else if (post.user_email && profilesMap[post.user_email] !== undefined) {
+              authorPoin = profilesMap[post.user_email];
+            } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
+              authorPoin = usedPaidCoins;
+            }
+
+            const userLvl = getUserLevel(authorPoin);
+
+            cardsHTML += `
+              <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
+                <div style="position: relative; width: 26px; height: 26px;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
+                    🤍
+                  </div>
+                  <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
+                    ${userLvl.icon}
+                  </div>
+                </div>
+
+                <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
+                  ${snippet}
+                </div>
+
+                <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${rawName}
+                </div>
+              </div>
+            `;
+          });
+
+          if (cardsHTML !== '') {
+            promotedSection.style.display = 'block';
+            promotedCarousel.innerHTML = cardsHTML;
+          } else {
+            promotedSection.style.display = 'none';
+          }
+        } else {
+          promotedSection.style.display = 'none';
+        }
+
+        renderFilteredFeed();
+      } catch (err) {
+        console.error("Error loading posts:", err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan tekan tombol Refresh.</p>';
       }
     }
 
-    loadPosts();
+    function renderFilteredFeed() {
+      const container = document.getElementById('postsList');
+      let filteredData = allPostsCache;
+
+      if (currentFeedFilter === 'mengikuti') {
+        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
+      }
+
+      if (filteredData.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">${currentFeedFilter === 'mengikuti' ? 'Belum ada curhatan dari member yang kamu ikuti.' : 'Belum ada curhatan di beranda.'}</p>`;
+        return;
+      }
+
+      container.innerHTML = filteredData.map(p => renderCardHTML(p)).join('');
+    }
+
+    function openPromotedDetail(postId) {
+      const post = allPostsCache.find(p => String(p.id) === String(postId));
+      if (!post) return;
+
+      const modalContent = document.getElementById('promotedDetailContent');
+      modalContent.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:11px; font-weight:800; color:#e67e22;">🚀 POSTINGAN SOROTAN</span>
+          <button onclick="document.getElementById('promotedDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+        </div>
+        ${renderCardHTML(post)}
+      `;
+      
+      document.getElementById('promotedDetailModal').style.display = 'flex';
+    }
+
+    async function promotePost(postId) {
+      const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
+      if (hours <= 0) return;
+
+      if (paidCoins < hours) {
+        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
+      }
+
+      const nowMs = Date.now();
+      const expiryMs = nowMs + (hours * 3600 * 1000);
+      const expiryISO = new Date(expiryMs).toISOString();
+
+      const { error } = await supabaseClient
+        .from('curhat')
+        .update({
+          is_promoted: true,
+          promoted_until: expiryISO
+        })
+        .eq('id', postId);
+
+      if (error) {
+        return alert('Gagal mempromosikan postingan: ' + error.message);
+      }
+
+      paidCoins -= hours;
+      usedPaidCoins += hours;
+      updateCoinUI();
+
+      alert(`Postingan berhasil dipromosikan ke barisan Sorotan secara GLOBAL selama ${hours} jam! (+${hours} EXP Jam Terbang)`);
+      loadPosts();
+    }
+
+    function renderCardHTML(p) {
+      let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
+      let feelingTag = p.feeling || 'Bahagia';
+      const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
+      
+      const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
+      const commentsCount = p.comments_count ?? 0;
+      const giftsCoinsCount = p.gifts_count ?? 0;
+      const isLiked = userLikedPostsSet.has(String(p.id));
+      
+      let authorPoin = 0;
+      if (p.user_id && profilesMap[p.user_id] !== undefined) {
+        authorPoin = profilesMap[p.user_id];
+      } else if (p.user_email && profilesMap[p.user_email] !== undefined) {
+        authorPoin = profilesMap[p.user_email];
+      } else if (currentUser && (currentUser.id === p.user_id || currentUser.email === p.user_email)) {
+        authorPoin = usedPaidCoins;
+      }
+
+      const userLvl = getUserLevel(authorPoin);
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const isSelf = (p.user_email === myEmail);
+      const isFollowing = followingSet.has(p.user_email);
+
+      return `
+        <div class="post-card">
+          <div class="post-header">
+            <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
+              <div class="avatar-container">
+                <div class="avatar-circle">🤍</div>
+                <div class="level-badge-icon">${userLvl.icon}</div>
+              </div>
+              <div class="user-details">
+                <div class="user-name-row">
+                  <span class="user-name">${rawName}</span>
+                  ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+                </div>
+                <div class="badge-row">
+                  <span class="btn-sm-badge" style="background:${userLvl.color}; color:#fff;">${userLvl.title}</span>
+                  <span class="btn-sm-badge tag-${cleanTag}">${feelingTag}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <button class="btn-secondary" style="padding: 3px 6px; border-radius: 6px; font-size:10px;" onclick="alert('Laporan dikirim!')">🚩</button>
+              <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+            </div>
+          </div>
+          <div class="post-body">${p.content}</div>
+          <span class="btn-sm-badge badge-publik">🌐 Publik</span>
+          <div class="post-footer-actions">
+            <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#6c5ce7; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+            <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
+            <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
+            <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleFollow(targetEmail, btn) {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      if (!targetEmail || targetEmail === myEmail) return;
+
+      if (followingSet.has(targetEmail)) {
+        followingSet.delete(targetEmail);
+        await supabaseClient.from('follows').delete().eq('follower_email', myEmail).eq('following_email', targetEmail);
+      } else {
+        followingSet.add(targetEmail);
+        await supabaseClient.from('follows').insert([{ follower_email: myEmail, following_email: targetEmail }]);
+      }
+
+      await updateFollowCounts(myEmail, targetEmail);
+      loadPosts();
+      renderProfileData();
+    }
+
+    async function loadFollows() {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const { data: followsData } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
+      if (followsData) {
+        followingSet = new Set(followsData.map(f => f.following_email));
+      }
+    }
+
+    async function updateFollowCounts(myEmail, targetEmail) {
+      const { count: myFollowing } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+      await supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail);
+
+      const { count: targetFollowers } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail);
+      await supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail);
+    }
+
+    function initGlobalRealtime() {
+      supabaseClient.channel('realtime_curhat')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'curhat' }, () => {
+          loadPosts();
+        }).subscribe();
+    }
+
+    async function toggleLike(postId) {
+      let guestToken = localStorage.getItem('cuit_guest_token');
+      if (!guestToken) {
+        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+        localStorage.setItem('cuit_guest_token', guestToken);
+      }
+
+      const strPostId = String(postId);
+
+      let checkQuery = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
+      if (currentUser) {
+        checkQuery = checkQuery.eq('user_id', currentUser.id);
+      } else {
+        checkQuery = checkQuery.eq('guest_token', guestToken);
+      }
+
+      const { data: existingLike } = await checkQuery.maybeSingle();
+      const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
+      let currentLikes = (currentPost && currentPost.likes_count) || 0;
+
+      if (existingLike || userLikedPostsSet.has(strPostId)) {
+        userLikedPostsSet.delete(strPostId);
+        const newLikeCount = Math.max(0, currentLikes - 1);
+        if (currentPost) currentPost.likes_count = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+        
+        loadPosts();
+
+        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
+        if (currentUser) delQuery = delQuery.eq('user_id', currentUser.id);
+        else delQuery = delQuery.eq('guest_token', guestToken);
+        
+        await delQuery;
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+
+      } else {
+        userLikedPostsSet.add(strPostId);
+        const newLikeCount = currentLikes + 1;
+        if (currentPost) currentPost.likes_count = newLikeCount;
+        likesStore[strPostId] = newLikeCount;
+        
+        loadPosts();
+
+        await supabaseClient.from('post_likes').insert([
+          { post_id: postId, user_id: currentUser ? currentUser.id : null, guest_token: currentUser ? null : guestToken }
+        ]);
+
+        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+      }
+    }
+
+    async function openCommentsModal(postId) {
+      activeCommentPostId = postId;
+      const listContainer = document.getElementById('commentsList');
+      document.getElementById('commentsModal').style.display = 'flex';
+      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>';
+
+      const { data: comments } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: true });
+
+      if (!comments || comments.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 20px;">Belum ada komentar. Jadi yang pertama berkomentar!</p>';
+        return;
+      }
+
+      listContainer.innerHTML = comments.map(c => `
+        <div style="background: #f8f9fe; padding: 8px 10px; border-radius: 12px; border: 1px solid #eef1f8;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+            <span style="font-weight: 800; font-size: 11px; color: var(--text-main);">${c.username || 'Pengguna'}</span>
+            <span style="font-size: 9px; color: var(--text-sub);">${new Date(c.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+          </div>
+          <div style="font-size: 12px; color: #2c2e43; word-break: break-word;">${c.content}</div>
+        </div>
+      `).join('');
+    }
+
+    async function submitCommentAction() {
+      const input = document.getElementById('commentInputText');
+      const comm = input.value.trim();
+      if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
+
+      const coinsNeeded = Math.ceil(comm.length / 1200);
+
+      if (freeCoins >= coinsNeeded) {
+        freeCoins -= coinsNeeded;
+      } else if (paidCoins >= coinsNeeded) {
+        paidCoins -= coinsNeeded;
+        usedPaidCoins += coinsNeeded;
+      } else {
+        return alert(`Komentar membutuhkan ${coinsNeeded} Koin. Saldo koin kamu tidak cukup!`);
+      }
+
+      updateCoinUI();
+
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const authorEmail = currentUser ? currentUser.email : guestId;
+
+      const { error } = await supabaseClient.from('comments').insert([
+        {
+          post_id: activeCommentPostId,
+          content: comm,
+          user_id: currentUser ? currentUser.id : 'demo_id',
+          user_email: authorEmail,
+          username: authorName
+        }
+      ]);
+
+      if (!error) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
+        const newCount = ((currentPost && currentPost.comments_count) || 0) + 1;
+        if (currentPost) currentPost.comments_count = newCount;
+
+        await supabaseClient.from('curhat').update({ comments_count: newCount }).eq('id', activeCommentPostId);
+
+        input.value = '';
+        openCommentsModal(activeCommentPostId);
+        loadPosts();
+      } else {
+        alert('Gagal mengirim komentar: ' + error.message);
+      }
+    }
+
+    function openGiftModal(postId) {
+      activeTargetPostId = postId;
+      isLiveGiftContext = false;
+      document.getElementById('giftModal').style.display = 'flex';
+    }
+
+    async function openLiveGiftModal() {
+      if (!currentActiveLive) return alert('Tidak ada Live aktif!');
+      
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      const { data: messages } = await supabaseClient
+        .from('live_messages')
+        .select('username')
+        .eq('live_id', currentActiveLive.id);
+
+      const container = document.getElementById('liveRecipientsList');
+      let recipientsMap = new Map();
+
+      if (currentActiveLive.host_name !== myName && currentActiveLive.host_email !== myEmail) {
+        recipientsMap.set(currentActiveLive.host_name, currentActiveLive.host_email);
+      }
+
+      if (messages) {
+        messages.forEach(m => {
+          if (m.username !== myName && !recipientsMap.has(m.username)) {
+            recipientsMap.set(m.username, m.username);
+          }
+        });
+      }
+
+      if (recipientsMap.size === 0) {
+        return alert('Belum ada penonton atau host lain di room ini untuk diberi gift!');
+      }
+
+      let html = '';
+      recipientsMap.forEach((emailOrName, name) => {
+        const isHost = (name === currentActiveLive.host_name);
+        html += `
+          <button class="btn-secondary" style="width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; padding:8px 12px;" onclick="chooseLiveRecipient('${name}', '${emailOrName}')">
+            <span><b>${name}</b> ${isHost ? '👑 (Host)' : '👤 (Penonton)'}</span>
+            <span style="font-size:10px; color:var(--primary);">Pilih →</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('selectLiveRecipientModal').style.display = 'flex';
+    }
+
+    function chooseLiveRecipient(name, emailOrName) {
+      selectedLiveRecipient = { name, emailOrName };
+      document.getElementById('selectLiveRecipientModal').style.display = 'none';
+      isLiveGiftContext = true;
+      document.getElementById('giftModal').style.display = 'flex';
+    }
+
+    function sendGiftAction(cost, giftName) {
+      if (paidCoins < cost) return alert('Saldo Bank Koin Berbayar tidak mencukupi!');
+
+      pendingGiftData = { cost, giftName };
+
+      document.getElementById('confirmGiftText').innerHTML = `
+        Kamu yakin ingin mengirimkan <b>Gift ${giftName}</b> seharga <b>${cost} Koin Berbayar</b> (Rp ${cost.toLocaleString('id-ID')})?
+      `;
+
+      document.getElementById('giftModal').style.display = 'none';
+      document.getElementById('confirmGiftModal').style.display = 'flex';
+    }
+
+    /* FUNGSI SAWER / GIFT DENGAN ANIMASI POP-UP & CONFETTI HASIL REVISI SULTAN */
+    async function executeSendGift() {
+      if (!pendingGiftData) return;
+
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+
+      if (!isLiveGiftContext && activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+        if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+          document.getElementById('confirmGiftModal').style.display = 'none';
+          pendingGiftData = null;
+          return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
+        }
+      }
+
+      const { cost, giftName } = pendingGiftData;
+
+      paidCoins -= cost;
+      usedPaidCoins += cost;
+      updateCoinUI();
+
+      // Tutup Modal Konfirmasi Terlebih Dahulu Agar Animasi Terlihat Jelas
+      document.getElementById('confirmGiftModal').style.display = 'none';
+
+      if (isLiveGiftContext && currentActiveLive) {
+        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+
+        await supabaseClient.from('live_messages').insert([
+          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+        ]);
+
+        await supabaseClient.rpc('process_gift_rewards', {
+          p_creator_identifier: String(targetIdentifier),
+          p_cost: parseInt(cost)
+        });
+
+        // Panggil Animasi di Live
+        triggerGiftAnimation(myName, giftName, cost, targetName);
+
+      } else if (activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+
+        if (currentPost) {
+          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+          currentPost.gifts_count = newGiftCoinsCount;
+
+          await supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId);
+
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+          const targetName = currentPost.username || "Pembuat Curhat";
+
+          await supabaseClient.rpc('process_gift_rewards', {
+            p_creator_identifier: String(targetIdentifier),
+            p_cost: parseInt(cost)
+          });
+
+          // Panggil Animasi Pop-Up & Confetti dengan Nama Target Asli
+          triggerGiftAnimation(myName, giftName, cost, targetName);
+        }
+        loadPosts();
+      }
+
+      pendingGiftData = null;
+      selectedLiveRecipient = null;
+    }
+
+    function triggerGiftAnimation(senderName, giftName, coins, targetName) {
+      const container = document.getElementById('giftOverlayContainer');
+      const banner = document.createElement('div');
+      
+      let sizeClass = 'small';
+      let icon = '🎁';
+
+      const iconsMap = {
+        'Badai Petir': '⚡',
+        'Gunung Meletus': '🌋',
+        'Komet Raksasa': '☄️',
+        'Supernova': '🌌'
+      };
+
+      let stayDuration = 3000;
+
+      if (coins >= 500) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '🌌';
+        stayDuration = 15000; // 15 Detik melayang murni ala TikTok!
+        spawnConfetti(100, stayDuration);
+      } else if (coins >= 400) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '☄️';
+        stayDuration = 12000;
+        spawnConfetti(80, stayDuration);
+      } else if (coins >= 300) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '🌋';
+        stayDuration = 10000;
+        spawnConfetti(70, stayDuration);
+      } else if (coins >= 200) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '⚡';
+        stayDuration = 8000;
+        spawnConfetti(50, stayDuration);
+      } else if (coins >= 50) {
+        sizeClass = 'large';
+        icon = '👑';
+        stayDuration = 6000;
+        spawnConfetti(30, stayDuration);
+      } else if (coins >= 5) {
+        sizeClass = 'medium';
+        icon = '🌟';
+        stayDuration = 4500;
+      }
+
+      banner.className = `gift-banner ${sizeClass}`;
+      
+      if (sizeClass === 'ultimate') {
+        banner.style.animation = 'ultimatePopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate';
+      } else {
+        banner.style.animation = 'giftPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+      }
+
+      banner.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      
+      banner.innerHTML = `
+        <div class="icon">${icon}</div>
+        <div class="text-group">
+          <div class="sender">${senderName}</div>
+          <div class="action">Mengirimkan <b>${giftName}</b> (${coins} 🪙) untuk <b>@${targetName}</b></div>
+        </div>
+      `;
+
+      container.appendChild(banner);
+
+      setTimeout(() => {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(-30px) scale(0.6)';
+        setTimeout(() => banner.remove(), 800);
+      }, stayDuration);
+    }
+
+    function toggleLeaderboard() {
+      isLeaderboardOpen = !isLeaderboardOpen;
+      const lbList = document.getElementById('liveLeaderboardList');
+      const iconSpan = document.getElementById('lbToggleIcon');
+
+      if (isLeaderboardOpen) {
+        lbList.style.display = 'flex';
+        iconSpan.innerText = '▲ Sembunyikan';
+      } else {
+        lbList.style.display = 'none';
+        iconSpan.innerText = '▼ Tampilkan';
+      }
+    }
+
+    function leaveLiveSession() {
+      userHasLeftLive = true;
+      cleanupLiveSesssion();
+      
+      document.getElementById('liveChatBox').style.display = 'none';
+      document.getElementById('btnStartLiveHeader').style.display = 'block';
+      document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
+      
+      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+    }
+
+    async function loadActiveLiveSession() {
+      const { data: activeLive } = await supabaseClient
+        .from('lives')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const statusBox = document.getElementById('liveStatusBox');
+      const chatBox = document.getElementById('liveChatBox');
+      const btnHeader = document.getElementById('btnStartLiveHeader');
+
+      if (activeLive) {
+        const nowMs = Date.now();
+        const createdMs = new Date(activeLive.created_at).getTime();
+        const expiryMs = activeLive.ended_at ? new Date(activeLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
+
+        if (nowMs >= expiryMs) {
+          await supabaseClient.from('lives').update({ is_active: false }).eq('id', activeLive.id);
+          cleanupLiveSesssion();
+          statusBox.innerHTML = `Sesi Live Teks telah berakhir otomatis (Batas waktu 60 menit tercapai).`;
+          chatBox.style.display = 'none';
+          btnHeader.style.display = 'block';
+          return;
+        }
+
+        currentActiveLive = activeLive;
+        localStorage.setItem('cuit_active_live_id', activeLive.id);
+
+        const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
+        const isHost = activeLive.host_email === myEmail;
+
+        if (userHasLeftLive && !isHost) {
+          statusBox.innerHTML = `
+            <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 ADA LIVE BERJALAN (${remainingMinutes} mnt tersisa)</div>
+            <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
+            <button class="btn-primary" style="margin-top:6px;" onclick="reJoinLiveSession()">💬 Masuk Ruang Live</button>
+          `;
+          chatBox.style.display = 'none';
+          btnHeader.style.display = 'none';
+          return;
+        }
+
+        document.body.classList.add('is-in-live');
+        statusBox.innerHTML = `
+          <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
+          <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
+          <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
+            ${isHost ? `<button class="btn-primary" style="background:#ff7675; padding:4px 12px;" onclick="stopLiveSession('${activeLive.id}')">Akhiri Live</button>` : ''}
+            <button class="btn-secondary" style="background:#e0e0e0; color:#333; padding:4px 12px;" onclick="leaveLiveSession()">🚪 Keluar Live</button>
+          </div>
+        `;
+
+        chatBox.style.display = 'flex';
+        btnHeader.style.display = 'none';
+        
+        loadLiveMessages(activeLive.id);
+        subscribeToLiveRealtime(activeLive.id);
+
+        if (livePollingTimer) clearInterval(livePollingTimer);
+        livePollingTimer = setInterval(() => {
+          if (currentActiveLive) loadActiveLiveSession();
+        }, 5000);
+
+      } else {
+        cleanupLiveSesssion();
+        statusBox.innerHTML = `Belum ada Live aktif. Kamu bisa mencoba memulai jika level dan saldo memenuhi syarat.`;
+        chatBox.style.display = 'none';
+        btnHeader.style.display = 'block';
+      }
+    }
+
+    function reJoinLiveSession() {
+      userHasLeftLive = false;
+      loadActiveLiveSession();
+    }
+
+    function cleanupLiveSesssion() {
+      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
+      if (livePollingTimer) clearInterval(livePollingTimer);
+      currentActiveLive = null;
+      localStorage.removeItem('cuit_active_live_id');
+      document.body.classList.remove('is-in-live');
+    }
+
+    let processedMsgIds = new Set();
+
+    function subscribeToLiveRealtime(liveId) {
+      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
+
+      liveRealtimeChannel = supabaseClient
+        .channel(`live_room_${liveId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_messages', filter: `live_id=eq.${liveId}` }, payload => {
+          const newMsg = payload.new;
+          
+          if (!processedMsgIds.has(newMsg.id)) {
+            processedMsgIds.add(newMsg.id);
+
+            if (newMsg.content.includes('🎁 Mengirimkan Gift')) {
+              const matchCoins = newMsg.content.match(/\((\d+)\s*🪙\)/);
+              const matchGiftName = newMsg.content.match(/Gift\s+([^(]+)/);
+              const matchTarget = newMsg.content.match(/untuk\s+@(.+)/);
+
+              const coins = matchCoins ? parseInt(matchCoins[1]) : 1;
+              const giftName = matchGiftName ? matchGiftName[1].trim() : 'Gift';
+              const targetName = matchTarget ? matchTarget[1].trim() : 'Host';
+
+              triggerGiftAnimation(newMsg.username, giftName, coins, targetName);
+            }
+          }
+
+          loadLiveMessages(liveId);
+        })
+        .subscribe();
+    }
+
+    async function startLiveTeks() {
+      const userLvl = getUserLevel();
+      if (userLvl.title === '🌱 Cuiter Baru') return alert('Syarat membuat Live Teks minimal level 💙 Cuiter Setia!');
+      if (paidCoins < 10) return alert('Minimal saldo 10 Koin Berbayar untuk siaran Live Teks!');
+
+      const title = prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
+      if (!title) return;
+
+      paidCoins -= 10;
+      usedPaidCoins += 10;
+      updateCoinUI();
+
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      const nowMs = Date.now();
+      const maxLiveMs = nowMs + (60 * 60 * 1000);
+      const endedAtISO = new Date(maxLiveMs).toISOString();
+
+      const { data, error } = await supabaseClient.from('lives').insert([
+        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO }
+      ]).select().single();
+
+      if (!error) {
+        userHasLeftLive = false;
+        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit. (Terpakai 10 Koin Berbayar & +10 EXP)');
+        loadActiveLiveSession();
+      } else {
+        alert('Gagal memulai Live: ' + error.message);
+      }
+    }
+
+    async function stopLiveSession(liveId) {
+      if (!confirm('Yakin ingin mengakhiri sesi Live ini?')) return;
+
+      await supabaseClient.from('lives').update({ is_active: false }).eq('id', liveId);
+      alert('Sesi Live telah diakhiri.');
+      cleanupLiveSesssion();
+      loadActiveLiveSession();
+    }
+
+    async function loadLiveMessages(liveId) {
+      const messagesList = document.getElementById('liveMessagesList');
+      const leaderboardList = document.getElementById('liveLeaderboardList');
+
+      const { data: messages } = await supabaseClient
+        .from('live_messages')
+        .select('*')
+        .eq('live_id', liveId)
+        .order('created_at', { ascending: true });
+
+      if (!messages || messages.length === 0) {
+        messagesList.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Belum ada pesan di ruang Live.</p>';
+        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
+        return;
+      }
+
+      let supporterMap = {};
+      messages.forEach(m => {
+        if (m.content.includes('🎁 Mengirimkan Gift')) {
+          const match = m.content.match(/\((\d+)\s*🪙\)/);
+          if (match) {
+            const coins = parseInt(match[1]) || 0;
+            supporterMap[m.username] = (supporterMap[m.username] || 0) + coins;
+          }
+        }
+      });
+
+      let sortedSupporters = Object.keys(supporterMap)
+        .map(user => ({ user, coins: supporterMap[user] }))
+        .sort((a, b) => b.coins - a.coins);
+
+      if (sortedSupporters.length > 0) {
+        const medals = ['🥇', '🥈', '🥉'];
+        leaderboardList.innerHTML = sortedSupporters.map((s, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ffe082; padding-bottom: 2px;">
+            <span><b>${medals[idx] || '🏅'} ${s.user}</b></span>
+            <span style="font-weight: 800; color: #d35400;">${s.coins} 🪙</span>
+          </div>
+        `).join('');
+      } else {
+        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
+      }
+
+      messagesList.innerHTML = messages.map(m => {
+        const isGiftMsg = m.content.includes('🎁 Mengirimkan Gift');
+        return `
+          <div style="background: ${isGiftMsg ? '#fff8e1' : '#ffffff'}; padding: 6px 10px; border-radius: 10px; border: 1px solid ${isGiftMsg ? '#ffe082' : '#e2e7f5'}; font-size: 11px;">
+            <b style="color: var(--primary);">${m.username}:</b> <span style="${isGiftMsg ? 'font-weight: 800; color: #d35400;' : ''}">${m.content}</span>
+          </div>
+        `;
+      }).join('');
+
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    function applyQuickChat(text) {
+      const input = document.getElementById('liveInputMessage');
+      input.value = text;
+      sendLiveMessage();
+    }
+
+    async function sendLiveMessage() {
+      const input = document.getElementById('liveInputMessage');
+      const msg = input.value.trim();
+      if (!msg || !currentActiveLive) return;
+
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+
+      await supabaseClient.from('live_messages').insert([
+        { live_id: currentActiveLive.id, username: myName, content: msg }
+      ]);
+
+      input.value = '';
+    }
+
+    function filterByTag(tagName) {
+      document.getElementById('searchInput').value = tagName;
+      switchTab('pageSearch', document.querySelectorAll('.nav-bar .nav-item')[1]);
+      document.getElementById('mainSearchFilter').value = tagName;
+      searchPosts();
+    }
+
+    function filterPosts(type, btn) {
+      document.querySelectorAll('.pills-group .pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFeedFilter = type;
+      renderFilteredFeed();
+    }
+
+    async function searchPosts() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filterType = document.getElementById('mainSearchFilter').value;
+      const container = document.getElementById('searchResults');
+
+      if (filterType === 'top_level' || filterType === 'top_sawer') {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
+        const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
+        
+        if (!topUsers || topUsers.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
+          return;
+        }
+
+        const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+        container.innerHTML = topUsers.map((u, idx) => {
+          const lvl = getUserLevel(u.used_paid_coins || 0);
+          const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
+          return `
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">${rankIcons[idx]}</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 13px;">${name}</div>
+                  <div style="font-size: 10px; color: var(--text-sub);">${lvl.title}</div>
+                </div>
+              </div>
+              <div style="font-weight: 900; font-size: 12px; color: var(--primary);">${u.used_paid_coins || 0} EXP</div>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      if (filterType === 'top_followers' || filterType === 'top_sponsor') {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Data Rangking...</p>';
+        const { data: topFollowed } = await supabaseClient.from('profiles').select('*').order('followers_count', { ascending: false }).limit(10);
+        
+        if (!topFollowed || topFollowed.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
+          return;
+        }
+
+        const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+        container.innerHTML = topFollowed.map((u, idx) => {
+          const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
+          return `
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">${rankIcons[idx]}</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 13px;">${name}</div>
+                  <div style="font-size: 10px; color: var(--text-sub);">${u.followers_count || 0} Pengikut</div>
+                </div>
+              </div>
+              <button class="btn-follow" style="padding: 4px 10px;">Lihat Profil</button>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      let filtered = allPostsCache.filter(p => {
+        const matchesQuery = !query || (p.content && p.content.toLowerCase().includes(query)) || (p.username && p.username.toLowerCase().includes(query));
+        const matchesFeeling = (filterType === 'all') || (p.feeling && p.feeling.includes(filterType));
+        return matchesQuery && matchesFeeling;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tidak ditemukan curhatan yang sesuai.</p>';
+      } else {
+        container.innerHTML = filtered.map(p => renderCardHTML(p)).join('');
+      }
+    }
+
+    function openWalletModal() {
+      document.getElementById('wPaidCoin').innerText = paidCoins;
+      document.getElementById('wPaidValue').innerText = (paidCoins * CONFIG.COIN_RATE_RP).toLocaleString('id-ID');
+      document.getElementById('walletModal').style.display = 'flex';
+    }
+
+    function openAboutModal() {
+      document.getElementById('aboutModal').style.display = 'flex';
+    }
+
+    function buyPackageDANA(price, coins) {
+      const intentUrl = `intent://qr/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}#Intent;scheme=dana;package=id.dana;end`;
+      window.location.href = intentUrl;
+
+      setTimeout(async () => {
+        if (confirm(`Apakah Anda telah menyelesaikan pembayaran sebesar Rp ${price.toLocaleString('id-ID')} di aplikasi DANA?\n\nKlik "OK" untuk menambahkan ${coins} Koin Berbayar ke akun Anda.`)) {
+          paidCoins += coins;
+          
+          const expBonus = Math.floor(coins * 0.10);
+          usedPaidCoins += expBonus;
+
+          updateCoinUI();
+          await syncCoinsToSupabase();
+
+          openWalletModal();
+          alert(`Top-Up Berhasil!\n+${coins.toLocaleString('id-ID')} Koin Berbayar ditambahkan.\n+${expBonus.toLocaleString('id-ID')} EXP diperoleh (10% Bonus Top-Up).`);
+        }
+      }, 1000);
+    }
+
+    function openCashoutModal() {
+      calcCashoutFee();
+      document.getElementById('cashoutModal').style.display = 'flex';
+    }
+
+    function calcCashoutFee() {
+      const type = document.getElementById('cashoutType').value;
+      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+      const gross = coins * 1;
+      const fee = type === 'bank' ? 3000 : 500;
+      const net = Math.max(0, gross - fee);
+
+      document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
+      document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
+      document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
+    }
+
+    async function submitCashout() {
+      const type = document.getElementById('cashoutType').value;
+      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+      const accountName = document.getElementById('cashoutAccountName').value.trim();
+      const account = document.getElementById('cashoutAccount').value.trim();
+
+      if (coins < 1000) return alert('Minimum penarikan adalah 1.000 Permata CUIT (Rp 1.000)!');
+      if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
+      
+      if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
+      if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
+
+      const gross = coins * 1;
+      const fee = type === 'bank' ? 3000 : 500;
+      const netAmount = Math.max(0, gross - fee);
+
+      try {
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
+
+        await supabaseClient.from('payouts').insert([
+          {
+            user_id: currentUser ? currentUser.id : 'demo_id',
+            user_email: myEmail,
+            payout_type: type,
+            account_name: accountName,
+            account_number: account,
+            coins_deducted: coins,
+            net_amount: netAmount,
+            status: 'pending'
+          }
+        ]);
+
+        gems -= coins;
+        updateCoinUI();
+        document.getElementById('cashoutModal').style.display = 'none';
+
+        document.getElementById('cashoutAccountName').value = '';
+        document.getElementById('cashoutAccount').value = '';
+
+        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
+      } catch (err) {
+        alert('Terjadi kesalahan proses penarikan: ' + err.message);
+      }
+    }
+
+    function openModerationPanel() {
+      const userLvl = getUserLevel();
+      if (userLvl.title === '🌱 Cuiter Baru' || userLvl.title === '💙 Cuiter Setia') {
+        return alert('Akses Panel Moderasi terbuka mulai dari Level 🔥 Cuiter Aktif!');
+      }
+      alert('Panel Moderasi Aktif: Anda memiliki hak akses meninjau laporan curhatan!');
+    }
+
+    function openCommunityModal() {
+      const userLvl = getUserLevel();
+      if (userLvl.title === '🌱 Cuiter Baru') {
+        return alert('Fitur membuat Komunitas terbuka mulai dari Level 💙 Cuiter Setia!');
+      }
+      alert('Selamat! Anda dapat membuat Komunitas CUIT baru.');
+    }
+
+    function openConfigModal() {
+      document.getElementById('configModal').style.display = 'flex';
+    }
+
+    /* FUNGSI RENDER DATA PROFIL DENGAN STATISTIK LENGKAP */
+    async function renderProfileData() {
+      const userLvl = getUserLevel();
+      const displayName = customDisplayName || 'mantanperamal';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      document.getElementById('profName').innerText = displayName;
+      document.getElementById('profBadgeIcon').innerText = userLvl.icon;
+      document.getElementById('profLevelTitle').innerText = userLvl.title;
+      document.getElementById('profLevelTitle').style.background = userLvl.color;
+      document.getElementById('profLevelTitle').style.color = '#fff';
+      document.getElementById('profExp').innerText = `${usedPaidCoins} EXP`;
+
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+      const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (displayName.replace(/\s+/g, '').toUpperCase());
+
+      const fullSponsorLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
+      document.getElementById('displaySponsorLink').innerText = fullSponsorLink;
+
+      document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
+
+      // 1. Ambil data Pengikut & Mengikuti
+      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
+      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+
+      document.getElementById('profFollowers').innerText = followersCount || 0;
+      document.getElementById('profFollowing').innerText = followingCount || 0;
+
+      // 2. Ambil data Downline Langsung
+      const { count: downlinesCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`);
+      document.getElementById('profDownlines').innerText = downlinesCount || 0;
+
+      // 3. Ambil data Jumlah Postingan
+      let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
+      if (currentUser) {
+        postQuery = postQuery.eq('user_id', currentUser.id);
+      } else {
+        postQuery = postQuery.eq('user_email', myEmail);
+      }
+      const { count: postsCount } = await postQuery;
+      document.getElementById('profPostsCount').innerText = postsCount || 0;
+
+      // 4. Khusus Admin: Ambil Total Seluruh Member
+      const adminMemberCard = document.getElementById('adminTotalMemberCard');
+      if (isAdmin) {
+        adminMemberCard.style.display = 'block';
+        const { count: totalMembers } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true });
+        document.getElementById('profTotalMembers').innerText = totalMembers || 0;
+      } else {
+        adminMemberCard.style.display = 'none';
+      }
+
+      // Progress bar level
+      const progressBar = document.getElementById('levelProgressBar');
+      const nextInfo = document.getElementById('levelNextInfo');
+
+      if (!userLvl.next) {
+        progressBar.style.width = '100%';
+        nextInfo.innerText = 'Level Maksimal Cuiter!';
+      } else {
+        const range = userLvl.target - userLvl.prev;
+        const currentProgress = usedPaidCoins - userLvl.prev;
+        const percentage = Math.min(100, Math.max(0, (currentProgress / range) * 100));
+        const needed = userLvl.target - usedPaidCoins;
+
+        progressBar.style.width = `${percentage}%`;
+        nextInfo.innerText = `${needed.toLocaleString('id-ID')} EXP lagi menuju ${userLvl.next}`;
+      }
+
+      if (currentUser) {
+        document.getElementById('authBtnLogout').innerText = 'Keluar Akun';
+      } else {
+        document.getElementById('authBtnLogout').innerText = 'Masuk / Daftar';
+      }
+    }
+
+    function normalizeFbUrl(url) {
+      if (!url) return '';
+      let clean = url.trim();
+      clean = clean.replace('m.facebook.com', 'www.facebook.com')
+                   .replace('mobile.facebook.com', 'www.facebook.com');
+      return clean;
+    }
+
+    async function openReelsModal() {
+      const container = document.getElementById('reelsListContainer');
+      document.getElementById('reelsModal').style.display = 'flex';
+      container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat 10 misi video...</p>';
+
+      const { data: missions } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
+      let links = {};
+
+      if (missions && missions.length > 0) {
+        missions.forEach(m => {
+          links[`v${m.id}`] = m.facebook_url || '';
+        });
+      }
+
+      let html = '';
+      for (let i = 1; i <= 10; i++) {
+        const slotKey = `v${i}`;
+        const url = links[slotKey] || '';
+        const isValid = url && url.trim().length > 5 && url !== 'null';
+
+        html += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
+            <span style="font-weight: 800; font-size: 12px; color: #333;">🎬 Video ${i}</span>
+            <button ${isValid ? `onclick="playEmbeddedVideo('${url}', '${slotKey}')"` : 'disabled'} 
+              style="background: ${isValid ? '#1877f2' : '#ccc'}; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: ${isValid ? 'pointer' : 'not-allowed'};">
+              ${isValid ? 'Tonton & Klaim +10 🪙' : 'Belum Ada Video'}
+            </button>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function playEmbeddedVideo(targetUrl, slot) {
+      if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
+        return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
+      }
+
+      activeVideoSlot = slot;
+
+      const reelsModal = document.getElementById('reelsModal');
+      if (reelsModal) reelsModal.style.display = 'none';
+
+      let rawUrl = normalizeFbUrl(targetUrl);
+      if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+        rawUrl = 'https://' + rawUrl;
+      }
+
+      const frameContainer = document.getElementById('videoFrameContainer');
+      
+      frameContainer.innerHTML = `
+        <div class="fb-video" 
+          data-href="${rawUrl}" 
+          data-width="360" 
+          data-show-text="false" 
+          data-autoplay="false" 
+          data-allowfullscreen="true">
+        </div>
+      `;
+
+      if (window.FB) {
+        FB.XFBML.parse(frameContainer);
+      }
+
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose) {
+        btnClose.disabled = true;
+        btnClose.style.opacity = '0.5';
+        btnClose.style.cursor = 'not-allowed';
+        btnClose.style.background = '#e74c3c';
+        btnClose.innerText = '⏳ Tekan Play di Video';
+      }
+
+      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!';
+
+      if (videoTimerInterval) {
+        clearInterval(videoTimerInterval);
+        videoTimerInterval = null;
+      }
+
+      const playerModal = document.getElementById('videoPlayerModal');
+      if (playerModal) playerModal.style.display = 'flex';
+    }
+
+    let videoSecondsLeft = 10;
+
+    function startVideoTimerAuto() {
+      const btnClose = document.getElementById('btnCloseVideo');
+      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar! Harap tonton selama 10 detik...';
+
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
+
+      videoTimerInterval = setInterval(() => {
+        videoSecondsLeft--;
+        if (btnClose && videoSecondsLeft > 0) {
+          btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)`;
+        } else {
+          clearInterval(videoTimerInterval);
+          videoTimerInterval = null;
+          if (btnClose) {
+            btnClose.disabled = false;
+            btnClose.style.opacity = '1';
+            btnClose.style.cursor = 'pointer';
+            btnClose.style.background = '#2ecc71';
+            btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+          }
+          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai! Klik tombol hijau di atas untuk klaim koin gratisan.';
+        }
+      }, 1000);
+    }
+
+    function pauseVideoTimerAuto() {
+      if (videoTimerInterval) {
+        clearInterval(videoTimerInterval);
+        videoTimerInterval = null;
+      }
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose && videoSecondsLeft > 0) {
+        btnClose.innerText = '⏸️ Video Di-pause';
+        document.getElementById('videoTimerStatusText').innerText = '⚠️ Video di-pause! Lanjutkan pemutaran video untuk melanjutkan timer.';
+      }
+    }
+
+    function claimVideoRewardAndClose() {
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose.disabled) return;
+
+      document.getElementById('videoPlayerModal').style.display = 'none';
+      document.getElementById('videoFrameContainer').innerHTML = '';
+
+      freeCoins += 10;
+      updateCoinUI();
+
+      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+
+      if (activeVideoSlot === 'v10') {
+        alert('🚀 Luar biasa! Kamu telah menyelesaikan putaran 10 Video. Seluruh video terbuka kembali untuk ditonton lagi!');
+      }
+
+      videoSecondsLeft = 10;
+      openReelsModal();
+    }
+
+    async function openAdminModal() {
+      try {
+        const { data } = await supabaseClient
+          .from('reels_missions')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (data && data.length > 0) {
+          data.forEach(item => {
+            const inputElem = document.getElementById(`adminVideo${item.id}`);
+            if (inputElem) inputElem.value = item.facebook_url || '';
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil reels_missions:", err);
+      }
+      
+      const modal = document.getElementById('adminReelsModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      } else {
+        alert('Modal Admin tidak ditemukan!');
+      }
+    }
+
+    async function saveAdminReelsLinks() {
+      try {
+        for (let i = 1; i <= 10; i++) {
+          const inputElem = document.getElementById(`adminVideo${i}`);
+          let urlVal = inputElem ? inputElem.value.trim() : '';
+
+          urlVal = normalizeFbUrl(urlVal);
+
+          await supabaseClient
+            .from('reels_missions')
+            .upsert({ 
+              id: i, 
+              slot_name: `Video ${i}`, 
+              facebook_url: urlVal 
+            }, { onConflict: 'id' });
+        }
+
+        alert('✅ Link 10 Video Reels FB berhasil disimpan ke Database Supabase!');
+        document.getElementById('adminReelsModal').style.display = 'none';
+
+      } catch (err) {
+        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+      }
+    }
+
+    function handleAuthAction() {
+      if (currentUser) {
+        supabaseClient.auth.signOut().then(() => {
+          localStorage.removeItem('cuit_user_name');
+          localStorage.removeItem('cuit_free_coins');
+          localStorage.removeItem('cuit_paid_coins');
+          localStorage.removeItem('cuit_gems');
+          localStorage.removeItem('cuit_user_exp');
+          alert('Berhasil keluar akun!');
+          location.reload();
+        });
+      } else {
+        const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        document.getElementById('referralCodeInput').value = activeSponsor;
+        document.getElementById('authModal').style.display = 'flex';
+      }
+    }
+
+    async function submitLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (!error) {
+        document.getElementById('authModal').style.display = 'none';
+        checkUser();
+      } else alert('Gagal masuk: ' + error.message);
+    }
+
+    async function submitSignUp() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const sponsorCode = document.getElementById('referralCodeInput').value || CONFIG.DEFAULT_SPONSOR;
+
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (!error) {
+        const username = email.split('@')[0];
+        await supabaseClient.from('profiles').upsert([
+          {
+            id: data.user ? data.user.id : undefined,
+            email: email,
+            username: username,
+            sponsor: sponsorCode,
+            free_coins: 20,
+            paid_coins: 0,
+            gems: 0,
+            used_paid_coins: 0
+          }
+        ]);
+
+        alert(`Pendaftaran berhasil! Sponsor kamu: ${sponsorCode}. Silakan masuk.`);
+      } else alert('Error: ' + error.message);
+    }
+
+    checkUser();
   </script>
 </body>
 </html>
