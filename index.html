@@ -1527,11 +1527,14 @@
         document.getElementById('champPujanggaScore').innerText = `${maxPosts} Post`;
 
         const nowMs = Date.now();
-        const activePromotions = data.filter(p => {
-          if (!p.is_promoted || !p.promoted_until) return false;
-          const expiryMs = new Date(p.promoted_until).getTime();
-          return expiryMs > nowMs;
-        });
+        const activePromotions = data
+  .filter(p => {
+    if (!p.is_promoted || !p.promoted_until) return false;
+    const expiryMs = new Date(p.promoted_until).getTime();
+    return expiryMs > nowMs;
+  })
+  .sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
+
 
         if (activePromotions.length > 0) {
           let cardsHTML = '';
