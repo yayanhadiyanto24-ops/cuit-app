@@ -1792,21 +1792,120 @@
 
             // 2. Tambah 10% permata ke sponsor (pencarian fleksibel)
             const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-            const { data: sponsorProfile } = await supabaseClient
-              .from('profiles')
-              .select('id, gems')
-              .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
-              .limit(1)
-              .maybeSingle();
+/* FUNGSI SAWER / GIFT DENGAN PERBAIKAN PERMATA SPONSOR (TUNTAS) */
+async function executeSendGift() {
+  if (!pendingGiftData) return;
 
-            if (sponsorProfile) {
-              await supabaseClient
-                .from('profiles')
-                .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
-                .eq('id', sponsorProfile.id);
-            }
-          }
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
+  const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+
+  if (!isLiveGiftContext && activeTargetPostId) {
+    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+    if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+      document.getElementById('confirmGiftModal').style.display = 'none';
+      pendingGiftData = null;
+      return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
+    }
+  }
+
+  const { cost, giftName } = pendingGiftData;
+
+  paidCoins -= cost;
+  usedPaidCoins += cost;
+  updateCoinUI();
+  document.getElementById('confirmGiftModal').style.display = 'none';
+
+  const creatorGems = Math.floor(cost * 0.50);
+  const sponsorGems = Math.floor(cost * 0.10);
+
+  if (isLiveGiftContext && currentActiveLive) {
+    const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+    const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+
+    await supabaseClient.from('live_messages').insert([
+      { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+    ]);
+
+    const { data: creatorProfile } = await supabaseClient
+      .from('profiles')
+      .select('gems, sponsor')
+      .eq('email', targetIdentifier)
+      .maybeSingle();
+
+    if (creatorProfile) {
+      await supabaseClient
+        .from('profiles')
+        .update({ gems: (creatorProfile.gems || 0) + creatorGems })
+        .eq('email', targetIdentifier);
+
+      const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
+      
+      // Pencarian sponsor yang akurat
+      const { data: sponsorProfile } = await supabaseClient
+        .from('profiles')
+        .select('id, gems')
+        .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode}`)
+        .limit(1)
+        .maybeSingle();
+
+      if (sponsorProfile) {
+        await supabaseClient
+          .from('profiles')
+          .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
+          .eq('id', sponsorProfile.id);
+      }
+    }
+  } else if (activeTargetPostId) {
+    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+
+    if (currentPost) {
+      const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+      currentPost.gifts_count = newGiftCoinsCount;
+
+      await supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId);
+
+      const targetIdentifier = currentPost.user_id || currentPost.user_email;
+
+      const { data: creatorProfile } = await supabaseClient
+        .from('profiles')
+        .select('gems, sponsor')
+        .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+        .maybeSingle();
+
+      if (creatorProfile) {
+        // 1. Tambah 50% permata ke pembuat curhatan
+        await supabaseClient
+          .from('profiles')
+          .update({ gems: (creatorProfile.gems || 0) + creatorGems })
+          .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+
+        // 2. Tambah 10% permata ke sponsor
+        const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
+        
+        const { data: sponsorProfile } = await supabaseClient
+          .from('profiles')
+          .select('id, gems')
+          .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode}`)
+          .limit(1)
+          .maybeSingle();
+
+        if (sponsorProfile) {
+          await supabaseClient
+            .from('profiles')
+            .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
+            .eq('id', sponsorProfile.id);
         }
+      }
+    }
+    loadPosts();
+    triggerGiftAnimation(myName, giftName, cost, "Penulis");
+  }
+
+  pendingGiftData = null;
+  selectedLiveRecipient = null;
+}
+
         loadPosts();
         triggerGiftAnimation(myName, giftName, cost, "Penulis");
       }
