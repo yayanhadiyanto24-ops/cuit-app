@@ -18,57 +18,30 @@ jobs:
 
     steps:
       - name: Ambil kode CUIT
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Siapkan Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: 'zulu'
           java-version: '17'
 
       - name: Siapkan Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '18'
 
-      - name: Siapkan folder www
+      - name: Install Dependensi & Build APK Android
         run: |
-          mkdir -p www
-          cp index.html www/index.html
-          if [ -f banner.png ]; then cp banner.png www/; fi
-          if [ -f icon.png ]; then cp icon.png www/; fi
-
-      - name: Buat Proyek Capacitor dan Generate Icon
-        run: |
-          npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets
-
-          # Siapkan folder assets untuk ikon
-          mkdir -p assets
-          if [ -f icon.png ]; then
-            cp icon.png assets/icon-only.png
-            cp icon.png assets/icon-foreground.png
-            cp icon.png assets/icon-background.png
-          fi
-
-          npx cap init "CUIT" "com.cuit.app" --web-dir www
-          npx cap add android
-
-          # Bikin ikon Android otomatis dari icon.png
-          if [ -f icon.png ]; then
-            npx capacitor-assets generate --android
-          fi
-
+          npm install -g @capacitor/cli
+          npm install
           npx cap sync android
-
-      - name: Build APK Android
-        run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Simpan APK Hasil Build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: CUIT-APK
+          name: cuit-release-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
