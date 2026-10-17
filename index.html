@@ -980,7 +980,6 @@
 
       updateCoinUI();
       
-      // WAJIB KUNCI LIKES SEBELUM RENDER
       await loadUserLikes();
       await loadFollows();
       await loadPosts();
@@ -993,7 +992,6 @@
       }
     }
 
-    /* BACA STATUS LIKE SECARA KONSISTEN DARI DATABASE */
     async function loadUserLikes() {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1015,42 +1013,42 @@
     }
 
     async function syncCoinsToSupabase() {
-  localStorage.setItem('cuit_free_coins', freeCoins);
-  localStorage.setItem('cuit_paid_coins', paidCoins);
-  localStorage.setItem('cuit_gems', gems);
-  localStorage.setItem('cuit_user_exp', usedPaidCoins);
+      try {
+        localStorage.setItem('cuit_free_coins', freeCoins);
+        localStorage.setItem('cuit_paid_coins', paidCoins);
+        localStorage.setItem('cuit_gems', gems);
+        localStorage.setItem('cuit_user_exp', usedPaidCoins);
 
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
 
-  // Kode referral unik milik user sendiri (Downline link)
-  const myOwnReferralCode = customDisplayName.replace(/\s+/g, '').toUpperCase();
+        const myOwnReferralCode = (customDisplayName || 'TEMANCUIT').replace(/\s+/g, '').toUpperCase();
 
-  const profilePayload = {
-    email: myEmail,
-    username: customDisplayName || 'mantanperamal',
-    referral_code: myOwnReferralCode, // Kode referral milik sendiri
-    free_coins: freeCoins,
-    paid_coins: paidCoins,
-    gems: gems,
-    used_paid_coins: usedPaidCoins
-  };
+        let activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
+          mySponsorCode = activeSponsorRef;
+        }
 
-  if (currentUser && currentUser.id) {
-    profilePayload.id = currentUser.id;
-  }
+        const profilePayload = {
+          email: myEmail,
+          username: customDisplayName || 'mantanperamal',
+          referral_code: myOwnReferralCode,
+          sponsor: mySponsorCode,
+          free_coins: freeCoins,
+          paid_coins: paidCoins,
+          gems: gems,
+          used_paid_coins: usedPaidCoins
+        };
 
-  // Cari sponsor asli dari penampung pendaftaran/URL
-  const activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
-  
-  // Jika sponsor di database belum ada atau tidak valid, gunakan activeSponsorRef
-  if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
-    profilePayload.sponsor = activeSponsorRef;
-    mySponsorCode = activeSponsorRef;
-  }
+        if (currentUser && currentUser.id) {
+          profilePayload.id = currentUser.id;
+        }
 
-  await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
-}
+        await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
+      } catch (err) {
+        console.error("Gagal sync ke Supabase:", err);
+      }
+    }
 
     function updateCoinUI() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
@@ -1085,7 +1083,7 @@
       document.getElementById('mBadge').style.color = '#fff';
       document.getElementById('mExp').innerText = `${poin} EXP`;
 
-      const { data: profile } = await supabaseClient.from('profiles').select('sponsor').eq('email', email).single();
+      const { data: profile } = await supabaseClient.from('profiles').select('sponsor').eq('email', email).maybeSingle();
       document.getElementById('mSponsorName').innerText = (profile && profile.sponsor) ? profile.sponsor : CONFIG.DEFAULT_SPONSOR;
 
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email);
@@ -1131,9 +1129,6 @@
       const myEmail = currentUser ? currentUser.email : guestId;
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
-      
-      mySponsorCode = myNewReferralCode;
-      localStorage.setItem('cuit_my_sponsor', myNewReferralCode);
 
       let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
       if (currentUser) {
@@ -1491,6 +1486,15 @@
       renderProfileData();
     }
 
+    async function loadFollows() {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const { data: followsData } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
+      if (followsData) {
+        followingSet = new Set(followsData.map(f => f.following_email));
+      }
+    }
+
     async function updateFollowCounts(myEmail, targetEmail) {
       const { count: myFollowing } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
       await supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail);
@@ -1506,7 +1510,6 @@
         }).subscribe();
     }
 
-    /* PERBAIKAN LIKE BERULANG DENGAN PENGECEKAN DIRECT KE DATABASE */
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1705,7 +1708,7 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* FUNGSI SAWER / GIFT DENGAN PERBAIKAN PERMATA SPONSOR (BERSIH & TUNTAS) */
+    /* FUNGSI SAWER / GIFT DENGAN DATABASE RPC (100% PASTI LANCAR) */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -1729,9 +1732,6 @@
       updateCoinUI();
       document.getElementById('confirmGiftModal').style.display = 'none';
 
-      const creatorGems = Math.floor(cost * 0.50);
-      const sponsorGems = Math.floor(cost * 0.10);
-
       if (isLiveGiftContext && currentActiveLive) {
         const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
         const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
@@ -1740,33 +1740,11 @@
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
 
-        const { data: creatorProfile } = await supabaseClient
-          .from('profiles')
-          .select('gems, sponsor')
-          .eq('email', targetIdentifier)
-          .maybeSingle();
+        await supabaseClient.rpc('process_gift_rewards', {
+          p_creator_identifier: String(targetIdentifier),
+          p_cost: parseInt(cost)
+        });
 
-        if (creatorProfile) {
-          await supabaseClient
-            .from('profiles')
-            .update({ gems: (creatorProfile.gems || 0) + creatorGems })
-            .eq('email', targetIdentifier);
-
-          const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-          const { data: sponsorProfile } = await supabaseClient
-            .from('profiles')
-            .select('id, gems')
-            .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
-            .limit(1)
-            .maybeSingle();
-
-          if (sponsorProfile) {
-            await supabaseClient
-              .from('profiles')
-              .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
-              .eq('id', sponsorProfile.id);
-          }
-        }
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
 
@@ -1778,35 +1756,10 @@
 
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
 
-          const { data: creatorProfile } = await supabaseClient
-            .from('profiles')
-            .select('gems, sponsor')
-            .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-            .maybeSingle();
-
-          if (creatorProfile) {
-            // 1. Tambah 50% permata ke pembuat curhatan
-            await supabaseClient
-              .from('profiles')
-              .update({ gems: (creatorProfile.gems || 0) + creatorGems })
-              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
-
-            // 2. Tambah 10% permata ke sponsor (pencarian fleksibel)
-            const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-            const { data: sponsorProfile } = await supabaseClient
-              .from('profiles')
-              .select('id, gems')
-              .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
-              .limit(1)
-              .maybeSingle();
-
-            if (sponsorProfile) {
-              await supabaseClient
-                .from('profiles')
-                .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
-                .eq('id', sponsorProfile.id);
-            }
-          }
+          await supabaseClient.rpc('process_gift_rewards', {
+            p_creator_identifier: String(targetIdentifier),
+            p_cost: parseInt(cost)
+          });
         }
         loadPosts();
         triggerGiftAnimation(myName, giftName, cost, "Penulis");
@@ -1893,7 +1846,7 @@
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       const statusBox = document.getElementById('liveStatusBox');
       const chatBox = document.getElementById('liveChatBox');
@@ -2572,7 +2525,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
       }
     }
 
