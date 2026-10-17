@@ -1819,7 +1819,7 @@
       selectedLiveRecipient = null;
     }
 
-    function triggerGiftAnimation(senderName, giftName, coins, targetName) {
+        function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
       const banner = document.createElement('div');
       
@@ -1833,20 +1833,44 @@
         'Supernova': '🌌'
       };
 
-      if (coins >= 200) {
+      // Hitung durasi dinamis berdasarkan jumlah koin (semakin banyak koin, semakin lama)
+      // Dasar durasi: 3.5 detik, bertambah sesuai tingkat nominal koin
+      let displayDuration = 3500;
+
+      if (coins >= 500) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '🌌';
-        spawnConfetti();
+        displayDuration = 12000; // 12 detik untuk 500 koin (Supernova)
+        spawnConfetti(100, displayDuration);
+      } else if (coins >= 400) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '☄️';
+        displayDuration = 10000; // 10 detik untuk 400 koin (Komet Raksasa)
+        spawnConfetti(80, displayDuration);
+      } else if (coins >= 300) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '🌋';
+        displayDuration = 8500;  // 8.5 detik untuk 300 koin (Gunung Meletus)
+        spawnConfetti(70, displayDuration);
+      } else if (coins >= 200) {
+        sizeClass = 'ultimate';
+        icon = iconsMap[giftName] || '⚡';
+        displayDuration = 7000;  // 7 detik untuk 200 koin (Badai Petir)
+        spawnConfetti(50, displayDuration);
       } else if (coins >= 50) {
         sizeClass = 'large';
         icon = '👑';
-        spawnConfetti();
+        displayDuration = 5500;  // 5.5 detik untuk 50 koin
+        spawnConfetti(30, displayDuration);
       } else if (coins >= 5) {
         sizeClass = 'medium';
         icon = '🌟';
+        displayDuration = 4000;  // 4 detik untuk 5-20 koin
       }
 
       banner.className = `gift-banner ${sizeClass}`;
+      banner.style.animationDuration = `0.8s, gradientBg 1.5s, giftPopOut 0.5s ease-in ${displayDuration - 500}ms`;
+      
       banner.innerHTML = `
         <div class="icon">${icon}</div>
         <div class="text-group">
@@ -1859,21 +1883,25 @@
 
       setTimeout(() => {
         banner.remove();
-      }, coins >= 200 ? 7500 : (coins >= 50 ? 6000 : (coins >= 5 ? 4500 : 3500)));
+      }, displayDuration);
     }
 
-    function spawnConfetti() {
+    function spawnConfetti(amount = 40, durationMs = 4000) {
       const colors = ['#f1c40f', '#e74c3c', '#9b59b6', '#2ecc71', '#3498db', '#e67e22', '#ff007f', '#ffd700'];
-      for (let i = 0; i < 50; i++) {
+      const durationInSeconds = durationMs / 1000;
+
+      for (let i = 0; i < amount; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + 'vw';
         confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + (durationInSeconds - 1)) + 's';
         document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 4000);
+        
+        setTimeout(() => confetti.remove(), durationMs);
       }
     }
+
 
     function toggleLeaderboard() {
       isLeaderboardOpen = !isLeaderboardOpen;
