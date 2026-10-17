@@ -215,6 +215,67 @@
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
+  <!-- PANGGUNG JUARA LIGA 7 HARI (Di Bawah Banner Utama) -->
+  <div style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
+        🏆 PANGGUNG JUARA LIGA 7 HARI
+      </span>
+      <span style="font-size: 9px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 8px; color: #cbd5e1;">
+        Bergulir Mingguan
+      </span>
+    </div>
+
+    <!-- Carousel Para Pemenang -->
+    <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;">
+      
+      <!-- 1. JUARA RAJA SAWER -->
+      <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center;">
+        <div style="font-size: 9px; font-weight: 800; color: #fde047; margin-bottom: 4px; white-space: nowrap;">👑 Raja Sawer</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fde047;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">👑</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #fef08a; font-weight: 700; margin-top: 2px;" id="champSawerScore">0 🪙</div>
+      </div>
+
+      <!-- 2. JUARA BINTANG CURHAT -->
+      <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 12px; padding: 8px 6px; text-align: center;">
+        <div style="font-size: 9px; font-weight: 800; color: #93c5fd; margin-bottom: 4px; white-space: nowrap;">🌟 Bintang Curhat</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #60a5fa;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">🔥</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #bfdbfe; font-weight: 700; margin-top: 2px;" id="champCurhatScore">0 Suka</div>
+      </div>
+
+      <!-- 3. JUARA PUJANGGA UTAMA -->
+      <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 12px; padding: 8px 6px; text-align: center;">
+        <div style="font-size: 9px; font-weight: 800; color: #86efac; margin-bottom: 4px; white-space: nowrap;">✍️ Pujangga Utama</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #4ade80;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💙</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
+        <div style="font-size: 8.5px; color: #bbf7d0; font-weight: 700; margin-top: 2px;" id="champPujanggaScore">0 Post</div>
+      </div>
+
+      <!-- 4. JUARA MAGNET SPONSOR -->
+      <div style="min-width: 95px; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 12px; padding: 8px 6px; text-align: center;">
+        <div style="font-size: 9px; font-weight: 800; color: #fbcfe8; margin-bottom: 4px; white-space: nowrap;">🧲 Magnet Sponsor</div>
+        <div style="position: relative; width: 34px; height: 34px; margin: 0 auto 4px auto;">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #f472b6;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 9px;">💎</div>
+        </div>
+        <div style="font-size: 10px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
+        <div style="font-size: 8.5px; color: #fbcfe8; font-weight: 700; margin-top: 2px;" id="champSponsorScore">Utama</div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
@@ -911,6 +972,23 @@
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
+    /* FUNGSI EFEK KONFETI LEPASAN UNTUK GIFT SULTAN */
+    function spawnConfetti(count, duration) {
+      const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#ffd700'];
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+          document.body.appendChild(confetti);
+
+          setTimeout(() => confetti.remove(), 3000);
+        }, Math.random() * (duration / 2));
+      }
+    }
+
     /* LOGIKA SIKLUS MINGGUAN (7 HARI) */
     function checkWeeklyLeagueReset() {
       const now = new Date();
@@ -1325,13 +1403,22 @@
       const promotedSection = document.getElementById('promotedSection');
 
       try {
-        const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins');
+        const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins, username');
         if (profilesData) {
           profilesMap = {};
           profilesData.forEach(pr => {
             if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
             if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
           });
+
+          // UPDATE OTOMATIS TAMPILAN CHAMPION DI PANGGUNG
+          if (profilesData.length > 0) {
+            const sortedByCoins = [...profilesData].sort((a,b) => (b.used_paid_coins||0) - (a.used_paid_coins||0));
+            if (sortedByCoins[0]) {
+              document.getElementById('champSawerName').innerText = sortedByCoins[0].username || 'Sultan';
+              document.getElementById('champSawerScore').innerText = `${sortedByCoins[0].used_paid_coins||0} 🪙`;
+            }
+          }
         }
 
         const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
@@ -1343,6 +1430,13 @@
         }
 
         allPostsCache = data;
+
+        // Peringkat Bintang Curhat Paling Banyak Disukai
+        const sortedPostsByLikes = [...data].sort((a,b) => (b.likes_count||0) - (a.likes_count||0));
+        if (sortedPostsByLikes[0]) {
+          document.getElementById('champCurhatName').innerText = sortedPostsByLikes[0].username || 'Penulis';
+          document.getElementById('champCurhatScore').innerText = `${sortedPostsByLikes[0].likes_count||0} Suka`;
+        }
 
         const nowMs = Date.now();
         const activePromotions = data.filter(p => {
