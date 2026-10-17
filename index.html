@@ -872,17 +872,14 @@
         version: 'v18.0'
       });
 
-      // Deteksi otomatis saat pemutar video FB di dalam modal siap
       FB.Event.subscribe('xfbml.ready', function(msg) {
         if (msg.type === 'video') {
           const fbVideoPlayer = msg.instance;
 
-          // Timer HANYA otomatis berjalan saat tombol play video ditekan
           fbVideoPlayer.subscribe('startedPlaying', function() {
             startVideoTimerAuto();
           });
 
-          // Timer otomatis dipause jika video di-pause
           fbVideoPlayer.subscribe('paused', function() {
             pauseVideoTimerAuto();
           });
@@ -941,7 +938,6 @@
       }
     }
 
-    /* FUNGSI CHECKUSER DENGAN PROTEKSI SINKRONISASI SALDO & HASIL PERBAIKAN */
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
@@ -983,9 +979,12 @@
       }
 
       updateCoinUI();
+      
+      // WAJIB KUNCI LIKES SEBELUM RENDER
       await loadUserLikes();
       await loadFollows();
-      loadPosts();
+      await loadPosts();
+      
       initGlobalRealtime();
 
       const savedLiveId = localStorage.getItem('cuit_active_live_id');
@@ -994,7 +993,7 @@
       }
     }
 
-    /* PERBAIKAN 1: BACA LIKES SECARA KONSISTEN BERSAMAAN DENGAN ID / TOKEN GUEST */
+    /* BACA STATUS LIKE SECARA KONSISTEN DARI DATABASE */
     async function loadUserLikes() {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1120,7 +1119,6 @@
       document.getElementById('editProfileModal').style.display = 'flex';
     }
 
-    /* PERBAIKAN 3: EDIT PROFIL MEMPERBARUI NAMA TAMPILAN PADA RIWAYAT POSTINGAN LAMA DI CURHAT */
     async function saveProfileChanges() {
       const newName = document.getElementById('editDisplayName').value.trim();
       if (!newName) return alert('Nama tidak boleh kosong!');
@@ -1136,7 +1134,6 @@
       mySponsorCode = myNewReferralCode;
       localStorage.setItem('cuit_my_sponsor', myNewReferralCode);
 
-      // PERBAIKAN BUG NAMA: Perbarui kolom username pada seluruh postingan lama milik pengguna ini di database Supabase
       let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
       if (currentUser) {
         curhatUpdateQuery = curhatUpdateQuery.eq('user_id', currentUser.id);
@@ -1149,7 +1146,7 @@
       
       updateCoinUI();
       await syncCoinsToSupabase();
-      await loadPosts(); // Muat ulang feed agar nama postingan lama langsung ter-refresh
+      await loadPosts();
       
       alert(`Profil berhasil diperbarui!\nNama Tampilan & Postingan Lama Diperbarui ke: ${newName}\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
     }
@@ -1508,7 +1505,7 @@
         }).subscribe();
     }
 
-    /* PERBAIKAN 1: PERBAIKAN BUG LIKE BERULANG DENGAN PENJAGAAN STATE DB TERKUNCI */
+    /* PERBAIKAN LIKE BERULANG DENGAN PENGECEKAN DIRECT KE DATABASE */
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1517,11 +1514,19 @@
       }
 
       const strPostId = String(postId);
-      const isLiked = userLikedPostsSet.has(strPostId);
+
+      let checkQuery = supabaseClient.from('post_likes').select('id').eq('post_id', postId);
+      if (currentUser) {
+        checkQuery = checkQuery.eq('user_id', currentUser.id);
+      } else {
+        checkQuery = checkQuery.eq('guest_token', guestToken);
+      }
+
+      const { data: existingLike } = await checkQuery.maybeSingle();
       const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
       let currentLikes = (currentPost && currentPost.likes_count) || 0;
 
-      if (isLiked) {
+      if (existingLike || userLikedPostsSet.has(strPostId)) {
         userLikedPostsSet.delete(strPostId);
         const newLikeCount = Math.max(0, currentLikes - 1);
         if (currentPost) currentPost.likes_count = newLikeCount;
@@ -1699,107 +1704,116 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* PERBAIKAN 2: PENCARIAN SPONSOR DIUBAH MENJADI CASE-INSENSITIVE (`ilike`) AGAR PERMATA SELALU MASUK */
-    /* FUNGSI SAWER / GIFT DENGAN PERBAIKAN PERMATA SPONSOR */
-async function executeSendGift() {
-  if (!pendingGiftData) return;
+    /* FUNGSI SAWER / GIFT DENGAN PERBAIKAN PERMATA SPONSOR (TUNTAS) */
+    async function executeSendGift() {
+      if (!pendingGiftData) return;
 
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
-  const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
 
-  if (!isLiveGiftContext && activeTargetPostId) {
-    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-    if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
-      document.getElementById('confirmGiftModal').style.display = 'none';
-      pendingGiftData = null;
-      return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
-    }
-  }
-
-  const { cost, giftName } = pendingGiftData;
-
-  paidCoins -= cost;
-  usedPaidCoins += cost;
-  updateCoinUI();
-  document.getElementById('confirmGiftModal').style.display = 'none';
-
-  const creatorGems = Math.floor(cost * 0.50);
-  const sponsorGems = Math.floor(cost * 0.10);
-
-  if (isLiveGiftContext && currentActiveLive) {
-    const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
-    const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
-
-    await supabaseClient.from('live_messages').insert([
-      { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
-    ]);
-
-    const { data: creatorProfile } = await supabaseClient.from('profiles').select('gems, sponsor').eq('email', targetIdentifier).maybeSingle();
-    if (creatorProfile) {
-      await supabaseClient.from('profiles').update({ gems: (creatorProfile.gems || 0) + creatorGems }).eq('email', targetIdentifier);
-
-      const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-      
-      // PERBAIKAN: Pencarian fleksibel agar permata sponsor 10% selalu berhasil masuk
-      const { data: sponsorProfile } = await supabaseClient
-        .from('profiles')
-        .select('id, gems')
-        .or(`sponsor.ilike.${sponsorCode},username.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
-        .maybeSingle();
-
-      if (sponsorProfile) {
-        await supabaseClient.from('profiles').update({ gems: (sponsorProfile.gems || 0) + sponsorGems }).eq('id', sponsorProfile.id);
-      }
-    }
-  } else if (activeTargetPostId) {
-    const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-
-    if (currentPost) {
-      const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
-      currentPost.gifts_count = newGiftCoinsCount;
-
-      await supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId);
-
-      const targetIdentifier = currentPost.user_id || currentPost.user_email;
-
-      const { data: creatorProfile } = await supabaseClient
-        .from('profiles')
-        .select('gems, sponsor')
-        .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
-        .maybeSingle();
-
-      if (creatorProfile) {
-        // 1. Tambah 50% permata ke pembuat curhatan
-        await supabaseClient
-          .from('profiles')
-          .update({ gems: (creatorProfile.gems || 0) + creatorGems })
-          .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
-
-        // 2. Tambah 10% permata ke akun sponsor
-        const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-        
-        const { data: sponsorProfile } = await supabaseClient
-          .from('profiles')
-          .select('id, gems')
-          .or(`sponsor.ilike.${sponsorCode},username.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
-          .maybeSingle();
-
-        if (sponsorProfile) {
-          await supabaseClient
-            .from('profiles')
-            .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
-            .eq('id', sponsorProfile.id);
+      if (!isLiveGiftContext && activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+        if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+          document.getElementById('confirmGiftModal').style.display = 'none';
+          pendingGiftData = null;
+          return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
         }
       }
-    }
-    loadPosts();
-    triggerGiftAnimation(myName, giftName, cost, "Penulis");
-  }
 
-  pendingGiftData = null;
-  selectedLiveRecipient = null;
-}
+      const { cost, giftName } = pendingGiftData;
+
+      paidCoins -= cost;
+      usedPaidCoins += cost;
+      updateCoinUI();
+      document.getElementById('confirmGiftModal').style.display = 'none';
+
+      const creatorGems = Math.floor(cost * 0.50);
+      const sponsorGems = Math.floor(cost * 0.10);
+
+      if (isLiveGiftContext && currentActiveLive) {
+        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+
+        await supabaseClient.from('live_messages').insert([
+          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
+        ]);
+
+        const { data: creatorProfile } = await supabaseClient
+          .from('profiles')
+          .select('gems, sponsor')
+          .eq('email', targetIdentifier)
+          .maybeSingle();
+
+        if (creatorProfile) {
+          await supabaseClient
+            .from('profiles')
+            .update({ gems: (creatorProfile.gems || 0) + creatorGems })
+            .eq('email', targetIdentifier);
+
+          const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
+          const { data: sponsorProfile } = await supabaseClient
+            .from('profiles')
+            .select('id, gems')
+            .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
+            .limit(1)
+            .maybeSingle();
+
+          if (sponsorProfile) {
+            await supabaseClient
+              .from('profiles')
+              .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
+              .eq('id', sponsorProfile.id);
+          }
+        }
+      } else if (activeTargetPostId) {
+        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+
+        if (currentPost) {
+          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
+          currentPost.gifts_count = newGiftCoinsCount;
+
+          await supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId);
+
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+
+          const { data: creatorProfile } = await supabaseClient
+            .from('profiles')
+            .select('gems, sponsor')
+            .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier)
+            .maybeSingle();
+
+          if (creatorProfile) {
+            // 1. Tambah 50% permata ke pembuat curhatan
+            await supabaseClient
+              .from('profiles')
+              .update({ gems: (creatorProfile.gems || 0) + creatorGems })
+              .eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
+
+            // 2. Tambah 10% permata ke sponsor (pencarian fleksibel)
+            const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
+            const { data: sponsorProfile } = await supabaseClient
+              .from('profiles')
+              .select('id, gems')
+              .or(`username.ilike.${sponsorCode},sponsor.ilike.${sponsorCode},email.ilike.${sponsorCode}`)
+              .limit(1)
+              .maybeSingle();
+
+            if (sponsorProfile) {
+              await supabaseClient
+                .from('profiles')
+                .update({ gems: (sponsorProfile.gems || 0) + sponsorGems })
+                .eq('id', sponsorProfile.id);
+            }
+          }
+        }
+        loadPosts();
+        triggerGiftAnimation(myName, giftName, cost, "Penulis");
+      }
+
+      pendingGiftData = null;
+      selectedLiveRecipient = null;
+    }
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
@@ -1868,7 +1882,7 @@ async function executeSendGift() {
       document.getElementById('btnStartLiveHeader').style.display = 'block';
       document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
       
-      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
@@ -2401,7 +2415,6 @@ async function executeSendGift() {
       container.innerHTML = html;
     }
 
-    /* PERBAIKAN 4: PEMUTAR VIDEO FACEBOOK DENGAN PENGENDALIAN SDK PENUH */
     function playEmbeddedVideo(targetUrl, slot) {
       if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
@@ -2419,7 +2432,6 @@ async function executeSendGift() {
 
       const frameContainer = document.getElementById('videoFrameContainer');
       
-      // Render elemen fb-video resmi agar dikenali oleh Facebook JS SDK
       frameContainer.innerHTML = `
         <div class="fb-video" 
           data-href="${rawUrl}" 
@@ -2430,7 +2442,6 @@ async function executeSendGift() {
         </div>
       `;
 
-      // Parsing ulang oleh Facebook JS SDK
       if (window.FB) {
         FB.XFBML.parse(frameContainer);
       }
@@ -2560,7 +2571,7 @@ async function executeSendGift() {
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
       }
     }
 
