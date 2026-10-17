@@ -11,6 +11,9 @@
   
   <title>CUIT – Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- INTEGRASI FACEBOOK JS SDK UNTUK PENGAWASAN TIMER VIDEO -->
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
+
   <style>
     :root {
       --bg: #f4f6fc;
@@ -259,20 +262,20 @@
     </div>
   </div>
 
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED DENGAN SDK FACEBOOK AUTOMATIC DETECT -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi CUIT</span>
         <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed;">
-          ⏳ Tunggu (10s)
+          ⏳ Tekan Play di Video
         </button>
       </div>
 
-      <div id="videoFrameContainer" style="width: 100%; height: 420px; background: #000; border-radius: 12px; overflow: hidden; position: relative;"></div>
+      <div id="videoFrameContainer" style="width: 100%; height: 400px; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;"></div>
 
-      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;">
-        Tonton selama 10 detik. Poin +10 Koin Gratisan diberikan saat menekan tombol X di atas.
+      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;" id="videoTimerStatusText">
+        Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!
       </div>
     </div>
   </div>
@@ -862,6 +865,31 @@
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
+    /* INISIALISASI SDK FACEBOOK */
+    window.fbAsyncInit = function() {
+      FB.init({
+        xfbml: true,
+        version: 'v18.0'
+      });
+
+      // Deteksi otomatis saat pemutar video FB di dalam modal siap
+      FB.Event.subscribe('xfbml.ready', function(msg) {
+        if (msg.type === 'video') {
+          const fbVideoPlayer = msg.instance;
+
+          // Timer HANYA otomatis berjalan saat tombol play video ditekan
+          fbVideoPlayer.subscribe('startedPlaying', function() {
+            startVideoTimerAuto();
+          });
+
+          // Timer otomatis dipause jika video di-pause
+          fbVideoPlayer.subscribe('paused', function() {
+            pauseVideoTimerAuto();
+          });
+        }
+      });
+    };
+
     function initSponsorFromURL() {
       const urlParams = new URLSearchParams(window.location.search);
       const refParam = urlParams.get('ref');
@@ -913,65 +941,60 @@
       }
     }
 
-    /* FUNGSI CHECKUSER DENGAN PROTEKSI SALDO ANTI-RESET */
+    /* FUNGSI CHECKUSER DENGAN PROTEKSI SINKRONISASI SALDO & HASIL PERBAIKAN */
     async function checkUser() {
-  initSponsorFromURL();
-  checkDailyCoinReset();
+      initSponsorFromURL();
+      checkDailyCoinReset();
 
-  const { data } = await supabaseClient.auth.getUser();
-  currentUser = data.user;
+      const { data } = await supabaseClient.auth.getUser();
+      currentUser = data.user;
 
-  // 1. Jika pengguna SUDAH LOGIN akun Supabase resmi
-  if (currentUser) {
-    const myIdentifier = currentUser.email;
+      if (currentUser) {
+        const myIdentifier = currentUser.email;
 
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('email', myIdentifier)
-      .maybeSingle();
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('email', myIdentifier)
+          .maybeSingle();
 
-    if (profile) {
-      freeCoins = profile.free_coins ?? freeCoins;
-      paidCoins = profile.paid_coins ?? paidCoins;
-      gems = profile.gems ?? gems;
-      usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
-      if (profile.username) customDisplayName = profile.username;
-      if (profile.sponsor) mySponsorCode = profile.sponsor;
+        if (profile) {
+          freeCoins = profile.free_coins ?? freeCoins;
+          paidCoins = profile.paid_coins ?? paidCoins;
+          gems = profile.gems ?? gems;
+          usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
+          if (profile.username) customDisplayName = profile.username;
+          if (profile.sponsor) mySponsorCode = profile.sponsor;
+        }
+      } else {
+        let guestId = localStorage.getItem('cuit_guest_identifier');
+        if (!guestId) {
+          guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
+          localStorage.setItem('cuit_guest_identifier', guestId);
+        }
+
+        const savedName = localStorage.getItem('cuit_user_name');
+        if (!savedName || savedName === 'mantanperamal') {
+          customDisplayName = 'TemanCUIT_' + Math.floor(1000 + Math.random() * 9000);
+          localStorage.setItem('cuit_user_name', customDisplayName);
+        } else {
+          customDisplayName = savedName;
+        }
+      }
+
+      updateCoinUI();
+      await loadUserLikes();
+      await loadFollows();
+      loadPosts();
+      initGlobalRealtime();
+
+      const savedLiveId = localStorage.getItem('cuit_active_live_id');
+      if (savedLiveId) {
+        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+      }
     }
-  } 
-  // 2. Jika pengguna MENGGUNAKAN TAB SAMARAN / GUEST (Belum Login)
-  else {
-    let guestId = localStorage.getItem('cuit_guest_identifier');
-    if (!guestId) {
-      // Buat ID Guest acak unik, BUKAN mantanperamal@gmail.com
-      guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
-      localStorage.setItem('cuit_guest_identifier', guestId);
-    }
 
-    // Berikan nama tampilan bawaan sebagai Pengguna Guest
-    const savedName = localStorage.getItem('cuit_user_name');
-    if (!savedName || savedName === 'mantanperamal') {
-      customDisplayName = 'TemanCUIT_' + Math.floor(1000 + Math.random() * 9000);
-      localStorage.setItem('cuit_user_name', customDisplayName);
-    } else {
-      customDisplayName = savedName;
-    }
-  }
-
-  updateCoinUI();
-  await loadUserLikes();
-  await loadFollows();
-  loadPosts();
-  initGlobalRealtime();
-
-  const savedLiveId = localStorage.getItem('cuit_active_live_id');
-  if (savedLiveId) {
-    switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
-  }
-}
-
-
+    /* PERBAIKAN 1: BACA LIKES SECARA KONSISTEN BERSAMAAN DENGAN ID / TOKEN GUEST */
     async function loadUserLikes() {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1097,7 +1120,8 @@
       document.getElementById('editProfileModal').style.display = 'flex';
     }
 
-    function saveProfileChanges() {
+    /* PERBAIKAN 3: EDIT PROFIL MEMPERBARUI NAMA TAMPILAN PADA RIWAYAT POSTINGAN LAMA DI CURHAT */
+    async function saveProfileChanges() {
       const newName = document.getElementById('editDisplayName').value.trim();
       if (!newName) return alert('Nama tidak boleh kosong!');
       
@@ -1112,13 +1136,22 @@
       mySponsorCode = myNewReferralCode;
       localStorage.setItem('cuit_my_sponsor', myNewReferralCode);
 
+      // PERBAIKAN BUG NAMA: Perbarui kolom username pada seluruh postingan lama milik pengguna ini di database Supabase
+      let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
+      if (currentUser) {
+        curhatUpdateQuery = curhatUpdateQuery.eq('user_id', currentUser.id);
+      } else {
+        curhatUpdateQuery = curhatUpdateQuery.eq('user_email', myEmail);
+      }
+      await curhatUpdateQuery;
+
       document.getElementById('editProfileModal').style.display = 'none';
       
       updateCoinUI();
-      syncCoinsToSupabase();
-      loadPosts();
+      await syncCoinsToSupabase();
+      await loadPosts(); // Muat ulang feed agar nama postingan lama langsung ter-refresh
       
-      alert(`Profil berhasil diperbarui!\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
+      alert(`Profil berhasil diperbarui!\nNama Tampilan & Postingan Lama Diperbarui ke: ${newName}\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
     }
 
     function copyMySponsorLink() {
@@ -1172,64 +1205,62 @@
     }
 
     async function submitNewPost() {
-  // Cek apakah pengguna adalah Guest (belum login akun Supabase resmi)
-  if (!currentUser) {
-    const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
-    document.getElementById('referralCodeInput').value = activeSponsor;
-    document.getElementById('authModal').style.display = 'flex';
-    
-    alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
-    return;
-  }
+      if (!currentUser) {
+        const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        document.getElementById('referralCodeInput').value = activeSponsor;
+        document.getElementById('authModal').style.display = 'flex';
+        
+        alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
+        return;
+      }
 
-  const type = document.getElementById('curhatCoinType').value;
-  const content = document.getElementById('postContent').value.trim();
-  const feeling = document.getElementById('postFeeling').value;
+      const type = document.getElementById('curhatCoinType').value;
+      const content = document.getElementById('postContent').value.trim();
+      const feeling = document.getElementById('postFeeling').value;
 
-  if (!content) return alert('Isi cerita tidak boleh kosong!');
+      if (!content) return alert('Isi cerita tidak boleh kosong!');
 
-  const coinsNeeded = Math.ceil(content.length / 1200);
+      const coinsNeeded = Math.ceil(content.length / 1200);
 
-  if (type === 'free') {
-    if (freeCoins < coinsNeeded) {
-      return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
+      if (type === 'free') {
+        if (freeCoins < coinsNeeded) {
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
+        }
+        freeCoins -= coinsNeeded;
+      } else {
+        if (paidCoins < coinsNeeded) {
+          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
+        }
+        paidCoins -= coinsNeeded;
+        usedPaidCoins += coinsNeeded;
+      }
+
+      updateCoinUI();
+
+      const authorName = customDisplayName || currentUser.email.split('@')[0];
+
+      const { error } = await supabaseClient.from('curhat').insert([
+        { 
+          content, 
+          user_id: currentUser.id, 
+          user_email: currentUser.email, 
+          username: authorName, 
+          feeling, 
+          likes_count: 0, 
+          comments_count: 0, 
+          gifts_count: 0 
+        }
+      ]);
+
+      if (!error) {
+        localStorage.removeItem('cuit_draft_content');
+        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
+        document.getElementById('postContent').value = '';
+        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      } else {
+        alert('Gagal mengirim: ' + error.message);
+      }
     }
-    freeCoins -= coinsNeeded;
-  } else {
-    if (paidCoins < coinsNeeded) {
-      return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
-    }
-    paidCoins -= coinsNeeded;
-    usedPaidCoins += coinsNeeded;
-  }
-
-  updateCoinUI();
-
-  const authorName = customDisplayName || currentUser.email.split('@')[0];
-
-  const { error } = await supabaseClient.from('curhat').insert([
-    { 
-      content, 
-      user_id: currentUser.id, 
-      user_email: currentUser.email, 
-      username: authorName, 
-      feeling, 
-      likes_count: 0, 
-      comments_count: 0, 
-      gifts_count: 0 
-    }
-  ]);
-
-  if (!error) {
-    localStorage.removeItem('cuit_draft_content');
-    alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
-    document.getElementById('postContent').value = '';
-    switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
-  } else {
-    alert('Gagal mengirim: ' + error.message);
-  }
-}
-
 
     async function loadPosts() {
       const container = document.getElementById('postsList');
@@ -1477,6 +1508,7 @@
         }).subscribe();
     }
 
+    /* PERBAIKAN 1: PERBAIKAN BUG LIKE BERULANG DENGAN PENJAGAAN STATE DB TERKUNCI */
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -1667,6 +1699,7 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
+    /* PERBAIKAN 2: PENCARIAN SPONSOR DIUBAH MENJADI CASE-INSENSITIVE (`ilike`) AGAR PERMATA SELALU MASUK */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -1706,9 +1739,11 @@
           await supabaseClient.from('profiles').update({ gems: (creatorProfile.gems || 0) + creatorGems }).eq('email', targetIdentifier);
 
           const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-          const { data: sponsorProfile } = await supabaseClient.from('profiles').select('gems').eq('username', sponsorCode).single();
+          
+          // PERBAIKAN PENCARIAN SPONSOR (ILIKE / CASE INSENSITIVE)
+          const { data: sponsorProfile } = await supabaseClient.from('profiles').select('id, gems').ilike('username', sponsorCode).maybeSingle();
           if (sponsorProfile) {
-            await supabaseClient.from('profiles').update({ gems: (sponsorProfile.gems || 0) + sponsorGems }).eq('username', sponsorCode);
+            await supabaseClient.from('profiles').update({ gems: (sponsorProfile.gems || 0) + sponsorGems }).eq('id', sponsorProfile.id);
           }
         }
       } else if (activeTargetPostId) {
@@ -1727,9 +1762,11 @@
             await supabaseClient.from('profiles').update({ gems: (creatorProfile.gems || 0) + creatorGems }).eq(currentPost.user_id ? 'id' : 'email', targetIdentifier);
 
             const sponsorCode = creatorProfile.sponsor || CONFIG.DEFAULT_SPONSOR;
-            const { data: sponsorProfile } = await supabaseClient.from('profiles').select('gems').eq('username', sponsorCode).single();
+            
+            // PERBAIKAN PENCARIAN SPONSOR (ILIKE / CASE INSENSITIVE)
+            const { data: sponsorProfile } = await supabaseClient.from('profiles').select('id, gems').ilike('username', sponsorCode).maybeSingle();
             if (sponsorProfile) {
-              await supabaseClient.from('profiles').update({ gems: (sponsorProfile.gems || 0) + sponsorGems }).eq('username', sponsorCode);
+              await supabaseClient.from('profiles').update({ gems: (sponsorProfile.gems || 0) + sponsorGems }).eq('id', sponsorProfile.id);
             }
           }
         }
@@ -1808,7 +1845,7 @@
       document.getElementById('btnStartLiveHeader').style.display = 'block';
       document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
       
-      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
@@ -2341,6 +2378,7 @@
       container.innerHTML = html;
     }
 
+    /* PERBAIKAN 4: PEMUTAR VIDEO FACEBOOK DENGAN PENGENDALIAN SDK PENUH */
     function playEmbeddedVideo(targetUrl, slot) {
       if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
@@ -2357,20 +2395,21 @@
       }
 
       const frameContainer = document.getElementById('videoFrameContainer');
-      const encodedUrl = encodeURIComponent(rawUrl);
-      const fbEmbedSrc = `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=360`;
+      
+      // Render elemen fb-video resmi agar dikenali oleh Facebook JS SDK
+      frameContainer.innerHTML = `
+        <div class="fb-video" 
+          data-href="${rawUrl}" 
+          data-width="360" 
+          data-show-text="false" 
+          data-autoplay="false" 
+          data-allowfullscreen="true">
+        </div>
+      `;
 
-      if (frameContainer) {
-        frameContainer.innerHTML = `
-          <div style="width:100%; height:100%; display:flex; flex-direction:column;">
-            <iframe src="${fbEmbedSrc}" width="100%" height="80%" style="border:none; overflow:hidden; border-radius:12px 12px 0 0;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-            <div style="height:20%; background:#1e1e2d; display:flex; align-items:center; justify-content:center; padding:6px;">
-              <button id="btnStartWatching" onclick="startVideoTimer()" style="background:#2ecc71; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer;">
-                ▶️ Mulai Putar & Jalankan Timer
-              </button>
-            </div>
-          </div>
-        `;
+      // Parsing ulang oleh Facebook JS SDK
+      if (window.FB) {
+        FB.XFBML.parse(frameContainer);
       }
 
       const btnClose = document.getElementById('btnCloseVideo');
@@ -2379,8 +2418,10 @@
         btnClose.style.opacity = '0.5';
         btnClose.style.cursor = 'not-allowed';
         btnClose.style.background = '#e74c3c';
-        btnClose.innerText = '⏳ Tunggu (10s)';
+        btnClose.innerText = '⏳ Tekan Play di Video';
       }
+
+      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!';
 
       if (videoTimerInterval) {
         clearInterval(videoTimerInterval);
@@ -2391,23 +2432,18 @@
       if (playerModal) playerModal.style.display = 'flex';
     }
 
-    function startVideoTimer() {
-      const btnStart = document.getElementById('btnStartWatching');
-      if (btnStart) {
-        btnStart.innerText = '🎬 Video Sedang Diputar...';
-        btnStart.style.background = '#34495e';
-        btnStart.disabled = true;
-      }
+    let videoSecondsLeft = 10;
 
-      let secondsLeft = 10;
+    function startVideoTimerAuto() {
       const btnClose = document.getElementById('btnCloseVideo');
+      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar! Harap tonton selama 10 detik...';
 
       if (videoTimerInterval) clearInterval(videoTimerInterval);
 
       videoTimerInterval = setInterval(() => {
-        secondsLeft--;
-        if (btnClose && secondsLeft > 0) {
-          btnClose.innerText = `⏳ Tunggu (${secondsLeft}s)`;
+        videoSecondsLeft--;
+        if (btnClose && videoSecondsLeft > 0) {
+          btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)`;
         } else {
           clearInterval(videoTimerInterval);
           videoTimerInterval = null;
@@ -2418,8 +2454,21 @@
             btnClose.style.background = '#2ecc71';
             btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
           }
+          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai! Klik tombol hijau di atas untuk klaim koin gratisan.';
         }
       }, 1000);
+    }
+
+    function pauseVideoTimerAuto() {
+      if (videoTimerInterval) {
+        clearInterval(videoTimerInterval);
+        videoTimerInterval = null;
+      }
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose && videoSecondsLeft > 0) {
+        btnClose.innerText = '⏸️ Video Di-pause';
+        document.getElementById('videoTimerStatusText').innerText = '⚠️ Video di-pause! Lanjutkan pemutaran video untuk melanjutkan timer.';
+      }
     }
 
     function claimVideoRewardAndClose() {
@@ -2438,6 +2487,7 @@
         alert('🚀 Luar biasa! Kamu telah menyelesaikan putaran 10 Video. Seluruh video terbuka kembali untuk ditonton lagi!');
       }
 
+      videoSecondsLeft = 10;
       openReelsModal();
     }
 
@@ -2487,7 +2537,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
       }
     }
 
