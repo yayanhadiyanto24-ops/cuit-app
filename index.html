@@ -66,8 +66,8 @@
     .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
 
     /* Filter Pills */
-    .pills-group { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-    .pill-btn { padding: 6px 14px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
+    .pills-group { display: flex; gap: 6px; overflow-x: auto; }
+    .pill-btn { padding: 5px 12px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
     /* Quick Chat Templates Pills */
@@ -298,24 +298,37 @@
 
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-      <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
+    <!-- HEADER BERANDA -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
+        <div class="pills-group">
+          <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
+          <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+        </div>
+      </div>
       <button 
         onclick="openReelsModal()" 
-        style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #3e2723; border: 1px solid #ffe082; padding: 6px 12px; border-radius: 16px; font-weight: 900; font-size: 11px; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 143, 0, 0.4); display: flex; align-items: center; gap: 4px; white-space: nowrap;"
+        style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #3e2723; border: 1px solid #ffe082; padding: 5px 10px; border-radius: 16px; font-weight: 900; font-size: 10.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 143, 0, 0.4); display: flex; align-items: center; gap: 4px; white-space: nowrap;"
       >
         🎁 +10 Koin Gratis
       </button>
     </div>
 
-    <div class="section-sub">Ada cerita baru secara real-time dari sesama anggota.</div>
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <div class="pills-group">
-        <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
-        <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+    <!-- AREA KOTAK INPUT CURHAT DENGAN IKON PROFIL -->
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: #ffffff; padding: 6px 10px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+      <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
+        <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 13px;">🤍</div>
+        <div class="level-badge-icon" id="homeQuickUserBadge" style="width: 13px; height: 13px; font-size: 8px;">🌱</div>
       </div>
-      <button class="btn-primary" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
+      <input 
+        type="text" 
+        placeholder="Apa yang ingin kamu curhatkan?" 
+        readonly 
+        onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])"
+        style="margin-bottom: 0; background: #f8f9fe; border: 1px solid #eef1f8; cursor: pointer; border-radius: 20px; padding: 7px 12px; font-size: 11.5px; color: var(--text-sub);"
+      >
+      <button class="btn-primary" style="padding: 7px 12px; flex-shrink: 0; border-radius: 18px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
     <!-- FEED KAPSUL PROMOSI SOROTAN -->
@@ -327,7 +340,7 @@
     </div>
 
     <!-- FEED CURHATAN ANGGOTA -->
-    <div class="feed-container" id="postsList" style="margin-top: 8px;">
+    <div class="feed-container" id="postsList" style="margin-top: 4px;">
       <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
     </div>
   </div>
@@ -1236,6 +1249,11 @@
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
       document.getElementById('gemsCount').innerText = gems;
+
+      const myLvl = getUserLevel();
+      const badgeElem = document.getElementById('homeQuickUserBadge');
+      if (badgeElem) badgeElem.innerText = myLvl.icon;
+
       syncCoinsToSupabase();
       
       if (document.getElementById('pageProfile').classList.contains('active')) {
@@ -1782,7 +1800,6 @@
       const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
       if (isAlreadyLiked) {
-        // --- UNLIKE (BATAL SUKA) ---
         userLikedPostsSet.delete(strPostId);
         const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
         currentPost.likes_count = newLikeCount;
@@ -1801,7 +1818,6 @@
         await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
 
       } else {
-        // --- LIKE (TAMBAH SUKA) ---
         userLikedPostsSet.add(strPostId);
         const newLikeCount = (currentPost.likes_count || 0) + 1;
         currentPost.likes_count = newLikeCount;
@@ -2000,7 +2016,6 @@
       usedPaidCoins += cost;
       updateCoinUI();
 
-      // Tutup Modal Konfirmasi Terlebih Dahulu Agar Animasi Terlihat Jelas
       document.getElementById('confirmGiftModal').style.display = 'none';
 
       if (isLiveGiftContext && currentActiveLive) {
@@ -2016,7 +2031,6 @@
           p_cost: parseInt(cost)
         });
 
-        // Panggil Animasi di Live
         triggerGiftAnimation(myName, giftName, cost, targetName);
 
       } else if (activeTargetPostId) {
@@ -2036,7 +2050,6 @@
             p_cost: parseInt(cost)
           });
 
-          // Panggil Animasi Pop-Up & Confetti dengan Nama Target Asli
           triggerGiftAnimation(myName, giftName, cost, targetName);
         }
         loadPosts();
