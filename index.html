@@ -172,7 +172,7 @@
     .live-chat-controls-sticky { background: #ffffff; padding: 6px 0; border-top: 1px solid #f0f2f8; z-index: 25; }
     .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
 
-    /* ANIMASI POP-UP GIFT OVERLAY HASIL REVISI HASIL KINERJA */
+    /* ANIMASI POP-UP GIFT OVERLAY */
     #giftOverlayContainer { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 90%; max-width: 400px; }
     .gift-banner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 30px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); opacity: 0; width: fit-content; max-width: 100%; }
     .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
@@ -251,8 +251,6 @@
 
     <!-- Layout Statis Grid 4 Kolom -->
     <div id="leagueChampionsCarousel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%;">
-      
-      <!-- 1. JUARA RAJA SAWER -->
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
         <div style="font-size: 8px; font-weight: 800; color: #fde047; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👑 Raja Sawer</div>
         <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
@@ -263,7 +261,6 @@
         <div style="font-size: 7.5px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSawerScore">0 🪙</div>
       </div>
 
-      <!-- 2. JUARA BINTANG CURHAT -->
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
         <div style="font-size: 8px; font-weight: 800; color: #93c5fd; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🌟 Bintang Curhat</div>
         <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
@@ -274,7 +271,6 @@
         <div style="font-size: 7.5px; color: #bfdbfe; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champCurhatScore">0 ♥ + 0 💬</div>
       </div>
 
-      <!-- 3. JUARA PUJANGGA UTAMA -->
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
         <div style="font-size: 8px; font-weight: 800; color: #86efac; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✍️ Pujangga Utama</div>
         <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
@@ -285,7 +281,6 @@
         <div style="font-size: 7.5px; color: #bbf7d0; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champPujanggaScore">0 Post</div>
       </div>
 
-      <!-- 4. JUARA MAGNET SPONSOR -->
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
         <div style="font-size: 8px; font-weight: 800; color: #fbcfe8; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🧲 Magnet Sponsor</div>
         <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
@@ -295,13 +290,11 @@
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
         <div style="font-size: 7.5px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSponsorScore">0 Member</div>
       </div>
-
     </div>
   </div>
 
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <!-- HEADER BERANDA -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
@@ -318,7 +311,6 @@
       </button>
     </div>
 
-    <!-- AREA KOTAK INPUT CURHAT DENGAN IKON PROFIL -->
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: #ffffff; padding: 6px 10px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
       <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
         <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 13px;">🤍</div>
@@ -334,7 +326,6 @@
       <button class="btn-primary" style="padding: 7px 12px; flex-shrink: 0; border-radius: 18px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
-    <!-- FEED KAPSUL PROMOSI SOROTAN -->
     <div id="promotedSection" style="display: none; margin-top: 10px; margin-bottom: 4px;">
       <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
         🚀 SOROTAN HARI INI
@@ -342,7 +333,6 @@
       <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
     </div>
 
-    <!-- FEED CURHATAN ANGGOTA -->
     <div class="feed-container" id="postsList" style="margin-top: 4px;">
       <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
     </div>
@@ -362,7 +352,7 @@
     </div>
   </div>
 
-  <!-- MODAL NOTIFIKASI MASUK (BISA DIHAPUS) -->
+  <!-- MODAL NOTIFIKASI MASUK -->
   <div id="notificationsModal" class="modal">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
@@ -376,7 +366,31 @@
     </div>
   </div>
 
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED DENGAN SDK FACEBOOK AUTOMATIC DETECT -->
+  <!-- MODAL KOMUNITAS INTERAKTIF -->
+  <div id="communityModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">👥 Komunitas CUIT</h3>
+        <button onclick="document.getElementById('communityModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:#f8f9fe; padding:10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:12px;">
+        <label style="font-size:11px; font-weight:800; display:block; margin-bottom:4px;">➕ Buat Komunitas Baru</label>
+        <input type="text" id="newCommName" placeholder="Nama Komunitas (contoh: Penulis Seni Rancagé)" style="margin-bottom:6px;">
+        <textarea id="newCommDesc" rows="2" placeholder="Deskripsi singkat komunitas..." style="margin-bottom:6px;"></textarea>
+        <button class="btn-primary" style="width:100%; font-size:11px; padding:7px;" onclick="createNewCommunity()">Terbitkan Komunitas</button>
+      </div>
+
+      <label style="font-size:11px; font-weight:800; display:block; margin-bottom:6px;">🌐 Daftar Komunitas Terdaftar:</label>
+      <div id="communityListContainer" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>
+      </div>
+
+      <button class="btn-secondary" style="width:100%; margin-top:12px; background:#eee;" onclick="document.getElementById('communityModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -573,7 +587,6 @@
         <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
       </div>
 
-      <!-- GRID STATISTIK DILENGKAPI -->
       <div class="profile-stats-grid" id="mainProfileStatsGrid">
         <div class="stat-card-item">
           <div class="val" id="profExp">0 EXP</div>
@@ -875,7 +888,6 @@
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
       
       <div class="gift-grid">
-        <!-- GIFT SULTAN UTAMA -->
         <div class="gift-card-item" style="background:#e8eaf6; border:1px solid #c5cae9; font-weight:900;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
         <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9; font-weight:900;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet Raksasa (400 🪙)</div>
         <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung Meletus (300 🪙)</div>
@@ -883,7 +895,6 @@
         <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
         <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
 
-        <!-- GIFT REGULER LAINNYA -->
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
@@ -927,7 +938,7 @@
     </div>
   </div>
 
-  <!-- MODAL DOMPET & TOP-UP DOKU QRIS (DILENGKAPI BUKU KAS RIWAYAT PERMANEN) -->
+  <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
@@ -941,7 +952,6 @@
         <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
 
-      <!-- BUKU KAS RIWAYAT PERMANEN GIFT MASUK -->
       <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin: 14px 0 6px 0;">📜 Riwayat Penerimaan Permata (Buku Kas Permanen):</div>
       <div id="giftHistoryListContainer" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #f8f9fe; padding: 8px; border-radius: 12px; border: 1px solid #e2e7f5;">
         <p style="text-align: center; font-size: 10.5px; color: var(--text-sub);">Memuat riwayat transaksi...</p>
@@ -951,7 +961,7 @@
     </div>
   </div>
 
-  <!-- MODAL TAMPILKAN QRIS DOKU DARI EDGE FUNCTION -->
+  <!-- MODAL TAMPILKAN QRIS DOKU -->
   <div id="qrisDisplayModal" class="modal" style="z-index: 150;">
     <div class="modal-content" style="text-align: center; max-width: 360px;">
       <h3 style="font-size: 16px; margin-bottom: 4px;">Pindai QRIS DOKU 📱</h3>
@@ -1062,7 +1072,6 @@
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
-    /* LOGIKA BANNER MELIPAT OTOMATIS SETELAH 3 DETIK */
     function initAutoCollapseBanner() {
       setTimeout(() => {
         const banner = document.getElementById('cuitMainBanner');
@@ -1072,7 +1081,6 @@
       }, 3000);
     }
 
-    /* FUNGSI EFEK KONFETI LEPASAN UNTUK GIFT SULTAN */
     function spawnConfetti(count, duration) {
       const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#ffd700'];
       for (let i = 0; i < count; i++) {
@@ -1089,7 +1097,6 @@
       }
     }
 
-    /* LOGIKA SIKLUS MINGGUAN (7 HARI) */
     function checkWeeklyLeagueReset() {
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -1106,24 +1113,13 @@
       }
     }
 
-    /* INISIALISASI SDK FACEBOOK */
     window.fbAsyncInit = function() {
-      FB.init({
-        xfbml: true,
-        version: 'v18.0'
-      });
-
+      FB.init({ xfbml: true, version: 'v18.0' });
       FB.Event.subscribe('xfbml.ready', function(msg) {
         if (msg.type === 'video') {
           const fbVideoPlayer = msg.instance;
-
-          fbVideoPlayer.subscribe('startedPlaying', function() {
-            startVideoTimerAuto();
-          });
-
-          fbVideoPlayer.subscribe('paused', function() {
-            pauseVideoTimerAuto();
-          });
+          fbVideoPlayer.subscribe('startedPlaying', function() { startVideoTimerAuto(); });
+          fbVideoPlayer.subscribe('paused', function() { pauseVideoTimerAuto(); });
         }
       });
     };
@@ -1455,7 +1451,6 @@
         const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
         document.getElementById('referralCodeInput').value = activeSponsor;
         document.getElementById('authModal').style.display = 'flex';
-        
         alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
         return;
       }
@@ -1486,16 +1481,7 @@
       const authorName = customDisplayName || currentUser.email.split('@')[0];
 
       const { error } = await supabaseClient.from('curhat').insert([
-        { 
-          content, 
-          user_id: currentUser.id, 
-          user_email: currentUser.email, 
-          username: authorName, 
-          feeling, 
-          likes_count: 0, 
-          comments_count: 0, 
-          gifts_count: 0 
-        }
+        { content, user_id: currentUser.id, user_email: currentUser.email, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
       ]);
 
       if (!error) {
@@ -1522,7 +1508,6 @@
             if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
           });
 
-          // 1. UPDATE RAJA SAWER
           if (profilesData.length > 0) {
             const sortedByCoins = [...profilesData].sort((a,b) => (b.used_paid_coins||0) - (a.used_paid_coins||0));
             if (sortedByCoins[0]) {
@@ -1530,7 +1515,6 @@
               document.getElementById('champSawerScore').innerText = `${sortedByCoins[0].used_paid_coins||0} 🪙`;
             }
 
-            // 2. UPDATE MAGNET SPONSOR
             const sponsorCounts = {};
             profilesData.forEach(p => {
               if (p.sponsor) {
@@ -1564,7 +1548,6 @@
 
         allPostsCache = data;
 
-        // 3. UPDATE BINTANG CURHAT
         let topCurhat = null;
         let maxScore = -1;
 
@@ -1587,7 +1570,6 @@
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
-        // 4. UPDATE PUJANGGA UTAMA
         const postCounts = {};
         data.forEach(p => {
           const author = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Cuiter');
@@ -1636,21 +1618,13 @@
             cardsHTML += `
               <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
                 <div style="position: relative; width: 26px; height: 26px;">
-                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">
-                    🤍
-                  </div>
-                  <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">
-                    ${userLvl.icon}
-                  </div>
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">🤍</div>
+                  <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">${userLvl.icon}</div>
                 </div>
 
-                <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">
-                  ${snippet}
-                </div>
+                <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">${snippet}</div>
 
-                <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${rawName}
-                </div>
+                <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
               </div>
             `;
           });
@@ -1718,15 +1692,10 @@
 
       const { error } = await supabaseClient
         .from('curhat')
-        .update({
-          is_promoted: true,
-          promoted_until: expiryISO
-        })
+        .update({ is_promoted: true, promoted_until: expiryISO })
         .eq('id', postId);
 
-      if (error) {
-        return alert('Gagal mempromosikan postingan: ' + error.message);
-      }
+      if (error) return alert('Gagal mempromosikan postingan: ' + error.message);
 
       paidCoins -= hours;
       usedPaidCoins += hours;
@@ -2054,7 +2023,6 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* FUNGSI SAWER / GIFT DENGAN PENCATATAN NOTIFIKASI & BUKU KAS */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -2092,7 +2060,6 @@
           p_cost: parseInt(cost)
         });
 
-        // Catat Notifikasi (Bisa dihapus) & Riwayat Kas (Permanen)
         const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!`;
         await supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: notifMsg }]);
         await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }]);
@@ -2116,7 +2083,6 @@
             p_cost: parseInt(cost)
           });
 
-          // Catat Notifikasi (Bisa dihapus) & Riwayat Kas (Permanen)
           const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!`;
           await supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: notifMsg }]);
           await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }]);
@@ -2204,7 +2170,6 @@
       }, stayDuration);
     }
 
-    /* FUNGSI NOTIFIKASI & BUKU KAS RIWAYAT PERMANEN */
     async function checkUnreadNotifications() {
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
@@ -2258,6 +2223,70 @@
       const myEmail = currentUser ? currentUser.email : guestId;
       await supabaseClient.from('user_notifications').delete().eq('recipient_email', myEmail);
       openNotificationsModal();
+    }
+
+    async function openCommunityModal() {
+      const userLvl = getUserLevel();
+      if (userLvl.title === '🌱 Cuiter Baru') {
+        return alert('Fitur membuat Komunitas terbuka mulai dari Level 💙 Cuiter Setia!');
+      }
+
+      document.getElementById('communityModal').style.display = 'flex';
+      loadCommunityList();
+    }
+
+    async function loadCommunityList() {
+      const container = document.getElementById('communityListContainer');
+      container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>';
+
+      const { data: communities, error } = await supabaseClient
+        .from('communities')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !communities || communities.length === 0) {
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Belum ada komunitas. Buat yang pertama di atas!</p>';
+        return;
+      }
+
+      container.innerHTML = communities.map(c => `
+        <div style="background:#fff; border:1px solid #e2e7f5; padding:8px 10px; border-radius:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; font-size:12px; color:var(--primary);">${c.name}</span>
+            <span style="font-size:9px; color:var(--text-sub);">Oleh: ${c.creator_name}</span>
+          </div>
+          <div style="font-size:11px; color:#444; margin-top:3px;">${c.description || '-'}</div>
+        </div>
+      `).join('');
+    }
+
+    async function createNewCommunity() {
+      const name = document.getElementById('newCommName').value.trim();
+      const desc = document.getElementById('newCommDesc').value.trim();
+
+      if (!name) return alert('Nama Komunitas wajib diisi!');
+
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const myName = customDisplayName || 'mantanperamal';
+
+      const { error } = await supabaseClient.from('communities').insert([
+        {
+          name: name,
+          description: desc,
+          creator_email: myEmail,
+          creator_name: myName
+        }
+      ]);
+
+      if (!error) {
+        alert(`Komunitas "${name}" berhasil dibuat!`);
+        document.getElementById('newCommName').value = '';
+        document.getElementById('newCommDesc').value = '';
+        loadCommunityList();
+      } else {
+        alert('Gagal membuat komunitas: ' + error.message);
+      }
     }
 
     async function loadGiftHistoryLedger() {
@@ -2787,19 +2816,10 @@
       alert('Panel Moderasi Aktif: Anda memiliki hak akses meninjau laporan curhatan!');
     }
 
-    function openCommunityModal() {
-      const userLvl = getUserLevel();
-      if (userLvl.title === '🌱 Cuiter Baru') {
-        return alert('Fitur membuat Komunitas terbuka mulai dari Level 💙 Cuiter Setia!');
-      }
-      alert('Selamat! Anda dapat membuat Komunitas CUIT baru.');
-    }
-
     function openConfigModal() {
       document.getElementById('configModal').style.display = 'flex';
     }
 
-    /* FUNGSI RENDER DATA PROFIL DENGAN STATISTIK LENGKAP */
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || 'mantanperamal';
@@ -2821,18 +2841,15 @@
 
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
-      // 1. Ambil data Pengikut & Mengikuti
       const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
       const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
 
       document.getElementById('profFollowers').innerText = followersCount || 0;
       document.getElementById('profFollowing').innerText = followingCount || 0;
 
-      // 2. Ambil data Downline Langsung
       const { count: downlinesCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`);
       document.getElementById('profDownlines').innerText = downlinesCount || 0;
 
-      // 3. Ambil data Jumlah Postingan
       let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
       if (currentUser) {
         postQuery = postQuery.eq('user_id', currentUser.id);
@@ -2842,7 +2859,6 @@
       const { count: postsCount } = await postQuery;
       document.getElementById('profPostsCount').innerText = postsCount || 0;
 
-      // 4. Khusus Admin: Ambil Total Seluruh Member
       const adminMemberCard = document.getElementById('adminTotalMemberCard');
       if (isAdmin) {
         adminMemberCard.style.display = 'block';
@@ -2852,7 +2868,6 @@
         adminMemberCard.style.display = 'none';
       }
 
-      // Progress bar level
       const progressBar = document.getElementById('levelProgressBar');
       const nextInfo = document.getElementById('levelNextInfo');
 
@@ -3063,11 +3078,7 @@
 
           await supabaseClient
             .from('reels_missions')
-            .upsert({ 
-              id: i, 
-              slot_name: `Video ${i}`, 
-              facebook_url: urlVal 
-            }, { onConflict: 'id' });
+            .upsert({ id: i, slot_name: `Video ${i}`, facebook_url: urlVal }, { onConflict: 'id' });
         }
 
         alert('✅ Link 10 Video Reels FB berhasil disimpan ke Database Supabase!');
