@@ -28,7 +28,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
-    /* Top Stats Bar Compact - Indikator 3 Saldo */
+    /* Top Stats Bar Compact - Indikator 3 Saldo + Lonceng Notifikasi */
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 6px 10px; background: #e8f0fe; }
     .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
@@ -220,10 +220,13 @@
 
   <div id="giftOverlayContainer"></div>
 
-  <!-- Top Stats Bar Compact - INDIKATOR 3 SALDO -->
+  <!-- Top Stats Bar Compact - INDIKATOR 3 SALDO + LONCENG NOTIFIKASI -->
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔄 Refresh
+    </button>
+    <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+      🔔 <span id="notifBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#e74c3c; width:8px; height:8px; border-radius:50%;"></span>
     </button>
     <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">20</span></div>
     <div class="stat-badge" title="Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
@@ -359,6 +362,20 @@
     </div>
   </div>
 
+  <!-- MODAL NOTIFIKASI MASUK (BISA DIHAPUS) -->
+  <div id="notificationsModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+        <h3 style="font-size:15px; font-weight:900;">🔔 Notifikasi Masuk</h3>
+        <button class="btn-secondary" style="padding:4px 8px; font-size:10px; background:#ff7675; color:#fff;" onclick="clearAllNotifications()">Hapus Semua</button>
+      </div>
+      <div id="notificationsList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat notifikasi...</p>
+      </div>
+      <button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('notificationsModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
   <!-- MODAL PEMUTAR VIDEO EMBEDDED DENGAN SDK FACEBOOK AUTOMATIC DETECT -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
@@ -377,12 +394,11 @@
     </div>
   </div>
 
-  <!-- 2. HALAMAN CARI (DENGAN TAG PERASAAN DIPINDAHKAN KE SINI) -->
+  <!-- 2. HALAMAN CARI -->
   <div id="pageSearch" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title">Jelajahi CUIT</h2>
     
-    <!-- KOTAK PERASAAN DIPINDAHKAN KE HALAMAN CARI -->
     <div class="feelings-card">
       <h3>Pilih dari Perasaanmu</h3>
       <div class="tags-grid">
@@ -911,7 +927,7 @@
     </div>
   </div>
 
-  <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
+  <!-- MODAL DOMPET & TOP-UP DOKU QRIS (DILENGKAPI BUKU KAS RIWAYAT PERMANEN) -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
@@ -925,6 +941,12 @@
         <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
 
+      <!-- BUKU KAS RIWAYAT PERMANEN GIFT MASUK -->
+      <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin: 14px 0 6px 0;">📜 Riwayat Penerimaan Permata (Buku Kas Permanen):</div>
+      <div id="giftHistoryListContainer" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #f8f9fe; padding: 8px; border-radius: 12px; border: 1px solid #e2e7f5;">
+        <p style="text-align: center; font-size: 10.5px; color: var(--text-sub);">Memuat riwayat transaksi...</p>
+      </div>
+
       <button class="btn-secondary" style="width: 100%; margin-top: 12px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
     </div>
   </div>
@@ -936,7 +958,6 @@
       <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 12px;">Gunakan aplikasi M-Banking atau e-Wallet favoritmu untuk membayar secara instan.</p>
 
       <div id="qrisImageContainer" style="min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8f9fe; border-radius: 14px; padding: 14px; border: 1px dashed #c7d2fe;">
-        <!-- Gambar QRIS atau indikator loading dirender di sini -->
       </div>
 
       <div style="font-size: 10.5px; color: #16a34a; font-weight: 700; margin-top: 10px;">
@@ -948,69 +969,65 @@
   </div>
 
   <!-- MODAL PENARIKAN DANA -->
-<div id="cashoutModal" class="modal">
-  <div class="modal-content">
-    <h3>💸 Penarikan Permata CUIT</h3>
-    <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
+  <div id="cashoutModal" class="modal">
+    <div class="modal-content">
+      <h3>💸 Penarikan Permata CUIT</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
 
-    <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan (Bank / E-Wallet):</label>
-    <input list="bankListOptions" id="cashoutType" placeholder="Ketik/pilih nama bank atau e-wallet..." oninput="calcCashoutFee()">
-    <datalist id="bankListOptions">
-      <option value="DANA"></option>
-      <option value="GoPay"></option>
-      <option value="OVO"></option>
-      <option value="ShopeePay"></option>
-      <option value="LinkAja"></option>
-      <option value="BCA"></option>
-      <option value="Mandiri"></option>
-      <option value="BRI"></option>
-      <option value="BNI"></option>
-      <option value="BSI (Bank Syariah Indonesia)"></option>
-      <option value="Bank Jabar Banten (BJB)"></option>
-      <option value="CIMB Niaga"></option>
-      <option value="Bank Permata"></option>
-      <option value="Bank Danamon"></option>
-      <option value="Bank Tabungan Negara (BTN)"></option>
-      <option value="Bank Neo Commerce"></option>
-      <option value="SeaBank"></option>
-    </datalist>
+      <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan (Bank / E-Wallet):</label>
+      <input list="bankListOptions" id="cashoutType" placeholder="Ketik/pilih nama bank atau e-wallet..." oninput="calcCashoutFee()">
+      <datalist id="bankListOptions">
+        <option value="DANA"></option>
+        <option value="GoPay"></option>
+        <option value="OVO"></option>
+        <option value="ShopeePay"></option>
+        <option value="LinkAja"></option>
+        <option value="BCA"></option>
+        <option value="Mandiri"></option>
+        <option value="BRI"></option>
+        <option value="BNI"></option>
+        <option value="BSI (Bank Syariah Indonesia)"></option>
+        <option value="Bank Jabar Banten (BJB)"></option>
+        <option value="CIMB Niaga"></option>
+        <option value="Bank Permata"></option>
+        <option value="Bank Danamon"></option>
+        <option value="Bank Tabungan Negara (BTN)"></option>
+        <option value="Bank Neo Commerce"></option>
+        <option value="SeaBank"></option>
+      </datalist>
 
-    <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
-    <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
+      <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
 
-    <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-      <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
-      <div>Total Biaya Admin: Rp <span id="coFee">5.000</span></div>
-      <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
-      <div><b>Bersih Diterima:</b> Rp <span id="coNet">15.000</span></div>
-    </div>
+      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
+        <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
+        <div>Total Biaya Admin: Rp <span id="coFee">5.000</span></div>
+        <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
+        <div><b>Bersih Diterima:</b> Rp <span id="coNet">15.000</span></div>
+      </div>
 
-    <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
-    <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
+      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
+      <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
 
-    <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
-    <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
+      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
+      <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
 
-    <div style="display: flex; gap: 6px; margin-top: 8px;">
-      <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
-      <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
+      </div>
     </div>
   </div>
-</div>
-
-
 
   <script>
     const CONFIG = {
-  FREE_COINS_DAILY: 20,
-  MAX_CHAR_FREE_CURHAT: 1200,
-  COIN_RATE_RP: 1,
-  DEFAULT_SPONSOR: 'ADMINCUIT',
-  // Pengaturan Biaya Penarikan (Bisa diganti kapan saja dari sini)
-  CASHOUT_FEE_FLAT: 5000, // Aktifkan jika ingin biaya flat (misal: 5000)
-  USE_FLAT_FEE: true      // Ubah ke true jika pakai biaya flat, atau false jika beda DANA/Bank
-};
-
+      FREE_COINS_DAILY: 20,
+      MAX_CHAR_FREE_CURHAT: 1200,
+      COIN_RATE_RP: 1,
+      DEFAULT_SPONSOR: 'ADMINCUIT',
+      CASHOUT_FEE_FLAT: 5000,
+      USE_FLAT_FEE: true
+    };
 
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
@@ -1209,6 +1226,7 @@
       await loadUserLikes();
       await loadFollows();
       await loadPosts();
+      await checkUnreadNotifications();
       
       initGlobalRealtime();
 
@@ -1819,6 +1837,14 @@
         .on('postgres_changes', { event: '*', schema: 'public', table: 'curhat' }, () => {
           loadPosts();
         }).subscribe();
+
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      supabaseClient.channel('realtime_notifs')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_notifications', filter: `recipient_email=eq.${myEmail}` }, () => {
+          checkUnreadNotifications();
+        }).subscribe();
     }
 
     async function toggleLike(postId) {
@@ -2028,7 +2054,7 @@
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    /* FUNGSI SAWER / GIFT DENGAN ANIMASI POP-UP & CONFETTI HASIL REVISI SULTAN */
+    /* FUNGSI SAWER / GIFT DENGAN PENCATATAN NOTIFIKASI & BUKU KAS */
     async function executeSendGift() {
       if (!pendingGiftData) return;
 
@@ -2066,6 +2092,11 @@
           p_cost: parseInt(cost)
         });
 
+        // Catat Notifikasi (Bisa dihapus) & Riwayat Kas (Permanen)
+        const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!`;
+        await supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: notifMsg }]);
+        await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }]);
+
         triggerGiftAnimation(myName, giftName, cost, targetName);
 
       } else if (activeTargetPostId) {
@@ -2084,6 +2115,11 @@
             p_creator_identifier: String(targetIdentifier),
             p_cost: parseInt(cost)
           });
+
+          // Catat Notifikasi (Bisa dihapus) & Riwayat Kas (Permanen)
+          const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!`;
+          await supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: notifMsg }]);
+          await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }]);
 
           triggerGiftAnimation(myName, giftName, cost, targetName);
         }
@@ -2166,6 +2202,89 @@
         banner.style.transform = 'translateY(-30px) scale(0.6)';
         setTimeout(() => banner.remove(), 800);
       }, stayDuration);
+    }
+
+    /* FUNGSI NOTIFIKASI & BUKU KAS RIWAYAT PERMANEN */
+    async function checkUnreadNotifications() {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      const { count } = await supabaseClient.from('user_notifications').select('*', { count: 'exact', head: true }).eq('recipient_email', myEmail).eq('is_read', false);
+      const badge = document.getElementById('notifBadge');
+      if (badge) {
+        badge.style.display = (count && count > 0) ? 'block' : 'none';
+      }
+    }
+
+    async function openNotificationsModal() {
+      document.getElementById('notificationsModal').style.display = 'flex';
+      document.getElementById('notifBadge').style.display = 'none';
+
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      await supabaseClient.from('user_notifications').update({ is_read: true }).eq('recipient_email', myEmail);
+
+      const { data: notifs } = await supabaseClient
+        .from('user_notifications')
+        .select('*')
+        .eq('recipient_email', myEmail)
+        .order('created_at', { ascending: false });
+
+      const container = document.getElementById('notificationsList');
+      if (!notifs || notifs.length === 0) {
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub); margin-top:10px;">Belum ada notifikasi baru.</p>';
+        return;
+      }
+
+      container.innerHTML = notifs.map(n => `
+        <div style="background:#f0f3fa; padding:8px 10px; border-radius:10px; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div>${n.message}</div>
+            <div style="font-size:9px; color:var(--text-sub); margin-top:2px;">${new Date(n.created_at).toLocaleString('id-ID')}</div>
+          </div>
+          <button style="border:none; background:none; color:#e74c3c; cursor:pointer; font-size:14px; padding:0 4px;" onclick="deleteSingleNotif('${n.id}')">✕</button>
+        </div>
+      `).join('');
+    }
+
+    async function deleteSingleNotif(notifId) {
+      await supabaseClient.from('user_notifications').delete().eq('id', notifId);
+      openNotificationsModal();
+    }
+
+    async function clearAllNotifications() {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      await supabaseClient.from('user_notifications').delete().eq('recipient_email', myEmail);
+      openNotificationsModal();
+    }
+
+    async function loadGiftHistoryLedger() {
+      const container = document.getElementById('giftHistoryListContainer');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      const { data: transactions } = await supabaseClient
+        .from('gift_transactions')
+        .select('*')
+        .eq('recipient_email', myEmail)
+        .order('created_at', { ascending: false });
+
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<p style="text-align:center; font-size:10.5px; color:var(--text-sub);">Belum ada riwayat penerimaan Permata.</p>';
+        return;
+      }
+
+      container.innerHTML = transactions.map(t => `
+        <div style="background:#fff; padding:6px 8px; border-radius:8px; font-size:10.5px; border:1px solid #eef1f8; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <b>🎁 ${t.gift_name}</b> dari <span style="color:var(--primary);">${t.sender_name}</span>
+            <div style="font-size:8.5px; color:var(--text-sub);">${new Date(t.created_at).toLocaleString('id-ID')}</div>
+          </div>
+          <div style="font-weight:900; color:#10b981;">+${t.coins_amount} 💎</div>
+        </div>
+      `).join('');
     }
 
     function toggleLeaderboard() {
@@ -2523,6 +2642,8 @@
       document.getElementById('wPaidValue').innerText = (paidCoins * CONFIG.COIN_RATE_RP).toLocaleString('id-ID');
       document.getElementById('walletModal').style.display = 'flex';
 
+      loadGiftHistoryLedger();
+
       const container = document.getElementById('packageListContainer');
       container.innerHTML = '<p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat daftar paket koin...</p>';
 
@@ -2600,64 +2721,63 @@
     }
 
     function calcCashoutFee() {
-  const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-  const gross = coins * 1;
-  const fee = 5000; // Biaya flat Rp 5.000
-  const net = Math.max(0, gross - fee);
+      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+      const gross = coins * 1;
+      const fee = 5000;
+      const net = Math.max(0, gross - fee);
 
-  document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
-  document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
-  document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
-}
+      document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
+      document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
+      document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
+    }
 
-async function submitCashout() {
-  const typeInput = document.getElementById('cashoutType');
-  const type = typeInput ? typeInput.value.trim() : '';
-  const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-  const accountName = document.getElementById('cashoutAccountName').value.trim();
-  const account = document.getElementById('cashoutAccount').value.trim();
+    async function submitCashout() {
+      const typeInput = document.getElementById('cashoutType');
+      const type = typeInput ? typeInput.value.trim() : '';
+      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+      const accountName = document.getElementById('cashoutAccountName').value.trim();
+      const account = document.getElementById('cashoutAccount').value.trim();
 
-  if (!type) return alert('Silakan pilih atau ketik nama Bank/E-Wallet tujuan!');
-  if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
-  if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
-  if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
-  if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
+      if (!type) return alert('Silakan pilih atau ketik nama Bank/E-Wallet tujuan!');
+      if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
+      if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
+      if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
+      if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
 
-  const gross = coins * 1;
-  const fee = 5000;
-  const netAmount = Math.max(0, gross - fee);
+      const gross = coins * 1;
+      const fee = 5000;
+      const netAmount = Math.max(0, gross - fee);
 
-  try {
-    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-    const myEmail = currentUser ? currentUser.email : guestId;
+      try {
+        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+        const myEmail = currentUser ? currentUser.email : guestId;
 
-    await supabaseClient.from('payouts').insert([
-      {
-        user_id: currentUser ? currentUser.id : 'demo_id',
-        user_email: myEmail,
-        payout_type: type,
-        account_name: accountName,
-        account_number: account,
-        coins_deducted: coins,
-        net_amount: netAmount,
-        status: 'pending'
+        await supabaseClient.from('payouts').insert([
+          {
+            user_id: currentUser ? currentUser.id : 'demo_id',
+            user_email: myEmail,
+            payout_type: type,
+            account_name: accountName,
+            account_number: account,
+            coins_deducted: coins,
+            net_amount: netAmount,
+            status: 'pending'
+          }
+        ]);
+
+        gems -= coins;
+        updateCoinUI();
+        document.getElementById('cashoutModal').style.display = 'none';
+
+        document.getElementById('cashoutType').value = '';
+        document.getElementById('cashoutAccountName').value = '';
+        document.getElementById('cashoutAccount').value = '';
+
+        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
+      } catch (err) {
+        alert('Terjadi kesalahan proses penarikan: ' + err.message);
       }
-    ]);
-
-    gems -= coins;
-    updateCoinUI();
-    document.getElementById('cashoutModal').style.display = 'none';
-
-    document.getElementById('cashoutType').value = '';
-    document.getElementById('cashoutAccountName').value = '';
-    document.getElementById('cashoutAccount').value = '';
-
-    alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
-  } catch (err) {
-    alert('Terjadi kesalahan proses penarikan: ' + err.message);
-  }
-}
-
+    }
 
     function openModerationPanel() {
       const userLvl = getUserLevel();
