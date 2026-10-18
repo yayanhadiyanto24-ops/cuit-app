@@ -167,9 +167,32 @@
     body.is-in-live .top-bar, 
     body.is-in-live #mainLeagueContainer { display: none !important; }
 
-    .live-chat-fullscreen { display: flex; flex-direction: column; height: calc(100vh - 120px); position: relative; }
-    .live-chat-messages-area { flex: 1; overflow-y: auto; background: #f8f9fe; border: 1px solid #eef1f8; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; min-height: 120px; }
-    .live-chat-controls-sticky { background: #ffffff; padding: 6px 0; border-top: 1px solid #f0f2f8; z-index: 25; }
+    .live-chat-fullscreen { 
+      display: flex; 
+      flex-direction: column; 
+      height: calc(100vh - 210px) !important; 
+      position: relative; 
+    }
+    .live-chat-messages-area { 
+      flex: 1; 
+      overflow-y: auto; 
+      background: #f8f9fe; 
+      border: 1px solid #eef1f8; 
+      border-radius: 12px; 
+      padding: 10px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+      margin-bottom: 6px; 
+      max-height: 280px !important; 
+    }
+    .live-chat-controls-sticky { 
+      background: #ffffff; 
+      padding: 8px 0; 
+      border-top: 1px solid #f0f2f8; 
+      position: relative; 
+      z-index: 30; 
+    }
     .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
 
     /* ANIMASI POP-UP GIFT OVERLAY */
@@ -423,7 +446,7 @@
         <button class="btn-primary" style="width:100%; padding:6px; font-size:11px;" onclick="sendCommunityMessage()">Kirim Postingan Komunitas</button>
       </div>
 
-      <!-- Feed Postingan Komunitas (Fitur Sama Dengan Beranda) -->
+      <!-- Feed Postingan Komunitas -->
       <div style="font-size:11px; font-weight:800; margin-bottom:6px; color:#333;">💬 Obrolan Komunitas:</div>
       <div id="communityPostsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
         <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat obrolan...</p>
@@ -559,8 +582,8 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
-  <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (RAPI DAN TIDAK MENUTUPI TOMBOL) -->
+  <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
         <button class="back-btn" style="margin-bottom:0;" onclick="leaveLiveSession()">←</button>
@@ -585,24 +608,22 @@
           </div>
         </div>
 
+        <!-- Area Pesan Terlihat Rapi & Tidak Menutupi Layar -->
         <div id="liveMessagesList" class="live-chat-messages-area"></div>
 
+        <!-- Sticky Controls Terlihat Jelas di Atas Navigasi -->
         <div class="live-chat-controls-sticky">
           <div class="quick-chat-container">
             <div class="quick-chip" onclick="applyQuickChat('Assalamu\'alaikum')">👋 Assalamu'alaikum</div>
             <div class="quick-chip" onclick="applyQuickChat('Wa\'alaikumsalam')">🤝 Wa'alaikumsalam</div>
             <div class="quick-chip" onclick="applyQuickChat('Selamat bergabung!')">🎉 Selamat bergabung!</div>
-            <div class="quick-chip" onclick="applyQuickChat('Jangan lupa absen dulu ya')">📌 Jangan lupa absen dulu</div>
-            <div class="quick-chip" onclick="applyQuickChat('Apa kabar semuanya?')">💬 Apa kabar?</div>
-            <div class="quick-chip" onclick="applyQuickChat('Hai!')">✨ Hai!</div>
-            <div class="quick-chip" onclick="applyQuickChat('Setuju banget!')">👍 Setuju banget!</div>
             <div class="quick-chip" onclick="applyQuickChat('Semangat terus ya!')">🔥 Semangat terus!</div>
           </div>
 
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="liveInputMessage" placeholder="Tulis pesan live... (Gratis)" style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
-            <button class="btn-primary" style="padding: 0 12px;" onclick="sendLiveMessage()">Kirim</button>
-            <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
+          <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+            <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
+            <button class="btn-primary" style="padding: 8px 12px;" onclick="sendLiveMessage()">Kirim</button>
+            <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 12px; font-weight:800; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
           </div>
         </div>
       </div>
@@ -923,7 +944,7 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT REVISI URUTAN DITAMPILKAN SULTAN ATAS -->
+  <!-- MODAL GIFT REVISI URUTAN SULTAN DI ATAS -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
