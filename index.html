@@ -1137,7 +1137,6 @@
     
     let allPostsCache = [];
     let profilesMap = {};
-    let likesStore = {};
     let userLikedPostsSet = new Set();
     let activeTargetPostId = null;
     let activeCommentPostId = null;
@@ -1291,7 +1290,6 @@
       }
     }
 
-    // PEMUATAN KILAT DENGAN PROMISE.ALL
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
@@ -1336,7 +1334,6 @@
 
       updateCoinUI();
       
-      // JALANKAN KILAT DENGAN PROMISE.ALL
       await Promise.all([
         loadUserLikes(),
         loadFollows(),
@@ -1613,7 +1610,6 @@
       }
     }
 
-    // PEMUATAN DATA KILAT PARALEL
     async function loadPosts() {
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
@@ -1827,7 +1823,6 @@
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
 
-    // FITUR PROMOSI POSTINGAN AKTIF BERJALAN
     async function promotePost(postId) {
       const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
       if (hours <= 0) return;
@@ -1855,9 +1850,11 @@
       loadPosts();
     }
 
-    // FITUR PROMOSI LIVE TEKS AKTIF BERJALAN
+    // MEMPERBAIKI PROMOSI LIVE AGAR SELALU BISA BERJALAN
     async function promoteLiveSession() {
-      if (!currentActiveLive) return alert('Tidak ada Live aktif yang dapat dipromosikan!');
+      if (!currentActiveLive || !currentActiveLive.id) {
+        return alert('Tidak ada Live aktif yang dapat dipromosikan!');
+      }
 
       const minutes = parseInt(prompt("Berapa menit ingin mempromosikan Sesi Live ini ke Feed Beranda? (1 Koin Berbayar = 1 Menit Promosi):", "10")) || 0;
       if (minutes <= 0) return;
@@ -1872,10 +1869,16 @@
 
       const { error } = await supabaseClient
         .from('lives')
-        .update({ promoted_until: expiryISO, updated_at: new Date().toISOString() })
+        .update({ 
+          promoted_until: expiryISO, 
+          updated_at: new Date().toISOString() 
+        })
         .eq('id', currentActiveLive.id);
 
-      if (error) return alert('Gagal mempromosikan Sesi Live: ' + error.message);
+      if (error) {
+        console.error("Gagal mempromosikan Sesi Live:", error);
+        return alert('Gagal mempromosikan Sesi Live: ' + error.message);
+      }
 
       paidCoins -= minutes;
       usedPaidCoins += minutes;
@@ -1890,7 +1893,7 @@
       let feelingTag = p.feeling || 'Bahagia';
       const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
       
-      const likesCount = p.likes_count ?? (likesStore[p.id] || 0);
+      const likesCount = p.likes_count ?? 0;
       const commentsCount = p.comments_count ?? 0;
       const giftsCoinsCount = p.gifts_count ?? 0;
       const isLiked = userLikedPostsSet.has(String(p.id));
@@ -2000,7 +2003,7 @@
         }).subscribe();
     }
 
-    // TOGGLE LIKE DENGAN TERSIMPAN PERMANEN
+    // MEMPERBAIKI PENINGKATAN KREDIBILITAS LIKE POSTINGAN (CEK SET DAHULU)
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -2015,10 +2018,10 @@
       const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
       if (isAlreadyLiked) {
+        // UNLIKE: Hanya dikurangi jika user memang sudah pernah like
         userLikedPostsSet.delete(strPostId);
         const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
         currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
         
         renderFilteredFeed();
 
@@ -2035,10 +2038,10 @@
         ]);
 
       } else {
+        // LIKE: Hanya ditambah 1x
         userLikedPostsSet.add(strPostId);
         const newLikeCount = (currentPost.likes_count || 0) + 1;
         currentPost.likes_count = newLikeCount;
-        likesStore[strPostId] = newLikeCount;
 
         renderFilteredFeed();
 
@@ -2051,9 +2054,9 @@
         const { error } = await supabaseClient.from('post_likes').insert([payload]);
 
         if (error) {
+          // Jika gagal insert (misal konflik unik DB), batalkan state UI
           userLikedPostsSet.delete(strPostId);
           currentPost.likes_count = Math.max(0, newLikeCount - 1);
-          likesStore[strPostId] = currentPost.likes_count;
           renderFilteredFeed();
           alert("Gagal menyimpan Like ke database: " + error.message);
           return;
@@ -2063,7 +2066,7 @@
       }
     }
 
-    // TOGGLE LIKE LIVE CHAT DENGAN TERSIMPAN PERMANEN
+    // MEMPERBAIKI LIKE LIVE CHAT AGAR HANYA BISA 1X PER USER
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
 
@@ -2793,7 +2796,6 @@
         userHasLeftLive = false;
         localStorage.setItem('cuit_active_live_id', live.id);
         
-        // SINKRONKAN JUMLAH LIKE DARI DATABASE SUPABASE
         const likesCount = live.likes_count || 0;
         const btnLike = document.getElementById('btnLikeLive');
         if (btnLike) {
