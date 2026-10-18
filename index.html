@@ -11,7 +11,6 @@
   
   <title>CUIT – Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- INTEGRASI FACEBOOK JS SDK UNTUK PENGAWASAN TIMER VIDEO -->
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
 
   <style>
@@ -28,11 +27,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
-    /* Top Stats Bar Compact - Indikator 3 Saldo + Lonceng Notifikasi */
+    /* Top Stats Bar Compact */
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 6px 10px; background: #e8f0fe; }
     .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-    /* Banner Image Container DENGAN ANIMASI MELIPAT OTOMATIS 3 DETIK */
+    /* Banner Image Container */
     .cuit-banner-container { 
       width: 100%; 
       border-bottom: 1px solid #e2e8f5; 
@@ -70,9 +69,32 @@
     .pill-btn { padding: 5px 12px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
-    /* Quick Chat Templates Pills */
-    .quick-chat-container { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; padding-bottom: 4px; scrollbar-width: none; }
-    .quick-chip { background: #ece8ff; color: var(--primary); border: 1px solid #dcd6ff; padding: 4px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    /* Quick Chat Grid Area */
+    .quick-chat-grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      margin-bottom: 8px;
+      background: #f0f3fa;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid #e2e7f5;
+    }
+    .quick-chip { 
+      background: #ffffff; 
+      color: var(--primary); 
+      border: 1px solid #dcd6ff; 
+      padding: 6px 4px; 
+      border-radius: 8px; 
+      font-size: 10px; 
+      font-weight: 700; 
+      text-align: center;
+      white-space: nowrap; 
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
     .quick-chip:hover { background: var(--primary); color: #fff; }
 
     /* Dynamic Tag Colors */
@@ -105,12 +127,10 @@
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     
-    /* AVATAR DENGAN WARNA DASAR UNGU CUIT & BORDER TEGAS */
     .avatar-container { position: relative; width: 40px; height: 40px; }
     .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #513cd8; box-shadow: 0 2px 5px rgba(108, 92, 231, 0.25); }
     .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1.5px solid #ffffff; }
 
-    /* NAV PROFILE ICON IKUTI WARNA UNGU UTAMA */
     .nav-profile-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #513cd8; }
     .nav-item.active .nav-profile-avatar { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
     
@@ -126,7 +146,6 @@
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
 
-    /* Kartu Ranking Anggota */
     .user-rank-card { background: #ffffff; border-radius: 14px; padding: 10px 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; }
 
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
@@ -134,7 +153,6 @@
     .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
     .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     
-    /* GRID PROFIL 3 KOLOM */
     .profile-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
     .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
     .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
@@ -157,8 +175,9 @@
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
-    .gift-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; }
-    .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 8px; border-radius: 12px; text-align: center; cursor: pointer; font-size: 11px; font-weight: 800; color: #1c1d36; }
+    /* GRID GIFT SEKALI KETUK TERLIHAT */
+    .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; max-height: 380px; overflow-y: auto; padding-right: 2px; }
+    .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 6px 4px; border-radius: 10px; text-align: center; cursor: pointer; font-size: 10px; font-weight: 800; color: #1c1d36; }
     .gift-card-item:hover { border-color: var(--primary); background: #ece8ff; }
 
     /* STYLES RUANG LIVE CHAT FULLSCREEN REVISI LAYOUT */
@@ -170,7 +189,7 @@
     .live-chat-fullscreen { 
       display: flex; 
       flex-direction: column; 
-      height: calc(100vh - 210px) !important; 
+      height: calc(100vh - 160px) !important; 
       position: relative; 
     }
     .live-chat-messages-area { 
@@ -184,7 +203,7 @@
       flex-direction: column; 
       gap: 6px; 
       margin-bottom: 6px; 
-      max-height: 280px !important; 
+      max-height: 250px !important; 
     }
     .live-chat-controls-sticky { 
       background: #ffffff; 
@@ -213,10 +232,7 @@
     
     .gift-banner .icon { font-size: 32px; animation: bounceIcon 0.8s infinite alternate; }
     .gift-banner.large .icon { font-size: 52px; animation: zoomPulsate 0.6s infinite alternate; }
-    .gift-banner.ultimate .icon {
-      font-size: 65px !important;
-      animation: zoomPulsate 0.5s infinite alternate;
-    }
+    .gift-banner.ultimate .icon { font-size: 65px !important; animation: zoomPulsate 0.5s infinite alternate; }
     .gift-banner .text-group { display: flex; flex-direction: column; }
     .gift-banner .sender { font-weight: 900; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .gift-banner.large .sender { font-size: 15px; color: #ffeaa7; text-shadow: 0 0 8px rgba(255, 234, 167, 0.8); }
@@ -243,7 +259,7 @@
 
   <div id="giftOverlayContainer"></div>
 
-  <!-- Top Stats Bar Compact - INDIKATOR 3 SALDO + LONCENG NOTIFIKASI -->
+  <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔄 Refresh
@@ -256,12 +272,12 @@
     <div class="stat-badge" title="Permata CUIT Hasil Kerja">💎 <span id="gemsCount">0</span></div>
   </div>
 
-  <!-- Hero Banner Bergambar Resmi CUIT DENGAN EFEK MELIPAT 3 DETIK -->
+  <!-- Hero Banner -->
   <div class="cuit-banner-container" id="cuitMainBanner">
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- PANGGUNG JUARA MINGGU INI (SENIN - MINGGU) -->
+  <!-- PANGGUNG JUARA MINGGU INI (REVISI GRID 5 KOLOM TERMASUK LIVE TERMEGAH) -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 6px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;">
       <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
@@ -272,46 +288,55 @@
       </span>
     </div>
 
-    <!-- Layout Statis Grid 4 Kolom -->
-    <div id="leagueChampionsCarousel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%;">
+    <div id="leagueChampionsCarousel" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; width: 100%;">
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 8px; font-weight: 800; color: #fde047; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👑 Raja Sawer</div>
-        <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid #fde047;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">👑</div>
+        <div style="font-size: 7.5px; font-weight: 800; color: #fde047; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👑 Raja Sawer</div>
+        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #fde047;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">👑</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">ADMINCUIT</div>
-        <div style="font-size: 7.5px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSawerScore">0 🪙</div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">ADMINCUIT</div>
+        <div style="font-size: 7px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSawerScore">0 🪙</div>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.1); border: 1px solid #ff7675; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
+        <div style="font-size: 7.5px; font-weight: 800; color: #ff7675; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🎙️ Live Termegah</div>
+        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #ff7675;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">🔴</div>
+        </div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champLiveName">Belum Ada</div>
+        <div style="font-size: 7px; color: #ffbe76; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champLiveScore">0 🪙</div>
       </div>
 
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 8px; font-weight: 800; color: #93c5fd; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🌟 Bintang Curhat</div>
-        <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid #60a5fa;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🔥</div>
+        <div style="font-size: 7.5px; font-weight: 800; color: #93c5fd; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🌟 Bintang Curhat</div>
+        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #60a5fa;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">🔥</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #bfdbfe; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champCurhatScore">0 ♥ + 0 💬</div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
+        <div style="font-size: 7px; color: #bfdbfe; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champCurhatScore">0 ♥ + 0 💬</div>
       </div>
 
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 8px; font-weight: 800; color: #86efac; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✍️ Pujangga Utama</div>
-        <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid #4ade80;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💙</div>
+        <div style="font-size: 7.5px; font-weight: 800; color: #86efac; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✍️ Pujangga Utama</div>
+        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #4ade80;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">💙</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #bbf7d0; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champPujanggaScore">0 Post</div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
+        <div style="font-size: 7px; color: #bbf7d0; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champPujanggaScore">0 Post</div>
       </div>
 
       <div style="background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 8px; font-weight: 800; color: #fbcfe8; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🧲 Magnet Sponsor</div>
-        <div style="position: relative; width: 28px; height: 28px; margin: 0 auto 3px auto;">
-          <div style="width: 28px; height: 28px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1.5px solid #f472b6;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💎</div>
+        <div style="font-size: 7.5px; font-weight: 800; color: #fbcfe8; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🧲 Magnet Sponsor</div>
+        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #f472b6;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">💎</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
-        <div style="font-size: 7.5px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSponsorScore">0 Member</div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
+        <div style="font-size: 7px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSponsorScore">0 Member</div>
       </div>
     </div>
   </div>
@@ -349,6 +374,7 @@
       <button class="btn-primary" style="padding: 7px 12px; flex-shrink: 0; border-radius: 18px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
+    <!-- BANNER LIVE TERSIAR / PROMOSI LIVE DI BERANDA -->
     <div id="promotedSection" style="display: none; margin-top: 10px; margin-bottom: 4px;">
       <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
         🚀 SOROTAN HARI INI
@@ -417,36 +443,30 @@
   <div id="communityDetailModal" class="modal">
     <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column; padding: 14px;">
       
-      <!-- Header Modal -->
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:10px;">
         <h3 style="font-size:15px; font-weight:900; color:var(--primary);" id="cdTitle">👥 Ruang Komunitas</h3>
         <button onclick="document.getElementById('communityDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
       </div>
 
-      <!-- Informasi Pembuat & Deskripsi -->
       <div style="background:#ece8ff; padding:10px; border-radius:12px; border:1px solid #dcd6ff; margin-bottom:10px;">
         <div style="font-size:11.5px; color:#2c2e43; line-height:1.4;" id="cdDesc">Deskripsi...</div>
         <div style="font-size:10px; font-weight:800; color:var(--primary); margin-top:6px;" id="cdCreator">👑 Pembuat: -</div>
       </div>
 
-      <!-- Daftar Anggota Terdaftar -->
       <div style="background:#f8f9fe; padding:8px 10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <span style="font-size:11px; font-weight:800; color:#1c1d36;" id="cdMemberCount">👥 Anggota (0)</span>
           <button id="btnJoinCommAction" class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="toggleJoinCommunity()">+ Bergabung</button>
         </div>
         <div id="cdMemberList" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;">
-          <!-- Avatar Anggota -->
         </div>
       </div>
 
-      <!-- Form Tulis Pesan Komunitas -->
       <div id="commPostForm" style="display:none; background:#fff; border:1px solid #6c5ce7; padding:8px; border-radius:12px; margin-bottom:10px;">
         <textarea id="commInputText" rows="2" placeholder="Tulis obrolan khusus komunitas ini..." style="margin-bottom:6px; font-size:11.5px;"></textarea>
         <button class="btn-primary" style="width:100%; padding:6px; font-size:11px;" onclick="sendCommunityMessage()">Kirim Postingan Komunitas</button>
       </div>
 
-      <!-- Feed Postingan Komunitas -->
       <div style="font-size:11px; font-weight:800; margin-bottom:6px; color:#333;">💬 Obrolan Komunitas:</div>
       <div id="communityPostsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
         <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat obrolan...</p>
@@ -582,17 +602,21 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (RAPI DAN TIDAK MENUTUPI TOMBOL) -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (RAPI & DUKUNG LIKE LIVE + MULTI-ROOM) -->
   <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
         <button class="back-btn" style="margin-bottom:0;" onclick="leaveLiveSession()">←</button>
         <h2 class="section-title" style="font-size:16px;">Live Teks</h2>
       </div>
-      <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live</button>
+      <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live Baru</button>
     </div>
 
     <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
+      
+      <!-- List Banyak Live Aktif -->
+      <div id="activeLivesListContainer" style="margin-bottom: 10px;"></div>
+
       <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
         Belum ada sesi Live Teks aktif.
       </div>
@@ -608,22 +632,22 @@
           </div>
         </div>
 
-        <!-- Area Pesan Terlihat Rapi & Tidak Menutupi Layar -->
+        <!-- Area Pesan Live -->
         <div id="liveMessagesList" class="live-chat-messages-area"></div>
 
         <!-- Sticky Controls Terlihat Jelas di Atas Navigasi -->
         <div class="live-chat-controls-sticky">
-          <div class="quick-chat-container">
-            <div class="quick-chip" onclick="applyQuickChat('Assalamu\'alaikum')">👋 Assalamu'alaikum</div>
-            <div class="quick-chip" onclick="applyQuickChat('Wa\'alaikumsalam')">🤝 Wa'alaikumsalam</div>
-            <div class="quick-chip" onclick="applyQuickChat('Selamat bergabung!')">🎉 Selamat bergabung!</div>
-            <div class="quick-chip" onclick="applyQuickChat('Semangat terus ya!')">🔥 Semangat terus!</div>
+          <!-- QUICK CHAT GRID KUSTOM DUKUNG PERAN (HOST & PENONTON) -->
+          <div class="quick-chat-grid-container" id="quickChatContainer">
+            <!-- Diisi Otomatis via JS Sesuai Peran User -->
           </div>
 
-          <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+          <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
             <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
-            <button class="btn-primary" style="padding: 8px 12px;" onclick="sendLiveMessage()">Kirim</button>
-            <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 12px; font-weight:800; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
+            <button class="btn-primary" style="padding: 8px 10px;" onclick="sendLiveMessage()">Kirim</button>
+            <button class="btn-secondary" id="btnLikeLive" style="background: #ece8ff; color: #6c5ce7; border: 1px solid #dcd6ff; padding: 8px 8px; font-weight:800; white-space: nowrap;" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">0</span>)</button>
+            <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; font-weight:800; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
+            <button class="btn-secondary" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; padding: 8px 6px; font-weight:800; white-space: nowrap;" onclick="promoteLiveSession()" title="1 Koin / Menit">🚀</button>
           </div>
         </div>
       </div>
@@ -944,57 +968,57 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT REVISI URUTAN SULTAN DI ATAS -->
+  <!-- MODAL GIFT TERSTRUKTUR DARI KECIL KE BESAR + TERPISAH ABSEN -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 4px;">Pilih Gift Apresiasi 🎁</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
+      <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
+      <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
       
-      <div class="gift-grid">
-        <div class="gift-card-item" style="background:#e8eaf6; border:1px solid #c5cae9; font-weight:900;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
-        <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9; font-weight:900;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet Raksasa (400 🪙)</div>
-        <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung Meletus (300 🪙)</div>
-        <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2; font-weight:900;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai Petir (200 🪙)</div>
-        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super Supporter (100 🪙)</div>
-        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja Curhat (50 🪙)</div>
+      <!-- GIFT ABSEN TERPISAH DI ATAS -->
+      <div style="background: #ece8ff; border: 1.5px dashed #6c5ce7; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
+        <span style="font-weight: 900; font-size: 12px; color: var(--primary); display: block;">📌 Kirim Gift Absen (1 🪙)</span>
+        <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
+      </div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Absen')">📌 Absen (1 🪙)</div>
+      <!-- GRID GIFT URUTAN DARI KOIN TERKECIL S/D TERBESAR (GAMPANG DIKETUK) -->
+      <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk Hangat (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin Dulu (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Cokelat Empati')">🍫 Cokelat Empati (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Permen Manis')">🍬 Permen Manis (2 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk (2 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin (2 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(2, 'Cokelat Empati')">🍫 Cokelat (2 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Kamu Hebat (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga Empati (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Donat Hangat')">🍩 Donat Hangat (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Jus Segar')">🧃 Jus Segar (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Hebat (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga (3 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(3, 'Donat Hangat')">🍩 Donat (3 🪙)</div>
 
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Karya Indah (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Traktir Pizza')">🍕 Traktir Pizza (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Kue Apresiasi')">🍰 Kue Apresiasi (5 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Indah (5 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Traktir Pizza')">🍕 Pizza (5 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang Cerita (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Nobar Seru')">🍿 Nobar Seru (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Kotak Kejutan')">🎁 Kotak Kejutan (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Taman Bunga')">🌸 Taman Bunga (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Nobar Seru')">🍿 Nobar (10 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Kotak Kejutan')">🎁 Kejutan (10 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Karya Agung (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Pesta Burger (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon Harapan (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Suara Emas')">🎙️ Suara Emas (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Agung (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Burger (20 🪙)</div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon (20 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser Mini (50 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala Utama (50 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Istana Cerita')">🏰 Istana Cerita (50 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja (50 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser (50 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala (50 🪙)</div>
 
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Kembang Api')">🎆 Kembang Api (100 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil Balap (100 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal Pesiar (100 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super (100 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil (100 🪙)</div>
+        <div class="gift-card-item" style="background:#ece8ff; border:1px solid #dcd6ff; font-weight:900;" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal (100 🪙)</div>
+
+        <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2; font-weight:900;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai (200 🪙)</div>
+        <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung (300 🪙)</div>
+        <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9; font-weight:900;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet (400 🪙)</div>
+        
+        <div class="gift-card-item" style="grid-column: span 3; background:#e8eaf6; border:1.5px solid #c5cae9; font-weight:900; padding:8px;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova SULTAN (500 🪙)</div>
       </div>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
@@ -1126,6 +1150,8 @@
     let livePollingTimer = null;
     let isLeaderboardOpen = true;
     let userHasLeftLive = false;
+    let userHasCheckedInLive = {}; 
+    let userLikedLivesSet = new Set();
     
     let currentCommData = null;
     let isUserJoinedComm = false;
@@ -1137,6 +1163,30 @@
 
     let activeVideoSlot = null;
     let videoTimerInterval = null;
+
+    const QUICK_TEMPLATES_PENONTON = [
+      "🖐️ Assalamu'alaikum",
+      "👋 Halo host!",
+      "🔥 Semangat, Bos!",
+      "✨ Keren banget!",
+      "🙏 Izin mampir ya",
+      "👍 Mantap nih!",
+      "❓ Mau tanya dong",
+      "👏 Top banget!",
+      "😊 Salam kenal"
+    ];
+
+    const QUICK_TEMPLATES_HOST = [
+      "🤲 Wa'alaikumsalam",
+      "📝 Absen dulu ya...!",
+      "👋 Selamat datang semuanya!",
+      "🙏 Terima kasih udah mampir!",
+      "🎁 Makasih banyak gift-nya!",
+      "📌 Jangan lupa follow ya!",
+      "💬 Ada yang mau ditanya?",
+      "✨ Lanjut ke sesi berikutnya",
+      "🔥 Semangat bareng-bareng!"
+    ];
 
     function initAutoCollapseBanner() {
       setTimeout(() => {
@@ -1172,7 +1222,7 @@
       const lastWeekEvaluated = localStorage.getItem('cuit_last_league_week');
 
       if (lastWeekEvaluated && parseInt(lastWeekEvaluated) !== currentWeekNumber) {
-        alert(`🏆 [LIGA MINGGUAN BERAKHIR!]\n\nSiklus kompetisi Panggung Juara Minggu Ini telah di-reset! Para pemenang kategori Raja Sawer, Bintang Curhat, Pujangga Utama, dan Magnet Sponsor berhasil meraih Mahkota Kehormatan minggu ini! ✨\n\nRebut tahtamu di siklus baru minggu ini!`);
+        alert(`🏆 [LIGA MINGGUAN BERAKHIR!]\n\nSiklus Panggung Juara Minggu Ini telah di-reset!`);
         localStorage.setItem('cuit_last_league_week', currentWeekNumber);
       } else if (!lastWeekEvaluated) {
         localStorage.setItem('cuit_last_league_week', currentWeekNumber);
@@ -1459,7 +1509,7 @@
       await syncCoinsToSupabase();
       await loadPosts();
       
-      alert(`Profil berhasil diperbarui!\nNama Tampilan & Postingan Lama Diperbarui ke: ${newName}\nKode Referral Otomatis Kamu: ${myNewReferralCode}`);
+      alert(`Profil berhasil diperbarui!\nNama Tampilan: ${newName}`);
     }
 
     function copyMySponsorLink() {
@@ -1552,7 +1602,7 @@
 
       if (!error) {
         localStorage.removeItem('cuit_draft_content');
-        alert(`Curhatan berhasil diterbitkan! (${content.length} karakter - terpakai ${coinsNeeded} ${type === 'free' ? 'Koin Gratisan' : 'Koin Berbayar'})`);
+        alert(`Curhatan berhasil diterbitkan!`);
         document.getElementById('postContent').value = '';
         switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
       } else {
@@ -1602,6 +1652,22 @@
             document.getElementById('champSponsorName').innerText = topSponsorCode;
             document.getElementById('champSponsorScore').innerText = `${maxDownlines} Member`;
           }
+        }
+
+        // AMBIL JUARA LIVE TERMEGAH DARI SUM APLIKASI
+        const { data: topLiveHost } = await supabaseClient
+          .from('lives')
+          .select('host_name, total_coins_received')
+          .order('total_coins_received', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (topLiveHost && topLiveHost.total_coins_received > 0) {
+          document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
+          document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
+        } else {
+          document.getElementById('champLiveName').innerText = 'Belum Ada';
+          document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
         const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
@@ -1656,51 +1722,71 @@
         document.getElementById('champPujanggaScore').innerText = `${maxPosts} Post`;
 
         const nowMs = Date.now();
-        const activePromotions = data
-          .filter(p => {
-            if (!p.is_promoted || !p.promoted_until) return false;
-            const expiryMs = new Date(p.promoted_until).getTime();
-            return expiryMs > nowMs;
-          })
-          .sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
+        
+        const { data: activeLivePromos } = await supabaseClient
+          .from('lives')
+          .select('*')
+          .eq('is_active', true)
+          .gt('promoted_until', new Date().toISOString());
 
-        if (activePromotions.length > 0) {
+        let sorotanItems = [];
+
+        if (activeLivePromos && activeLivePromos.length > 0) {
+          activeLivePromos.forEach(live => {
+            sorotanItems.push({
+              type: 'live',
+              id: live.id,
+              title: live.title,
+              username: live.host_name,
+              user_email: live.host_email,
+              promoted_until: live.promoted_until,
+              updated_at: live.updated_at || live.created_at
+            });
+          });
+        }
+
+        data.filter(p => p.is_promoted && p.promoted_until && new Date(p.promoted_until).getTime() > nowMs)
+          .forEach(post => {
+            sorotanItems.push({
+              type: 'post',
+              id: post.id,
+              title: post.content,
+              username: post.username,
+              user_email: post.user_email,
+              promoted_until: post.promoted_until,
+              updated_at: post.updated_at || post.created_at,
+              rawPost: post
+            });
+          });
+
+        // REVISI ATURAN FEED SOROTAN: PALING KIRI ADALAH YANG TERBARU DIPROMOSIKAN (ORDER BY PROMOTED_UNTIL / UPDATED_AT DESC)
+        sorotanItems.sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
+
+        if (sorotanItems.length > 0) {
           let cardsHTML = '';
-          activePromotions.forEach(post => {
-            let rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna');
-            let snippet = post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content;
-            
-            let authorPoin = 0;
-            if (post.user_id && profilesMap[post.user_id] !== undefined) {
-              authorPoin = profilesMap[post.user_id];
-            } else if (post.user_email && profilesMap[post.user_email] !== undefined) {
-              authorPoin = profilesMap[post.user_email];
-            } else if (currentUser && (currentUser.id === post.user_id || currentUser.email === post.user_email)) {
-              authorPoin = usedPaidCoins;
-            }
-
-            const userLvl = getUserLevel(authorPoin);
+          sorotanItems.forEach(item => {
+            let rawName = item.username || 'Pengguna';
+            let snippet = item.title.length > 45 ? item.title.substring(0, 45) + '...' : item.title;
+            const isLive = (item.type === 'live');
 
             cardsHTML += `
-              <div onclick="openPromotedDetail('${post.id}')" style="min-width: 95px; width: 95px; height: 145px; background: linear-gradient(180deg, #6c5ce7 0%, #341f97 100%); border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-                <div style="position: relative; width: 26px; height: 26px;">
-                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #ffd700;">🤍</div>
-                  <div style="position: absolute; bottom: -3px; right: -3px; width: 13px; height: 13px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8.5px;">${userLvl.icon}</div>
+              <div onclick="${isLive ? `joinLiveRoomDirect('${item.id}')` : `openPromotedDetail('${item.id}')`}" 
+                   style="min-width: 100px; width: 100px; height: 145px; background: ${isLive ? 'linear-gradient(180deg, #ff4757 0%, #2f3542 100%)' : 'linear-gradient(180deg, #6c5ce7 0%, #341f97 100%)'}; border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="width: 24px; height: 24px; border-radius: 50%; background: #fff; color:#333; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ffd700;">🤍</div>
+                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800; animation:bounceIcon 1s infinite;">🔴 LIVE</span>` : ''}
                 </div>
 
-                <div style="font-size: 10px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">${snippet}</div>
+                <div style="font-size: 9.5px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">${snippet}</div>
 
-                <div style="font-size: 9.5px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
+                <div style="font-size: 9px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
               </div>
             `;
           });
 
-          if (cardsHTML !== '') {
-            promotedSection.style.display = 'block';
-            promotedCarousel.innerHTML = cardsHTML;
-          } else {
-            promotedSection.style.display = 'none';
-          }
+          promotedSection.style.display = 'block';
+          promotedCarousel.innerHTML = cardsHTML;
         } else {
           promotedSection.style.display = 'none';
         }
@@ -1758,7 +1844,7 @@
 
       const { error } = await supabaseClient
         .from('curhat')
-        .update({ is_promoted: true, promoted_until: expiryISO })
+        .update({ is_promoted: true, promoted_until: expiryISO, updated_at: new Date().toISOString() })
         .eq('id', postId);
 
       if (error) return alert('Gagal mempromosikan postingan: ' + error.message);
@@ -1767,7 +1853,36 @@
       usedPaidCoins += hours;
       updateCoinUI();
 
-      alert(`Postingan berhasil dipromosikan ke barisan Sorotan secara GLOBAL selama ${hours} jam! (+${hours} EXP Jam Terbang)`);
+      alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
+      loadPosts();
+    }
+
+    async function promoteLiveSession() {
+      if (!currentActiveLive) return alert('Tidak ada Live aktif yang dapat dipromosikan!');
+
+      const minutes = parseInt(prompt("Berapa menit ingin mempromosikan Sesi Live ini ke Feed Beranda? (1 Koin Berbayar = 1 Menit Promosi):", "10")) || 0;
+      if (minutes <= 0) return;
+
+      if (paidCoins < minutes) {
+        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${minutes} menit membutuhkan ${minutes} Koin Berbayar.`);
+      }
+
+      const nowMs = Date.now();
+      const expiryMs = nowMs + (minutes * 60 * 1000);
+      const expiryISO = new Date(expiryMs).toISOString();
+
+      const { error } = await supabaseClient
+        .from('lives')
+        .update({ promoted_until: expiryISO, updated_at: new Date().toISOString() })
+        .eq('id', currentActiveLive.id);
+
+      if (error) return alert('Gagal mempromosikan Sesi Live: ' + error.message);
+
+      paidCoins -= minutes;
+      usedPaidCoins += minutes;
+      updateCoinUI();
+
+      alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
       loadPosts();
     }
 
@@ -1940,6 +2055,40 @@
 
         await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
       }
+    }
+
+    // MENGELOLA LIKE DENGAN TOMBOL LIKE KHUSUS PADA RUANG LIVE CHAT
+    async function toggleLikeLive() {
+      if (!currentActiveLive) return;
+
+      const liveIdStr = String(currentActiveLive.id);
+      const isAlreadyLiked = userLikedLivesSet.has(liveIdStr);
+
+      let newCount = currentActiveLive.likes_count || 0;
+
+      if (isAlreadyLiked) {
+        userLikedLivesSet.delete(liveIdStr);
+        newCount = Math.max(0, newCount - 1);
+      } else {
+        userLikedLivesSet.add(liveIdStr);
+        newCount++;
+      }
+
+      currentActiveLive.likes_count = newCount;
+      document.getElementById('liveLikesCount').innerText = newCount;
+
+      const btn = document.getElementById('btnLikeLive');
+      if (userLikedLivesSet.has(liveIdStr)) {
+        btn.innerHTML = `♥ (${newCount})`;
+        btn.style.background = 'var(--primary)';
+        btn.style.color = '#fff';
+      } else {
+        btn.innerHTML = `♡ (${newCount})`;
+        btn.style.background = '#ece8ff';
+        btn.style.color = '#6c5ce7';
+      }
+
+      await supabaseClient.from('lives').update({ likes_count: newCount }).eq('id', currentActiveLive.id);
     }
 
     async function openCommentsModal(postId) {
@@ -2117,9 +2266,14 @@
         const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
         const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
 
+        userHasCheckedInLive[currentActiveLive.id] = true;
+
         await supabaseClient.from('live_messages').insert([
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
+
+        const currentLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
+        await supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id);
 
         await supabaseClient.rpc('process_gift_rewards', {
           p_creator_identifier: String(targetIdentifier),
@@ -2129,8 +2283,6 @@
         const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!`;
         await supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: notifMsg }]);
         await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }]);
-
-        triggerGiftAnimation(myName, giftName, cost, targetName);
 
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
@@ -2400,7 +2552,7 @@
         await supabaseClient.from('community_members').insert([
           { community_id: currentCommData.id, user_email: myEmail, username: myName }
         ]);
-        alert(`Selamat! Anda telah resmi bergabung dengan komunitas "${currentCommData.name}". Sekarang Anda bisa saling berkirim pesan!`);
+        alert(`Selamat! Anda telah resmi bergabung dengan komunitas "${currentCommData.name}".`);
       }
 
       loadCommunityMembers(currentCommData.id);
@@ -2530,89 +2682,116 @@
       
       document.getElementById('liveChatBox').style.display = 'none';
       document.getElementById('btnStartLiveHeader').style.display = 'block';
-      document.getElementById('liveStatusBox').innerHTML = 'Kamu telah keluar dari ruang Live. Ketuk "Masuk Live" untuk bergabung kembali.';
       
       switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
-      const { data: activeLive } = await supabaseClient
+      const { data: activeLives } = await supabaseClient
         .from('lives')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
       const statusBox = document.getElementById('liveStatusBox');
       const chatBox = document.getElementById('liveChatBox');
       const btnHeader = document.getElementById('btnStartLiveHeader');
+      const livesListContainer = document.getElementById('activeLivesListContainer');
 
-      if (activeLive) {
+      btnHeader.style.display = 'block';
+
+      if (currentActiveLive) {
+        livesListContainer.style.display = 'none';
+        
         const nowMs = Date.now();
-        const createdMs = new Date(activeLive.created_at).getTime();
-        const expiryMs = activeLive.ended_at ? new Date(activeLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
+        const createdMs = new Date(currentActiveLive.created_at).getTime();
+        const expiryMs = currentActiveLive.ended_at ? new Date(currentActiveLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
 
         if (nowMs >= expiryMs) {
-          await supabaseClient.from('lives').update({ is_active: false }).eq('id', activeLive.id);
+          await supabaseClient.from('lives').update({ is_active: false }).eq('id', currentActiveLive.id);
           cleanupLiveSesssion();
           statusBox.innerHTML = `Sesi Live Teks telah berakhir otomatis (Batas waktu 60 menit tercapai).`;
           chatBox.style.display = 'none';
-          btnHeader.style.display = 'block';
           return;
         }
-
-        currentActiveLive = activeLive;
-        localStorage.setItem('cuit_active_live_id', activeLive.id);
 
         const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
         const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
         const myEmail = currentUser ? currentUser.email : guestId;
-        const isHost = activeLive.host_email === myEmail;
-
-        if (userHasLeftLive && !isHost) {
-          statusBox.innerHTML = `
-            <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 ADA LIVE BERJALAN (${remainingMinutes} mnt tersisa)</div>
-            <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
-            <button class="btn-primary" style="margin-top:6px;" onclick="reJoinLiveSession()">💬 Masuk Ruang Live</button>
-          `;
-          chatBox.style.display = 'none';
-          btnHeader.style.display = 'none';
-          return;
-        }
+        const isHost = currentActiveLive.host_email === myEmail;
 
         document.body.classList.add('is-in-live');
         statusBox.innerHTML = `
           <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
-          <div style="font-size: 11px; color: #333;">Host: <b>${activeLive.host_name}</b> (${activeLive.title})</div>
+          <div style="font-size: 11px; color: #333;">Host: <b>${currentActiveLive.host_name}</b> (${currentActiveLive.title})</div>
           <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
-            ${isHost ? `<button class="btn-primary" style="background:#ff7675; padding:4px 12px;" onclick="stopLiveSession('${activeLive.id}')">Akhiri Live</button>` : ''}
+            ${isHost ? `<button class="btn-primary" style="background:#ff7675; padding:4px 12px;" onclick="stopLiveSession('${currentActiveLive.id}')">Akhiri Live</button>` : ''}
             <button class="btn-secondary" style="background:#e0e0e0; color:#333; padding:4px 12px;" onclick="leaveLiveSession()">🚪 Keluar Live</button>
           </div>
         `;
 
         chatBox.style.display = 'flex';
-        btnHeader.style.display = 'none';
         
-        loadLiveMessages(activeLive.id);
-        subscribeToLiveRealtime(activeLive.id);
+        document.getElementById('liveLikesCount').innerText = currentActiveLive.likes_count || 0;
+        
+        renderQuickChatGrid(isHost);
 
-        if (livePollingTimer) clearInterval(livePollingTimer);
-        livePollingTimer = setInterval(() => {
-          if (currentActiveLive) loadActiveLiveSession();
-        }, 5000);
+      } else if (activeLives && activeLives.length > 0) {
+        document.body.classList.remove('is-in-live');
+        chatBox.style.display = 'none';
+        livesListContainer.style.display = 'block';
+
+        statusBox.innerHTML = `<div style="font-weight:800; font-size:12px; color:#2c2e43;">🌐 ${activeLives.length} Sesi Live Teks Sedang Berlangsung:</div>`;
+
+        let listHTML = '';
+        activeLives.forEach(live => {
+          const nowMs = Date.now();
+          const createdMs = new Date(live.created_at).getTime();
+          const expiryMs = live.ended_at ? new Date(live.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
+          const remMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
+
+          listHTML += `
+            <div style="background:#f8f9fe; border:1px solid #e2e7f5; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:800; font-size:12px; color:var(--primary);">🔴 ${live.title}</div>
+                <div style="font-size:10.5px; color:#444; margin-top:2px;">Host: <b>${live.host_name}</b> • <span style="color:#e67e22;">⏳ ${remMinutes}m tersisa</span></div>
+              </div>
+              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="joinLiveRoomDirect('${live.id}')">Masuk Live</button>
+            </div>
+          `;
+        });
+
+        livesListContainer.innerHTML = listHTML;
 
       } else {
+        document.body.classList.remove('is-in-live');
         cleanupLiveSesssion();
-        statusBox.innerHTML = `Belum ada Live aktif. Kamu bisa mencoba memulai jika level dan saldo memenuhi syarat.`;
+        livesListContainer.style.display = 'none';
+        statusBox.innerHTML = `Belum ada Live aktif. Kamu bisa mencoba memulai sesi Live baru jika level dan saldo memenuhi syarat.`;
         chatBox.style.display = 'none';
-        btnHeader.style.display = 'block';
       }
     }
 
-    function reJoinLiveSession() {
-      userHasLeftLive = false;
-      loadActiveLiveSession();
+    function renderQuickChatGrid(isHost) {
+      const container = document.getElementById('quickChatContainer');
+      const templates = isHost ? QUICK_TEMPLATES_HOST : QUICK_TEMPLATES_PENONTON;
+
+      container.innerHTML = templates.map(txt => `
+        <div class="quick-chip" onclick="applyQuickChat('${txt.replace(/'/g, "\\'")}')">${txt}</div>
+      `).join('');
+    }
+
+    async function joinLiveRoomDirect(liveId) {
+      const { data: live } = await supabaseClient.from('lives').select('*').eq('id', liveId).maybeSingle();
+      if (live) {
+        currentActiveLive = live;
+        userHasLeftLive = false;
+        localStorage.setItem('cuit_active_live_id', live.id);
+        
+        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+        loadLiveMessages(live.id);
+        subscribeToLiveRealtime(live.id);
+      }
     }
 
     function cleanupLiveSesssion() {
@@ -2675,13 +2854,13 @@
       const endedAtISO = new Date(maxLiveMs).toISOString();
 
       const { data, error } = await supabaseClient.from('lives').insert([
-        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO }
+        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO, total_coins_received: 0 }
       ]).select().single();
 
       if (!error) {
         userHasLeftLive = false;
-        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit. (Terpakai 10 Koin Berbayar & +10 EXP)');
-        loadActiveLiveSession();
+        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit.');
+        joinLiveRoomDirect(data.id);
       } else {
         alert('Gagal memulai Live: ' + error.message);
       }
@@ -2763,6 +2942,19 @@
       if (!msg || !currentActiveLive) return;
 
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+
+      const isHost = (currentActiveLive.host_email === myEmail || currentActiveLive.host_name === myName);
+
+      if (!isHost && !userHasCheckedInLive[currentActiveLive.id]) {
+        alert("📌 Penonton wajib mengirimkan Gift Absen (1 Koin) lebih dulu untuk membuka akses komentar di ruang live ini!");
+        
+        selectedLiveRecipient = { name: currentActiveLive.host_name, emailOrName: currentActiveLive.host_email };
+        isLiveGiftContext = true;
+        sendGiftAction(1, 'Absen');
+        return;
+      }
 
       await supabaseClient.from('live_messages').insert([
         { live_id: currentActiveLive.id, username: myName, content: msg }
@@ -3020,7 +3212,7 @@
         document.getElementById('cashoutAccountName').value = '';
         document.getElementById('cashoutAccount').value = '';
 
-        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
+        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim!`);
       } catch (err) {
         alert('Terjadi kesalahan proses penarikan: ' + err.message);
       }
@@ -3191,7 +3383,7 @@
         btnClose.innerText = '⏳ Tekan Play di Video';
       }
 
-      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!';
+      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas.';
 
       if (videoTimerInterval) {
         clearInterval(videoTimerInterval);
@@ -3206,7 +3398,7 @@
 
     function startVideoTimerAuto() {
       const btnClose = document.getElementById('btnCloseVideo');
-      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar! Harap tonton selama 10 detik...';
+      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar!';
 
       if (videoTimerInterval) clearInterval(videoTimerInterval);
 
@@ -3224,7 +3416,7 @@
             btnClose.style.background = '#2ecc71';
             btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
           }
-          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai! Klik tombol hijau di atas untuk klaim koin gratisan.';
+          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai!';
         }
       }, 1000);
     }
@@ -3237,7 +3429,7 @@
       const btnClose = document.getElementById('btnCloseVideo');
       if (btnClose && videoSecondsLeft > 0) {
         btnClose.innerText = '⏸️ Video Di-pause';
-        document.getElementById('videoTimerStatusText').innerText = '⚠️ Video di-pause! Lanjutkan pemutaran video untuk melanjutkan timer.';
+        document.getElementById('videoTimerStatusText').innerText = '⚠️ Video di-pause!';
       }
     }
 
@@ -3252,10 +3444,6 @@
       updateCoinUI();
 
       alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
-
-      if (activeVideoSlot === 'v10') {
-        alert('🚀 Luar biasa! Kamu telah menyelesaikan putaran 10 Video. Seluruh video terbuka kembali untuk ditonton lagi!');
-      }
 
       videoSecondsLeft = 10;
       openReelsModal();
@@ -3299,7 +3487,7 @@
             .upsert({ id: i, slot_name: `Video ${i}`, facebook_url: urlVal }, { onConflict: 'id' });
         }
 
-        alert('✅ Link 10 Video Reels FB berhasil disimpan ke Database Supabase!');
+        alert('✅ Link 10 Video Reels FB berhasil disimpan!');
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
