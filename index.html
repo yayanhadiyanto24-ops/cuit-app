@@ -2063,7 +2063,7 @@
       }
     }
 
-    // TOGGLE LIKE LIVE CHAT
+    // TOGGLE LIKE LIVE CHAT DENGAN TERSIMPAN PERMANEN
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
 
@@ -2684,7 +2684,7 @@
       document.getElementById('liveChatBox').style.display = 'none';
       document.getElementById('btnStartLiveHeader').style.display = 'block';
       
-      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
@@ -2782,12 +2782,33 @@
     }
 
     async function joinLiveRoomDirect(liveId) {
-      const { data: live } = await supabaseClient.from('lives').select('*').eq('id', liveId).maybeSingle();
+      const { data: live } = await supabaseClient
+        .from('lives')
+        .select('*')
+        .eq('id', liveId)
+        .maybeSingle();
+
       if (live) {
         currentActiveLive = live;
         userHasLeftLive = false;
         localStorage.setItem('cuit_active_live_id', live.id);
         
+        // SINKRONKAN JUMLAH LIKE DARI DATABASE SUPABASE
+        const likesCount = live.likes_count || 0;
+        const btnLike = document.getElementById('btnLikeLive');
+        if (btnLike) {
+          document.getElementById('liveLikesCount').innerText = likesCount;
+          if (userLikedLivesSet.has(String(live.id))) {
+            btnLike.innerHTML = `♥ (<span id="liveLikesCount">${likesCount}</span>)`;
+            btnLike.style.background = 'var(--primary)';
+            btnLike.style.color = '#fff';
+          } else {
+            btnLike.innerHTML = `♡ (<span id="liveLikesCount">${likesCount}</span>)`;
+            btnLike.style.background = '#ece8ff';
+            btnLike.style.color = '#6c5ce7';
+          }
+        }
+
         switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
         loadLiveMessages(live.id);
         subscribeToLiveRealtime(live.id);
@@ -2853,7 +2874,7 @@
       const endedAtISO = new Date(maxLiveMs).toISOString();
 
       const { data, error } = await supabaseClient.from('lives').insert([
-        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO, total_coins_received: 0 }
+        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO, total_coins_received: 0, likes_count: 0 }
       ]).select().single();
 
       if (!error) {
