@@ -2,628 +2,867 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- KODE ANTI-CACHE -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  
-  <title>CUIT – Curhat dapat Duit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CUIT - Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
-
+  <script async defer src="https://connect.facebook.net/id_ID/sdk.js#xfbml=1&version=v18.0"></script>
   <style>
     :root {
-      --bg: #f4f6fc;
-      --card-bg: #ffffff;
       --primary: #6c5ce7;
-      --primary-light: #ece8ff;
-      --primary-gradient: linear-gradient(135deg, #7451f8, #513cd8);
-      --text-main: #1c1d36;
-      --text-sub: #828599;
-      --border-color: #f0f2f8;
+      --primary-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      --bg-color: #f4f6fb;
+      --card-bg: #ffffff;
+      --text-main: #2d3436;
+      --text-sub: #636e72;
+      --border-color: #e2e8f0;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text-main); padding-bottom: 70px; max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
 
-    /* Top Stats Bar Compact */
-    .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 6px 10px; background: #e8f0fe; }
-    .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-    /* Banner Image Container */
-    .cuit-banner-container { 
-      width: 100%; 
-      border-bottom: 1px solid #e2e8f5; 
-      line-height: 0; 
-      background: #fff; 
-      transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); 
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.05);
+      padding-bottom: 70px;
+    }
+
+    body.is-in-live .app-container {
+      padding-bottom: 120px;
+    }
+
+    /* Header Sticky */
+    .top-header {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-logo {
+      font-size: 20px;
+      font-weight: 900;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .wallet-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f2f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .coin-badge {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    /* Page Navigation */
+    .page-section {
+      display: none;
+      padding: 12px 16px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Banners & Cards */
+    .cuit-banner {
+      background: linear-gradient(135deg, #2d3436, #000000);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      position: relative;
       overflow: hidden;
-      max-height: 250px;
+      transition: all 0.3s ease;
     }
-    .cuit-banner-container.collapsed {
-      max-height: 0px !important;
-      border-bottom: none !important;
-      opacity: 0;
+
+    .cuit-banner.collapsed {
+      padding: 8px 12px;
     }
-    .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
 
-    /* Page Visibility & Sections */
-    .page-section { display: none; padding: 10px 14px; }
-    .page-section.active { display: block; }
+    .cuit-banner.collapsed .banner-details {
+      display: none;
+    }
 
-    .back-btn { width: 32px; height: 32px; background: #ece8ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 14px; margin-bottom: 8px; border: none; cursor: pointer; }
+    /* Post Card */
+    .post-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
 
-    .section-title { font-size: 20px; font-weight: 900; color: #1c1d36; margin-bottom: 2px; }
-    .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .avatar-container {
+      position: relative;
+    }
+
+    .avatar-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .level-badge-icon {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      font-size: 11px;
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-name {
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .btn-sm-badge {
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .tag-Bahagia { background: #e3f9e5; color: #1f9d55; }
+    .tag-Sedih { background: #e0f2fe; color: #0284c7; }
+    .tag-Marah { background: #fee2e2; color: #dc2626; }
+
+    .post-time {
+      font-size: 10px;
+      color: var(--text-sub);
+    }
+
+    .post-body {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #2d3436;
+      margin-bottom: 10px;
+      white-space: pre-line;
+    }
+
+    .badge-publik {
+      background: #f1f2f6;
+      color: #57606f;
+      font-size: 9px;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+
+    .post-footer-actions {
+      display: flex;
+      gap: 6px;
+      border-top: 1px solid #f1f2f6;
+      padding-top: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .action-chip {
+      font-size: 11px;
+      font-weight: 700;
+      background: #f8f9fe;
+      border: 1px solid #e2e7f5;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-follow {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .btn-follow.following {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
 
     /* Buttons */
-    .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(108, 92, 231, 0.2); }
-    .btn-secondary { background: #f0f3fa; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
-    .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
-    .btn-follow.following { background: #eef1f8; color: var(--text-sub); }
-    .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-    /* Filter Pills */
-    .pills-group { display: flex; gap: 6px; overflow-x: auto; }
-    .pill-btn { padding: 5px 12px; border-radius: 14px; background: #eef1f8; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
-    .pill-btn.active { background: var(--primary); color: #ffffff; }
+    .btn-secondary {
+      background: #f1f2f6;
+      color: #2d3436;
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-    /* Quick Chat Grid Area */
-    .quick-chat-grid-container {
+    /* Bottom Nav Bar */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 60px;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-sub);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 20%;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .nav-icon-bg {
+      background: #ece8ff;
+      padding: 4px 12px;
+      border-radius: 16px;
+    }
+
+    .nav-profile-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: #fff;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 20px;
+      padding: 18px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    /* Form Inputs */
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    /* Gifts Grid */
+    .gift-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 5px;
-      margin-bottom: 8px;
-      background: #f0f3fa;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .gift-card-item {
+      background: #f8f9fe;
+      border: 1px solid #e2e7f5;
+      padding: 8px 4px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Profile Page Layout */
+    .profile-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .profile-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card-item {
+      background: #f8f9fe;
       padding: 8px;
       border-radius: 12px;
-      border: 1px solid #e2e7f5;
-    }
-    .quick-chip { 
-      background: #ffffff; 
-      color: var(--primary); 
-      border: 1px solid #dcd6ff; 
-      padding: 6px 4px; 
-      border-radius: 8px; 
-      font-size: 10px; 
-      font-weight: 700; 
       text-align: center;
-      white-space: nowrap; 
+      border: 1px solid #eef1f8;
+    }
+
+    .stat-card-item .val {
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .stat-card-item .lbl {
+      font-size: 9px;
+      color: var(--text-sub);
+    }
+
+    .level-progress-container {
+      background: #f8f9fe;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #eef1f8;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-bg {
+      background: #e2e8f0;
+      height: 8px;
+      border-radius: 4px;
       overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      margin-top: 6px;
     }
-    .quick-chip:hover { background: var(--primary); color: #fff; }
 
-    /* Dynamic Tag Colors */
-    .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
-    .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
-    .tag-Semangat { background: #FFF3E0; color: #E67E22; }
-    .tag-Cinta { background: #FCE4EC; color: #E91E63; }
-    .tag-Lega { background: #E8EAF6; color: #3F51B5; }
-    .tag-Humor { background: #FFFDE7; color: #F1C40F; }
-    .tag-Sedih { background: #EAF2FF; color: #3498DB; }
-    .tag-Cemas { background: #F3E5F5; color: #9B59B6; }
-    .tag-Marah { background: #FFEBEE; color: #E74C3C; }
-    .tag-Kecewa { background: #ECEFF1; color: #607D8B; }
-    .tag-Kesepian { background: #EDE7F6; color: #5E35B1; }
-    .tag-PatahHati { background: #FBE9E7; color: #D84315; }
-    .tag-Bingung { background: #FFF8E1; color: #F39C12; }
-    .tag-Rindu { background: #F3E5F5; color: #9C27B0; }
-    .tag-Lelah { background: #EFEBE9; color: #4E342E; }
-    .tag-Ragu { background: #E0F7FA; color: #00838F; }
-
-    /* Tags Grid */
-    .feelings-card { background: #ffffff; padding: 10px 10px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 10px; margin-bottom: 10px; }
-    .feelings-card h3 { font-size: 12px; font-weight: 800; color: #1e1e38; margin-bottom: 6px; }
-    .tags-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag-item { padding: 4px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
-
-    /* Post Cards Feed */
-    .feed-container { display: flex; flex-direction: column; gap: 10px; }
-    .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-    .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-    
-    .avatar-container { position: relative; width: 40px; height: 40px; }
-    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #513cd8; box-shadow: 0 2px 5px rgba(108, 92, 231, 0.25); }
-    .level-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); border: 1.5px solid #ffffff; }
-
-    .nav-profile-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #513cd8; }
-    .nav-item.active .nav-profile-avatar { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
-    
-    .user-details { display: flex; flex-direction: column; gap: 1px; }
-    .user-name-row { display: flex; align-items: center; gap: 6px; }
-    .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
-    .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
-    .post-time { font-size: 10px; color: var(--text-sub); }
-
-    .post-body { font-size: 13px; line-height: 1.45; color: #2c2e43; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
-    .badge-publik { background: #eaf2ff; color: #3498db; margin-bottom: 10px; display: inline-flex; }
-
-    .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
-    .action-chip { background: #f4f6fc; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #4a4d65; cursor: pointer; white-space: nowrap; }
-
-    .user-rank-card { background: #ffffff; border-radius: 14px; padding: 10px 12px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; }
-
-    input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #e2e7f5; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; }
-
-    .profile-card { background: #ffffff; border-radius: 18px; padding: 16px; border: 1px solid var(--border-color); margin-bottom: 12px; }
-    .profile-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    
-    .profile-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
-    .stat-card-item { background: #f8f9fe; padding: 10px 6px; border-radius: 12px; text-align: center; }
-    .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
-    .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
-
-    .level-progress-container { background: #f0f3fa; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
-    .progress-bar-bg { width: 100%; height: 8px; background: #e2e7f5; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
-    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
-
-    .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
-
-    /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
-    .nav-item.active { color: var(--primary); font-weight: 800; }
-    .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
-    .nav-icon { font-size: 15px; }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
-    .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
-
-    /* GRID GIFT SEKALI KETUK TERLIHAT */
-    .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; max-height: 380px; overflow-y: auto; padding-right: 2px; }
-    .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 6px 4px; border-radius: 10px; text-align: center; cursor: pointer; font-size: 10px; font-weight: 800; color: #1c1d36; }
-    .gift-card-item:hover { border-color: var(--primary); background: #ece8ff; }
-
-    /* STYLES RUANG LIVE CHAT FULLSCREEN REVISI LAYOUT */
-    body.is-in-live { padding-bottom: 0; overflow: hidden; }
-    body.is-in-live .cuit-banner-container, 
-    body.is-in-live .top-bar, 
-    body.is-in-live #mainLeagueContainer { display: none !important; }
-
-    .live-chat-fullscreen { 
-      display: flex; 
-      flex-direction: column; 
-      height: calc(100vh - 160px) !important; 
-      position: relative; 
+    .progress-bar-fill {
+      background: var(--primary-gradient);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
     }
-    .live-chat-messages-area { 
-      flex: 1; 
-      overflow-y: auto; 
-      background: #f8f9fe; 
-      border: 1px solid #eef1f8; 
-      border-radius: 12px; 
-      padding: 10px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
-      margin-bottom: 6px; 
-      max-height: 250px !important; 
-    }
-    .live-chat-controls-sticky { 
-      background: #ffffff; 
-      padding: 8px 0; 
-      border-top: 1px solid #f0f2f8; 
-      position: relative; 
-      z-index: 30; 
-    }
-    .leaderboard-toggle-header { font-size: 11px; font-weight: 800; color: #d35400; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
 
-    /* ANIMASI POP-UP GIFT OVERLAY */
-    #giftOverlayContainer { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 999; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 90%; max-width: 400px; }
-    .gift-banner { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 30px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.3); opacity: 0; width: fit-content; max-width: 100%; }
-    .gift-banner.small { background: linear-gradient(135deg, #ff7675, #d63031); border: 2px solid #ffbe76; }
-    .gift-banner.medium { background: linear-gradient(135deg, #fdcb6e, #e17055); border: 2px solid #ffeaa7; transform: scale(1.15); }
-    .gift-banner.large { background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); background-size: 200% 200%; border: 3px solid #ffeaa7; box-shadow: 0 0 30px rgba(253, 203, 110, 0.9); padding: 14px 22px; transform: scale(1.25); }
+    .profile-menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .menu-btn-item {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* Live Chat Section */
+    .live-chat-messages-area {
+      flex: 1;
+      min-height: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px;
+      background: #f8f9fe;
+      border-radius: 12px;
+      border: 1px solid #e2e7f5;
+      margin-bottom: 8px;
+    }
+
+    .live-chat-controls-sticky {
+      position: sticky;
+      bottom: 60px;
+      background: #fff;
+      padding: 8px 0;
+      z-index: 90;
+    }
+
+    .quick-chat-grid-container {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+
+    .quick-chip {
+      background: #ece8ff;
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    /* Floating Overlay Banners for Gift */
+    #giftOverlayContainer {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 440px;
+      z-index: 300;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gift-banner {
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      pointer-events: auto;
+    }
+
     .gift-banner.ultimate {
-      background: linear-gradient(135deg, #0d0d0d, #4a00e0, #ff007f);
-      background-size: 200% 200%;
-      border: 3px solid #ffd700;
-      box-shadow: 0 0 35px rgba(255, 215, 0, 0.9);
-      padding: 16px 24px;
-      border-radius: 30px;
+      background: linear-gradient(135deg, #ff0055, #7928ca, #00dfd8);
+      border: 2px solid #fff;
+    }
+
+    .gift-banner .icon {
+      font-size: 24px;
+    }
+
+    .gift-banner .text-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gift-banner .sender {
+      font-weight: 900;
+      font-size: 12px;
+      color: #fde047;
+    }
+
+    .gift-banner .action {
+      font-size: 11px;
+    }
+
+    .pills-group {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-bottom: 12px;
+    }
+
+    .pill-btn {
+      background: #f1f2f6;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: var(--primary);
       color: #fff;
     }
-    
-    .gift-banner .icon { font-size: 32px; animation: bounceIcon 0.8s infinite alternate; }
-    .gift-banner.large .icon { font-size: 52px; animation: zoomPulsate 0.6s infinite alternate; }
-    .gift-banner.ultimate .icon { font-size: 65px !important; animation: zoomPulsate 0.5s infinite alternate; }
-    .gift-banner .text-group { display: flex; flex-direction: column; }
-    .gift-banner .sender { font-weight: 900; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    .gift-banner.large .sender { font-size: 15px; color: #ffeaa7; text-shadow: 0 0 8px rgba(255, 234, 167, 0.8); }
-    .gift-banner.ultimate .sender { font-size: 17px; color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 1); }
-    .gift-banner .action { font-size: 11px; opacity: 0.95; }
 
-    @keyframes ultimatePopIn {
-      0% { transform: scale(0.1) rotate(-15deg); opacity: 0; filter: drop-shadow(0 0 0 rgba(255, 215, 0, 0)); }
-      50% { transform: scale(1.4) rotate(5deg); opacity: 1; filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); }
-      70% { transform: scale(0.95) rotate(-2deg); }
-      100% { transform: scale(1.25) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)); }
+    .user-rank-card {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
     }
 
-    @keyframes giftPopIn { 0% { opacity: 0; transform: translateY(30px) scale(0.5); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes bounceIcon { 0% { transform: scale(1); } 100% { transform: scale(1.3) rotate(12deg); } }
-    @keyframes zoomPulsate { 0% { transform: scale(1); } 100% { transform: scale(1.4) rotate(-8deg); } }
-    @keyframes gradientBg { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+    .notification-dot {
+      width: 8px;
+      height: 8px;
+      background: #ff4757;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
 
-    .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 998; pointer-events: none; top: -10px; animation: confettiFall 3s linear forwards; }
-    @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    /* Confetti Animation */
+    .confetti {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      z-index: 400;
+      pointer-events: none;
+      animation: confettiFall 3s linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
 
   <div id="giftOverlayContainer"></div>
 
-  <!-- Top Stats Bar Compact -->
-  <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#6c5ce7; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-      🔄 Refresh
-    </button>
-    <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-      🔔 <span id="notifBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#e74c3c; width:8px; height:8px; border-radius:50%;"></span>
-    </button>
-    <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">20</span></div>
-    <div class="stat-badge" title="Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
-    <div class="stat-badge" title="Permata CUIT Hasil Kerja">💎 <span id="gemsCount">0</span></div>
-  </div>
-
-  <!-- Hero Banner -->
-  <div class="cuit-banner-container" id="cuitMainBanner">
-    <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
-  </div>
-
-  <!-- PANGGUNG JUARA MINGGU INI (REVISI GRID 5 KOLOM TERMASUK LIVE TERMEGAH) -->
-  <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 6px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;">
-      <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
-        🏆 PANGGUNG JUARA MINGGU INI
-      </span>
-      <span style="font-size: 9px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 8px; color: #cbd5e1; font-weight: 700;">
-        📅 Senin – Minggu
-      </span>
-    </div>
-
-    <div id="leagueChampionsCarousel" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; width: 100%;">
-      <div style="background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 7.5px; font-weight: 800; color: #fde047; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👑 Raja Sawer</div>
-        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
-          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #fde047;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">👑</div>
-        </div>
-        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">ADMINCUIT</div>
-        <div style="font-size: 7px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSawerScore">0 🪙</div>
+  <div class="app-container">
+    
+    <!-- Top Bar Sticky Header -->
+    <div class="top-header">
+      <div class="brand-logo">
+        <span>CUIT</span>
+        <span style="font-size: 10px; font-weight: 700; color: var(--text-sub); -webkit-text-fill-color: initial;">v2.0</span>
       </div>
 
-      <div style="background: rgba(255,255,255,0.1); border: 1px solid #ff7675; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 7.5px; font-weight: 800; color: #ff7675; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🎙️ Live Termegah</div>
-        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
-          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #ff7675;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">🔴</div>
+      <div class="wallet-status-bar">
+        <div class="coin-badge" onclick="openWalletModal()" title="Koin Gratisan">
+          <span>🪙</span>
+          <span id="freeCoinCount">20</span>
         </div>
-        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champLiveName">Belum Ada</div>
-        <div style="font-size: 7px; color: #ffbe76; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champLiveScore">0 🪙</div>
-      </div>
-
-      <div style="background: rgba(255,255,255,0.1); border: 1px solid #60a5fa; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 7.5px; font-weight: 800; color: #93c5fd; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🌟 Bintang Curhat</div>
-        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
-          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #60a5fa;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">🔥</div>
+        <div style="color: #cbd5e1;">|</div>
+        <div class="coin-badge" onclick="openWalletModal()" title="Koin Berbayar">
+          <span>💳</span>
+          <span id="paidCoinCount">0</span>
         </div>
-        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
-        <div style="font-size: 7px; color: #bfdbfe; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champCurhatScore">0 ♥ + 0 💬</div>
-      </div>
-
-      <div style="background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 7.5px; font-weight: 800; color: #86efac; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✍️ Pujangga Utama</div>
-        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
-          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #4ade80;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">💙</div>
-        </div>
-        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
-        <div style="font-size: 7px; color: #bbf7d0; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champPujanggaScore">0 Post</div>
-      </div>
-
-      <div style="background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 10px; padding: 6px 2px; text-align: center; width: 100%; box-sizing: border-box;">
-        <div style="font-size: 7.5px; font-weight: 800; color: #fbcfe8; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🧲 Magnet Sponsor</div>
-        <div style="position: relative; width: 24px; height: 24px; margin: 0 auto 3px auto;">
-          <div style="width: 24px; height: 24px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 1.5px solid #f472b6;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 7px;">💎</div>
-        </div>
-        <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
-        <div style="font-size: 7px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSponsorScore">0 Member</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 1. HALAMAN BERANDA -->
-  <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
-        <div class="pills-group">
-          <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
-          <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+        <div style="color: #cbd5e1;">|</div>
+        <div class="coin-badge" onclick="openCashoutModal()" title="Permata CUIT">
+          <span>💎</span>
+          <span id="gemsCount">0</span>
         </div>
       </div>
-      <button 
-        onclick="openReelsModal()" 
-        style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #3e2723; border: 1px solid #ffe082; padding: 5px 10px; border-radius: 16px; font-weight: 900; font-size: 10.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 143, 0, 0.4); display: flex; align-items: center; gap: 4px; white-space: nowrap;"
-      >
-        🎁 +10 Koin Gratis
-      </button>
+
+      <div style="position: relative; cursor: pointer;" onclick="openNotificationsModal()">
+        <span style="font-size: 18px;">🔔</span>
+        <div id="notifBadge" class="notification-dot" style="display: none;"></div>
+      </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: #ffffff; padding: 6px 10px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-      <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
-        <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 13px;">🤍</div>
-        <div class="level-badge-icon" id="homeQuickUserBadge" style="width: 13px; height: 13px; font-size: 8px;">🌱</div>
-      </div>
-      <input 
-        type="text" 
-        placeholder="Apa yang ingin kamu curhatkan?" 
-        readonly 
-        onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])"
-        style="margin-bottom: 0; background: #f8f9fe; border: 1px solid #eef1f8; cursor: pointer; border-radius: 20px; padding: 7px 12px; font-size: 11.5px; color: var(--text-sub);"
-      >
-      <button class="btn-primary" style="padding: 7px 12px; flex-shrink: 0; border-radius: 18px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
-    </div>
-
-    <!-- BANNER LIVE TERSIAR / PROMOSI LIVE DI BERANDA -->
-    <div id="promotedSection" style="display: none; margin-top: 10px; margin-bottom: 4px;">
-      <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-        🚀 SOROTAN HARI INI
-      </div>
-      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
-    </div>
-
-    <div class="feed-container" id="postsList" style="margin-top: 4px;">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
-    </div>
-  </div>
-
-  <!-- MODAL MISI REELS FB -->
-  <div id="reelsModal" class="modal">
-    <div class="modal-content" style="text-align: center;">
-      <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah (10 Video)</h3>
-      <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.4;">
-        Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!
-      </p>
-
-      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;"></div>
-
-      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL NOTIFIKASI MASUK -->
-  <div id="notificationsModal" class="modal">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
-        <h3 style="font-size:15px; font-weight:900;">🔔 Notifikasi Masuk</h3>
-        <button class="btn-secondary" style="padding:4px 8px; font-size:10px; background:#ff7675; color:#fff;" onclick="clearAllNotifications()">Hapus Semua</button>
-      </div>
-      <div id="notificationsList" style="max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat notifikasi...</p>
-      </div>
-      <button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('notificationsModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL KOMUNITAS INTERAKTIF -->
-  <div id="communityModal" class="modal">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
-        <h3 style="font-size:15px; font-weight:900;">👥 Komunitas CUIT</h3>
-        <button onclick="document.getElementById('communityModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="background:#f8f9fe; padding:10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:12px;">
-        <label style="font-size:11px; font-weight:800; display:block; margin-bottom:4px;">➕ Buat Komunitas Baru</label>
-        <input type="text" id="newCommName" placeholder="Nama Komunitas (contoh: Penulis Seni Rancagé)" style="margin-bottom:6px;">
-        <textarea id="newCommDesc" rows="2" placeholder="Deskripsi singkat komunitas..." style="margin-bottom:6px;"></textarea>
-        <button class="btn-primary" style="width:100%; font-size:11px; padding:7px;" onclick="createNewCommunity()">Terbitkan Komunitas</button>
-      </div>
-
-      <label style="font-size:11px; font-weight:800; display:block; margin-bottom:6px;">🌐 Daftar Komunitas Terdaftar:</label>
-      <div id="communityListContainer" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
-        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>
-      </div>
-
-      <button class="btn-secondary" style="width:100%; margin-top:12px; background:#eee;" onclick="document.getElementById('communityModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL RUANG KOMUNITAS LENGKAP -->
-  <div id="communityDetailModal" class="modal">
-    <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column; padding: 14px;">
+    <!-- 1. HALAMAN BERANDA -->
+    <div id="pageHome" class="page-section active">
       
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:10px;">
-        <h3 style="font-size:15px; font-weight:900; color:var(--primary);" id="cdTitle">👥 Ruang Komunitas</h3>
-        <button onclick="document.getElementById('communityDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="background:#ece8ff; padding:10px; border-radius:12px; border:1px solid #dcd6ff; margin-bottom:10px;">
-        <div style="font-size:11.5px; color:#2c2e43; line-height:1.4;" id="cdDesc">Deskripsi...</div>
-        <div style="font-size:10px; font-weight:800; color:var(--primary); margin-top:6px;" id="cdCreator">👑 Pembuat: -</div>
-      </div>
-
-      <div style="background:#f8f9fe; padding:8px 10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:11px; font-weight:800; color:#1c1d36;" id="cdMemberCount">👥 Anggota (0)</span>
-          <button id="btnJoinCommAction" class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="toggleJoinCommunity()">+ Bergabung</button>
+      <!-- Banner Utama CUIT -->
+      <div class="cuit-banner" id="cuitMainBanner">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; font-weight: 900; color: #fde047;">✨ Curhat Aman & Dapat Apresiasi</span>
+          <span id="homeQuickUserBadge" style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 8px;">🌱</span>
         </div>
-        <div id="cdMemberList" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;">
+        <div class="banner-details" style="font-size: 10.5px; color: #e2e8f0; margin-top: 4px; line-height: 1.4;">
+          Sampaikan keluh kesahmu tanpa rasa cemas. Saling dukung sesama Cuiter & dapatkan Permata yang bisa dicairkan ke DANA/Bank.
         </div>
       </div>
 
-      <div id="commPostForm" style="display:none; background:#fff; border:1px solid #6c5ce7; padding:8px; border-radius:12px; margin-bottom:10px;">
-        <textarea id="commInputText" rows="2" placeholder="Tulis obrolan khusus komunitas ini..." style="margin-bottom:6px; font-size:11.5px;"></textarea>
-        <button class="btn-primary" style="width:100%; padding:6px; font-size:11px;" onclick="sendCommunityMessage()">Kirim Postingan Komunitas</button>
+      <!-- PANGGUNG JUARA MINGGU INI (UKURAN SIMETRIS & MERATA) -->
+      <div id="mainLeagueContainer" style="margin: 0 0 12px 0; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 8px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 2px;">
+          <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.3px;">
+            🏆 PANGGUNG JUARA MINGGU INI
+          </span>
+          <span style="font-size: 8.5px; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 8px; color: #cbd5e1; font-weight: 700;">
+            📅 Senin – Minggu
+          </span>
+        </div>
+
+        <!-- CONTAINER CAROUSEL GRID LEBAR SAMA & RAPI -->
+        <div id="leagueChampionsCarousel" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none;">
+          
+          <!-- CARD 1: RAJA SAWER -->
+          <div style="flex: 1; min-width: 78px; height: 82px; background: rgba(255,255,255,0.08); border: 1px solid #fde047; border-radius: 12px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="font-size: 8px; font-weight: 800; color: #fde047; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">👑 Raja Sawer</div>
+            <div style="position: relative; width: 22px; height: 22px; margin: 0 auto;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 1.5px solid #fde047;">🤍</div>
+              <div style="position: absolute; bottom: -3px; right: -3px; font-size: 7px;">👑</div>
+            </div>
+            <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">ADMINCUIT</div>
+            <div style="font-size: 7px; color: #fef08a; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSawerScore">0 🪙</div>
+          </div>
+
+          <!-- CARD 2: LIVE TERMEGAH -->
+          <div style="flex: 1; min-width: 78px; height: 82px; background: rgba(255,255,255,0.08); border: 1px solid #ff7675; border-radius: 12px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="font-size: 8px; font-weight: 800; color: #ff7675; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🎙️ Live Termegah</div>
+            <div style="position: relative; width: 22px; height: 22px; margin: 0 auto;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 1.5px solid #ff7675;">🤍</div>
+              <div style="position: absolute; bottom: -3px; right: -3px; font-size: 7px;">🔴</div>
+            </div>
+            <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champLiveName">Belum Ada</div>
+            <div style="font-size: 7px; color: #ffbe76; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champLiveScore">0 🪙</div>
+          </div>
+
+          <!-- CARD 3: BINTANG CURHAT -->
+          <div style="flex: 1; min-width: 78px; height: 82px; background: rgba(255,255,255,0.08); border: 1px solid #60a5fa; border-radius: 12px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="font-size: 8px; font-weight: 800; color: #93c5fd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🌟 Bintang Curhat</div>
+            <div style="position: relative; width: 22px; height: 22px; margin: 0 auto;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 1.5px solid #60a5fa;">🤍</div>
+              <div style="position: absolute; bottom: -3px; right: -3px; font-size: 7px;">🔥</div>
+            </div>
+            <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
+            <div style="font-size: 7px; color: #bfdbfe; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champCurhatScore">0 ♥ + 0 💬</div>
+          </div>
+
+          <!-- CARD 4: PUJANGGA UTAMA -->
+          <div style="flex: 1; min-width: 78px; height: 82px; background: rgba(255,255,255,0.08); border: 1px solid #4ade80; border-radius: 12px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="font-size: 8px; font-weight: 800; color: #86efac; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✍️ Pujangga Utama</div>
+            <div style="position: relative; width: 22px; height: 22px; margin: 0 auto;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 1.5px solid #4ade80;">🤍</div>
+              <div style="position: absolute; bottom: -3px; right: -3px; font-size: 7px;">💙</div>
+            </div>
+            <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
+            <div style="font-size: 7px; color: #bbf7d0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champPujanggaScore">0 Post</div>
+          </div>
+
+          <!-- CARD 5: MAGNET SPONSOR -->
+          <div style="flex: 1; min-width: 78px; height: 82px; background: rgba(255,255,255,0.08); border: 1px solid #f472b6; border-radius: 12px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+            <div style="font-size: 8px; font-weight: 800; color: #fbcfe8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🧲 Magnet Sponsor</div>
+            <div style="position: relative; width: 22px; height: 22px; margin: 0 auto;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 9px; border: 1.5px solid #f472b6;">🤍</div>
+              <div style="position: absolute; bottom: -3px; right: -3px; font-size: 7px;">💎</div>
+            </div>
+            <div style="font-size: 8.5px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
+            <div style="font-size: 7px; color: #fbcfe8; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="champSponsorScore">0 Member</div>
+          </div>
+
+        </div>
       </div>
 
-      <div style="font-size:11px; font-weight:800; margin-bottom:6px; color:#333;">💬 Obrolan Komunitas:</div>
-      <div id="communityPostsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat obrolan...</p>
-      </div>
+      <!-- Area Tombol Misi Koin Gratisan (Reels) & Filter -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div class="pills-group" style="margin-bottom: 0;">
+          <button class="pill-btn active" onclick="filterPosts('semua', this)">Semua</button>
+          <button class="pill-btn" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+        </div>
 
-    </div>
-  </div>
-
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
-  <div id="videoPlayerModal" class="modal" style="z-index: 200;">
-    <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi CUIT</span>
-        <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed;">
-          ⏳ Tekan Play di Video
+        <button class="btn-secondary" style="background: linear-gradient(135deg, #ff9f43, #ee5253); color: #fff; border: none; padding: 6px 10px; border-radius: 20px; font-size: 10.5px; font-weight: 800;" onclick="openReelsModal()">
+          🎁 +10 Koin Gratis
         </button>
       </div>
 
-      <div id="videoFrameContainer" style="width: 100%; height: 400px; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;"></div>
-
-      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;" id="videoTimerStatusText">
-        Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!
+      <!-- Carousel Sorotan Harian (Postingan Dipromosikan) -->
+      <div id="promotedSection" style="display: none; margin-bottom: 12px;">
+        <div style="font-size: 11px; font-weight: 900; color: #e67e22; margin-bottom: 6px;">🚀 SOROTAN HARI INI</div>
+        <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- 2. HALAMAN CARI -->
-  <div id="pageSearch" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Jelajahi CUIT</h2>
-    
-    <div class="feelings-card">
-      <h3>Pilih dari Perasaanmu</h3>
-      <div class="tags-grid">
-        <button class="tag-item tag-Bahagia" onclick="filterByTag('Bahagia')">🌱 Bahagia</button>
-        <button class="tag-item tag-Bersyukur" onclick="filterByTag('Bersyukur')">🤲 Bersyukur</button>
-        <button class="tag-item tag-Semangat" onclick="filterByTag('Semangat')">🔥 Semangat</button>
-        <button class="tag-item tag-Cinta" onclick="filterByTag('Cinta')">🌸 Cinta</button>
-        <button class="tag-item tag-Lega" onclick="filterByTag('Lega')">😌 Lega</button>
-        <button class="tag-item tag-Humor" onclick="filterByTag('Humor')">😄 Humor</button>
-        <button class="tag-item tag-Sedih" onclick="filterByTag('Sedih')">🌧️ Sedih</button>
-        <button class="tag-item tag-Cemas" onclick="filterByTag('Cemas')">☁️ Cemas</button>
-        <button class="tag-item tag-Marah" onclick="filterByTag('Marah')">🌶️ Marah</button>
-        <button class="tag-item tag-Kecewa" onclick="filterByTag('Kecewa')">🌊 Kecewa</button>
-        <button class="tag-item tag-Kesepian" onclick="filterByTag('Kesepian')">🌙 Kesepian</button>
-        <button class="tag-item tag-PatahHati" onclick="filterByTag('Patah Hati')">🥀 Patah Hati</button>
-        <button class="tag-item tag-Bingung" onclick="filterByTag('Bingung')">🌀 Bingung</button>
-        <button class="tag-item tag-Rindu" onclick="filterByTag('Rindu')">💜 Rindu</button>
-        <button class="tag-item tag-Lelah" onclick="filterByTag('Lelah / Burnout')">🕯️ Lelah / Burnout</button>
-        <button class="tag-item tag-Ragu" onclick="filterByTag('Ragu')">❓ Ragu</button>
+      <!-- Feed Beranda Utama -->
+      <div id="postsList">
+        <p style="text-align: center; color: var(--text-sub); margin-top: 20px; font-size: 12px;">Memuat curhatan...</p>
       </div>
     </div>
 
-    <input type="text" id="searchInput" placeholder="Cari curhatan, anggota, komunitas..." onkeyup="searchPosts()" style="margin-top: 4px;">
-    
-    <label style="font-size: 11px; font-weight: 700; color: #333; margin-top: 4px; display: block;">Filter Kategori & Rangking</label>
-    <select id="mainSearchFilter" onchange="searchPosts()">
-      <optgroup label="Filter Perasaan">
-        <option value="all">Semua Perasaan</option>
-        <option value="Bahagia">🌱 Bahagia</option>
-        <option value="Bersyukur">🤲 Bersyukur</option>
-        <option value="Semangat">🔥 Semangat</option>
-        <option value="Cinta">🌸 Cinta</option>
-        <option value="Lega">😌 Lega</option>
-        <option value="Humor">😄 Humor</option>
-        <option value="Sedih">🌧️ Sedih</option>
-        <option value="Cemas">☁️ Cemas</option>
-        <option value="Marah">🌶️ Marah</option>
-        <option value="Kecewa">🌊 Kecewa</option>
-        <option value="Kesepian">🌙 Kesepian</option>
-        <option value="Patah Hati">🥀 Patah Hati</option>
-        <option value="Bingung">🌀 Bingung</option>
-        <option value="Rindu">💜 Rindu</option>
-        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
-        <option value="Ragu">❓ Ragu</option>
-      </optgroup>
-      <optgroup label="🏆 Liga Prestasi 7 Hari">
-        <option value="top_sawer">👑 Raja Sawer</option>
-        <option value="top_curhat">🌟 Bintang Curhat</option>
-        <option value="top_pujangga">✍️ Pujangga Utama</option>
-        <option value="top_sponsor">🧲 Magnet Sponsor</option>
-        <option value="top_level">🏆 Jam Terbang (Level)</option>
-        <option value="top_followers">👥 Top Popularitas</option>
-      </optgroup>
-    </select>
-
-    <div class="feed-container" id="searchResults">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tulis kata kunci atau pilih filter di atas.</p>
-    </div>
-  </div>
-
-  <!-- 3. HALAMAN BUAT CURHATAN -->
-  <div id="pageCreate" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Buat curhatan</h2>
-    <div class="section-sub">Tulis dengan nyaman. Tarif koin dinamis 1 koin per 1.200 karakter!</div>
-
-    <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 6px;">Opsi Pembayaran / Curhat:</label>
-      <select id="curhatCoinType" onchange="toggleCurhatLimit()">
-        <option value="free">Pakai Koin Gratisan (1 Koin / 1.200 Karakter)</option>
-        <option value="paid">Pakai Bank Koin Berbayar (1 Koin / 1.200 Karakter)</option>
-      </select>
-
-      <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
-      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin Gratisan)</div>
-
-      <label style="font-size: 12px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
-      <select id="postFeeling">
-        <option value="Bahagia">🌱 Bahagia</option>
-        <option value="Bersyukur">🤲 Bersyukur</option>
-        <option value="Semangat">🔥 Semangat</option>
-        <option value="Cinta">🌸 Cinta</option>
-        <option value="Lega">😌 Lega</option>
-        <option value="Humor">😄 Humor</option>
-        <option value="Sedih">🌧️ Sedih</option>
-        <option value="Cemas">☁️ Cemas</option>
-        <option value="Marah">🌶️ Marah</option>
-        <option value="Kecewa">🌊 Kecewa</option>
-        <option value="Kesepian">🌙 Kesepian</option>
-        <option value="Patah Hati">🥀 Patah Hati</option>
-        <option value="Bingung">🌀 Bingung</option>
-        <option value="Rindu">💜 Rindu</option>
-        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
-        <option value="Ragu">❓ Ragu</option>
-      </select>
-
-      <div style="display: flex; gap: 6px; margin-top: 12px;">
-        <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
-        <button class="btn-secondary" style="flex: 1.2;" onclick="saveDraftLocally()">Simpan Draf</button>
-        <button class="btn-secondary" style="background: #f4f6fc;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (RAPI & DUKUNG LIKE LIVE + MULTI-ROOM) -->
-  <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button class="back-btn" style="margin-bottom:0;" onclick="leaveLiveSession()">←</button>
-        <h2 class="section-title" style="font-size:16px;">Live Teks</h2>
-      </div>
-      <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live Baru</button>
-    </div>
-
-    <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
+    <!-- 2. HALAMAN PENCARIAN & RANGKING LIGA -->
+    <div id="pageSearch" class="page-section">
+      <h2 class="section-title" style="margin-bottom: 10px;">Cari & Rangking</h2>
       
-      <!-- List Banyak Live Aktif -->
-      <div id="activeLivesListContainer" style="margin-bottom: 10px;"></div>
-
-      <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
-        Belum ada sesi Live Teks aktif.
+      <input type="text" id="searchInput" placeholder="Cari kata kunci curhatan atau komunitas..." onkeyup="searchPosts()">
+      
+      <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+        <select id="mainSearchFilter" style="margin-bottom: 0; flex: 1;" onchange="searchPosts()">
+          <option value="all">🔍 Cari Semua Curhatan</option>
+          <option value="top_level">🏆 Top EXP Jam Terbang</option>
+          <option value="top_sawer">🪙 Top Raja Sawer</option>
+          <option value="top_followers">👥 Top Pengikut Banyak</option>
+          <option value="top_sponsor">🧲 Top Magnet Sponsor</option>
+          <option value="Bahagia">😊 Perasaan: Bahagia</option>
+          <option value="Sedih">😢 Perasaan: Sedih</option>
+          <option value="Marah">😡 Perasaan: Marah</option>
+        </select>
       </div>
 
-      <div id="liveChatBox" class="live-chat-fullscreen" style="display: none;">
-        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 6px 10px; margin-bottom: 6px;">
-          <div class="leaderboard-toggle-header" onclick="toggleLeaderboard()">
+      <div id="searchResults">
+        <p style="text-align: center; color: var(--text-sub); font-size: 12px; margin-top: 15px;">Ketik di atas atau pilih filter untuk melihat data.</p>
+      </div>
+    </div>
+
+    <!-- 3. HALAMAN BUAT CURHATAN -->
+    <div id="pageCreate" class="page-section">
+      <h2 class="section-title" style="margin-bottom: 10px;">Tulis Curhatan</h2>
+
+      <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 16px; padding: 14px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-sub); display: block; margin-bottom: 4px;">Pilih Jenis Koin untuk Menerbitkan:</label>
+        <select id="curhatCoinType" style="margin-bottom: 10px;" onchange="toggleCurhatLimit()">
+          <option value="free">🪙 Koin Gratisan (Maks 1.200 Karakter / Koin)</option>
+          <option value="paid">💳 Bank Koin Berbayar (Dapat EXP Jam Terbang)</option>
+        </select>
+
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-sub); display: block; margin-bottom: 4px;">Suasana Hati / Perasaan:</label>
+        <select id="postFeeling" style="margin-bottom: 10px;">
+          <option value="😊 Bahagia">😊 Bahagia</option>
+          <option value="😢 Sedih">😢 Sedih</option>
+          <option value="😡 Marah">😡 Marah</option>
+          <option value="😐 Santai">😐 Santai</option>
+          <option value="🔥 Semangat">🔥 Semangat</option>
+        </select>
+
+        <textarea id="postContent" rows="6" placeholder="Sampaikan apa yang sedang kamu rasakan hari ini..." oninput="updateCharCount(this)"></textarea>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span id="charCount" style="font-size: 10.5px; color: var(--text-sub); font-weight: 700;">0 karakter (Biaya: 1 Koin)</span>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 10.5px;" onclick="saveDraftLocally()">Simpan Draf</button>
+        </div>
+
+        <button class="btn-primary" style="width: 100%;" onclick="submitNewPost()">Terbitkan Curhatan</button>
+      </div>
+    </div>
+
+    <!-- 4. HALAMAN LIVE TEKS -->
+    <div id="pageLive" class="page-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h2 class="section-title" style="margin-bottom: 0;">Live Teks</h2>
+        <button class="btn-primary" id="btnStartLiveHeader" style="padding: 6px 12px; font-size: 11px;" onclick="startLiveTeks()">+ Mulai Live Baru</button>
+      </div>
+
+      <div id="activeLivesListContainer" style="display: none; margin-bottom: 12px;"></div>
+
+      <div id="liveStatusBox" style="background: #f8f9fe; border: 1px solid #e2e7f5; padding: 12px; border-radius: 14px; font-size: 11.5px; margin-bottom: 10px; text-align: center;">
+        Memuat status Live...
+      </div>
+
+      <!-- Area Ruang Live Chat -->
+      <div id="liveChatBox" style="display: none; flex-direction: column;">
+        
+        <!-- Top Supporter Leaderboard Widget -->
+        <div id="liveLeaderboardWidget" style="background: linear-gradient(135deg, #fff8e1, #ffecb3); border: 1px solid #ffe082; padding: 8px 10px; border-radius: 12px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 800; color: #b7950b; cursor: pointer;" onclick="toggleLeaderboard()">
             <span>🏆 TOP SUPPORTER (Gift Terbanyak)</span>
             <span id="lbToggleIcon" style="font-size:11px; font-weight:800; color:#d35400;">▲ Sembunyikan</span>
           </div>
@@ -638,9 +877,7 @@
         <!-- Sticky Controls Terlihat Jelas di Atas Navigasi -->
         <div class="live-chat-controls-sticky">
           <!-- QUICK CHAT GRID KUSTOM DUKUNG PERAN (HOST & PENONTON) -->
-          <div class="quick-chat-grid-container" id="quickChatContainer">
-            <!-- Diisi Otomatis via JS Sesuai Peran User -->
-          </div>
+          <div class="quick-chat-grid-container" id="quickChatContainer"></div>
 
           <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
             <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
@@ -652,94 +889,120 @@
         </div>
       </div>
     </div>
+
+    <!-- 5. HALAMAN PROFIL -->
+    <div id="pageProfile" class="page-section">
+      <h2 class="section-title" style="margin-bottom: 12px;">Profil Saya</h2>
+
+      <div class="profile-card">
+        <div class="profile-header-flex">
+          <div class="user-info" style="cursor:default;">
+            <div class="avatar-container">
+              <div class="avatar-circle">🤍</div>
+              <div class="level-badge-icon" id="profBadgeIcon">🌱</div>
+            </div>
+            <div>
+              <div style="font-size: 16px; font-weight: 900;" id="profName">mantanperamal</div>
+              <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #e2e7f5; color: #333;">🌱 Cuiter Baru</span>
+            </div>
+          </div>
+          <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
+        </div>
+
+        <div class="profile-stats-grid" id="mainProfileStatsGrid">
+          <div class="stat-card-item">
+            <div class="val" id="profExp">0 EXP</div>
+            <div class="lbl">Jam Terbang</div>
+          </div>
+          <div class="stat-card-item">
+            <div class="val" id="profFollowers">0</div>
+            <div class="lbl">Pengikut</div>
+          </div>
+          <div class="stat-card-item">
+            <div class="val" id="profFollowing">0</div>
+            <div class="lbl">Mengikuti</div>
+          </div>
+          <div class="stat-card-item">
+            <div class="val" id="profDownlines">0</div>
+            <div class="lbl">Downline</div>
+          </div>
+          <div class="stat-card-item">
+            <div class="val" id="profPostsCount">0</div>
+            <div class="lbl">Postingan</div>
+          </div>
+          <div class="stat-card-item" id="adminTotalMemberCard" style="display: none; background: #eef2ff; border: 1px solid #c7d2fe;">
+            <div class="val" id="profTotalMembers" style="color: #1e40af;">0</div>
+            <div class="lbl" style="color: #1e40af; font-weight: 800;">Total Member</div>
+          </div>
+        </div>
+
+        <div class="level-progress-container">
+          <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
+            <span>Kemajuan Level Cuiter</span>
+            <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="levelProgressBar"></div>
+          </div>
+        </div>
+
+        <div style="background: #f8f9fe; padding: 12px; border-radius: 14px; border: 1px solid #e2e7f5; margin-top: 10px;">
+          <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
+          <div style="font-size: 10px; color: #828599; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
+          
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
+            <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
+          </div>
+        </div>
+
+        <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
+      </div>
+
+      <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
+        <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
+        <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
+        <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
+      </div>
+
+      <div class="profile-menu-grid" style="margin-bottom: 12px;">
+        <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
+        <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
+        <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
+        <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
+        <div class="menu-btn-item" style="grid-column: span 2;" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
+      </div>
+
+      <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
+    </div>
+
+  </div> <!-- End App Container -->
+
+  <!-- Bottom Navigation Bar -->
+  <div class="nav-bar">
+    <div class="nav-item active" onclick="switchTab('pageHome', this)">
+      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
+      <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageSearch', this)">
+      <span class="nav-icon">🔍</span>
+      <span>Cari</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageCreate', this)">
+      <span class="nav-icon">➕</span>
+      <span>Buat</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageLive', this)">
+      <span class="nav-icon">📄</span>
+      <span>Live</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('pageProfile', this)">
+      <span class="nav-icon"><div class="nav-profile-avatar">🤍</div></span>
+      <span>Profil</span>
+    </div>
   </div>
 
-  <!-- 5. HALAMAN PROFIL -->
-  <div id="pageProfile" class="page-section">
-    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
-
-    <div class="profile-card">
-      <div class="profile-header-flex">
-        <div class="user-info" style="cursor:default;">
-          <div class="avatar-container">
-            <div class="avatar-circle">🤍</div>
-            <div class="level-badge-icon" id="profBadgeIcon">🌱</div>
-          </div>
-          <div>
-            <div style="font-size: 16px; font-weight: 900;" id="profName">mantanperamal</div>
-            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #e2e7f5; color: #333;">🌱 Cuiter Baru</span>
-          </div>
-        </div>
-        <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
-      </div>
-
-      <div class="profile-stats-grid" id="mainProfileStatsGrid">
-        <div class="stat-card-item">
-          <div class="val" id="profExp">0 EXP</div>
-          <div class="lbl">Jam Terbang</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profFollowers">0</div>
-          <div class="lbl">Pengikut</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profFollowing">0</div>
-          <div class="lbl">Mengikuti</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profDownlines">0</div>
-          <div class="lbl">Downline</div>
-        </div>
-        <div class="stat-card-item">
-          <div class="val" id="profPostsCount">0</div>
-          <div class="lbl">Postingan</div>
-        </div>
-        <div class="stat-card-item" id="adminTotalMemberCard" style="display: none; background: #eef2ff; border: 1px solid #c7d2fe;">
-          <div class="val" id="profTotalMembers" style="color: #1e40af;">0</div>
-          <div class="lbl" style="color: #1e40af; font-weight: 800;">Total Member</div>
-        </div>
-      </div>
-
-      <div class="level-progress-container">
-        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #1c1d36;">
-          <span>Kemajuan Level Cuiter</span>
-          <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="levelProgressBar"></div>
-        </div>
-      </div>
-
-      <div style="background: #f8f9fe; padding: 12px; border-radius: 14px; border: 1px solid #e2e7f5; margin-top: 10px;">
-        <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
-        <div style="font-size: 10px; color: #828599; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
-        
-        <div style="display: flex; gap: 6px;">
-          <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
-          <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
-        </div>
-      </div>
-
-      <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
-    </div>
-
-    <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
-      <h4 style="margin: 0 0 6px 0; color: #1e40af; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
-      <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
-      <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
-    </div>
-
-    <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
-      <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
-      <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
-      <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
-      <div class="menu-btn-item" style="grid-column: span 2;" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
-    </div>
-
-    <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
-  </div>
+  <!-- ALL MODALS -->
 
   <!-- MODAL ADMIN EDIT 10 LINK REELS -->
   <div id="adminReelsModal" class="modal">
@@ -767,27 +1030,34 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar -->
-  <div class="nav-bar">
-    <div class="nav-item active" onclick="switchTab('pageHome', this)">
-      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
-      <span>Beranda</span>
+  <!-- MODAL MISI MISI VIDEO REELS (PENONTON) -->
+  <div id="reelsModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">🎁 Misi 10 Video FB Reels</h3>
+        <button onclick="document.getElementById('reelsModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:11px; color:var(--text-sub); margin-bottom:12px;">Tonton video Reels pendek di bawah ini untuk mendapatkan bonus +10 Koin Gratisan per video!</p>
+      
+      <div id="reelsListContainer" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat 10 misi video...</p>
+      </div>
     </div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)">
-      <span class="nav-icon">🔍</span>
-      <span>Cari</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageCreate', this)">
-      <span class="nav-icon">➕</span>
-      <span>Buat</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageLive', this)">
-      <span class="nav-icon">📄</span>
-      <span>Live</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon"><div class="nav-profile-avatar">🤍</div></span>
-      <span>Profil</span>
+  </div>
+
+  <!-- MODAL EMBED VIDEO PLAYER REELS -->
+  <div id="videoPlayerModal" class="modal" style="z-index:250;">
+    <div class="modal-content" style="text-align:center; max-width:380px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:800; font-size:12px; color:var(--primary);">🎬 Menonton Misi Video FB</span>
+        <span id="videoTimerStatusText" style="font-size:10px; color:#e67e22; font-weight:700;">Tekan Play pada video</span>
+      </div>
+
+      <div id="videoFrameContainer" style="min-height:250px; background:#000; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center;"></div>
+
+      <button id="btnCloseVideo" class="btn-primary" style="width:100%; margin-top:12px; background:#e74c3c; opacity:0.5; cursor:not-allowed;" disabled onclick="claimVideoRewardAndClose()">
+        ⏳ Tekan Play di Video
+      </button>
     </div>
   </div>
 
@@ -825,6 +1095,72 @@
       </div>
 
       <div id="mFollowActionContainer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL NOTIFIKASI SAYA -->
+  <div id="notificationsModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">🔔 Notifikasi Saya</h3>
+        <button onclick="document.getElementById('notificationsModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div id="notificationsList" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; margin-bottom:12px;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat notifikasi...</p>
+      </div>
+
+      <button class="btn-secondary" style="width:100%; background:#fee2e2; color:#dc2626;" onclick="clearAllNotifications()">Hapus Semua Notifikasi</button>
+    </div>
+  </div>
+
+  <!-- MODAL KOMUNITAS LIST -->
+  <div id="communityModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;">👥 Komunitas CUIT</h3>
+        <button onclick="document.getElementById('communityModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:#f8f9fe; padding:10px; border-radius:12px; margin-bottom:12px; border:1px solid #eef1f8;">
+        <b style="font-size:11px; display:block; margin-bottom:4px;">➕ Buat Komunitas Baru:</b>
+        <input type="text" id="newCommName" placeholder="Nama Komunitas (misal: Pecinta Tari)">
+        <input type="text" id="newCommDesc" placeholder="Deskripsi Singkat Komunitas">
+        <button class="btn-primary" style="width:100%;" onclick="createNewCommunity()">Buat Komunitas</button>
+      </div>
+
+      <div style="font-size:11px; font-weight:800; margin-bottom:6px;">Daftar Komunitas Aktif:</div>
+      <div id="communityListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL KOMUNITAS -->
+  <div id="communityDetailModal" class="modal">
+    <div class="modal-content" style="max-height:85vh; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:8px;">
+        <h3 style="font-size:15px; font-weight:900;" id="cdTitle">👥 Nama Komunitas</h3>
+        <button onclick="document.getElementById('communityDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="font-size:11px; color:var(--text-sub); margin-bottom:8px;" id="cdDesc">Deskripsi komunitas...</div>
+      <div style="font-size:10px; color:var(--primary); font-weight:800; margin-bottom:10px;" id="cdCreator">Pembuat: -</div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:800;" id="cdMemberCount">👥 Anggota (0)</span>
+        <button id="btnJoinCommAction" class="btn-primary" style="padding:4px 12px; font-size:10.5px;" onclick="toggleJoinCommunity()">+ Bergabung</button>
+      </div>
+
+      <div id="cdMemberList" style="display:flex; gap:4px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px;"></div>
+
+      <div id="commPostForm" style="display:none; margin-bottom:10px; border-top:1px solid #eee; padding-top:8px;">
+        <input type="text" id="commInputText" placeholder="Tulis postingan khusus komunitas ini..." style="margin-bottom:6px;">
+        <button class="btn-primary" style="width:100%;" onclick="sendCommunityMessage()">Kirim ke Komunitas</button>
+      </div>
+
+      <div style="font-size:11px; font-weight:800; margin-bottom:6px;">Postingan Komunitas:</div>
+      <div id="communityPostsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
     </div>
   </div>
 
@@ -975,12 +1311,12 @@
       <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
       
       <!-- GIFT ABSEN TERPISAH DI ATAS -->
-      <div style="background: #ece8ff; border: 1.5px dashed #6c5ce7; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
+      <div style="background: #ece8ff; border: 1.5px dashed #6c5ce7; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center; cursor: pointer;" onclick="sendGiftAction(1, 'Absen')">
         <span style="font-weight: 900; font-size: 12px; color: var(--primary); display: block;">📌 Kirim Gift Absen (1 🪙)</span>
         <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
 
-      <!-- GRID GIFT URUTAN DARI KOIN TERKECIL S/D TERBESAR (GAMPANG DIKETUK) -->
+      <!-- GRID GIFT URUTAN DARI KOIN TERKECIL S/D TERBESAR -->
       <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
@@ -1493,7 +1829,6 @@
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
-      const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
 
       let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
       if (currentUser) {
@@ -1654,18 +1989,22 @@
           }
         }
 
-        // AMBIL JUARA LIVE TERMEGAH DARI SUM APLIKASI
-        const { data: topLiveHost } = await supabaseClient
-          .from('lives')
-          .select('host_name, total_coins_received')
-          .order('total_coins_received', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        try {
+          const { data: topLiveHost } = await supabaseClient
+            .from('lives')
+            .select('host_name, total_coins_received')
+            .order('total_coins_received', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        if (topLiveHost && topLiveHost.total_coins_received > 0) {
-          document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
-          document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
-        } else {
+          if (topLiveHost && topLiveHost.total_coins_received > 0) {
+            document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
+            document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
+          } else {
+            document.getElementById('champLiveName').innerText = 'Belum Ada';
+            document.getElementById('champLiveScore').innerText = '0 🪙';
+          }
+        } catch (errLive) {
           document.getElementById('champLiveName').innerText = 'Belum Ada';
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
@@ -1759,7 +2098,6 @@
             });
           });
 
-        // REVISI ATURAN FEED SOROTAN: PALING KIRI ADALAH YANG TERBARU DIPROMOSIKAN (ORDER BY PROMOTED_UNTIL / UPDATED_AT DESC)
         sorotanItems.sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
 
         if (sorotanItems.length > 0) {
@@ -1775,7 +2113,7 @@
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <div style="width: 24px; height: 24px; border-radius: 50%; background: #fff; color:#333; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ffd700;">🤍</div>
-                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800; animation:bounceIcon 1s infinite;">🔴 LIVE</span>` : ''}
+                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800;">🔴 LIVE</span>` : ''}
                 </div>
 
                 <div style="font-size: 9.5px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">${snippet}</div>
@@ -2057,7 +2395,6 @@
       }
     }
 
-    // MENGELOLA LIKE DENGAN TOMBOL LIKE KHUSUS PADA RUANG LIVE CHAT
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
 
@@ -2273,7 +2610,9 @@
         ]);
 
         const currentLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
-        await supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id);
+        try {
+          await supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id);
+        } catch (eLive) {}
 
         await supabaseClient.rpc('process_gift_rewards', {
           p_creator_identifier: String(targetIdentifier),
@@ -2683,7 +3022,7 @@
       document.getElementById('liveChatBox').style.display = 'none';
       document.getElementById('btnStartLiveHeader').style.display = 'block';
       
-      switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
     }
 
     async function loadActiveLiveSession() {
@@ -2853,9 +3192,19 @@
       const maxLiveMs = nowMs + (60 * 60 * 1000);
       const endedAtISO = new Date(maxLiveMs).toISOString();
 
-      const { data, error } = await supabaseClient.from('lives').insert([
-        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO, total_coins_received: 0 }
-      ]).select().single();
+      const livePayload = { 
+        title, 
+        host_name: myName, 
+        host_email: myEmail, 
+        is_active: true, 
+        ended_at: endedAtISO 
+      };
+
+      const { data, error } = await supabaseClient
+        .from('lives')
+        .insert([livePayload])
+        .select()
+        .single();
 
       if (!error) {
         userHasLeftLive = false;
@@ -3491,7 +3840,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
       }
     }
 
@@ -3548,6 +3897,7 @@
       } else alert('Error: ' + error.message);
     }
 
+    // Jalankan Inisialisasi Utama saat halaman dibuka
     checkUser();
   </script>
 </body>
