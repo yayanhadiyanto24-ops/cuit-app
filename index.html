@@ -277,7 +277,7 @@
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- PANGGUNG JUARA MINGGU INI (REVISI GRID 5 KOLOM TERMASUK LIVE TERMEGAH) -->
+  <!-- PANGGUNG JUARA MINGGU INI -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 6px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px;">
       <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
@@ -383,7 +383,10 @@
     </div>
 
     <div class="feed-container" id="postsList" style="margin-top: 4px;">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Memuat cerita real-time...</p>
+      <div style="text-align: center; padding: 20px;">
+        <span style="font-size:20px;">⚡</span>
+        <p style="font-size: 11px; color: var(--text-sub); margin-top: 6px;">Memuat cerita kilat...</p>
+      </div>
     </div>
   </div>
 
@@ -602,7 +605,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (RAPI & DUKUNG LIKE LIVE + MULTI-ROOM) -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
   <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -637,10 +640,8 @@
 
         <!-- Sticky Controls Terlihat Jelas di Atas Navigasi -->
         <div class="live-chat-controls-sticky">
-          <!-- QUICK CHAT GRID KUSTOM DUKUNG PERAN (HOST & PENONTON) -->
-          <div class="quick-chat-grid-container" id="quickChatContainer">
-            <!-- Diisi Otomatis via JS Sesuai Peran User -->
-          </div>
+          <!-- QUICK CHAT GRID KUSTOM DUKUNG PERAN -->
+          <div class="quick-chat-grid-container" id="quickChatContainer"></div>
 
           <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
             <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
@@ -968,7 +969,7 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT TERSTRUKTUR DARI KECIL KE BESAR + TERPISAH ABSEN -->
+  <!-- MODAL GIFT TERSTRUKTUR DARI KECIL KE BESAR -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
@@ -980,7 +981,7 @@
         <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
 
-      <!-- GRID GIFT URUTAN DARI KOIN TERKECIL S/D TERBESAR (GAMPANG DIKETUK) -->
+      <!-- GRID GIFT -->
       <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
@@ -1147,7 +1148,6 @@
     let currentFeedFilter = 'semua';
     let currentActiveLive = null;
     let liveRealtimeChannel = null;
-    let livePollingTimer = null;
     let isLeaderboardOpen = true;
     let userHasLeftLive = false;
     let userHasCheckedInLive = {}; 
@@ -1291,6 +1291,7 @@
       }
     }
 
+    // PEMUATAN KILAT DENGAN PROMISE.ALL
     async function checkUser() {
       initSponsorFromURL();
       checkDailyCoinReset();
@@ -1335,10 +1336,13 @@
 
       updateCoinUI();
       
-      await loadUserLikes();
-      await loadFollows();
-      await loadPosts();
-      await checkUnreadNotifications();
+      // JALANKAN KILAT DENGAN PROMISE.ALL
+      await Promise.all([
+        loadUserLikes(),
+        loadFollows(),
+        loadPosts(),
+        checkUnreadNotifications()
+      ]);
       
       initGlobalRealtime();
 
@@ -1451,8 +1455,10 @@
       const { data: profile } = await supabaseClient.from('profiles').select('sponsor').eq('email', email).maybeSingle();
       document.getElementById('mSponsorName').innerText = (profile && profile.sponsor) ? profile.sponsor : CONFIG.DEFAULT_SPONSOR;
 
-      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email);
-      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
+      const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email),
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail)
+      ]);
 
       document.getElementById('mFollowers').innerText = followersCount || 0;
       document.getElementById('mFollowing').innerText = followingCount || 0;
@@ -1492,8 +1498,6 @@
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
-      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
-      const myNewReferralCode = isAdmin ? 'ADMINCUIT' : newName.replace(/\s+/g, '').toUpperCase();
 
       let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
       if (currentUser) {
@@ -1528,8 +1532,7 @@
     }
 
     function downloadAPK() {
-      const apkUrl = 'https://github.com/yayanhadiyanto24-ops/cuit-app/raw/refs/heads/main/cuit.apk';
-      window.open(apkUrl, '_blank');
+      window.open('https://github.com/yayanhadiyanto24-ops/cuit-app/raw/refs/heads/main/cuit.apk', '_blank');
     }
 
     function saveDraftLocally() {
@@ -1610,13 +1613,25 @@
       }
     }
 
+    // PEMUATAN DATA KILAT PARALEL
     async function loadPosts() {
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
 
       try {
-        const { data: profilesData } = await supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor');
+        const [
+          { data: profilesData },
+          { data: topLiveHost },
+          { data, error },
+          { data: activeLivePromos }
+        ] = await Promise.all([
+          supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor'),
+          supabaseClient.from('lives').select('host_name, total_coins_received').order('total_coins_received', { ascending: false }).limit(1).maybeSingle(),
+          supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
+          supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString())
+        ]);
+
         if (profilesData) {
           profilesMap = {};
           profilesData.forEach(pr => {
@@ -1654,14 +1669,6 @@
           }
         }
 
-        // AMBIL JUARA LIVE TERMEGAH DARI SUM APLIKASI
-        const { data: topLiveHost } = await supabaseClient
-          .from('lives')
-          .select('host_name, total_coins_received')
-          .order('total_coins_received', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
         if (topLiveHost && topLiveHost.total_coins_received > 0) {
           document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
           document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
@@ -1669,8 +1676,6 @@
           document.getElementById('champLiveName').innerText = 'Belum Ada';
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
-
-        const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
 
         if (error || !data || data.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
@@ -1722,13 +1727,6 @@
         document.getElementById('champPujanggaScore').innerText = `${maxPosts} Post`;
 
         const nowMs = Date.now();
-        
-        const { data: activeLivePromos } = await supabaseClient
-          .from('lives')
-          .select('*')
-          .eq('is_active', true)
-          .gt('promoted_until', new Date().toISOString());
-
         let sorotanItems = [];
 
         if (activeLivePromos && activeLivePromos.length > 0) {
@@ -1759,7 +1757,6 @@
             });
           });
 
-        // REVISI ATURAN FEED SOROTAN: PALING KIRI ADALAH YANG TERBARU DIPROMOSIKAN (ORDER BY PROMOTED_UNTIL / UPDATED_AT DESC)
         sorotanItems.sort((a, b) => new Date(b.promoted_until).getTime() - new Date(a.promoted_until).getTime());
 
         if (sorotanItems.length > 0) {
@@ -1830,6 +1827,7 @@
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
 
+    // FITUR PROMOSI POSTINGAN AKTIF BERJALAN
     async function promotePost(postId) {
       const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
       if (hours <= 0) return;
@@ -1857,6 +1855,7 @@
       loadPosts();
     }
 
+    // FITUR PROMOSI LIVE TEKS AKTIF BERJALAN
     async function promoteLiveSession() {
       if (!currentActiveLive) return alert('Tidak ada Live aktif yang dapat dipromosikan!');
 
@@ -1975,11 +1974,15 @@
     }
 
     async function updateFollowCounts(myEmail, targetEmail) {
-      const { count: myFollowing } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
-      await supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail);
+      const [{ count: myFollowing }, { count: targetFollowers }] = await Promise.all([
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail),
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail)
+      ]);
 
-      const { count: targetFollowers } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail);
-      await supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail);
+      await Promise.all([
+        supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail),
+        supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail)
+      ]);
     }
 
     function initGlobalRealtime() {
@@ -1997,6 +2000,7 @@
         }).subscribe();
     }
 
+    // TOGGLE LIKE DENGAN TERSIMPAN PERMANEN
     async function toggleLike(postId) {
       let guestToken = localStorage.getItem('cuit_guest_token');
       if (!guestToken) {
@@ -2025,8 +2029,10 @@
           delQuery = delQuery.eq('guest_token', guestToken);
         }
         
-        await delQuery;
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
+        await Promise.all([
+          delQuery,
+          supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId)
+        ]);
 
       } else {
         userLikedPostsSet.add(strPostId);
@@ -2057,7 +2063,7 @@
       }
     }
 
-    // MENGELOLA LIKE DENGAN TOMBOL LIKE KHUSUS PADA RUANG LIVE CHAT
+    // TOGGLE LIKE LIVE CHAT
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
 
@@ -2273,16 +2279,13 @@
         ]);
 
         const currentLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
-        await supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id);
-
-        await supabaseClient.rpc('process_gift_rewards', {
-          p_creator_identifier: String(targetIdentifier),
-          p_cost: parseInt(cost)
-        });
-
-        const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!`;
-        await supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: notifMsg }]);
-        await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }]);
+        
+        await Promise.all([
+          supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id),
+          supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+          supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!` }]),
+          supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }])
+        ]);
 
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
@@ -2291,19 +2294,15 @@
           const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
           currentPost.gifts_count = newGiftCoinsCount;
 
-          await supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId);
-
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
           const targetName = currentPost.username || "Pembuat Curhat";
 
-          await supabaseClient.rpc('process_gift_rewards', {
-            p_creator_identifier: String(targetIdentifier),
-            p_cost: parseInt(cost)
-          });
-
-          const notifMsg = `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!`;
-          await supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: notifMsg }]);
-          await supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }]);
+          await Promise.all([
+            supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
+            supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+            supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
+            supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
+          ]);
 
           triggerGiftAnimation(myName, giftName, cost, targetName);
         }
@@ -2491,8 +2490,10 @@
       document.getElementById('communityModal').style.display = 'none';
       document.getElementById('communityDetailModal').style.display = 'flex';
 
-      await loadCommunityMembers(id);
-      await loadCommunityPosts(name);
+      await Promise.all([
+        loadCommunityMembers(id),
+        loadCommunityPosts(name)
+      ]);
     }
 
     async function loadCommunityMembers(commId) {
@@ -2731,7 +2732,6 @@
         `;
 
         chatBox.style.display = 'flex';
-        
         document.getElementById('liveLikesCount').innerText = currentActiveLive.likes_count || 0;
         
         renderQuickChatGrid(isHost);
@@ -2796,7 +2796,6 @@
 
     function cleanupLiveSesssion() {
       if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
-      if (livePollingTimer) clearInterval(livePollingTimer);
       currentActiveLive = null;
       localStorage.removeItem('cuit_active_live_id');
       document.body.classList.remove('is-in-live');
@@ -3251,22 +3250,28 @@
 
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
 
-      const { count: followersCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail);
-      const { count: followingCount } = await supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail);
-
-      document.getElementById('profFollowers').innerText = followersCount || 0;
-      document.getElementById('profFollowing').innerText = followingCount || 0;
-
-      const { count: downlinesCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`);
-      document.getElementById('profDownlines').innerText = downlinesCount || 0;
-
       let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
       if (currentUser) {
         postQuery = postQuery.eq('user_id', currentUser.id);
       } else {
         postQuery = postQuery.eq('user_email', myEmail);
       }
-      const { count: postsCount } = await postQuery;
+
+      const [
+        { count: followersCount },
+        { count: followingCount },
+        { count: downlinesCount },
+        { count: postsCount }
+      ] = await Promise.all([
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail),
+        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail),
+        supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`),
+        postQuery
+      ]);
+
+      document.getElementById('profFollowers').innerText = followersCount || 0;
+      document.getElementById('profFollowing').innerText = followingCount || 0;
+      document.getElementById('profDownlines').innerText = downlinesCount || 0;
       document.getElementById('profPostsCount').innerText = postsCount || 0;
 
       const adminMemberCard = document.getElementById('adminTotalMemberCard');
@@ -3469,8 +3474,6 @@
       const modal = document.getElementById('adminReelsModal');
       if (modal) {
         modal.style.display = 'flex';
-      } else {
-        alert('Modal Admin tidak ditemukan!');
       }
     }
 
@@ -3491,7 +3494,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
       }
     }
 
