@@ -487,7 +487,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN (REVISI PERBAIKAN TINGGI AREA CHAT) -->
+  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
   <div id="pageLive" class="page-section" style="padding-bottom: 70px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -911,7 +911,7 @@
     </div>
   </div>
 
-  <!-- MODAL DOMPET & TOP-UP DANA -->
+  <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
@@ -919,17 +919,31 @@
         <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">0</span> Koin</div>
         <div><b>Nilai Setara:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
-      
-      <div style="background: #eaf2ff; padding: 10px; border-radius: 12px; font-size: 11px; color: #1e3a8a; margin-bottom: 8px;">
-        <b>Tujuan Pembayaran e-Wallet DANA:</b><br>
-        📱 <b>085624189461</b> (a.n CUIT Official)
+
+      <div style="font-size: 11px; font-weight: 800; color: #1c1d36; margin: 10px 0 6px 0;">Pilih Paket Top-Up (QRIS DOKU Otomatis):</div>
+      <div id="packageListContainer" style="display: flex; flex-direction: column; gap: 6px;">
+        <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
 
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(1000, 1000)">💰 Paket Rp 1.000 (1.000 Koin)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 6px; text-align: left;" onclick="buyPackageDANA(5000, 5000)">🎁 Paket Rp 5.000 (5.000 Koin)</button>
-      <button class="btn-secondary" style="width: 100%; margin-top: 10px; text-align: left;" onclick="buyPackageDANA(10000, 10000)">🚀 Paket Rp 10.000 (10.000 Koin)</button>
+      <button class="btn-secondary" style="width: 100%; margin-top: 12px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
 
-      <button class="btn-secondary" style="width: 100%; margin-top: 10px; background:#eee;" onclick="document.getElementById('walletModal').style.display='none'">Tutup</button>
+  <!-- MODAL TAMPILKAN QRIS DOKU DARI EDGE FUNCTION -->
+  <div id="qrisDisplayModal" class="modal" style="z-index: 150;">
+    <div class="modal-content" style="text-align: center; max-width: 360px;">
+      <h3 style="font-size: 16px; margin-bottom: 4px;">Pindai QRIS DOKU 📱</h3>
+      <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 12px;">Gunakan aplikasi M-Banking atau e-Wallet favoritmu untuk membayar secara instan.</p>
+
+      <div id="qrisImageContainer" style="min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8f9fe; border-radius: 14px; padding: 14px; border: 1px dashed #c7d2fe;">
+        <!-- Gambar QRIS atau indikator loading dirender di sini -->
+      </div>
+
+      <div style="font-size: 10.5px; color: #16a34a; font-weight: 700; margin-top: 10px;">
+        ✨ Koin akan otomatis bertambah saat pembayaran sukses!
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; margin-top: 12px; background: #eee;" onclick="document.getElementById('qrisDisplayModal').style.display='none'">Selesai / Tutup</button>
     </div>
   </div>
 
@@ -946,13 +960,13 @@
       </select>
 
       <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
-      <input type="number" id="cashoutCoins" value="2000" oninput="calcCashoutFee()">
+      <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
 
       <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-        <div>Gross Tunai: Rp <span id="coGross">2.000</span></div>
+        <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
         <div>Total Biaya Admin: Rp <span id="coFee">500</span></div>
         <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
-        <div><b>Bersih Diterima:</b> Rp <span id="coNet">1.500</span></div>
+        <div><b>Bersih Diterima:</b> Rp <span id="coNet">19.500</span></div>
       </div>
 
       <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
@@ -973,11 +987,10 @@
       FREE_COINS_DAILY: 20,
       MAX_CHAR_FREE_CURHAT: 1200,
       COIN_RATE_RP: 1,
-      DANA_NUMBER: '085624189461',
       DEFAULT_SPONSOR: 'ADMINCUIT'
     };
 
-    const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
+    const SUPABASE_URL = 'https://ozakuxlktqweembeqqyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -2483,34 +2496,80 @@
       }
     }
 
-    function openWalletModal() {
+    async function openWalletModal() {
       document.getElementById('wPaidCoin').innerText = paidCoins;
       document.getElementById('wPaidValue').innerText = (paidCoins * CONFIG.COIN_RATE_RP).toLocaleString('id-ID');
       document.getElementById('walletModal').style.display = 'flex';
+
+      const container = document.getElementById('packageListContainer');
+      container.innerHTML = '<p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat daftar paket koin...</p>';
+
+      const { data: packages, error } = await supabaseClient
+        .from('coin_packages')
+        .select('*')
+        .order('price_idr', { ascending: true });
+
+      if (error || !packages || packages.length === 0) {
+        container.innerHTML = '<p style="text-align: center; font-size: 11px; color: #ef4444;">Gagal memuat paket koin.</p>';
+        return;
+      }
+
+      container.innerHTML = packages.map(pkg => `
+        <button class="btn-secondary" style="width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" onclick="generateDokuQRIS('${pkg.id}', ${pkg.price_idr})">
+          <span><b>${pkg.name}</b> (${pkg.coins.toLocaleString('id-ID')} Koin)</span>
+          <span style="color: var(--primary); font-weight: 800;">Rp ${pkg.price_idr.toLocaleString('id-ID')}</span>
+        </button>
+      `).join('');
+    }
+
+    async function generateDokuQRIS(packageId, priceIdr) {
+      if (!currentUser) {
+        alert('Silakan masuk atau daftar akun terlebih dahulu untuk melakukan top-up!');
+        handleAuthAction();
+        return;
+      }
+
+      document.getElementById('walletModal').style.display = 'none';
+      const qrisModal = document.getElementById('qrisDisplayModal');
+      const qrisContainer = document.getElementById('qrisImageContainer');
+      
+      qrisModal.style.display = 'flex';
+      qrisContainer.innerHTML = `
+        <div style="font-size: 12px; font-weight: 700; color: #4338ca;">Menghubungkan ke DOKU QRIS...</div>
+        <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Harap tunggu sebentar</div>
+      `;
+
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('doku-generate-qris', {
+          body: {
+            package_id: packageId,
+            user_id: currentUser.id,
+            user_email: currentUser.email
+          }
+        });
+
+        if (error || !data || !data.qr_content) {
+          throw new Error((error && error.message) || (data && data.error) || 'Gagal menghasilkan QRIS.');
+        }
+
+        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr_content)}`;
+
+        qrisContainer.innerHTML = `
+          <div style="font-size: 12px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">Total Tagihan: Rp ${priceIdr.toLocaleString('id-ID')}</div>
+          <img src="${qrImageUrl}" alt="DOKU QRIS Code" style="width: 180px; height: 180px; border-radius: 8px; border: 2px solid #6c5ce7;" />
+        `;
+
+      } catch (err) {
+        console.error('Error QRIS:', err);
+        qrisContainer.innerHTML = `
+          <div style="color: #dc2626; font-size: 11px; font-weight: 700;">Gagal Membuat QRIS DOKU</div>
+          <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">${err.message}</div>
+        `;
+      }
     }
 
     function openAboutModal() {
       document.getElementById('aboutModal').style.display = 'flex';
-    }
-
-    function buyPackageDANA(price, coins) {
-      const intentUrl = `intent://qr/transfer?phone=${CONFIG.DANA_NUMBER}&amount=${price}#Intent;scheme=dana;package=id.dana;end`;
-      window.location.href = intentUrl;
-
-      setTimeout(async () => {
-        if (confirm(`Apakah Anda telah menyelesaikan pembayaran sebesar Rp ${price.toLocaleString('id-ID')} di aplikasi DANA?\n\nKlik "OK" untuk menambahkan ${coins} Koin Berbayar ke akun Anda.`)) {
-          paidCoins += coins;
-          
-          const expBonus = Math.floor(coins * 0.10);
-          usedPaidCoins += expBonus;
-
-          updateCoinUI();
-          await syncCoinsToSupabase();
-
-          openWalletModal();
-          alert(`Top-Up Berhasil!\n+${coins.toLocaleString('id-ID')} Koin Berbayar ditambahkan.\n+${expBonus.toLocaleString('id-ID')} EXP diperoleh (10% Bonus Top-Up).`);
-        }
-      }, 1000);
     }
 
     function openCashoutModal() {
@@ -2536,7 +2595,7 @@
       const accountName = document.getElementById('cashoutAccountName').value.trim();
       const account = document.getElementById('cashoutAccount').value.trim();
 
-      if (coins < 1000) return alert('Minimum penarikan adalah 1.000 Permata CUIT (Rp 1.000)!');
+      if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
       if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
       
       if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
