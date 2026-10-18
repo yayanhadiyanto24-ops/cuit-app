@@ -984,11 +984,15 @@
 
   <script>
     const CONFIG = {
-      FREE_COINS_DAILY: 20,
-      MAX_CHAR_FREE_CURHAT: 1200,
-      COIN_RATE_RP: 1,
-      DEFAULT_SPONSOR: 'ADMINCUIT'
-    };
+  FREE_COINS_DAILY: 20,
+  MAX_CHAR_FREE_CURHAT: 1200,
+  COIN_RATE_RP: 1,
+  DEFAULT_SPONSOR: 'ADMINCUIT',
+  // Pengaturan Biaya Penarikan (Bisa diganti kapan saja dari sini)
+  CASHOUT_FEE_FLAT: 5000, // Aktifkan jika ingin biaya flat (misal: 5000)
+  USE_FLAT_FEE: true      // Ubah ke true jika pakai biaya flat, atau false jika beda DANA/Bank
+};
+
 
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
@@ -2578,16 +2582,25 @@
     }
 
     function calcCashoutFee() {
-      const type = document.getElementById('cashoutType').value;
-      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-      const gross = coins * 1;
-      const fee = type === 'bank' ? 3000 : 500;
-      const net = Math.max(0, gross - fee);
+  const type = document.getElementById('cashoutType').value;
+  const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+  const gross = coins * 1;
 
-      document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
-      document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
-      document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
-    }
+  // Menggunakan sistem flat atau variasi biaya
+  let fee = 0;
+  if (CONFIG.USE_FLAT_FEE) {
+    fee = CONFIG.CASHOUT_FEE_FLAT;
+  } else {
+    fee = (type === 'bank') ? 3000 : 500;
+  }
+
+  const net = Math.max(0, gross - fee);
+
+  document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
+  document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
+  document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
+}
+
 
     async function submitCashout() {
       const type = document.getElementById('cashoutType').value;
