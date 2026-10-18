@@ -948,33 +948,56 @@
   </div>
 
   <!-- MODAL PENARIKAN DANA -->
-  <div id="cashoutModal" class="modal">
-    <div class="modal-content">
-      <h3>💸 Penarikan Permata CUIT</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
+<div id="cashoutModal" class="modal">
+  <div class="modal-content">
+    <h3>💸 Penarikan Permata CUIT</h3>
+    <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
 
-      <label style="font-size: 11px; font-weight: 700; display: block;">Pilih Bank / E-Wallet Tujuan:</label>
-<input list="bankListOptions" id="cashoutType" placeholder="Ketik atau pilih nama bank/e-wallet..." oninput="calcCashoutFee()">
+    <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan (Bank / E-Wallet):</label>
+    <input list="bankListOptions" id="cashoutType" placeholder="Ketik/pilih nama bank atau e-wallet..." oninput="calcCashoutFee()">
+    <datalist id="bankListOptions">
+      <option value="DANA"></option>
+      <option value="GoPay"></option>
+      <option value="OVO"></option>
+      <option value="ShopeePay"></option>
+      <option value="LinkAja"></option>
+      <option value="BCA"></option>
+      <option value="Mandiri"></option>
+      <option value="BRI"></option>
+      <option value="BNI"></option>
+      <option value="BSI (Bank Syariah Indonesia)"></option>
+      <option value="Bank Jabar Banten (BJB)"></option>
+      <option value="CIMB Niaga"></option>
+      <option value="Bank Permata"></option>
+      <option value="Bank Danamon"></option>
+      <option value="Bank Tabungan Negara (BTN)"></option>
+      <option value="Bank Neo Commerce"></option>
+      <option value="SeaBank"></option>
+    </datalist>
 
-<datalist id="bankListOptions">
-  <option value="DANA">
-  <option value="GoPay">
-  <option value="OVO">
-  <option value="ShopeePay">
-  <option value="LinkAja">
-  <option value="BCA">
-  <option value="Mandiri">
-  <option value="BRI">
-  <option value="BNI">
-  <option value="BSI (Bank Syariah Indonesia)">
-  <option value="Bank Jabar Banten (BJB)">
-  <option value="CIMB Niaga">
-  <option value="Bank Permata">
-  <option value="Bank Danamon">
-  <option value="Bank Tabungan Negara (BTN)">
-  <option value="Bank Neo Commerce">
-  <option value="SeaBank">
-</datalist>
+    <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
+    <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
+
+    <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
+      <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
+      <div>Total Biaya Admin: Rp <span id="coFee">5.000</span></div>
+      <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
+      <div><b>Bersih Diterima:</b> Rp <span id="coNet">15.000</span></div>
+    </div>
+
+    <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
+    <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
+
+    <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
+    <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
+
+    <div style="display: flex; gap: 6px; margin-top: 8px;">
+      <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
+      <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
+    </div>
+  </div>
+</div>
+
 
 
   <script>
@@ -2579,7 +2602,7 @@
     function calcCashoutFee() {
   const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
   const gross = coins * 1;
-  const fee = 5000; // Biaya flat Rp 5.000 untuk semua bank & e-wallet
+  const fee = 5000; // Biaya flat Rp 5.000
   const net = Math.max(0, gross - fee);
 
   document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
@@ -2587,53 +2610,54 @@
   document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
 }
 
+async function submitCashout() {
+  const typeInput = document.getElementById('cashoutType');
+  const type = typeInput ? typeInput.value.trim() : '';
+  const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
+  const accountName = document.getElementById('cashoutAccountName').value.trim();
+  const account = document.getElementById('cashoutAccount').value.trim();
 
+  if (!type) return alert('Silakan pilih atau ketik nama Bank/E-Wallet tujuan!');
+  if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
+  if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
+  if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
+  if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
 
-    async function submitCashout() {
-      const type = document.getElementById('cashoutType').value;
-      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-      const accountName = document.getElementById('cashoutAccountName').value.trim();
-      const account = document.getElementById('cashoutAccount').value.trim();
+  const gross = coins * 1;
+  const fee = 5000;
+  const netAmount = Math.max(0, gross - fee);
 
-      if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
-      if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
-      
-      if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
-      if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
+  try {
+    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+    const myEmail = currentUser ? currentUser.email : guestId;
 
-      const gross = coins * 1;
-      const fee = type === 'bank' ? 3000 : 500;
-      const netAmount = Math.max(0, gross - fee);
-
-      try {
-        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-        const myEmail = currentUser ? currentUser.email : guestId;
-
-        await supabaseClient.from('payouts').insert([
-          {
-            user_id: currentUser ? currentUser.id : 'demo_id',
-            user_email: myEmail,
-            payout_type: type,
-            account_name: accountName,
-            account_number: account,
-            coins_deducted: coins,
-            net_amount: netAmount,
-            status: 'pending'
-          }
-        ]);
-
-        gems -= coins;
-        updateCoinUI();
-        document.getElementById('cashoutModal').style.display = 'none';
-
-        document.getElementById('cashoutAccountName').value = '';
-        document.getElementById('cashoutAccount').value = '';
-
-        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
-      } catch (err) {
-        alert('Terjadi kesalahan proses penarikan: ' + err.message);
+    await supabaseClient.from('payouts').insert([
+      {
+        user_id: currentUser ? currentUser.id : 'demo_id',
+        user_email: myEmail,
+        payout_type: type,
+        account_name: accountName,
+        account_number: account,
+        coins_deducted: coins,
+        net_amount: netAmount,
+        status: 'pending'
       }
-    }
+    ]);
+
+    gems -= coins;
+    updateCoinUI();
+    document.getElementById('cashoutModal').style.display = 'none';
+
+    document.getElementById('cashoutType').value = '';
+    document.getElementById('cashoutAccountName').value = '';
+    document.getElementById('cashoutAccount').value = '';
+
+    alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim! Saldo bersih Rp ${netAmount.toLocaleString('id-ID')} akan diproses.`);
+  } catch (err) {
+    alert('Terjadi kesalahan proses penarikan: ' + err.message);
+  }
+}
+
 
     function openModerationPanel() {
       const userLvl = getUserLevel();
