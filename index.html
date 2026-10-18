@@ -148,7 +148,7 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
@@ -387,6 +387,30 @@
       </div>
 
       <button class="btn-secondary" style="width:100%; margin-top:12px; background:#eee;" onclick="document.getElementById('communityModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL RUANG KOMUNITAS (BISA DIKETUK & DIBUKA) -->
+  <div id="communityDetailModal" class="modal">
+    <div class="modal-content" style="max-height: 85vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900;" id="cdTitle">👥 Ruang Komunitas</h3>
+        <button onclick="document.getElementById('communityDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="background:#ece8ff; padding:10px; border-radius:12px; border:1px solid #dcd6ff; margin-bottom:12px;">
+        <div style="font-size:11px; color:#444;" id="cdDesc">Deskripsi komunitas...</div>
+        <div style="font-size:9.5px; color:var(--text-sub); margin-top:4px;" id="cdCreator">Pembuat: -</div>
+      </div>
+
+      <button class="btn-primary" style="width:100%; margin-bottom:12px;" onclick="joinCommunityAction()">+ Bergabung dengan Komunitas Ini</button>
+
+      <label style="font-size:11px; font-weight:800; display:block; margin-bottom:6px;">💬 Obrolan Komunitas:</label>
+      <div id="communityPostsList" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat obrolan...</p>
+      </div>
+
+      <button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('communityDetailModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -1063,6 +1087,7 @@
     let livePollingTimer = null;
     let isLeaderboardOpen = true;
     let userHasLeftLive = false;
+    let activeCommunityId = null;
 
     let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
     let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
@@ -2249,15 +2274,59 @@
         return;
       }
 
+      // Setiap baris komunitas BISA DIKETUK
       container.innerHTML = communities.map(c => `
-        <div style="background:#fff; border:1px solid #e2e7f5; padding:8px 10px; border-radius:10px;">
+        <div onclick="openCommunityDetail('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'")}', '${c.creator_name}')" 
+             style="background:#fff; border:1px solid #e2e7f5; padding:10px; border-radius:10px; cursor:pointer; transition:background 0.2s;"
+             onmouseover="this.style.background='#f0f3fa'" onmouseout="this.style.background='#fff'">
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-weight:800; font-size:12px; color:var(--primary);">${c.name}</span>
-            <span style="font-size:9px; color:var(--text-sub);">Oleh: ${c.creator_name}</span>
+            <span style="font-size:10px; color:var(--primary); font-weight:700;">Buka →</span>
           </div>
           <div style="font-size:11px; color:#444; margin-top:3px;">${c.description || '-'}</div>
+          <div style="font-size:9px; color:var(--text-sub); margin-top:2px;">Oleh: ${c.creator_name}</div>
         </div>
       `).join('');
+    }
+
+    async function openCommunityDetail(id, name, desc, creator) {
+      activeCommunityId = id;
+      
+      document.getElementById('cdTitle').innerText = `👥 ${name}`;
+      document.getElementById('cdDesc').innerText = desc || 'Tidak ada deskripsi.';
+      document.getElementById('cdCreator').innerText = `Pembuat Komunitas: ${creator}`;
+      
+      document.getElementById('communityModal').style.display = 'none';
+      document.getElementById('communityDetailModal').style.display = 'flex';
+
+      loadCommunityPosts(name);
+    }
+
+    async function loadCommunityPosts(communityName) {
+      const container = document.getElementById('communityPostsList');
+      container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat postingan komunitas...</p>';
+
+      const { data: posts } = await supabaseClient
+        .from('curhat')
+        .select('*')
+        .ilike('content', `%${communityName}%`)
+        .order('created_at', { ascending: false });
+
+      if (!posts || posts.length === 0) {
+        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Belum ada obrolan khusus di komunitas ini.</p>';
+        return;
+      }
+
+      container.innerHTML = posts.map(p => `
+        <div style="background:#f8f9fe; padding:8px; border-radius:10px; border:1px solid #eef1f8;">
+          <div style="font-weight:800; font-size:11px; color:var(--primary);">${p.username || 'Anggota'}</div>
+          <div style="font-size:11.5px; color:#333; margin-top:2px;">${p.content}</div>
+        </div>
+      `).join('');
+    }
+
+    function joinCommunityAction() {
+      alert('Selamat! Anda telah bergabung dengan komunitas ini. Sekarang Anda bisa saling berbagi cerita bersama anggota lainnya!');
     }
 
     async function createNewCommunity() {
@@ -2596,6 +2665,30 @@
       const filterType = document.getElementById('mainSearchFilter').value;
       const container = document.getElementById('searchResults');
 
+      if (query) {
+        const { data: comms } = await supabaseClient
+          .from('communities')
+          .select('*')
+          .ilike('name', `%${query}%`);
+
+        if (comms && comms.length > 0) {
+          let commHTML = comms.map(c => `
+            <div onclick="openCommunityDetail('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'")}', '${c.creator_name}')" 
+                 style="background:#fff; border:1px solid #6c5ce7; padding:10px; border-radius:12px; margin-bottom:8px; cursor:pointer;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:900; color:var(--primary); font-size:13px;">👥 Komunitas: ${c.name}</span>
+                <span style="font-size:10px; color:var(--primary); font-weight:700;">Buka →</span>
+              </div>
+              <div style="font-size:11px; color:#444; margin:3px 0;">${c.description || '-'}</div>
+              <div style="font-size:9.5px; color:var(--text-sub);">Pembuat: ${c.creator_name}</div>
+            </div>
+          `).join('');
+
+          container.innerHTML = commHTML;
+          return;
+        }
+      }
+
       if (filterType === 'top_level' || filterType === 'top_sawer') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
         const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
@@ -2660,7 +2753,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tidak ditemukan curhatan yang sesuai.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tidak ditemukan curhatan atau komunitas yang sesuai.</p>';
       } else {
         container.innerHTML = filtered.map(p => renderCardHTML(p)).join('');
       }
