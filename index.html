@@ -1722,7 +1722,7 @@
           }
         }
 
-        // 2. LIVE TERMEGAH
+        // 2. LIVE TERMEGAH (DIPERBAIKI SECARA REALTIME)
         if (topLiveHost && topLiveHost.total_coins_received > 0) {
           document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
           document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
@@ -2345,18 +2345,23 @@
 
         userHasCheckedInLive[currentActiveLive.id] = true;
 
+        // ACCUMULATE TOTAL KOIN LIVE REALS
+        const newLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
+        currentActiveLive.total_coins_received = newLiveCoins;
+
         await supabaseClient.from('live_messages').insert([
           { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
         ]);
 
-        const currentLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
-        
         await Promise.all([
-          supabaseClient.from('lives').update({ total_coins_received: currentLiveCoins }).eq('id', currentActiveLive.id),
+          supabaseClient.from('lives').update({ total_coins_received: newLiveCoins }).eq('id', currentActiveLive.id),
           supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
           supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!` }]),
           supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }])
         ]);
+
+        // LANGSUNG SINKRONKAN PANGGUNG JUARA
+        loadPosts();
 
       } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
