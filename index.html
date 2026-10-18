@@ -953,34 +953,29 @@
       <h3>💸 Penarikan Permata CUIT</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
 
-      <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan:</label>
-      <select id="cashoutType" onchange="calcCashoutFee()">
-        <option value="dana">DANA (Biaya Admin Rp 500)</option>
-        <option value="bank">Transfer Bank (Biaya Rp 2.500 + Admin Rp 500)</option>
-      </select>
+      <label style="font-size: 11px; font-weight: 700; display: block;">Pilih Bank / E-Wallet Tujuan:</label>
+<input list="bankListOptions" id="cashoutType" placeholder="Ketik atau pilih nama bank/e-wallet..." oninput="calcCashoutFee()">
 
-      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
-      <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
+<datalist id="bankListOptions">
+  <option value="DANA">
+  <option value="GoPay">
+  <option value="OVO">
+  <option value="ShopeePay">
+  <option value="LinkAja">
+  <option value="BCA">
+  <option value="Mandiri">
+  <option value="BRI">
+  <option value="BNI">
+  <option value="BSI (Bank Syariah Indonesia)">
+  <option value="Bank Jabar Banten (BJB)">
+  <option value="CIMB Niaga">
+  <option value="Bank Permata">
+  <option value="Bank Danamon">
+  <option value="Bank Tabungan Negara (BTN)">
+  <option value="Bank Neo Commerce">
+  <option value="SeaBank">
+</datalist>
 
-      <div style="background: #f0f3fa; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-        <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
-        <div>Total Biaya Admin: Rp <span id="coFee">500</span></div>
-        <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
-        <div><b>Bersih Diterima:</b> Rp <span id="coNet">19.500</span></div>
-      </div>
-
-      <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
-      <input type="text" id="cashoutAccountName" placeholder="Contoh: Budi Santoso">
-
-      <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 4px;">Nomor DANA / Rekening Bank:</label>
-      <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
-
-      <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
-        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
-      </div>
-    </div>
-  </div>
 
   <script>
     const CONFIG = {
@@ -2582,24 +2577,16 @@
     }
 
     function calcCashoutFee() {
-  const type = document.getElementById('cashoutType').value;
   const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
   const gross = coins * 1;
-
-  // Menggunakan sistem flat atau variasi biaya
-  let fee = 0;
-  if (CONFIG.USE_FLAT_FEE) {
-    fee = CONFIG.CASHOUT_FEE_FLAT;
-  } else {
-    fee = (type === 'bank') ? 3000 : 500;
-  }
-
+  const fee = 5000; // Biaya flat Rp 5.000 untuk semua bank & e-wallet
   const net = Math.max(0, gross - fee);
 
   document.getElementById('coGross').innerText = gross.toLocaleString('id-ID');
   document.getElementById('coFee').innerText = fee.toLocaleString('id-ID');
   document.getElementById('coNet').innerText = net.toLocaleString('id-ID');
 }
+
 
 
     async function submitCashout() {
