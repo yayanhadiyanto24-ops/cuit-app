@@ -219,7 +219,7 @@
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
-    /* MODAL VIDEO PEMUTAR SANGAT RESPONSIP DENGAN FRAME FLEKSIBEL (TIDAK KETUTUP & TIMER STICKY) */
+    /* MODAL VIDEO PEMUTAR SANGAT RESPONSIP */
     .video-modal-container {
       background: #111;
       color: #fff;
@@ -659,11 +659,9 @@
     </div>
   </div>
 
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED TERPERBAIKI (TIDAK KETUTUP & TIMER STICKY) -->
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="video-modal-container">
-      
-      <!-- Header Timer Sticky -->
       <div class="video-modal-header">
         <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi CUIT</span>
         <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 6px 14px; border-radius: 10px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed; transition: all 0.3s ease;">
@@ -671,16 +669,13 @@
         </button>
       </div>
 
-      <!-- Area Body Video Memanjang Fleksibel -->
       <div class="video-modal-body">
         <div id="videoFrameContainer" style="width: 100%; height: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 12px; overflow: hidden; position: relative;"></div>
       </div>
 
-      <!-- Footer Info Status Video -->
       <div class="video-modal-footer" id="videoTimerStatusText">
         Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!
       </div>
-
     </div>
   </div>
 
@@ -831,11 +826,17 @@
           <!-- QUICK CHAT GRID KUSTOM DUKUNG PERAN -->
           <div class="quick-chat-grid-container" id="quickChatContainer"></div>
 
-          <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
-            <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
+          <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+            <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1; min-width: 120px;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
             <button class="btn-primary" style="padding: 8px 10px;" onclick="sendLiveMessage()">Kirim</button>
             <button class="btn-secondary" id="btnLikeLive" style="background: #ece8ff; color: #6c5ce7; border: 1px solid #dcd6ff; padding: 8px 8px; font-weight:800; white-space: nowrap; transition: transform 0.1s ease;" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">0</span>)</button>
+            
+            <!-- TOMBOL GIFT REGULER -->
             <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; font-weight:800; white-space: nowrap;" onclick="openLiveGiftModal()">🎁 Gift</button>
+            
+            <!-- TOMBOL GIFT SPESIAL SUPER-SULTAN TERPISAH -->
+            <button class="btn-secondary" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: 1px solid #fff7c2; padding: 8px 10px; font-weight:900; white-space: nowrap; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);" onclick="openSpecialGiftModal()">👑 Gift Spesial</button>
+
             <button class="btn-secondary" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; padding: 8px 6px; font-weight:800; white-space: nowrap;" onclick="promoteLiveSession()" title="1 Koin / Menit">🚀</button>
           </div>
         </div>
@@ -1157,7 +1158,7 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT TERSTRUKTUR DARI KECIL KE BESAR -->
+  <!-- MODAL GIFT REGULER -->
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
@@ -1169,7 +1170,7 @@
         <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
 
-      <!-- GRID GIFT -->
+      <!-- GRID GIFT REGULER -->
       <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
@@ -1211,6 +1212,56 @@
       </div>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL GIFT SPESIAL SUPER-SULTAN TERPISAH -->
+  <div id="specialGiftModal" class="modal">
+    <div class="modal-content" style="background: linear-gradient(180deg, #1a1c29, #0f1016); color: #fff; border: 2px solid #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px;">
+        <h3 style="font-size: 16px; font-weight: 900; color: #ffd700;">👑 Gift Spesial Super-Sultan</h3>
+        <button onclick="document.getElementById('specialGiftModal').style.display='none'" style="border:none; background:none; font-size:18px; color:#fff; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="font-size: 11px; color: #ccc; margin-bottom: 12px; text-align: center;">
+        Apresiasi fantastis dengan animasi *Takeover Screen* & Suasana Megah!
+      </div>
+
+      <!-- GRID GIFT SPESIAL -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+        
+        <!-- 1.000 KOIN -->
+        <div onclick="sendGiftAction(1000, 'Naga Meteorit')" style="background: linear-gradient(135deg, #2b1055, #7597de); border: 1.5px solid #a29bfe; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
+          <div style="font-size: 32px; margin-bottom: 4px;">🐉</div>
+          <div style="font-size: 12px; font-weight: 900; color: #fff;">Naga Meteorit</div>
+          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">1.000 🪙</div>
+        </div>
+
+        <!-- 2.000 KOIN -->
+        <div onclick="sendGiftAction(2000, 'Kapal Selam Atlantis')" style="background: linear-gradient(135deg, #093028, #237a57); border: 1.5px solid #55efc4; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
+          <div style="font-size: 32px; margin-bottom: 4px;">🌊</div>
+          <div style="font-size: 12px; font-weight: 900; color: #fff;">Harta Atlantis</div>
+          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">2.000 🪙</div>
+        </div>
+
+        <!-- 5.000 KOIN -->
+        <div onclick="sendGiftAction(5000, 'Wijayakusuma Emas')" style="background: linear-gradient(135deg, #4a154b, #6b1110); border: 1.5px solid #ff7675; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
+          <div style="font-size: 32px; margin-bottom: 4px;">🪷</div>
+          <div style="font-size: 12px; font-weight: 900; color: #fff;">Wijayakusuma Emas</div>
+          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">5.000 🪙</div>
+        </div>
+
+        <!-- 10.000 KOIN -->
+        <div onclick="sendGiftAction(10000, 'Istana Sultan Agung')" style="background: linear-gradient(135deg, #000000, #434343); border: 2px solid #ffd700; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer; grid-column: span 2; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
+          <div style="font-size: 40px; margin-bottom: 4px;">🏰</div>
+          <div style="font-size: 14px; font-weight: 900; color: #ffd700;">Istana Sultan Agung (ULTIMATE)</div>
+          <div style="font-size: 12px; font-weight: 800; color: #fff; margin-top: 2px;">10.000 🪙</div>
+        </div>
+
+      </div>
+
+      <button class="btn-secondary" style="width: 100%; background: #222; color: #fff; border: 1px solid #444;" onclick="document.getElementById('specialGiftModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -1436,7 +1487,6 @@
       document.getElementById('coinCalcModal').style.display = 'flex';
     }
 
-    // MENGHITUNG MINGGU ISO SECARA AKURAT (SAMA DENGAN POSTGRESQL / SUPABASE)
     function getISOWeekNumber(d) {
       const date = new Date(d.getTime());
       date.setHours(0, 0, 0, 0);
@@ -1870,7 +1920,6 @@
       const promotedSection = document.getElementById('promotedSection');
 
       try {
-        // --- LOGIKA HITUNG AWAL MINGGU (SENIN 00:00:00 WIB) ---
         const now = new Date();
         const currentWeek = getISOWeekNumber(now);
         const currentYear = now.getFullYear();
@@ -1910,9 +1959,8 @@
           });
         }
 
-        // --- PANGGUNG JUARA MINGGU INI (Murni Sejak Senin 00:00 WIB) ---
+        // PANGGUNG JUARA MINGGU INI
         if (weeklyStats && weeklyStats.length > 0) {
-          // 1. RAJA SAWER MINGGUAN
           const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
           if (topSawer && topSawer.weekly_coins_spent > 0) {
             document.getElementById('champSawerName').innerText = topSawer.username || 'Sultan';
@@ -1922,7 +1970,6 @@
             document.getElementById('champSawerScore').innerText = '0 🪙';
           }
 
-          // 4. PUJANGGA UTAMA MINGGUAN
           const topPujangga = [...weeklyStats].sort((a,b) => (b.weekly_posts_count||0) - (a.weekly_posts_count||0))[0];
           if (topPujangga && topPujangga.weekly_posts_count > 0) {
             document.getElementById('champPujanggaName').innerText = topPujangga.username || 'Pujangga';
@@ -1932,7 +1979,6 @@
             document.getElementById('champPujanggaScore').innerText = '0 Post';
           }
 
-          // 5. RAJA KOMENTAR MINGGUAN
           const topKomentar = [...weeklyStats].sort((a,b) => (b.weekly_comments_count||0) - (a.weekly_comments_count||0))[0];
           if (topKomentar && topKomentar.weekly_comments_count > 0) {
             document.getElementById('champKomentarName').innerText = topKomentar.username || 'Komentator';
@@ -1942,7 +1988,6 @@
             document.getElementById('champKomentarScore').innerText = '0 Komen';
           }
 
-          // 7. KOLEKTOR KOIN MINGGUAN
           const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
           if (topPermata && topPermata.weekly_gems_earned > 0) {
             const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 1;
@@ -1969,7 +2014,6 @@
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
 
-        // 2. LIVE TERMEGAH MINGGU INI
         if (topLiveHost && topLiveHost.total_coins_received > 0) {
           document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
           document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
@@ -1978,7 +2022,6 @@
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
-        // 3. BINTANG CURHAT MINGGU INI
         if (weeklyPosts && weeklyPosts.length > 0) {
           let topCurhat = null;
           let maxScore = -1;
@@ -2004,7 +2047,6 @@
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
-        // 6. PENGIKUT TERBANYAK MINGGU INI
         if (weeklyFollows && weeklyFollows.length > 0) {
           const followCounts = {};
           weeklyFollows.forEach(f => {
@@ -2035,7 +2077,6 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // 8. MAGNET SPONSOR MINGGU INI
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
           weeklyNewMembers.forEach(m => {
@@ -2534,6 +2575,15 @@
       document.getElementById('giftModal').style.display = 'flex';
     }
 
+    /* FUNGSI UNTUK MEMBUKA MODAL GIFT SPESIAL SUPER-SULTAN */
+    function openSpecialGiftModal() {
+      if (isLiveGiftContext && currentActiveLive) {
+        document.getElementById('specialGiftModal').style.display = 'flex';
+      } else {
+        openLiveGiftModal();
+      }
+    }
+
     async function openLiveGiftModal() {
       if (!currentActiveLive) return alert('Tidak ada Live aktif!');
       
@@ -2593,10 +2643,11 @@
       pendingGiftData = { cost, giftName };
 
       document.getElementById('confirmGiftText').innerHTML = `
-        Kamu yakin ingin mengirimkan <b>Gift ${giftName}</b> seharga <b>${cost} Koin Berbayar</b> (Rp ${cost.toLocaleString('id-ID')})?
+        Kamu yakin ingin mengirimkan <b>Gift ${giftName}</b> seharga <b>${cost.toLocaleString('id-ID')} Koin Berbayar</b> (Rp ${cost.toLocaleString('id-ID')})?
       `;
 
       document.getElementById('giftModal').style.display = 'none';
+      document.getElementById('specialGiftModal').style.display = 'none';
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
@@ -2683,40 +2734,65 @@
         'Badai Petir': '⚡',
         'Gunung Meletus': '🌋',
         'Komet Raksasa': '☄️',
-        'Supernova': '🌌'
+        'Supernova': '🌌',
+        'Naga Meteorit': '🐉',
+        'Kapal Selam Atlantis': '🌊',
+        'Wijayakusuma Emas': '🪷',
+        'Istana Sultan Agung': '🏰'
       };
 
       let stayDuration = 3000;
 
-      if (coins >= 500) {
+      // HANDLER ANIMASI KHUSUS TIER SUPER-SULTAN
+      if (coins >= 10000) {
+        sizeClass = 'ultimate';
+        icon = '🏰';
+        stayDuration = 20000;
+        spawnConfetti(200, stayDuration);
+      } else if (coins >= 5000) {
+        sizeClass = 'ultimate';
+        icon = '🪷';
+        stayDuration = 15000;
+        spawnConfetti(150, stayDuration);
+      } else if (coins >= 2000) {
+        sizeClass = 'ultimate';
+        icon = '🌊';
+        stayDuration = 12000;
+        spawnConfetti(100, stayDuration);
+      } else if (coins >= 1000) {
+        sizeClass = 'ultimate';
+        icon = '🐉';
+        stayDuration = 10000;
+        spawnConfetti(80, stayDuration);
+      } else if (coins >= 500) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '🌌';
-        stayDuration = 15000;
-        spawnConfetti(100, stayDuration);
+        stayDuration = 8000;
+        spawnConfetti(60, stayDuration);
       } else if (coins >= 400) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '☄️';
-        stayDuration = 12000;
-        spawnConfetti(80, stayDuration);
+        stayDuration = 7000;
+        spawnConfetti(50, stayDuration);
       } else if (coins >= 300) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '🌋';
-        stayDuration = 10000;
-        spawnConfetti(70, stayDuration);
+        stayDuration = 6000;
+        spawnConfetti(40, stayDuration);
       } else if (coins >= 200) {
         sizeClass = 'ultimate';
         icon = iconsMap[giftName] || '⚡';
-        stayDuration = 8000;
-        spawnConfetti(50, stayDuration);
+        stayDuration = 5000;
+        spawnConfetti(30, stayDuration);
       } else if (coins >= 50) {
         sizeClass = 'large';
         icon = '👑';
-        stayDuration = 6000;
-        spawnConfetti(30, stayDuration);
+        stayDuration = 4500;
+        spawnConfetti(20, stayDuration);
       } else if (coins >= 5) {
         sizeClass = 'medium';
         icon = '🌟';
-        stayDuration = 4500;
+        stayDuration = 3500;
       }
 
       banner.className = `gift-banner ${sizeClass}`;
@@ -2733,7 +2809,7 @@
         <div class="icon">${icon}</div>
         <div class="text-group">
           <div class="sender">${senderName}</div>
-          <div class="action">Mengirimkan <b>${giftName}</b> (${coins} 🪙) untuk <b>@${targetName}</b></div>
+          <div class="action">Mengirimkan <b>${giftName}</b> (${coins.toLocaleString('id-ID')} 🪙) untuk <b>@${targetName}</b></div>
         </div>
       `;
 
@@ -3280,7 +3356,7 @@
         leaderboardList.innerHTML = sortedSupporters.map((s, idx) => `
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ffe082; padding-bottom: 2px;">
             <span><b>${medals[idx] || '🏅'} ${s.user}</b></span>
-            <span style="font-weight: 800; color: #d35400;">${s.coins} 🪙</span>
+            <span style="font-weight: 800; color: #d35400;">${s.coins.toLocaleString('id-ID')} 🪙</span>
           </div>
         `).join('');
       } else {
@@ -3334,7 +3410,7 @@
 
     function filterByTag(tagName) {
       document.getElementById('searchInput').value = tagName;
-      switchTab('pageSearch', document.querySelectorAll('.nav-bar .nav-item')[1]);
+      switchTab('pageSearch', document.querySelectorAll('.nav-item')[1]);
       document.getElementById('mainSearchFilter').value = tagName;
       searchPosts();
     }
@@ -3866,7 +3942,7 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
       }
     }
 
