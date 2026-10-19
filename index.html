@@ -352,7 +352,7 @@
           <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #38bdf8;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">👥</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champFollowersName">ADMINCUIT</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champFollowersName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #bae6fd; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champFollowersScore">0 Pengikut</div>
       </div>
 
@@ -374,7 +374,7 @@
           <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f472b6;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🤝</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">ADMINCUIT</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champSponsorScore">0 Member</div>
       </div>
 
@@ -1226,6 +1226,15 @@
       "🔥 Semangat bareng-bareng!"
     ];
 
+    // MENGHITUNG MINGGU ISO SECARA AKURAT (SAMA DENGAN POSTGRESQL / SUPABASE)
+    function getISOWeekNumber(d) {
+      const date = new Date(d.getTime());
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      const week1 = new Date(date.getFullYear(), 0, 4);
+      return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    }
+
     function initAutoCollapseBanner() {
       setTimeout(() => {
         const banner = document.getElementById('cuitMainBanner');
@@ -1253,10 +1262,7 @@
 
     function checkWeeklyLeagueReset() {
       const now = new Date();
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      const pastDaysOfYear = (now - startOfYear) / 86400000;
-      const currentWeekNumber = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
-      
+      const currentWeekNumber = getISOWeekNumber(now);
       const lastWeekEvaluated = localStorage.getItem('cuit_last_league_week');
 
       if (lastWeekEvaluated && parseInt(lastWeekEvaluated) !== currentWeekNumber) {
@@ -1654,17 +1660,15 @@
       const promotedSection = document.getElementById('promotedSection');
 
       try {
-        // --- LOGIKA HITUNG AWAL MINGGU (SENIN 00:00:00) ---
+        // --- LOGIKA HITUNG AWAL MINGGU (SENIN 00:00:00 WIB) ---
         const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        const pastDaysOfYear = (now - startOfYear) / 86400000;
-        const currentWeek = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+        const currentWeek = getISOWeekNumber(now);
         const currentYear = now.getFullYear();
 
         const startOfWeek = new Date(now);
-        const dayOfWeek = startOfWeek.getDay();
-        const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-        startOfWeek.setDate(startOfWeek.getDate() + diffToMonday);
+        const day = startOfWeek.getDay();
+        const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+        startOfWeek.setDate(diffToMonday);
         startOfWeek.setHours(0, 0, 0, 0);
         const startOfWeekISO = startOfWeek.toISOString();
 
@@ -1674,14 +1678,18 @@
           { data, error },
           { data: activeLivePromos },
           { data: weeklyStats },
-          { data: weeklyPosts }
+          { data: weeklyPosts },
+          { data: weeklyFollows },
+          { data: weeklyNewMembers }
         ] = await Promise.all([
           supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
           supabaseClient.from('lives').select('host_name, total_coins_received').gte('created_at', startOfWeekISO).order('total_coins_received', { ascending: false }).limit(1).maybeSingle(),
           supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
           supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
           supabaseClient.from('weekly_league_stats').select('*').eq('year_number', currentYear).eq('week_number', currentWeek),
-          supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO)
+          supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO),
+          supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
+          supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
         ]);
 
         if (profilesData) {
@@ -1690,40 +1698,9 @@
             if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
             if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
           });
-
-          if (profilesData.length > 0) {
-            // 6. PENGIKUT TERBANYAK (ALL-TIME)
-            const sortedByFollowers = [...profilesData].sort((a,b) => (b.followers_count||0) - (a.followers_count||0));
-            if (sortedByFollowers[0]) {
-              document.getElementById('champFollowersName').innerText = sortedByFollowers[0].username || 'Cuiter';
-              document.getElementById('champFollowersScore').innerText = `${sortedByFollowers[0].followers_count||0} Pengikut`;
-            }
-
-            // 8. MAGNET SPONSOR (ALL-TIME)
-            const sponsorCounts = {};
-            profilesData.forEach(p => {
-              if (p.sponsor) {
-                const sp = p.sponsor.toUpperCase();
-                sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
-              }
-            });
-
-            let topSponsorCode = 'ADMINCUIT';
-            let maxDownlines = 0;
-
-            for (const [code, count] of Object.entries(sponsorCounts)) {
-              if (count > maxDownlines) {
-                maxDownlines = count;
-                topSponsorCode = code;
-              }
-            }
-
-            document.getElementById('champSponsorName').innerText = topSponsorCode;
-            document.getElementById('champSponsorScore').innerText = `${maxDownlines} Member`;
-          }
         }
 
-        // --- PANGGUNG JUARA MINGGU INI (SENIN - MINGGU) ---
+        // --- PANGGUNG JUARA MINGGU INI (Murni Sejak Senin 00:00 WIB) ---
         if (weeklyStats && weeklyStats.length > 0) {
           // 1. RAJA SAWER MINGGUAN (Membaca weekly_coins_spent milik Pengirim)
           const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
@@ -1790,9 +1767,7 @@
           let maxScore = -1;
 
           weeklyPosts.forEach(p => {
-            const l = p.likes_count || 0;
-            const c = p.comments_count || 0;
-            const score = l + c;
+            const score = (p.likes_count || 0) + (p.comments_count || 0);
             if (score > maxScore) {
               maxScore = score;
               topCurhat = p;
@@ -1810,6 +1785,68 @@
         } else {
           document.getElementById('champCurhatName').innerText = 'Belum Ada';
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+        }
+
+        // 6. PENGIKUT TERBANYAK MINGGU INI (Penambahan Sejak Senin 00.00 WIB)
+        if (weeklyFollows && weeklyFollows.length > 0) {
+          const followCounts = {};
+          weeklyFollows.forEach(f => {
+            if (f.following_email) {
+              followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
+            }
+          });
+
+          let topFollowedEmail = null;
+          let maxNewFollowers = 0;
+          for (const [email, count] of Object.entries(followCounts)) {
+            if (count > maxNewFollowers) {
+              maxNewFollowers = count;
+              topFollowedEmail = email;
+            }
+          }
+
+          if (topFollowedEmail && maxNewFollowers > 0) {
+            const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topFollowedEmail).maybeSingle();
+            document.getElementById('champFollowersName').innerText = prof ? prof.username : topFollowedEmail.split('@')[0];
+            document.getElementById('champFollowersScore').innerText = `+${maxNewFollowers} Pengikut`;
+          } else {
+            document.getElementById('champFollowersName').innerText = 'Belum Ada';
+            document.getElementById('champFollowersScore').innerText = '0 Pengikut';
+          }
+        } else {
+          document.getElementById('champFollowersName').innerText = 'Belum Ada';
+          document.getElementById('champFollowersScore').innerText = '0 Pengikut';
+        }
+
+        // 8. MAGNET SPONSOR MINGGU INI (Member Baru Mendaftar Sejak Senin 00.00 WIB)
+        if (weeklyNewMembers && weeklyNewMembers.length > 0) {
+          const sponsorCounts = {};
+          weeklyNewMembers.forEach(m => {
+            if (m.sponsor) {
+              const sp = m.sponsor.toUpperCase();
+              sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
+            }
+          });
+
+          let topSponsorCode = null;
+          let maxWeeklyDownlines = 0;
+          for (const [code, count] of Object.entries(sponsorCounts)) {
+            if (count > maxWeeklyDownlines) {
+              maxWeeklyDownlines = count;
+              topSponsorCode = code;
+            }
+          }
+
+          if (topSponsorCode && maxWeeklyDownlines > 0) {
+            document.getElementById('champSponsorName').innerText = topSponsorCode;
+            document.getElementById('champSponsorScore').innerText = `+${maxWeeklyDownlines} Member`;
+          } else {
+            document.getElementById('champSponsorName').innerText = 'Belum Ada';
+            document.getElementById('champSponsorScore').innerText = '0 Member';
+          }
+        } else {
+          document.getElementById('champSponsorName').innerText = 'Belum Ada';
+          document.getElementById('champSponsorScore').innerText = '0 Member';
         }
 
         if (error || !data || data.length === 0) {
