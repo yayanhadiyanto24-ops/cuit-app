@@ -1800,10 +1800,10 @@
             document.getElementById('champKomentarScore').innerText = '0 Komen';
           }
 
-          // 7. KOLEKTOR KOIN MINGGUAN (Membaca weekly_gems_earned * 2 = nilai bruto koin)
+          // 7. KOLEKTOR KOIN MINGGUAN (Membaca weekly_gems_earned * 1 = nilai bruto koin)
           const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
           if (topPermata && topPermata.weekly_gems_earned > 0) {
-            const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 2;
+            const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 1;
             currentChampKoinData = {
               name: topPermata.username || 'Kolektor',
               coins: grossCoinsEarned
