@@ -210,14 +210,62 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
     .nav-icon { font-size: 15px; }
 
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+
+    /* MODAL VIDEO PEMUTAR SANGAT RESPONSIP DENGAN FRAME FLEKSIBEL (TIDAK KETUTUP & TIMER STICKY) */
+    .video-modal-container {
+      background: #111;
+      color: #fff;
+      width: 92%;
+      max-width: 440px;
+      max-height: 90vh;
+      border-radius: 20px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid #222;
+      position: relative;
+    }
+    .video-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .video-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: #000;
+      min-height: 320px;
+      max-height: 65vh;
+    }
+    .video-modal-footer {
+      padding: 10px 14px;
+      background: #1a1a1a;
+      border-top: 1px solid #2a2a2a;
+      text-align: center;
+      font-size: 10.5px;
+      color: #ccc;
+    }
 
     .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; max-height: 380px; overflow-y: auto; padding-right: 2px; }
     .gift-card-item { background: #f8f9fe; border: 1px solid #eef1f8; padding: 6px 4px; border-radius: 10px; text-align: center; cursor: pointer; font-size: 10px; font-weight: 800; color: #1c1d36; }
@@ -611,21 +659,28 @@
     </div>
   </div>
 
-  <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
+  <!-- MODAL PEMUTAR VIDEO EMBEDDED TERPERBAIKI (TIDAK KETUTUP & TIMER STICKY) -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
-    <div class="modal-content" style="max-width: 440px; padding: 12px; text-align: center; position: relative; background: #111; color: #fff;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <div class="video-modal-container">
+      
+      <!-- Header Timer Sticky -->
+      <div class="video-modal-header">
         <span style="font-size: 12px; font-weight: 800; color: #ffb300;">🎬 Nonton Video Misi CUIT</span>
-        <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed;">
+        <button id="btnCloseVideo" onclick="claimVideoRewardAndClose()" disabled style="background: #e74c3c; color: #fff; border: none; padding: 6px 14px; border-radius: 10px; font-weight: 800; font-size: 11px; opacity: 0.5; cursor: not-allowed; transition: all 0.3s ease;">
           ⏳ Tekan Play di Video
         </button>
       </div>
 
-      <div id="videoFrameContainer" style="width: 100%; height: 400px; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;"></div>
+      <!-- Area Body Video Memanjang Fleksibel -->
+      <div class="video-modal-body">
+        <div id="videoFrameContainer" style="width: 100%; height: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 12px; overflow: hidden; position: relative;"></div>
+      </div>
 
-      <div style="font-size: 10.5px; color: #ccc; margin-top: 8px;" id="videoTimerStatusText">
+      <!-- Footer Info Status Video -->
+      <div class="video-modal-footer" id="videoTimerStatusText">
         Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!
       </div>
+
     </div>
   </div>
 
@@ -926,7 +981,7 @@
   </div>
 
   <!-- MODAL DETAIL PROFIL ANGGOTA LAIN -->
-  <div id="userProfileModal" class="modal">
+  <div id="userProfileModal" class="modal" style="z-index: 120;">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
         <h3 style="font-size:15px; font-weight:900;">Profil Anggota</h3>
@@ -1857,7 +1912,7 @@
 
         // --- PANGGUNG JUARA MINGGU INI (Murni Sejak Senin 00:00 WIB) ---
         if (weeklyStats && weeklyStats.length > 0) {
-          // 1. RAJA SAWER MINGGUAN (Membaca weekly_coins_spent milik Pengirim)
+          // 1. RAJA SAWER MINGGUAN
           const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
           if (topSawer && topSawer.weekly_coins_spent > 0) {
             document.getElementById('champSawerName').innerText = topSawer.username || 'Sultan';
@@ -1887,7 +1942,7 @@
             document.getElementById('champKomentarScore').innerText = '0 Komen';
           }
 
-          // 7. KOLEKTOR KOIN MINGGUAN (Membaca weekly_gems_earned * 1 = nilai bruto koin)
+          // 7. KOLEKTOR KOIN MINGGUAN
           const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
           if (topPermata && topPermata.weekly_gems_earned > 0) {
             const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 1;
@@ -1949,7 +2004,7 @@
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
-        // 6. PENGIKUT TERBANYAK MINGGU INI (Penambahan Sejak Senin 00.00 WIB)
+        // 6. PENGIKUT TERBANYAK MINGGU INI
         if (weeklyFollows && weeklyFollows.length > 0) {
           const followCounts = {};
           weeklyFollows.forEach(f => {
@@ -1980,7 +2035,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // 8. MAGNET SPONSOR MINGGU INI (Member Baru Mendaftar Sejak Senin 00.00 WIB)
+        // 8. MAGNET SPONSOR MINGGU INI
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
           weeklyNewMembers.forEach(m => {
@@ -2214,7 +2269,6 @@
       const isSelf = (p.user_email === myEmail);
       const isFollowing = followingSet.has(p.user_email);
 
-      // Keamanan teks escaped untuk dipassing ke JavaScript
       const safeContent = (p.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
 
       return `
@@ -2240,7 +2294,6 @@
             <div style="display: flex; align-items: center; gap: 4px; position: relative;">
               <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
               
-              <!-- TOMBOL TITIK TIGA DENGAN DROPDOWN -->
               <button class="btn-more-options" onclick="togglePostMenu('${p.id}', event)">⋮</button>
               
               <div class="post-menu-dropdown" id="post-dropdown-${p.id}">
@@ -2260,7 +2313,6 @@
           <div class="post-body">${p.content}</div>
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
 
-          <!-- BARISAN UTAMA TOMBOL BAWAH RINGKAS -->
           <div class="post-footer-actions">
             <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#6c5ce7; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
             <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
@@ -3697,6 +3749,8 @@
         FB.XFBML.parse(frameContainer);
       }
 
+      videoSecondsLeft = 10;
+
       const btnClose = document.getElementById('btnCloseVideo');
       if (btnClose) {
         btnClose.disabled = true;
@@ -3706,7 +3760,7 @@
         btnClose.innerText = '⏳ Tekan Play di Video';
       }
 
-      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas.';
+      document.getElementById('videoTimerStatusText').innerText = 'Tekan tombol Play pada video di atas. Timer 10s otomatis berjalan saat video diputar!';
 
       if (videoTimerInterval) {
         clearInterval(videoTimerInterval);
