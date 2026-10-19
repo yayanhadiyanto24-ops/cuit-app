@@ -276,7 +276,7 @@
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- PANGGUNG JUARA MINGGU INI (8 KATEGORI & BISA DI-SCROLL MENYAMPING HASIL LEBAR PAS TEKS) -->
+  <!-- PANGGUNG JUARA MINGGU INI -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 2px;">
       <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
@@ -287,7 +287,7 @@
       </span>
     </div>
 
-    <!-- CONTAINER SCROLL MENYAMPING KOTAK LEBAR 90px PAS TEKS -->
+    <!-- CONTAINER SCROLL MENYAMPING -->
     <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 4px;">
       
       <!-- 1. RAJA SAWER -->
@@ -297,7 +297,7 @@
           <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #fde047;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">👑</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">ADMINCUIT</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champSawerScore">0 🪙</div>
       </div>
 
@@ -363,7 +363,7 @@
           <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ec4899;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💎</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPermataName">ADMINCUIT</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPermataName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champPermataScore">0 💎</div>
       </div>
 
@@ -1260,7 +1260,6 @@
       const lastWeekEvaluated = localStorage.getItem('cuit_last_league_week');
 
       if (lastWeekEvaluated && parseInt(lastWeekEvaluated) !== currentWeekNumber) {
-        alert(`🏆 [LIGA MINGGUAN BERAKHIR!]\n\nSiklus Panggung Juara Minggu Ini telah di-reset!`);
         localStorage.setItem('cuit_last_league_week', currentWeekNumber);
       } else if (!lastWeekEvaluated) {
         localStorage.setItem('cuit_last_league_week', currentWeekNumber);
@@ -1655,18 +1654,24 @@
       const promotedSection = document.getElementById('promotedSection');
 
       try {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const pastDaysOfYear = (now - startOfYear) / 86400000;
+        const currentWeek = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
+        const currentYear = now.getFullYear();
+
         const [
           { data: profilesData },
           { data: topLiveHost },
           { data, error },
           { data: activeLivePromos },
-          { data: commentsData }
+          { data: weeklyStats }
         ] = await Promise.all([
           supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
           supabaseClient.from('lives').select('host_name, total_coins_received').order('total_coins_received', { ascending: false }).limit(1).maybeSingle(),
           supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
           supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
-          supabaseClient.from('comments').select('username')
+          supabaseClient.from('weekly_league_stats').select('*').eq('year_number', currentYear).eq('week_number', currentWeek)
         ]);
 
         if (profilesData) {
@@ -1677,28 +1682,14 @@
           });
 
           if (profilesData.length > 0) {
-            // 1. RAJA SAWER
-            const sortedByCoins = [...profilesData].sort((a,b) => (b.used_paid_coins||0) - (a.used_paid_coins||0));
-            if (sortedByCoins[0]) {
-              document.getElementById('champSawerName').innerText = sortedByCoins[0].username || 'Sultan';
-              document.getElementById('champSawerScore').innerText = `${sortedByCoins[0].used_paid_coins||0} 🪙`;
-            }
-
-            // 6. PENGIKUT TERBANYAK
+            // 6. PENGIKUT TERBANYAK (ALL-TIME)
             const sortedByFollowers = [...profilesData].sort((a,b) => (b.followers_count||0) - (a.followers_count||0));
             if (sortedByFollowers[0]) {
               document.getElementById('champFollowersName').innerText = sortedByFollowers[0].username || 'Cuiter';
               document.getElementById('champFollowersScore').innerText = `${sortedByFollowers[0].followers_count||0} Pengikut`;
             }
 
-            // 7. KOLEKTOR PERMATA
-            const sortedByGems = [...profilesData].sort((a,b) => (b.gems||0) - (a.gems||0));
-            if (sortedByGems[0]) {
-              document.getElementById('champPermataName').innerText = sortedByGems[0].username || 'Cuiter';
-              document.getElementById('champPermataScore').innerText = `${sortedByGems[0].gems||0} 💎`;
-            }
-
-            // 8. MAGNET SPONSOR
+            // 8. MAGNET SPONSOR (ALL-TIME)
             const sponsorCounts = {};
             profilesData.forEach(p => {
               if (p.sponsor) {
@@ -1722,6 +1713,58 @@
           }
         }
 
+        // --- AMBIL STATISTIK PANGGUNG JUARA MINGGU INI DARI weekly_league_stats ---
+        if (weeklyStats && weeklyStats.length > 0) {
+          // 1. RAJA SAWER MINGGUAN
+          const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
+          if (topSawer && topSawer.weekly_coins_spent > 0) {
+            document.getElementById('champSawerName').innerText = topSawer.username || 'Sultan';
+            document.getElementById('champSawerScore').innerText = `${topSawer.weekly_coins_spent} 🪙`;
+          } else {
+            document.getElementById('champSawerName').innerText = 'Belum Ada';
+            document.getElementById('champSawerScore').innerText = '0 🪙';
+          }
+
+          // 4. PUJANGGA UTAMA MINGGUAN
+          const topPujangga = [...weeklyStats].sort((a,b) => (b.weekly_posts_count||0) - (a.weekly_posts_count||0))[0];
+          if (topPujangga && topPujangga.weekly_posts_count > 0) {
+            document.getElementById('champPujanggaName').innerText = topPujangga.username || 'Pujangga';
+            document.getElementById('champPujanggaScore').innerText = `${topPujangga.weekly_posts_count} Post`;
+          } else {
+            document.getElementById('champPujanggaName').innerText = 'Belum Ada';
+            document.getElementById('champPujanggaScore').innerText = '0 Post';
+          }
+
+          // 5. RAJA KOMENTAR MINGGUAN
+          const topKomentar = [...weeklyStats].sort((a,b) => (b.weekly_comments_count||0) - (a.weekly_comments_count||0))[0];
+          if (topKomentar && topKomentar.weekly_comments_count > 0) {
+            document.getElementById('champKomentarName').innerText = topKomentar.username || 'Komentator';
+            document.getElementById('champKomentarScore').innerText = `${topKomentar.weekly_comments_count} Komen`;
+          } else {
+            document.getElementById('champKomentarName').innerText = 'Belum Ada';
+            document.getElementById('champKomentarScore').innerText = '0 Komen';
+          }
+
+          // 7. KOLEKTOR PERMATA MINGGUAN
+          const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
+          if (topPermata && topPermata.weekly_gems_earned > 0) {
+            document.getElementById('champPermataName').innerText = topPermata.username || 'Kolektor';
+            document.getElementById('champPermataScore').innerText = `${topPermata.weekly_gems_earned} 💎`;
+          } else {
+            document.getElementById('champPermataName').innerText = 'Belum Ada';
+            document.getElementById('champPermataScore').innerText = '0 💎';
+          }
+        } else {
+          document.getElementById('champSawerName').innerText = 'Belum Ada';
+          document.getElementById('champSawerScore').innerText = '0 🪙';
+          document.getElementById('champPujanggaName').innerText = 'Belum Ada';
+          document.getElementById('champPujanggaScore').innerText = '0 Post';
+          document.getElementById('champKomentarName').innerText = 'Belum Ada';
+          document.getElementById('champKomentarScore').innerText = '0 Komen';
+          document.getElementById('champPermataName').innerText = 'Belum Ada';
+          document.getElementById('champPermataScore').innerText = '0 💎';
+        }
+
         // 2. LIVE TERMEGAH (DIPERBAIKI SECARA REALTIME)
         if (topLiveHost && topLiveHost.total_coins_received > 0) {
           document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
@@ -1729,30 +1772,6 @@
         } else {
           document.getElementById('champLiveName').innerText = 'Belum Ada';
           document.getElementById('champLiveScore').innerText = '0 🪙';
-        }
-
-        // 5. RAJA KOMENTAR
-        if (commentsData && commentsData.length > 0) {
-          const commentCounts = {};
-          commentsData.forEach(c => {
-            const user = c.username || 'Cuiter';
-            commentCounts[user] = (commentCounts[user] || 0) + 1;
-          });
-
-          let topKomentarName = 'Belum Ada';
-          let maxKomen = 0;
-          for (const [user, count] of Object.entries(commentCounts)) {
-            if (count > maxKomen) {
-              maxKomen = count;
-              topKomentarName = user;
-            }
-          }
-
-          document.getElementById('champKomentarName').innerText = topKomentarName;
-          document.getElementById('champKomentarScore').innerText = `${maxKomen} Komen`;
-        } else {
-          document.getElementById('champKomentarName').innerText = 'Belum Ada';
-          document.getElementById('champKomentarScore').innerText = '0 Komen';
         }
 
         if (error || !data || data.length === 0) {
@@ -1785,26 +1804,6 @@
           document.getElementById('champCurhatName').innerText = 'Belum Ada';
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
-
-        // 4. PUJANGGA UTAMA
-        const postCounts = {};
-        data.forEach(p => {
-          const author = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Cuiter');
-          postCounts[author] = (postCounts[author] || 0) + 1;
-        });
-
-        let topPujanggaName = 'Belum Ada';
-        let maxPosts = 0;
-
-        for (const [author, count] of Object.entries(postCounts)) {
-          if (count > maxPosts) {
-            maxPosts = count;
-            topPujanggaName = author;
-          }
-        }
-
-        document.getElementById('champPujanggaName').innerText = topPujanggaName;
-        document.getElementById('champPujanggaScore').innerText = `${maxPosts} Post`;
 
         const nowMs = Date.now();
         let sorotanItems = [];
@@ -2149,7 +2148,6 @@
       }
     }
 
-    // LIKE LIVE ALA TIKTOK (BEBAS TAP-TAP)
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
 
@@ -2345,7 +2343,6 @@
 
         userHasCheckedInLive[currentActiveLive.id] = true;
 
-        // ACCUMULATE TOTAL KOIN LIVE REALS
         const newLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
         currentActiveLive.total_coins_received = newLiveCoins;
 
@@ -2360,7 +2357,6 @@
           supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }])
         ]);
 
-        // LANGSUNG SINKRONKAN PANGGUNG JUARA
         loadPosts();
 
       } else if (activeTargetPostId) {
