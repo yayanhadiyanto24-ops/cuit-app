@@ -121,9 +121,9 @@
     .tags-grid { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag-item { padding: 4px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
 
-    /* Post Cards Feed */
+    /* Post Cards Feed & Options Menu */
     .feed-container { display: flex; flex-direction: column; gap: 10px; }
-    .post-card { background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .post-card { position: relative; background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     
@@ -139,6 +139,50 @@
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
     .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
     .post-time { font-size: 10px; color: var(--text-sub); }
+
+    .btn-more-options {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 900;
+      color: #828599;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .btn-more-options:hover { background: #f0f3fa; color: var(--text-main); }
+
+    .post-menu-dropdown {
+      position: absolute;
+      top: 36px;
+      right: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e7f5;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      min-width: 160px;
+      overflow: hidden;
+    }
+    .post-menu-dropdown.show { display: flex; }
+
+    .post-menu-item {
+      padding: 10px 14px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .post-menu-item:hover { background: #f8f9fe; }
+    .post-menu-item.danger { color: #e74c3c; }
 
     .post-body { font-size: 13px; line-height: 1.45; color: #2c2e43; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .badge-publik { background: #eaf2ff; color: #3498db; margin-bottom: 10px; display: inline-flex; }
@@ -254,7 +298,7 @@
     @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
   </style>
 </head>
-<body>
+<body onclick="closeAllPostMenus(event)">
 
   <div id="giftOverlayContainer"></div>
 
@@ -356,7 +400,7 @@
         <div style="font-size: 7.5px; color: #bae6fd; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champFollowersScore">0 Pengikut</div>
       </div>
 
-      <!-- 7. KOLEKTOR KOIN (PERUBAHAN TERBARU: DARI PERMATA KE KOIN) -->
+      <!-- 7. KOLEKTOR KOIN -->
       <div onclick="openCoinCollectorCalcModal()" style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box; cursor: pointer;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbbf24; margin-bottom: 4px; white-space: nowrap;">🪙 Kolektor Koin</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
@@ -1277,6 +1321,49 @@
       "🔥 Semangat bareng-bareng!"
     ];
 
+    /* --- FUNGSI POPUP DROPDOWN MENU KARTU --- */
+    function togglePostMenu(postId, event) {
+      if (event) event.stopPropagation();
+      closeAllPostMenus();
+      const menu = document.getElementById(`post-dropdown-${postId}`);
+      if (menu) {
+        menu.classList.toggle('show');
+      }
+    }
+
+    function closeAllPostMenus(event) {
+      document.querySelectorAll('.post-menu-dropdown').forEach(m => {
+        if (!event || !m.contains(event.target)) {
+          m.classList.remove('show');
+        }
+      });
+    }
+
+    function sharePost(postId, postText) {
+      closeAllPostMenus();
+      const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
+      const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!` : 'Lihat curhatan ini di CUIT!';
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Curhatan di CUIT',
+          text: shareText,
+          url: shareUrl,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
+        }).catch(() => {
+          prompt("Salin tautan postingan:", shareUrl);
+        });
+      }
+    }
+
+    function reportPost(postId) {
+      closeAllPostMenus();
+      alert("🚩 Laporan berhasil dikirim! Tim moderasi CUIT akan meninjau postingan ini.");
+    }
+
     function openCoinCollectorCalcModal() {
       const gross = currentChampKoinData.coins || 0;
       const streamerName = currentChampKoinData.name || 'Belum Ada';
@@ -2038,6 +2125,7 @@
     }
 
     async function promotePost(postId) {
+      closeAllPostMenus();
       const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
       if (hours <= 0) return;
 
@@ -2126,8 +2214,11 @@
       const isSelf = (p.user_email === myEmail);
       const isFollowing = followingSet.has(p.user_email);
 
+      // Keamanan teks escaped untuk dipassing ke JavaScript
+      const safeContent = (p.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+
       return `
-        <div class="post-card">
+        <div class="post-card" id="post-${p.id}">
           <div class="post-header">
             <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
               <div class="avatar-container">
@@ -2145,18 +2236,35 @@
                 </div>
               </div>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-              <button class="btn-secondary" style="padding: 3px 6px; border-radius: 6px; font-size:10px;" onclick="alert('Laporan dikirim!')">🚩</button>
+            
+            <div style="display: flex; align-items: center; gap: 4px; position: relative;">
               <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+              
+              <!-- TOMBOL TITIK TIGA DENGAN DROPDOWN -->
+              <button class="btn-more-options" onclick="togglePostMenu('${p.id}', event)">⋮</button>
+              
+              <div class="post-menu-dropdown" id="post-dropdown-${p.id}">
+                <button class="post-menu-item" onclick="promotePost('${p.id}')">
+                  <span>🚀</span> Promosikan Post
+                </button>
+                <button class="post-menu-item" onclick="sharePost('${p.id}', '${safeContent}')">
+                  <span>🔗</span> Bagikan Post
+                </button>
+                <button class="post-menu-item danger" onclick="reportPost('${p.id}')">
+                  <span>🚩</span> Laporkan Post
+                </button>
+              </div>
             </div>
           </div>
+
           <div class="post-body">${p.content}</div>
           <span class="btn-sm-badge badge-publik">🌐 Publik</span>
+
+          <!-- BARISAN UTAMA TOMBOL BAWAH RINGKAS -->
           <div class="post-footer-actions">
             <div class="action-chip" style="${isLiked ? 'background:#ece8ff; color:#6c5ce7; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
             <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
             <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
-            <div class="action-chip" style="background: #fff3e0; color: #e67e22;" onclick="promotePost('${p.id}')">🚀 Promosikan</div>
           </div>
         </div>
       `;
