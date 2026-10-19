@@ -1883,247 +1883,14 @@
         alert('Gagal mengirim: ' + error.message);
       }
     }
-
+           
     async function loadPosts() {
-      const container = document.getElementById('postsList');
-      const promotedCarousel = document.getElementById('promotedCarousel');
-      const promotedSection = document.getElementById('promotedSection');
-
-      try {
-        const now = new Date();
-
-        const startOfWeek = new Date(now);
-        const day = startOfWeek.getDay();
-        const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
-        startOfWeek.setDate(diffToMonday);
-        startOfWeek.setHours(0, 0, 0, 0);
-        const startOfWeekISO = startOfWeek.toISOString();
-
-        const [
-          { data: profilesData },
-          { data, error },
-          { data: activeLivePromos },
-          { data: weeklyStats },
-          { data: weeklyPosts },
-          { data: weeklyFollows },
-          { data: weeklyNewMembers }
-        ] = await Promise.all([
-          supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-          supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
-          supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
-          supabaseClient.from('weekly_league_stats').select('*').order('weekly_live_coins', { ascending: false }),
-          supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO),
-          supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
-          supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
-        ]);
-
-        if (profilesData) {
-          profilesMap = {};
-          profilesData.forEach(pr => {
-            if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
-            if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
-          });
-        }
-
-        // PANGGUNG JUARA MINGGU INI
-        if (weeklyStats && weeklyStats.length > 0) {
-          // 1. RAJA SAWER
-          const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
-          if (topSawer && topSawer.weekly_coins_spent > 0) {
-            document.getElementById('champSawerName').innerText = topSawer.username || 'Sultan';
-            document.getElementById('champSawerScore').innerText = `${topSawer.weekly_coins_spent.toLocaleString('id-ID')} 🪙`;
-          } else {
-            document.getElementById('champSawerName').innerText = 'Belum Ada';
-            document.getElementById('champSawerScore').innerText = '0 🪙';
-          }
-
-          // 2. LIVE TERMEGAH (AMBIL SKOR LIVE TERBANYAK DARI TABEL)
-          const topLiveHost = [...weeklyStats].sort((a,b) => (b.weekly_live_coins||0) - (a.weekly_live_coins||0))[0];
-          if (topLiveHost && (topLiveHost.weekly_live_coins || 0) > 0) {
-            document.getElementById('champLiveName').innerText = topLiveHost.username || 'ADMINCUIT';
-            document.getElementById('champLiveScore').innerText = `${topLiveHost.weekly_live_coins.toLocaleString('id-ID')} 🪙`;
-          } else {
-            document.getElementById('champLiveName').innerText = 'ADMINCUIT';
-            document.getElementById('champLiveScore').innerText = '102.326 🪙';
-          }
-
-          // 3. PUJANGGA UTAMA
-          const topPujangga = [...weeklyStats].sort((a,b) => (b.weekly_posts_count||0) - (a.weekly_posts_count||0))[0];
-          if (topPujangga && topPujangga.weekly_posts_count > 0) {
-            document.getElementById('champPujanggaName').innerText = topPujangga.username || 'Pujangga';
-            document.getElementById('champPujanggaScore').innerText = `${topPujangga.weekly_posts_count} Post`;
-          } else {
-            document.getElementById('champPujanggaName').innerText = 'Belum Ada';
-            document.getElementById('champPujanggaScore').innerText = '0 Post';
-          }
-
-          // 4. RAJA KOMENTAR
-          const topKomentar = [...weeklyStats].sort((a,b) => (b.weekly_comments_count||0) - (a.weekly_comments_count||0))[0];
-          if (topKomentar && topKomentar.weekly_comments_count > 0) {
-            document.getElementById('champKomentarName').innerText = topKomentar.username || 'Komentator';
-            document.getElementById('champKomentarScore').innerText = `${topKomentar.weekly_comments_count} Komen`;
-          } else {
-            document.getElementById('champKomentarName').innerText = 'Belum Ada';
-            document.getElementById('champKomentarScore').innerText = '0 Komen';
-          }
-
-          // 5. KOLEKTOR KOIN
-          const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
-          if (topPermata && topPermata.weekly_gems_earned > 0) {
-            const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 1;
-            currentChampKoinData = {
-              name: topPermata.username || 'Kolektor',
-              coins: grossCoinsEarned
-            };
-            document.getElementById('champPermataName').innerText = currentChampKoinData.name;
-            document.getElementById('champPermataScore').innerText = `${grossCoinsEarned.toLocaleString('id-ID')} 🪙`;
-          } else {
-            currentChampKoinData = { name: 'ADMINCUIT', coins: 102326 };
-            document.getElementById('champPermataName').innerText = 'ADMINCUIT';
-            document.getElementById('champPermataScore').innerText = '102.326 🪙';
-          }
-        } else {
-          document.getElementById('champLiveName').innerText = 'ADMINCUIT';
-          document.getElementById('champLiveScore').innerText = '102.326 🪙';
-          document.getElementById('champPermataName').innerText = 'ADMINCUIT';
-          document.getElementById('champPermataScore').innerText = '102.326 🪙';
-        }
-
-        // BINTANG CURHAT
-        if (weeklyPosts && weeklyPosts.length > 0) {
-          let topCurhat = null;
-          let maxScore = -1;
-
-          weeklyPosts.forEach(p => {
-            const score = (p.likes_count || 0) + (p.comments_count || 0);
-            if (score > maxScore) {
-              maxScore = score;
-              topCurhat = p;
-            }
-          });
-
-          if (topCurhat && maxScore > 0) {
-            const name = topCurhat.username || (topCurhat.user_email ? topCurhat.user_email.split('@')[0] : 'Penulis');
-            document.getElementById('champCurhatName').innerText = name;
-            document.getElementById('champCurhatScore').innerText = `${topCurhat.likes_count||0} ♥ + ${topCurhat.comments_count||0} 💬`;
-          } else {
-            document.getElementById('champCurhatName').innerText = 'Belum Ada';
-            document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-          }
-        } else {
-          document.getElementById('champCurhatName').innerText = 'Belum Ada';
-          document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-        }
-
-        // PENGIKUT TERBANYAK
-        if (weeklyFollows && weeklyFollows.length > 0) {
-          const followCounts = {};
-          weeklyFollows.forEach(f => {
-            if (f.following_email) {
-              followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
-            }
-          });
-
-          let topFollowedEmail = null;
-          let maxNewFollowers = 0;
-          for (const [email, count] of Object.entries(followCounts)) {
-            if (count > maxNewFollowers) {
-              maxNewFollowers = count;
-              topFollowedEmail = email;
-            }
-          }
-
-          if (topFollowedEmail && maxNewFollowers > 0) {
-            const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topFollowedEmail).maybeSingle();
-            document.getElementById('champFollowersName').innerText = prof ? prof.username : topFollowedEmail.split('@')[0];
-            document.getElementById('champFollowersScore').innerText = `+${maxNewFollowers} Pengikut`;
-          } else {
-            document.getElementById('champFollowersName').innerText = 'Belum Ada';
-            document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-          }
-        } else {
-          document.getElementById('champFollowersName').innerText = 'Belum Ada';
-          document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-        }
-
-        // MAGNET SPONSOR
-        if (weeklyNewMembers && weeklyNewMembers.length > 0) {
-          const sponsorCounts = {};
-          weeklyNewMembers.forEach(m => {
-            if (m.sponsor) {
-              const sp = m.sponsor.toUpperCase();
-              sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
-            }
-          });
-
-          let topSponsorCode = null;
-          let maxWeeklyDownlines = 0;
-          for (const [code, count] of Object.entries(sponsorCounts)) {
-            if (count > maxWeeklyDownlines) {
-              maxWeeklyDownlines = count;
-              topSponsorCode = code;
-            }
-          }
-
-          if (topSponsorCode && maxWeeklyDownlines > 0) {
-            document.getElementById('champSponsorName').innerText = topSponsorCode;
-            document.getElementById('champSponsorScore').innerText = `+${maxWeeklyDownlines} Member`;
-          } else {
-            document.getElementById('champSponsorName').innerText = 'Belum Ada';
-            document.getElementById('champSponsorScore').innerText = '0 Member';
-          }
-        } else {
-          document.getElementById('champSponsorName').innerText = 'Belum Ada';
-          document.getElementById('champSponsorScore').innerText = '0 Member';
-        }
-
-        if (error || !data || data.length === 0) {
-          container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
-          allPostsCache = [];
-          return;
-        }
-
-        allPostsCache = data;
-
-        const nowMs = Date.now();
-        let sorotanItems = [];
-
-        if (activeLivePromos && activeLivePromos.length > 0) {
-          activeLivePromos.forEach(live => {
-            sorotanItems.push({
-              type: 'live',
-              id: live.id,
-              title: live.title,
-              username: live.host_name,
-              user_email: live.host_email,
-              promoted_until: live.promoted_until,
-              updated_at: live.updated_at || live.created_at
-            });
-          });
-        }
-
-        data.filter(p => p.is_promoted && p.promoted_until && new Date(p.promoted_until).getTime() > nowMs)
-          .forEach(post => {
-            sorotanItems.push({
-              type: 'post',
-              id: post.id,
-              title: post.content,
-              username: post.username,
-              user_email: post.user_email,
-              promoted_until: post.promoted_until,
-              updated_at: post.updated_at || post.created_at,
-              rawPost: post
-            });
-          });
-async function loadPosts() {
   const container = document.getElementById('postsList');
   const promotedCarousel = document.getElementById('promotedCarousel');
   const promotedSection = document.getElementById('promotedSection');
 
   try {
     const now = new Date();
-
-    // Saring tanggal mulai hari Senin minggu ini pukul 00:00:00 WIB
     const startOfWeek = new Date(now);
     const day = startOfWeek.getDay();
     const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
@@ -2131,137 +1898,90 @@ async function loadPosts() {
     startOfWeek.setHours(0, 0, 0, 0);
     const startOfWeekISO = startOfWeek.toISOString();
 
+    // Ambil data curhatan utama dulu agar halaman tidak macet
+    const { data, error } = await supabaseClient
+      .from('curhat')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Ambil data pendukung secara aman
     const [
-      { data: profilesData },
-      { data, error },
-      { data: activeLivePromos },
       { data: weeklyGifts },
       { data: weeklyLives },
-      { data: weeklyPosts },
       { data: weeklyComments },
       { data: weeklyFollows },
       { data: weeklyNewMembers }
     ] = await Promise.all([
-      supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-      supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
-      supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
       supabaseClient.from('gift_transactions').select('sender_name, recipient_email, coins_amount').gte('created_at', startOfWeekISO),
       supabaseClient.from('lives').select('host_name, total_coins_received').gte('created_at', startOfWeekISO),
-      supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO),
       supabaseClient.from('comments').select('username, user_email').gte('created_at', startOfWeekISO),
       supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
       supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
     ]);
 
-    if (profilesData) {
-      profilesMap = {};
-      profilesData.forEach(pr => {
-        if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
-        if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
-      });
-    }
-
-    // 1. RAJA SAWER MINGGU INI
+    // 1. RAJA SAWER
     if (weeklyGifts && weeklyGifts.length > 0) {
       const sawerMap = {};
-      weeklyGifts.forEach(g => {
-        sawerMap[g.sender_name] = (sawerMap[g.sender_name] || 0) + (g.coins_amount || 0);
-      });
-      const topSawerName = Object.keys(sawerMap).reduce((a, b) => sawerMap[a] > sawerMap[b] ? a : b);
-      document.getElementById('champSawerName').innerText = topSawerName;
-      document.getElementById('champSawerScore').innerText = `${sawerMap[topSawerName].toLocaleString('id-ID')} 🪙`;
+      weeklyGifts.forEach(g => { sawerMap[g.sender_name] = (sawerMap[g.sender_name] || 0) + (g.coins_amount || 0); });
+      const topSawer = Object.keys(sawerMap).reduce((a, b) => sawerMap[a] > sawerMap[b] ? a : b);
+      document.getElementById('champSawerName').innerText = topSawer;
+      document.getElementById('champSawerScore').innerText = `${sawerMap[topSawer].toLocaleString('id-ID')} 🪙`;
     } else {
       document.getElementById('champSawerName').innerText = 'Belum Ada';
       document.getElementById('champSawerScore').innerText = '0 🪙';
     }
 
-    // 2. LIVE TERMEGAH MINGGU INI
+    // 2. LIVE TERMEGAH
     if (weeklyLives && weeklyLives.length > 0) {
       const liveMap = {};
-      weeklyLives.forEach(l => {
-        liveMap[l.host_name] = (liveMap[l.host_name] || 0) + (l.total_coins_received || 0);
-      });
-      const topHostName = Object.keys(liveMap).reduce((a, b) => liveMap[a] > liveMap[b] ? a : b);
-      if (liveMap[topHostName] > 0) {
-        document.getElementById('champLiveName').innerText = topHostName;
-        document.getElementById('champLiveScore').innerText = `${liveMap[topHostName].toLocaleString('id-ID')} 🪙`;
-      } else {
-        document.getElementById('champLiveName').innerText = 'Belum Ada';
-        document.getElementById('champLiveScore').innerText = '0 🪙';
-      }
+      weeklyLives.forEach(l => { liveMap[l.host_name] = (liveMap[l.host_name] || 0) + (l.total_coins_received || 0); });
+      const topHost = Object.keys(liveMap).reduce((a, b) => liveMap[a] > liveMap[b] ? a : b);
+      document.getElementById('champLiveName').innerText = topHost;
+      document.getElementById('champLiveScore').innerText = `${liveMap[topHost].toLocaleString('id-ID')} 🪙`;
     } else {
       document.getElementById('champLiveName').innerText = 'Belum Ada';
       document.getElementById('champLiveScore').innerText = '0 🪙';
     }
 
-    // 3. KOLEKTOR KOIN MINGGU INI
+    // 3. KOLEKTOR KOIN
     if (weeklyGifts && weeklyGifts.length > 0) {
       const collectorMap = {};
-      weeklyGifts.forEach(g => {
-        collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0);
-      });
-      const topCollectorEmail = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
-      const topCoins = collectorMap[topCollectorEmail];
-
-      const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topCollectorEmail).maybeSingle();
-      const name = prof ? prof.username : topCollectorEmail.split('@')[0];
-
-      currentChampKoinData = { name: name, coins: topCoins };
-      document.getElementById('champPermataName').innerText = name;
-      document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
+      weeklyGifts.forEach(g => { collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0); });
+      const topCollector = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
+      document.getElementById('champPermataName').innerText = topCollector.split('@')[0];
+      document.getElementById('champPermataScore').innerText = `${collectorMap[topCollector].toLocaleString('id-ID')} 🪙`;
     } else {
-      currentChampKoinData = { name: 'Belum Ada', coins: 0 };
       document.getElementById('champPermataName').innerText = 'Belum Ada';
       document.getElementById('champPermataScore').innerText = '0 🪙';
     }
 
-    // 4. BINTANG CURHAT MINGGU INI
-    if (weeklyPosts && weeklyPosts.length > 0) {
-      let topCurhat = null;
-      let maxScore = -1;
-      weeklyPosts.forEach(p => {
-        const score = (p.likes_count || 0) + (p.comments_count || 0);
-        if (score > maxScore) {
-          maxScore = score;
-          topCurhat = p;
-        }
-      });
-
-      if (topCurhat && maxScore > 0) {
-        const name = topCurhat.username || topCurhat.user_email.split('@')[0];
-        document.getElementById('champCurhatName').innerText = name;
-        document.getElementById('champCurhatScore').innerText = `${topCurhat.likes_count||0} ♥ + ${topCurhat.comments_count||0} 💬`;
+    // 4. BINTANG CURHAT
+    if (data && data.length > 0) {
+      const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
+      if (topPost && ((topPost.likes_count||0) + (topPost.comments_count||0)) > 0) {
+        document.getElementById('champCurhatName').innerText = topPost.username || topPost.user_email.split('@')[0];
+        document.getElementById('champCurhatScore').innerText = `${topPost.likes_count||0} ♥ + ${topPost.comments_count||0} 💬`;
       } else {
         document.getElementById('champCurhatName').innerText = 'Belum Ada';
         document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
       }
-    } else {
-      document.getElementById('champCurhatName').innerText = 'Belum Ada';
-      document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
     }
 
-    // 5. PUJANGGA UTAMA MINGGU INI
-    if (weeklyPosts && weeklyPosts.length > 0) {
+    // 5. PUJANGGA UTAMA
+    if (data && data.length > 0) {
       const postCounts = {};
-      weeklyPosts.forEach(p => {
-        const name = p.username || p.user_email.split('@')[0];
-        postCounts[name] = (postCounts[name] || 0) + 1;
-      });
+      data.forEach(p => { const name = p.username || p.user_email.split('@')[0]; postCounts[name] = (postCounts[name] || 0) + 1; });
       const topPujangga = Object.keys(postCounts).reduce((a, b) => postCounts[a] > postCounts[b] ? a : b);
       document.getElementById('champPujanggaName').innerText = topPujangga;
       document.getElementById('champPujanggaScore').innerText = `${postCounts[topPujangga]} Post`;
-    } else {
-      document.getElementById('champPujanggaName').innerText = 'Belum Ada';
-      document.getElementById('champPujanggaScore').innerText = '0 Post';
     }
 
-    // 6. RAJA KOMENTAR MINGGU INI
+    // 6. RAJA KOMENTAR
     if (weeklyComments && weeklyComments.length > 0) {
       const commentCounts = {};
-      weeklyComments.forEach(c => {
-        const name = c.username || (c.user_email ? c.user_email.split('@')[0] : 'Komentator');
-        commentCounts[name] = (commentCounts[name] || 0) + 1;
-      });
+      weeklyComments.forEach(c => { const name = c.username || c.user_email.split('@')[0]; commentCounts[name] = (commentCounts[name] || 0) + 1; });
       const topKomentator = Object.keys(commentCounts).reduce((a, b) => commentCounts[a] > commentCounts[b] ? a : b);
       document.getElementById('champKomentarName').innerText = topKomentator;
       document.getElementById('champKomentarScore').innerText = `${commentCounts[topKomentator]} Komen`;
@@ -2270,39 +1990,8 @@ async function loadPosts() {
       document.getElementById('champKomentarScore').innerText = '0 Komen';
     }
 
-    // 7. PENGIKUT TERBANYAK MINGGU INI
-    if (weeklyFollows && weeklyFollows.length > 0) {
-      const followCounts = {};
-      weeklyFollows.forEach(f => {
-        if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
-      });
-      const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
-      const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topEmail).maybeSingle();
-      document.getElementById('champFollowersName').innerText = prof ? prof.username : topEmail.split('@')[0];
-      document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
-    } else {
-      document.getElementById('champFollowersName').innerText = 'Belum Ada';
-      document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-    }
-
-    // 8. MAGNET SPONSOR MINGGU INI
-    if (weeklyNewMembers && weeklyNewMembers.length > 0) {
-      const sponsorCounts = {};
-      weeklyNewMembers.forEach(m => {
-        if (m.sponsor) {
-          const sp = m.sponsor.toUpperCase();
-          sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
-        }
-      });
-      const topSponsor = Object.keys(sponsorCounts).reduce((a, b) => sponsorCounts[a] > sponsorCounts[b] ? a : b);
-      document.getElementById('champSponsorName').innerText = topSponsor;
-      document.getElementById('champSponsorScore').innerText = `+${sponsorCounts[topSponsor]} Member`;
-    } else {
-      document.getElementById('champSponsorName').innerText = 'Belum Ada';
-      document.getElementById('champSponsorScore').innerText = '0 Member';
-    }
-
-    if (error || !data || data.length === 0) {
+    // Render postingan utama
+    if (!data || data.length === 0) {
       container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
       allPostsCache = [];
       return;
@@ -2313,26 +2002,10 @@ async function loadPosts() {
 
   } catch (err) {
     console.error("Error loading posts:", err);
-    container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan.</p>';
+    container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan muat ulang.</p>';
   }
 }
 
-
-    function renderFilteredFeed() {
-      const container = document.getElementById('postsList');
-      let filteredData = allPostsCache;
-
-      if (currentFeedFilter === 'mengikuti') {
-        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
-      }
-
-      if (filteredData.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">${currentFeedFilter === 'mengikuti' ? 'Belum ada curhatan dari member yang kamu ikuti.' : 'Belum ada curhatan di beranda.'}</p>`;
-        return;
-      }
-
-      container.innerHTML = filteredData.map(p => renderCardHTML(p)).join('');
-    }
 
     function openPromotedDetail(postId) {
       const post = allPostsCache.find(p => String(p.id) === String(postId));
