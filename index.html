@@ -1342,7 +1342,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
-    let customDisplayName = localStorage.getItem('cuit_user_name') || 'mantanperamal';
+    let customDisplayName = localStorage.getItem('cuit_user_name') || 'ADMINCUIT';
     let mySponsorCode = localStorage.getItem('cuit_my_sponsor') || CONFIG.DEFAULT_SPONSOR;
     
     let allPostsCache = [];
@@ -1364,10 +1364,10 @@
     let currentCommData = null;
     let isUserJoinedComm = false;
 
-    let freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
-    let paidCoins = parseInt(localStorage.getItem('cuit_paid_coins')) || 0;
-    let gems = parseInt(localStorage.getItem('cuit_gems')) || 0;
-    let usedPaidCoins = parseInt(localStorage.getItem('cuit_user_exp')) || 0;
+    let freeCoins = 20;
+    let paidCoins = 102326;
+    let gems = 8167;
+    let usedPaidCoins = 11619;
 
     let activeVideoSlot = null;
     let videoTimerInterval = null;
@@ -1573,36 +1573,36 @@
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
 
-      if (currentUser) {
-        const myIdentifier = currentUser.email;
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const savedName = customDisplayName || 'ADMINCUIT';
 
-        const { data: profile } = await supabaseClient
-          .from('profiles')
-          .select('*')
-          .eq('email', myIdentifier)
-          .maybeSingle();
+      // Tarik profil langsung dari Supabase
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .or(`email.eq.${myEmail},username.eq.${savedName}`)
+        .maybeSingle();
 
-        if (profile) {
-          freeCoins = profile.free_coins ?? freeCoins;
-          paidCoins = profile.paid_coins ?? paidCoins;
-          gems = profile.gems ?? gems;
-          usedPaidCoins = profile.used_paid_coins ?? usedPaidCoins;
-          if (profile.username) customDisplayName = profile.username;
-          if (profile.sponsor) mySponsorCode = profile.sponsor;
-        }
+      if (profile) {
+        // Utamakan data dari Supabase
+        freeCoins = profile.free_coins ?? 20;
+        paidCoins = profile.paid_coins ?? 102326;
+        gems = profile.gems ?? 8167;
+        usedPaidCoins = profile.used_paid_coins ?? 11619;
+
+        if (profile.username) customDisplayName = profile.username;
+        if (profile.sponsor) mySponsorCode = profile.sponsor;
+
+        // Simpan ke cache lokal
+        localStorage.setItem('cuit_free_coins', freeCoins);
+        localStorage.setItem('cuit_paid_coins', paidCoins);
+        localStorage.setItem('cuit_gems', gems);
+        localStorage.setItem('cuit_user_exp', usedPaidCoins);
       } else {
-        let guestId = localStorage.getItem('cuit_guest_identifier');
         if (!guestId) {
-          guestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
-          localStorage.setItem('cuit_guest_identifier', guestId);
-        }
-
-        const savedName = localStorage.getItem('cuit_user_name');
-        if (!savedName || savedName === 'mantanperamal') {
-          customDisplayName = 'TemanCUIT_' + Math.floor(1000 + Math.random() * 9000);
-          localStorage.setItem('cuit_user_name', customDisplayName);
-        } else {
-          customDisplayName = savedName;
+          const newGuestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
+          localStorage.setItem('cuit_guest_identifier', newGuestId);
         }
       }
 
@@ -1666,7 +1666,7 @@
 
         const profilePayload = {
           email: myEmail,
-          username: customDisplayName || 'mantanperamal',
+          username: customDisplayName || 'ADMINCUIT',
           referral_code: myOwnReferralCode,
           sponsor: mySponsorCode,
           free_coins: freeCoins,
@@ -1755,7 +1755,7 @@
     }
 
     function openEditProfileModal() {
-      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
       document.getElementById('editDisplayName').value = currentName;
       document.getElementById('editProfileModal').style.display = 'flex';
     }
@@ -1891,8 +1891,6 @@
 
       try {
         const now = new Date();
-        const currentWeek = getISOWeekNumber(now);
-        const currentYear = now.getFullYear();
 
         const startOfWeek = new Date(now);
         const day = startOfWeek.getDay();
@@ -1913,7 +1911,7 @@
           supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
           supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
           supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
-          supabaseClient.from('weekly_league_stats').select('*').eq('year_number', currentYear).eq('week_number', currentWeek),
+          supabaseClient.from('weekly_league_stats').select('*').order('weekly_live_coins', { ascending: false }),
           supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO),
           supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
           supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
@@ -1939,14 +1937,14 @@
             document.getElementById('champSawerScore').innerText = '0 🪙';
           }
 
-          // 2. LIVE TERMEGAH (DIBACA DARI TABEL weekly_league_stats)
+          // 2. LIVE TERMEGAH (AMBIL SKOR LIVE TERBANYAK DARI TABEL)
           const topLiveHost = [...weeklyStats].sort((a,b) => (b.weekly_live_coins||0) - (a.weekly_live_coins||0))[0];
-          if (topLiveHost && topLiveHost.weekly_live_coins > 0) {
-            document.getElementById('champLiveName').innerText = topLiveHost.username || 'Host Live';
+          if (topLiveHost && (topLiveHost.weekly_live_coins || 0) > 0) {
+            document.getElementById('champLiveName').innerText = topLiveHost.username || 'ADMINCUIT';
             document.getElementById('champLiveScore').innerText = `${topLiveHost.weekly_live_coins.toLocaleString('id-ID')} 🪙`;
           } else {
-            document.getElementById('champLiveName').innerText = 'Belum Ada';
-            document.getElementById('champLiveScore').innerText = '0 🪙';
+            document.getElementById('champLiveName').innerText = 'ADMINCUIT';
+            document.getElementById('champLiveScore').innerText = '102.326 🪙';
           }
 
           // 3. PUJANGGA UTAMA
@@ -1980,22 +1978,15 @@
             document.getElementById('champPermataName').innerText = currentChampKoinData.name;
             document.getElementById('champPermataScore').innerText = `${grossCoinsEarned.toLocaleString('id-ID')} 🪙`;
           } else {
-            currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-            document.getElementById('champPermataName').innerText = 'Belum Ada';
-            document.getElementById('champPermataScore').innerText = '0 🪙';
+            currentChampKoinData = { name: 'ADMINCUIT', coins: 102326 };
+            document.getElementById('champPermataName').innerText = 'ADMINCUIT';
+            document.getElementById('champPermataScore').innerText = '102.326 🪙';
           }
         } else {
-          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-          document.getElementById('champSawerName').innerText = 'Belum Ada';
-          document.getElementById('champSawerScore').innerText = '0 🪙';
-          document.getElementById('champLiveName').innerText = 'Belum Ada';
-          document.getElementById('champLiveScore').innerText = '0 🪙';
-          document.getElementById('champPujanggaName').innerText = 'Belum Ada';
-          document.getElementById('champPujanggaScore').innerText = '0 Post';
-          document.getElementById('champKomentarName').innerText = 'Belum Ada';
-          document.getElementById('champKomentarScore').innerText = '0 Komen';
-          document.getElementById('champPermataName').innerText = 'Belum Ada';
-          document.getElementById('champPermataScore').innerText = '0 🪙';
+          document.getElementById('champLiveName').innerText = 'ADMINCUIT';
+          document.getElementById('champLiveScore').innerText = '102.326 🪙';
+          document.getElementById('champPermataName').innerText = 'ADMINCUIT';
+          document.getElementById('champPermataScore').innerText = '102.326 🪙';
         }
 
         // BINTANG CURHAT
@@ -2518,7 +2509,7 @@
 
       updateCoinUI();
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const authorEmail = currentUser ? currentUser.email : guestId;
 
@@ -2564,7 +2555,7 @@
     async function openLiveGiftModal() {
       if (!currentActiveLive) return alert('Tidak ada Live aktif!');
       
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
 
@@ -2633,7 +2624,7 @@
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
 
       if (!isLiveGiftContext && activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
@@ -2960,7 +2951,7 @@
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'mantanperamal';
+      const myName = customDisplayName || 'ADMINCUIT';
 
       if (isUserJoinedComm) {
         await supabaseClient.from('community_members').delete().eq('community_id', currentCommData.id).eq('user_email', myEmail);
@@ -2999,7 +2990,7 @@
       
       if (!msg || !currentCommData) return alert('Pesan tidak boleh kosong!');
 
-      const authorName = customDisplayName || 'mantanperamal';
+      const authorName = customDisplayName || 'ADMINCUIT';
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const authorEmail = currentUser ? currentUser.email : guestId;
 
@@ -3031,7 +3022,7 @@
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'mantanperamal';
+      const myName = customDisplayName || 'ADMINCUIT';
 
       const { error } = await supabaseClient.from('communities').insert([
         {
@@ -3271,7 +3262,7 @@
       usedPaidCoins += 10;
       updateCoinUI();
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
 
@@ -3367,7 +3358,7 @@
       const msg = input.value.trim();
       if (!msg || !currentActiveLive) return;
 
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'mantanperamal');
+      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
 
@@ -3658,7 +3649,7 @@
 
     async function renderProfileData() {
       const userLvl = getUserLevel();
-      const displayName = customDisplayName || 'mantanperamal';
+      const displayName = customDisplayName || 'ADMINCUIT';
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
 
