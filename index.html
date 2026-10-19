@@ -2115,48 +2115,208 @@
               rawPost: post
             });
           });
+async function loadPosts() {
+  const container = document.getElementById('postsList');
+  const promotedCarousel = document.getElementById('promotedCarousel');
+  const promotedSection = document.getElementById('promotedSection');
 
-        sorotanItems.sort((a, b) => {
-          const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
-          const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
-          return timeB - timeA;
-        });
+  try {
+    const now = new Date();
 
-        if (sorotanItems.length > 0) {
-          let cardsHTML = '';
-          sorotanItems.forEach(item => {
-            let rawName = item.username || 'Pengguna';
-            let snippet = item.title.length > 45 ? item.title.substring(0, 45) + '...' : item.title;
-            const isLive = (item.type === 'live');
+    // Saring tanggal mulai hari Senin minggu ini pukul 00:00:00 WIB
+    const startOfWeek = new Date(now);
+    const day = startOfWeek.getDay();
+    const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diffToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeekISO = startOfWeek.toISOString();
 
-            cardsHTML += `
-              <div onclick="${isLive ? `joinLiveRoomDirect('${item.id}')` : `openPromotedDetail('${item.id}')`}" 
-                   style="min-width: 100px; width: 100px; height: 145px; background: ${isLive ? 'linear-gradient(180deg, #ff4757 0%, #2f3542 100%)' : 'linear-gradient(180deg, #6c5ce7 0%, #341f97 100%)'}; border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div style="width: 24px; height: 24px; border-radius: 50%; background: #fff; color:#333; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ffd700;">🤍</div>
-                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800; animation:bounceIcon 1s infinite;">🔴 LIVE</span>` : ''}
-                </div>
+    const [
+      { data: profilesData },
+      { data, error },
+      { data: activeLivePromos },
+      { data: weeklyGifts },
+      { data: weeklyLives },
+      { data: weeklyPosts },
+      { data: weeklyComments },
+      { data: weeklyFollows },
+      { data: weeklyNewMembers }
+    ] = await Promise.all([
+      supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
+      supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
+      supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
+      supabaseClient.from('gift_transactions').select('sender_name, recipient_email, coins_amount').gte('created_at', startOfWeekISO),
+      supabaseClient.from('lives').select('host_name, total_coins_received').gte('created_at', startOfWeekISO),
+      supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO),
+      supabaseClient.from('comments').select('username, user_email').gte('created_at', startOfWeekISO),
+      supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
+      supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
+    ]);
 
-                <div style="font-size: 9.5px; color: #ffffff; line-height: 1.25; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin: 4px 0;">${snippet}</div>
-
-                <div style="font-size: 9px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
-              </div>
-            `;
-          });
-
-          promotedSection.style.display = 'block';
-          promotedCarousel.innerHTML = cardsHTML;
-        } else {
-          promotedSection.style.display = 'none';
-        }
-
-        renderFilteredFeed();
-      } catch (err) {
-        console.error("Error loading posts:", err);
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan tekan tombol Refresh.</p>';
-      }
+    if (profilesData) {
+      profilesMap = {};
+      profilesData.forEach(pr => {
+        if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
+        if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+      });
     }
+
+    // 1. RAJA SAWER MINGGU INI
+    if (weeklyGifts && weeklyGifts.length > 0) {
+      const sawerMap = {};
+      weeklyGifts.forEach(g => {
+        sawerMap[g.sender_name] = (sawerMap[g.sender_name] || 0) + (g.coins_amount || 0);
+      });
+      const topSawerName = Object.keys(sawerMap).reduce((a, b) => sawerMap[a] > sawerMap[b] ? a : b);
+      document.getElementById('champSawerName').innerText = topSawerName;
+      document.getElementById('champSawerScore').innerText = `${sawerMap[topSawerName].toLocaleString('id-ID')} 🪙`;
+    } else {
+      document.getElementById('champSawerName').innerText = 'Belum Ada';
+      document.getElementById('champSawerScore').innerText = '0 🪙';
+    }
+
+    // 2. LIVE TERMEGAH MINGGU INI
+    if (weeklyLives && weeklyLives.length > 0) {
+      const liveMap = {};
+      weeklyLives.forEach(l => {
+        liveMap[l.host_name] = (liveMap[l.host_name] || 0) + (l.total_coins_received || 0);
+      });
+      const topHostName = Object.keys(liveMap).reduce((a, b) => liveMap[a] > liveMap[b] ? a : b);
+      if (liveMap[topHostName] > 0) {
+        document.getElementById('champLiveName').innerText = topHostName;
+        document.getElementById('champLiveScore').innerText = `${liveMap[topHostName].toLocaleString('id-ID')} 🪙`;
+      } else {
+        document.getElementById('champLiveName').innerText = 'Belum Ada';
+        document.getElementById('champLiveScore').innerText = '0 🪙';
+      }
+    } else {
+      document.getElementById('champLiveName').innerText = 'Belum Ada';
+      document.getElementById('champLiveScore').innerText = '0 🪙';
+    }
+
+    // 3. KOLEKTOR KOIN MINGGU INI
+    if (weeklyGifts && weeklyGifts.length > 0) {
+      const collectorMap = {};
+      weeklyGifts.forEach(g => {
+        collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0);
+      });
+      const topCollectorEmail = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
+      const topCoins = collectorMap[topCollectorEmail];
+
+      const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topCollectorEmail).maybeSingle();
+      const name = prof ? prof.username : topCollectorEmail.split('@')[0];
+
+      currentChampKoinData = { name: name, coins: topCoins };
+      document.getElementById('champPermataName').innerText = name;
+      document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
+    } else {
+      currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+      document.getElementById('champPermataName').innerText = 'Belum Ada';
+      document.getElementById('champPermataScore').innerText = '0 🪙';
+    }
+
+    // 4. BINTANG CURHAT MINGGU INI
+    if (weeklyPosts && weeklyPosts.length > 0) {
+      let topCurhat = null;
+      let maxScore = -1;
+      weeklyPosts.forEach(p => {
+        const score = (p.likes_count || 0) + (p.comments_count || 0);
+        if (score > maxScore) {
+          maxScore = score;
+          topCurhat = p;
+        }
+      });
+
+      if (topCurhat && maxScore > 0) {
+        const name = topCurhat.username || topCurhat.user_email.split('@')[0];
+        document.getElementById('champCurhatName').innerText = name;
+        document.getElementById('champCurhatScore').innerText = `${topCurhat.likes_count||0} ♥ + ${topCurhat.comments_count||0} 💬`;
+      } else {
+        document.getElementById('champCurhatName').innerText = 'Belum Ada';
+        document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+      }
+    } else {
+      document.getElementById('champCurhatName').innerText = 'Belum Ada';
+      document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+    }
+
+    // 5. PUJANGGA UTAMA MINGGU INI
+    if (weeklyPosts && weeklyPosts.length > 0) {
+      const postCounts = {};
+      weeklyPosts.forEach(p => {
+        const name = p.username || p.user_email.split('@')[0];
+        postCounts[name] = (postCounts[name] || 0) + 1;
+      });
+      const topPujangga = Object.keys(postCounts).reduce((a, b) => postCounts[a] > postCounts[b] ? a : b);
+      document.getElementById('champPujanggaName').innerText = topPujangga;
+      document.getElementById('champPujanggaScore').innerText = `${postCounts[topPujangga]} Post`;
+    } else {
+      document.getElementById('champPujanggaName').innerText = 'Belum Ada';
+      document.getElementById('champPujanggaScore').innerText = '0 Post';
+    }
+
+    // 6. RAJA KOMENTAR MINGGU INI
+    if (weeklyComments && weeklyComments.length > 0) {
+      const commentCounts = {};
+      weeklyComments.forEach(c => {
+        const name = c.username || (c.user_email ? c.user_email.split('@')[0] : 'Komentator');
+        commentCounts[name] = (commentCounts[name] || 0) + 1;
+      });
+      const topKomentator = Object.keys(commentCounts).reduce((a, b) => commentCounts[a] > commentCounts[b] ? a : b);
+      document.getElementById('champKomentarName').innerText = topKomentator;
+      document.getElementById('champKomentarScore').innerText = `${commentCounts[topKomentator]} Komen`;
+    } else {
+      document.getElementById('champKomentarName').innerText = 'Belum Ada';
+      document.getElementById('champKomentarScore').innerText = '0 Komen';
+    }
+
+    // 7. PENGIKUT TERBANYAK MINGGU INI
+    if (weeklyFollows && weeklyFollows.length > 0) {
+      const followCounts = {};
+      weeklyFollows.forEach(f => {
+        if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
+      });
+      const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
+      const { data: prof } = await supabaseClient.from('profiles').select('username').eq('email', topEmail).maybeSingle();
+      document.getElementById('champFollowersName').innerText = prof ? prof.username : topEmail.split('@')[0];
+      document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
+    } else {
+      document.getElementById('champFollowersName').innerText = 'Belum Ada';
+      document.getElementById('champFollowersScore').innerText = '0 Pengikut';
+    }
+
+    // 8. MAGNET SPONSOR MINGGU INI
+    if (weeklyNewMembers && weeklyNewMembers.length > 0) {
+      const sponsorCounts = {};
+      weeklyNewMembers.forEach(m => {
+        if (m.sponsor) {
+          const sp = m.sponsor.toUpperCase();
+          sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
+        }
+      });
+      const topSponsor = Object.keys(sponsorCounts).reduce((a, b) => sponsorCounts[a] > sponsorCounts[b] ? a : b);
+      document.getElementById('champSponsorName').innerText = topSponsor;
+      document.getElementById('champSponsorScore').innerText = `+${sponsorCounts[topSponsor]} Member`;
+    } else {
+      document.getElementById('champSponsorName').innerText = 'Belum Ada';
+      document.getElementById('champSponsorScore').innerText = '0 Member';
+    }
+
+    if (error || !data || data.length === 0) {
+      container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
+      allPostsCache = [];
+      return;
+    }
+
+    allPostsCache = data;
+    renderFilteredFeed();
+
+  } catch (err) {
+    console.error("Error loading posts:", err);
+    container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan.</p>';
+  }
+}
+
 
     function renderFilteredFeed() {
       const container = document.getElementById('postsList');
