@@ -356,15 +356,15 @@
         <div style="font-size: 7.5px; color: #bae6fd; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champFollowersScore">0 Pengikut</div>
       </div>
 
-      <!-- 7. KOLEKTOR PERMATA -->
-      <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #ec4899; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
-        <div style="font-size: 8.5px; font-weight: 800; color: #f472b6; margin-bottom: 4px; white-space: nowrap;">💎 Kolektor Permata</div>
+      <!-- 7. KOLEKTOR KOIN (PERUBAHAN TERBARU: DARI PERMATA KE KOIN) -->
+      <div onclick="openCoinCollectorCalcModal()" style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box; cursor: pointer;">
+        <div style="font-size: 8.5px; font-weight: 800; color: #fbbf24; margin-bottom: 4px; white-space: nowrap;">🪙 Kolektor Koin</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ec4899;">🤍</div>
-          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💎</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #6c5ce7; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f59e0b;">🤍</div>
+          <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🪙</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPermataName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #fbcfe8; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champPermataScore">0 💎</div>
+        <div style="font-size: 7.5px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champPermataScore">0 🪙</div>
       </div>
 
       <!-- 8. MAGNET SPONSOR -->
@@ -427,6 +427,55 @@
         <span style="font-size:20px;">⚡</span>
         <p style="font-size: 11px; color: var(--text-sub); margin-top: 6px;">Memuat cerita kilat...</p>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL KALKULATOR TRANSPARANSI KOLEKTOR KOIN -->
+  <div id="coinCalcModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-size:15px; font-weight:900; color:#d97706;">🪙 Transparansi Kolektor Koin</h3>
+        <button onclick="document.getElementById('coinCalcModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="text-align:center; margin-bottom:12px; background:#fef3c7; padding:12px; border-radius:14px; border:1px solid #fde047;">
+        <div style="font-size:11px; color:#92400e; font-weight:800;">TOTAL KOIN BRUTO TERKUMPUL (PANGGUNG)</div>
+        <div style="font-size:24px; font-weight:900; color:#b45309; margin:2px 0;" id="calcGrossCoins">0 🪙</div>
+        <div style="font-size:11px; color:#78350f;" id="calcStreamerName">Kreator: -</div>
+      </div>
+
+      <div style="font-size:11px; font-weight:800; color:#333; margin-bottom:6px;">💡 Rincian Rumus Pembagian Otomatis (50% / 10% / 40%):</div>
+
+      <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+        <!-- 50% Streamer -->
+        <div style="background:#ecfdf5; padding:8px 10px; border-radius:10px; border:1px solid #a7f3d0; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; font-weight:800; color:#065f46;">💎 50% Saldo Bersih Streamer</div>
+            <div style="font-size:9.5px; color:#047857;">Dikonversi otomatis ke Permata CUIT (Siap WD)</div>
+          </div>
+          <div style="font-size:13px; font-weight:900; color:#059669;" id="calcNetGems">0 💎</div>
+        </div>
+
+        <!-- 10% Sponsor -->
+        <div style="background:#eff6ff; padding:8px 10px; border-radius:10px; border:1px solid #bfdbfe; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; font-weight:800; color:#1e40af;">🤝 10% Bonus Referral Sponsor</div>
+            <div style="font-size:9.5px; color:#1d4ed8;">Masuk ke saldo dompet sponsor pengajak</div>
+          </div>
+          <div style="font-size:13px; font-weight:900; color:#2563eb;" id="calcSponsorCoins">0 🪙</div>
+        </div>
+
+        <!-- 40% Platform -->
+        <div style="background:#fef2f2; padding:8px 10px; border-radius:10px; border:1px solid #fecaca; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; font-weight:800; color:#991b1b;">🏛️ 40% Operational Platform</div>
+            <div style="font-size:9.5px; color:#b91c1c;">Kas operasional & pengembangan CUIT</div>
+          </div>
+          <div style="font-size:13px; font-weight:900; color:#dc2626;" id="calcPlatformCoins">0 🪙</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%; background:linear-gradient(135deg, #d97706, #b45309);" onclick="document.getElementById('coinCalcModal').style.display='none'">Mengerti & Tutup</button>
     </div>
   </div>
 
@@ -1202,6 +1251,8 @@
     let activeVideoSlot = null;
     let videoTimerInterval = null;
 
+    let currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+
     const QUICK_TEMPLATES_PENONTON = [
       "🖐️ Assalamu'alaikum",
       "👋 Halo host!",
@@ -1225,6 +1276,23 @@
       "✨ Lanjut ke sesi berikutnya",
       "🔥 Semangat bareng-bareng!"
     ];
+
+    function openCoinCollectorCalcModal() {
+      const gross = currentChampKoinData.coins || 0;
+      const streamerName = currentChampKoinData.name || 'Belum Ada';
+
+      const netGems = Math.floor(gross * 0.5);
+      const sponsorCoins = Math.floor(gross * 0.1);
+      const platformCoins = Math.floor(gross * 0.4);
+
+      document.getElementById('calcGrossCoins').innerText = `${gross.toLocaleString('id-ID')} 🪙`;
+      document.getElementById('calcStreamerName').innerText = `Kreator / Streamer: ${streamerName}`;
+      document.getElementById('calcNetGems').innerText = `${netGems.toLocaleString('id-ID')} 💎`;
+      document.getElementById('calcSponsorCoins').innerText = `${sponsorCoins.toLocaleString('id-ID')} 🪙`;
+      document.getElementById('calcPlatformCoins').innerText = `${platformCoins.toLocaleString('id-ID')} 🪙`;
+
+      document.getElementById('coinCalcModal').style.display = 'flex';
+    }
 
     // MENGHITUNG MINGGU ISO SECARA AKURAT (SAMA DENGAN POSTGRESQL / SUPABASE)
     function getISOWeekNumber(d) {
@@ -1732,16 +1800,23 @@
             document.getElementById('champKomentarScore').innerText = '0 Komen';
           }
 
-          // 7. KOLEKTOR PERMATA MINGGUAN (Membaca weekly_gems_earned milik Penerima)
+          // 7. KOLEKTOR KOIN MINGGUAN (Membaca weekly_gems_earned * 2 = nilai bruto koin)
           const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
           if (topPermata && topPermata.weekly_gems_earned > 0) {
-            document.getElementById('champPermataName').innerText = topPermata.username || 'Kolektor';
-            document.getElementById('champPermataScore').innerText = `${topPermata.weekly_gems_earned} 💎`;
+            const grossCoinsEarned = (topPermata.weekly_gems_earned || 0) * 2;
+            currentChampKoinData = {
+              name: topPermata.username || 'Kolektor',
+              coins: grossCoinsEarned
+            };
+            document.getElementById('champPermataName').innerText = currentChampKoinData.name;
+            document.getElementById('champPermataScore').innerText = `${grossCoinsEarned.toLocaleString('id-ID')} 🪙`;
           } else {
+            currentChampKoinData = { name: 'Belum Ada', coins: 0 };
             document.getElementById('champPermataName').innerText = 'Belum Ada';
-            document.getElementById('champPermataScore').innerText = '0 💎';
+            document.getElementById('champPermataScore').innerText = '0 🪙';
           }
         } else {
+          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
           document.getElementById('champSawerName').innerText = 'Belum Ada';
           document.getElementById('champSawerScore').innerText = '0 🪙';
           document.getElementById('champPujanggaName').innerText = 'Belum Ada';
@@ -1749,7 +1824,7 @@
           document.getElementById('champKomentarName').innerText = 'Belum Ada';
           document.getElementById('champKomentarScore').innerText = '0 Komen';
           document.getElementById('champPermataName').innerText = 'Belum Ada';
-          document.getElementById('champPermataScore').innerText = '0 💎';
+          document.getElementById('champPermataScore').innerText = '0 🪙';
         }
 
         // 2. LIVE TERMEGAH MINGGU INI
