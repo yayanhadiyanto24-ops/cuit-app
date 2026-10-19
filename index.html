@@ -1654,24 +1654,34 @@
       const promotedSection = document.getElementById('promotedSection');
 
       try {
+        // --- LOGIKA HITUNG AWAL MINGGU (SENIN 00:00:00) ---
         const now = new Date();
         const startOfYear = new Date(now.getFullYear(), 0, 1);
         const pastDaysOfYear = (now - startOfYear) / 86400000;
         const currentWeek = Math.ceil((pastDaysOfYear + startOfYear.getDay() + 1) / 7);
         const currentYear = now.getFullYear();
 
+        const startOfWeek = new Date(now);
+        const dayOfWeek = startOfWeek.getDay();
+        const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+        startOfWeek.setDate(startOfWeek.getDate() + diffToMonday);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfWeekISO = startOfWeek.toISOString();
+
         const [
           { data: profilesData },
           { data: topLiveHost },
           { data, error },
           { data: activeLivePromos },
-          { data: weeklyStats }
+          { data: weeklyStats },
+          { data: weeklyPosts }
         ] = await Promise.all([
           supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-          supabaseClient.from('lives').select('host_name, total_coins_received').order('total_coins_received', { ascending: false }).limit(1).maybeSingle(),
+          supabaseClient.from('lives').select('host_name, total_coins_received').gte('created_at', startOfWeekISO).order('total_coins_received', { ascending: false }).limit(1).maybeSingle(),
           supabaseClient.from('curhat').select('*').order('created_at', { ascending: false }),
           supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
-          supabaseClient.from('weekly_league_stats').select('*').eq('year_number', currentYear).eq('week_number', currentWeek)
+          supabaseClient.from('weekly_league_stats').select('*').eq('year_number', currentYear).eq('week_number', currentWeek),
+          supabaseClient.from('curhat').select('username, user_email, likes_count, comments_count').gte('created_at', startOfWeekISO)
         ]);
 
         if (profilesData) {
@@ -1713,9 +1723,9 @@
           }
         }
 
-        // --- AMBIL STATISTIK PANGGUNG JUARA MINGGU INI DARI weekly_league_stats ---
+        // --- PANGGUNG JUARA MINGGU INI (SENIN - MINGGU) ---
         if (weeklyStats && weeklyStats.length > 0) {
-          // 1. RAJA SAWER MINGGUAN
+          // 1. RAJA SAWER MINGGUAN (Membaca weekly_coins_spent milik Pengirim)
           const topSawer = [...weeklyStats].sort((a,b) => (b.weekly_coins_spent||0) - (a.weekly_coins_spent||0))[0];
           if (topSawer && topSawer.weekly_coins_spent > 0) {
             document.getElementById('champSawerName').innerText = topSawer.username || 'Sultan';
@@ -1745,7 +1755,7 @@
             document.getElementById('champKomentarScore').innerText = '0 Komen';
           }
 
-          // 7. KOLEKTOR PERMATA MINGGUAN
+          // 7. KOLEKTOR PERMATA MINGGUAN (Membaca weekly_gems_earned milik Penerima)
           const topPermata = [...weeklyStats].sort((a,b) => (b.weekly_gems_earned||0) - (a.weekly_gems_earned||0))[0];
           if (topPermata && topPermata.weekly_gems_earned > 0) {
             document.getElementById('champPermataName').innerText = topPermata.username || 'Kolektor';
@@ -1765,13 +1775,41 @@
           document.getElementById('champPermataScore').innerText = '0 💎';
         }
 
-        // 2. LIVE TERMEGAH (DIPERBAIKI SECARA REALTIME)
+        // 2. LIVE TERMEGAH MINGGU INI
         if (topLiveHost && topLiveHost.total_coins_received > 0) {
           document.getElementById('champLiveName').innerText = topLiveHost.host_name || 'Host Superstar';
           document.getElementById('champLiveScore').innerText = `${topLiveHost.total_coins_received} 🪙`;
         } else {
           document.getElementById('champLiveName').innerText = 'Belum Ada';
           document.getElementById('champLiveScore').innerText = '0 🪙';
+        }
+
+        // 3. BINTANG CURHAT MINGGU INI
+        if (weeklyPosts && weeklyPosts.length > 0) {
+          let topCurhat = null;
+          let maxScore = -1;
+
+          weeklyPosts.forEach(p => {
+            const l = p.likes_count || 0;
+            const c = p.comments_count || 0;
+            const score = l + c;
+            if (score > maxScore) {
+              maxScore = score;
+              topCurhat = p;
+            }
+          });
+
+          if (topCurhat && maxScore > 0) {
+            const name = topCurhat.username || (topCurhat.user_email ? topCurhat.user_email.split('@')[0] : 'Penulis');
+            document.getElementById('champCurhatName').innerText = name;
+            document.getElementById('champCurhatScore').innerText = `${topCurhat.likes_count||0} ♥ + ${topCurhat.comments_count||0} 💬`;
+          } else {
+            document.getElementById('champCurhatName').innerText = 'Belum Ada';
+            document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+          }
+        } else {
+          document.getElementById('champCurhatName').innerText = 'Belum Ada';
+          document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
         if (error || !data || data.length === 0) {
@@ -1781,29 +1819,6 @@
         }
 
         allPostsCache = data;
-
-        // 3. BINTANG CURHAT
-        let topCurhat = null;
-        let maxScore = -1;
-
-        data.forEach(p => {
-          const l = p.likes_count || 0;
-          const c = p.comments_count || 0;
-          const score = l + c;
-          if (score > maxScore) {
-            maxScore = score;
-            topCurhat = p;
-          }
-        });
-
-        if (topCurhat && maxScore > 0) {
-          const name = topCurhat.username || (topCurhat.user_email ? topCurhat.user_email.split('@')[0] : 'Penulis');
-          document.getElementById('champCurhatName').innerText = name;
-          document.getElementById('champCurhatScore').innerText = `${topCurhat.likes_count||0} ♥ + ${topCurhat.comments_count||0} 💬`;
-        } else {
-          document.getElementById('champCurhatName').innerText = 'Belum Ada';
-          document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-        }
 
         const nowMs = Date.now();
         let sorotanItems = [];
