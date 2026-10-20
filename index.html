@@ -4198,6 +4198,76 @@
 
       window.location.href = `${checkoutUrl}?${params.toString()}`;
     }
+// --- FUNGSI TAMPILKAN PROFIL DETAIL USER SAAT NAMA DIKETUK ---
+async function openUserProfileModal(userEmail, userName, userExp) {
+  const modal = document.getElementById('userProfileModal');
+  if (!modal) return;
+
+  const lvl = getUserLevel(userExp || 0);
+  
+  document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
+  document.getElementById('mBadge').innerText = lvl.title;
+  document.getElementById('mBadge').style.background = lvl.color;
+  document.getElementById('mBadge').style.color = '#fff';
+  document.getElementById('mExp').innerText = `${userExp || 0} EXP`;
+
+  const { data: prof } = await supabaseClient
+    .from('profiles')
+    .select('followers_count, following_count, sponsor')
+    .eq('email', userEmail)
+    .maybeSingle();
+
+  document.getElementById('mFollowers').innerText = prof?.followers_count || 0;
+  document.getElementById('mFollowing').innerText = prof?.following_count || 0;
+  document.getElementById('mSponsorName').innerText = prof?.sponsor || 'ADMINCUIT';
+
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
+  const isSelf = (userEmail === myEmail);
+  const isFollowing = followingSet.has(userEmail);
+
+  const followContainer = document.getElementById('mFollowActionContainer');
+  if (!isSelf) {
+    followContainer.innerHTML = `
+      <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eef1f8' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};" 
+              onclick="toggleFollow('${userEmail}', this); openUserProfileModal('${userEmail}', '${userName}', ${userExp});">
+        ${isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini'}
+      </button>
+    `;
+  } else {
+    followContainer.innerHTML = `<div style="text-align:center; font-size:11px; color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>`;
+  }
+
+  modal.style.display = 'flex';
+}
+
+// --- FUNGSI EDIT PROFIL ---
+function openEditProfileModal() {
+  document.getElementById('editDisplayName').value = customDisplayName || 'ADMINCUIT';
+  document.getElementById('editProfileModal').style.display = 'flex';
+}
+
+async function saveProfileChanges() {
+  const newName = document.getElementById('editDisplayName').value.trim();
+  if (!newName) return alert('Nama tampilan tidak boleh kosong!');
+
+  customDisplayName = newName;
+  localStorage.setItem('cuit_user_name', newName);
+
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
+
+  await supabaseClient
+    .from('profiles')
+    .update({ username: newName, updated_at: new Date().toISOString() })
+    .eq('email', myEmail);
+
+  document.getElementById('editProfileModal').style.display = 'none';
+  alert('✅ Profil berhasil diperbarui!');
+  
+  renderProfileData();
+  loadPosts();
+}
 
     checkUser();
   </script>
