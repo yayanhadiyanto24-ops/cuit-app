@@ -1423,25 +1423,35 @@
       });
     }
 
-    function sharePost(postId, postText) {
-      closeAllPostMenus();
-      const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
-      const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!` : 'Lihat curhatan ini di CUIT!';
+    async function sharePost(postId, postText) {
+  closeAllPostMenus();
+  const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
+  const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!` : 'Lihat curhatan ini di CUIT!';
 
-      if (navigator.share) {
-        navigator.share({
-          title: 'Curhatan di CUIT',
-          text: shareText,
-          url: shareUrl,
-        }).catch(() => {});
-      } else {
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
-        }).catch(() => {
-          prompt("Salin tautan postingan:", shareUrl);
-        });
-      }
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Curhatan di CUIT',
+        text: shareText,
+        url: shareUrl,
+      });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn("Share API gagal di WebView, menyalin ke Clipboard:", err);
     }
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
+    }).catch(() => {
+      prompt("Salin tautan postingan:", shareUrl);
+    });
+  } else {
+    prompt("Salin tautan postingan:", shareUrl);
+  }
+}
 
     function reportPost(postId) {
       closeAllPostMenus();
