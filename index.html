@@ -4281,6 +4281,52 @@ async function openUserProfileModal(userEmail, userName, userExp) {
 
   modal.style.display = 'flex';
 }
+// --- FUNGSI BUKA MODAL EDIT PROFIL ---
+function openEditProfileModal() {
+  const input = document.getElementById('editDisplayName');
+  if (input) {
+    input.value = customDisplayName || 'ADMINCUIT';
+  }
+  const modal = document.getElementById('editProfileModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+// --- FUNGSI SIMPAN PERUBAHAN PROFIL ---
+async function saveProfileChanges() {
+  const inputElem = document.getElementById('editDisplayName');
+  const newName = inputElem ? inputElem.value.trim() : '';
+
+  if (!newName) return alert('Nama tampilan tidak boleh kosong!');
+
+  customDisplayName = newName;
+  localStorage.setItem('cuit_user_name', newName);
+
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
+
+  // Update ke database Supabase
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update({ 
+      username: newName, 
+      referral_code: newName.replace(/\s+/g, '').toUpperCase(),
+      updated_at: new Date().toISOString() 
+    })
+    .eq('email', myEmail);
+
+  if (error) {
+    console.error('Gagal update di Supabase:', error);
+  }
+
+  document.getElementById('editProfileModal').style.display = 'none';
+  alert('✅ Profil berhasil diperbarui!');
+  
+  // Refresh tampilan profil & postingan
+  renderProfileData();
+  loadPosts();
+}
 
     checkUser();
   </script>
