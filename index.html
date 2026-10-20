@@ -1422,12 +1422,12 @@
         }
       });
     }
-
-    async function sharePost(postId, postText) {
+async function sharePost(postId, postText) {
   closeAllPostMenus();
   const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
-  const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!` : 'Lihat curhatan ini di CUIT!';
+  const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!\n${shareUrl}` : `Lihat curhatan ini di CUIT!\n${shareUrl}`;
 
+  // 1. Coba Web Share API bawaan (untuk Chrome & Browser)
   if (navigator.share) {
     try {
       await navigator.share({
@@ -1438,10 +1438,18 @@
       return;
     } catch (err) {
       if (err.name === 'AbortError') return;
-      console.warn("Share API gagal di WebView, menyalin ke Clipboard:", err);
     }
   }
 
+  // 2. Trik Khusus APK WebView: Panggil Android Intent Share Sheet secara langsung
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  if (isAndroid) {
+    const intentUrl = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT=${encodeURIComponent(shareText)};end`;
+    window.location.href = intentUrl;
+    return;
+  }
+
+  // 3. Fallback terakhir jika bukan Android / tidak mendukung intent
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(shareUrl).then(() => {
       alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
@@ -1452,6 +1460,7 @@
     prompt("Salin tautan postingan:", shareUrl);
   }
 }
+
 
     function reportPost(postId) {
       closeAllPostMenus();
