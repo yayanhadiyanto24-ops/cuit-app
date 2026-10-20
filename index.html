@@ -2735,23 +2735,28 @@
     }
 
     function openThankYouDraft(senderName, giftDetail) {
-      document.getElementById('notificationsModal').style.display = 'none';
+  // 1. Tutup modal notifikasi
+  document.getElementById('notificationsModal').style.display = 'none';
 
-      const defaultText = `Terima kasih banyak ya Kak @${senderName} atas kiriman ${giftDetail} nya! Ditunggu support-nya lagi, sehat dan sukses selalu ya! 🙏✨`;
-      
-      const postInput = document.getElementById('postContent');
-      const feelingSelect = document.getElementById('postFeeling');
-      
-      if (postInput) {
-        postInput.value = defaultText;
-        updateCharCount(postInput);
-      }
-      if (feelingSelect) {
-        feelingSelect.value = 'Bersyukur';
-      }
+  // 2. Rangkai teks ucapan terima kasih otomatis
+  const defaultText = `Terima kasih banyak ya Kak @${senderName} atas kiriman ${giftDetail} nya! Ditunggu support-nya lagi, sehat dan sukses selalu ya! 🙏✨`;
+  
+  // 3. Masukkan teks & atur perasaan ke "Bersyukur"
+  const postInput = document.getElementById('postContent');
+  const feelingSelect = document.getElementById('postFeeling');
+  
+  if (postInput) {
+    postInput.value = defaultText;
+    updateCharCount(postInput);
+  }
+  if (feelingSelect) {
+    feelingSelect.value = 'Bersyukur';
+  }
 
-      switchTab('pageCreate', document.querySelectorAll('.nav-item')[2]);
-    }
+  // 4. LANGSUNG berpindah ke Halaman Buat Curhat (Tab Ke-3 / Index 2)
+  const navItems = document.querySelectorAll('.nav-bar .nav-item');
+  switchTab('pageCreate', navItems[2]);
+}
 
     async function deleteSingleNotif(notifId) {
       await supabaseClient.from('user_notifications').delete().eq('id', notifId);
