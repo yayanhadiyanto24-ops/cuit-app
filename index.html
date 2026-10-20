@@ -210,7 +210,7 @@
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     /* Navigasi Bawah */
-    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-style: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
+    .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #ffffff; display: flex; justify-content: space-around; align-items: center; padding: 6px 0; border-top: 1px solid var(--border-color); z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
     .nav-item.active .nav-icon-bg { background: #ece8ff; width: 38px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
@@ -780,14 +780,8 @@
     <div class="section-sub">Tulis dengan nyaman. Tarif koin dinamis 1 koin per 1.200 karakter!</div>
 
     <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <label style="font-size: 12px; font-weight: 800; display: block; margin-bottom: 6px;">Opsi Pembayaran / Curhat:</label>
-      <select id="curhatCoinType" onchange="toggleCurhatLimit()">
-        <option value="free">Pakai Koin Gratisan (1 Koin / 1.200 Karakter)</option>
-        <option value="paid">Pakai Bank Koin Berbayar (1 Koin / 1.200 Karakter)</option>
-      </select>
-
       <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
-      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin Gratisan)</div>
+      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin)</div>
 
       <label style="font-size: 12px; font-weight: 800; color: #1c1d36; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
       <select id="postFeeling">
@@ -1444,6 +1438,28 @@
       "🔥 Semangat bareng-bareng!"
     ];
 
+    // FUNGSI UNIVERSAL PEMOTONG KOIN (Gratisan Dulu -> Beralih ke Berbayar)
+    async function deductCoin(amount = 1) {
+      if (freeCoins >= amount) {
+        freeCoins -= amount;
+      } else {
+        const remainingToDeduct = amount - freeCoins;
+        if (paidCoins >= remainingToDeduct) {
+          freeCoins = 0;
+          paidCoins -= remainingToDeduct;
+          usedPaidCoins += remainingToDeduct;
+        } else {
+          return false; // Saldo koin total tidak mencukupi
+        }
+      }
+
+      localStorage.setItem('cuit_free_coins', freeCoins);
+      localStorage.setItem('cuit_paid_coins', paidCoins);
+
+      updateCoinUI(true); 
+      return true;
+    }
+
     function togglePostMenu(postId, event) {
       if (event) event.stopPropagation();
       closeAllPostMenus();
@@ -1779,19 +1795,20 @@
       }
     }
 
-    async function updateCoinUI() {
-      if (currentUser) {
+    async function updateCoinUI(skipFetchFromDatabase = false) {
+      if (currentUser && !skipFetchFromDatabase) {
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
-            .select('free_coins, paid_coins, gems')
+            .select('free_coins, paid_coins, gems, used_paid_coins')
             .eq('id', currentUser.id)
-            .single();
+            .maybeSingle();
 
           if (data && !error) {
             freeCoins = data.free_coins ?? freeCoins;
             paidCoins = data.paid_coins ?? paidCoins;
             gems = data.gems ?? gems;
+            usedPaidCoins = data.used_paid_coins ?? usedPaidCoins;
           }
         } catch (err) {
           console.error('Gagal memperbarui koin:', err);
@@ -2149,7 +2166,7 @@
 
       paidCoins -= hours;
       usedPaidCoins += hours;
-      updateCoinUI();
+      updateCoinUI(true);
 
       alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
       loadPosts();
@@ -2185,7 +2202,7 @@
 
       paidCoins -= minutes;
       usedPaidCoins += minutes;
-      updateCoinUI();
+      updateCoinUI(true);
 
       alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
       loadPosts();
@@ -2378,12 +2395,10 @@
         ]);
 
       } else {
-        if (freeCoins < 1) {
-          return alert('Saldo Koin Gratisan kamu habis! Tonton video Misi Reels FB untuk menambah koin gratisan agar bisa memberikan Like.');
+        const success = await deductCoin(1);
+        if (!success) {
+          return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis! Tonton video Misi Reels FB untuk isi koin.');
         }
-
-        freeCoins -= 1;
-        updateCoinUI();
 
         userLikedPostsSet.add(strPostId);
         const newLikeCount = (currentPost.likes_count || 0) + 1;
@@ -2400,8 +2415,6 @@
         const { error } = await supabaseClient.from('post_likes').insert([payload]);
 
         if (error) {
-          freeCoins += 1;
-          updateCoinUI();
           userLikedPostsSet.delete(strPostId);
           currentPost.likes_count = Math.max(0, newLikeCount - 1);
           renderFilteredFeed();
@@ -2415,6 +2428,11 @@
 
     async function toggleLikeLive() {
       if (!currentActiveLive) return;
+
+      const success = await deductCoin(1);
+      if (!success) {
+        return alert('Saldo Koin kamu habis untuk memberikan Like di Live Chat!');
+      }
 
       currentActiveLive.likes_count = (currentActiveLive.likes_count || 0) + 1;
       const newCount = currentActiveLive.likes_count;
@@ -2464,8 +2482,9 @@
       const comm = input.value.trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
-      if (freeCoins < 1) {
-        return alert('Saldo Koin Gratisan kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
+      const success = await deductCoin(1);
+      if (!success) {
+        return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
       }
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
@@ -2483,9 +2502,6 @@
       ]);
 
       if (error) return alert('Gagal mengirim komentar: ' + error.message);
-
-      freeCoins -= 1;
-      updateCoinUI();
 
       const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
       
@@ -2512,7 +2528,7 @@
               .eq('id', activeCommentPostId);
 
             paidCoins += 1;
-            updateCoinUI();
+            updateCoinUI(true);
 
             await supabaseClient.from('user_notifications').insert([
               { 
@@ -2637,7 +2653,7 @@
 
       paidCoins -= cost;
       usedPaidCoins += cost;
-      updateCoinUI();
+      updateCoinUI(true);
 
       document.getElementById('confirmGiftModal').style.display = 'none';
 
@@ -3310,7 +3326,7 @@
 
       paidCoins -= 10;
       usedPaidCoins += 10;
-      updateCoinUI();
+      updateCoinUI(true);
 
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
@@ -3421,6 +3437,11 @@
         isLiveGiftContext = true;
         sendGiftAction(1, 'Absen');
         return;
+      }
+
+      const success = await deductCoin(1);
+      if (!success) {
+        return alert('Koin kamu habis! Tonton video Misi Reels untuk mendapatkan koin tambahan.');
       }
 
       await supabaseClient.from('live_messages').insert([
@@ -3672,7 +3693,7 @@
         ]);
 
         gems -= coins;
-        updateCoinUI();
+        updateCoinUI(true);
         document.getElementById('cashoutModal').style.display = 'none';
 
         document.getElementById('cashoutType').value = '';
@@ -3916,7 +3937,7 @@
       document.getElementById('videoFrameContainer').innerHTML = '';
 
       freeCoins += 10;
-      updateCoinUI();
+      updateCoinUI(true);
 
       alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
 
@@ -4036,23 +4057,14 @@
       const content = document.getElementById('postContent').value.trim();
       const feeling = document.getElementById('postFeeling').value;
       const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
-      const coinType = document.getElementById('curhatCoinType') ? document.getElementById('curhatCoinType').value : 'free';
 
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
 
       const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
 
-      if (coinType === 'paid') {
-        if (paidCoins < requiredCoins) {
-          return alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${requiredCoins} Koin Berbayar.`);
-        }
-        paidCoins -= requiredCoins;
-        usedPaidCoins += requiredCoins;
-      } else {
-        if (freeCoins < requiredCoins) {
-          return alert(`Saldo Koin Gratisan kamu tidak cukup! Kamu butuh ${requiredCoins} Koin Gratisan. Tonton Misi Video Reels untuk koin tambahan!`);
-        }
-        freeCoins -= requiredCoins;
+      const success = await deductCoin(requiredCoins);
+      if (!success) {
+        return alert(`Saldo Koin tidak cukup! Kamu butuh ${requiredCoins} Koin.`);
       }
 
       if (rewardCoins > 0) {
@@ -4061,9 +4073,8 @@
         }
         paidCoins -= rewardCoins;
         usedPaidCoins += rewardCoins;
+        updateCoinUI(true);
       }
-
-      updateCoinUI();
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
@@ -4086,7 +4097,7 @@
         document.getElementById('postRewardCoins').value = '';
         alert(rewardCoins > 0 
           ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` 
-          : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin ${coinType === 'paid' ? 'Berbayar' : 'Gratisan'})`);
+          : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin)`);
         switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
         loadPosts();
       } else {
