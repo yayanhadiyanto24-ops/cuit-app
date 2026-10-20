@@ -519,6 +519,44 @@
     </div>
   </div>
 
+  <!-- MODAL EDIT POSTINGAN SENDIIRI -->
+  <div id="editPostModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:6px;">
+        <h3 style="font-size:15px; font-weight:900;">✏️ Edit Postingan</h3>
+        <button onclick="document.getElementById('editPostModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+      </div>
+      <input type="hidden" id="editPostId">
+      <label style="font-size:11px; font-weight:700; display:block; margin-bottom:4px;">Isi Curhatan Baru:</label>
+      <textarea id="editPostText" rows="4" style="margin-bottom:10px;"></textarea>
+
+      <label style="font-size:11px; font-weight:700; display:block; margin-bottom:4px;">Perasaan:</label>
+      <select id="editPostFeeling" style="margin-bottom:14px;">
+        <option value="Bahagia">🌱 Bahagia</option>
+        <option value="Bersyukur">🤲 Bersyukur</option>
+        <option value="Semangat">🔥 Semangat</option>
+        <option value="Cinta">🌸 Cinta</option>
+        <option value="Lega">😌 Lega</option>
+        <option value="Humor">😄 Humor</option>
+        <option value="Sedih">🌧️ Sedih</option>
+        <option value="Cemas">☁️ Cemas</option>
+        <option value="Marah">🌶️ Marah</option>
+        <option value="Kecewa">🌊 Kecewa</option>
+        <option value="Kesepian">🌙 Kesepian</option>
+        <option value="Patah Hati">🥀 Patah Hati</option>
+        <option value="Bingung">🌀 Bingung</option>
+        <option value="Rindu">💜 Rindu</option>
+        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
+        <option value="Ragu">❓ Ragu</option>
+      </select>
+
+      <div style="display:flex; gap:6px;">
+        <button class="btn-primary" style="flex:1;" onclick="submitSaveEditedPost()">Simpan Perubahan</button>
+        <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('editPostModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL KALKULATOR TRANSPARANSI KOLEKTOR KOIN -->
   <div id="coinCalcModal" class="modal">
     <div class="modal-content">
@@ -1422,49 +1460,91 @@
         }
       });
     }
-async function sharePost(postId, postText) {
-  closeAllPostMenus();
-  const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
-  const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!\n${shareUrl}` : `Lihat curhatan ini di CUIT!\n${shareUrl}`;
 
-  // 1. Coba Web Share API bawaan (untuk Chrome & Browser)
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'Curhatan di CUIT',
-        text: shareText,
-        url: shareUrl,
-      });
-      return;
-    } catch (err) {
-      if (err.name === 'AbortError') return;
+    async function sharePost(postId, postText) {
+      closeAllPostMenus();
+      const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
+      const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!\n${shareUrl}` : `Lihat curhatan ini di CUIT!\n${shareUrl}`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Curhatan di CUIT',
+            text: shareText,
+            url: shareUrl,
+          });
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+        }
+      }
+
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      if (isAndroid) {
+        const intentUrl = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT=${encodeURIComponent(shareText)};end`;
+        window.location.href = intentUrl;
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
+        }).catch(() => {
+          prompt("Salin tautan postingan:", shareUrl);
+        });
+      } else {
+        prompt("Salin tautan postingan:", shareUrl);
+      }
     }
-  }
-
-  // 2. Trik Khusus APK WebView: Panggil Android Intent Share Sheet secara langsung
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  if (isAndroid) {
-    const intentUrl = `intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT=${encodeURIComponent(shareText)};end`;
-    window.location.href = intentUrl;
-    return;
-  }
-
-  // 3. Fallback terakhir jika bukan Android / tidak mendukung intent
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert("🔗 Tautan postingan berhasil disalin ke clipboard!");
-    }).catch(() => {
-      prompt("Salin tautan postingan:", shareUrl);
-    });
-  } else {
-    prompt("Salin tautan postingan:", shareUrl);
-  }
-}
-
 
     function reportPost(postId) {
       closeAllPostMenus();
       alert("🚩 Laporan berhasil dikirim! Tim moderasi CUIT akan meninjau postingan ini.");
+    }
+
+    function openEditPostModal(postId) {
+      closeAllPostMenus();
+      const post = allPostsCache.find(p => String(p.id) === String(postId));
+      if (!post) return;
+
+      document.getElementById('editPostId').value = post.id;
+      document.getElementById('editPostText').value = post.content || '';
+      document.getElementById('editPostFeeling').value = post.feeling || 'Bahagia';
+      document.getElementById('editPostModal').style.display = 'flex';
+    }
+
+    async function submitSaveEditedPost() {
+      const postId = document.getElementById('editPostId').value;
+      const newText = document.getElementById('editPostText').value.trim();
+      const newFeeling = document.getElementById('editPostFeeling').value;
+
+      if (!newText) return alert('Isi curhatan tidak boleh kosong!');
+
+      const { error } = await supabaseClient
+        .from('curhat')
+        .update({ content: newText, feeling: newFeeling, updated_at: new Date().toISOString() })
+        .eq('id', postId);
+
+      if (!error) {
+        document.getElementById('editPostModal').style.display = 'none';
+        alert('✅ Postingan berhasil diperbarui!');
+        loadPosts();
+      } else {
+        alert('Gagal memperbarui postingan: ' + error.message);
+      }
+    }
+
+    async function deletePostByAdmin(postId) {
+      closeAllPostMenus();
+      if (!confirm("⚠️ Khusus Admin: Apakah Anda yakin ingin menghapus postingan ini secara permanen?")) return;
+
+      const { error } = await supabaseClient.from('curhat').delete().eq('id', postId);
+      if (!error) {
+        alert("🗑️ Postingan berhasil dihapus oleh Admin!");
+        loadPosts();
+      } else {
+        alert("Gagal menghapus postingan: " + error.message);
+      }
     }
 
     function openCoinCollectorCalcModal() {
@@ -1748,7 +1828,6 @@ async function sharePost(postId, postText) {
         startOfWeek.setHours(0, 0, 0, 0);
         const startOfWeekISO = startOfWeek.toISOString();
 
-        // 1. Ambil data curhatan utama
         const { data, error } = await supabaseClient
           .from('curhat')
           .select('*')
@@ -1756,7 +1835,6 @@ async function sharePost(postId, postText) {
 
         if (error) throw error;
 
-        // 2. Ambil profil & transaksi pendukung
         const [
           { data: profilesData },
           { data: activeLivePromos },
@@ -1786,8 +1864,6 @@ async function sharePost(postId, postText) {
         }
 
         // --- AMBIL SEMUA DATA KATEGORI MINGGU INI ---
-
-        // 1. RAJA SAWER
         if (weeklyGifts && weeklyGifts.length > 0) {
           const sawerMap = {};
           weeklyGifts.forEach(g => { 
@@ -1802,7 +1878,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champSawerScore').innerText = '0 🪙';
         }
 
-        // 2. LIVE TERMEGAH
         let liveCoinMap = {};
         if (weeklyLives && weeklyLives.length > 0) {
           weeklyLives.forEach(l => {
@@ -1840,7 +1915,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
-        // 3. KOLEKTOR KOIN
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -1875,7 +1949,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
 
-        // 4. BINTANG CURHAT
         if (data && data.length > 0) {
           const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
           if (topPost && ((topPost.likes_count||0) + (topPost.comments_count||0)) > 0) {
@@ -1890,7 +1963,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
-        // 5. PUJANGGA UTAMA
         if (data && data.length > 0) {
           const postCounts = {};
           data.forEach(p => { const name = p.username || p.user_email.split('@')[0]; postCounts[name] = (postCounts[name] || 0) + 1; });
@@ -1902,7 +1974,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champPujanggaScore').innerText = '0 Post';
         }
 
-        // 6. RAJA KOMENTAR
         if (weeklyComments && weeklyComments.length > 0) {
           const commentCounts = {};
           weeklyComments.forEach(c => { const name = c.username || (c.user_email ? c.user_email.split('@')[0] : 'Komentator'); commentCounts[name] = (commentCounts[name] || 0) + 1; });
@@ -1914,7 +1985,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champKomentarScore').innerText = '0 Komen';
         }
 
-        // 7. PENGIKUT TERBANYAK
         if (weeklyFollows && weeklyFollows.length > 0) {
           const followCounts = {};
           weeklyFollows.forEach(f => {
@@ -1930,7 +2000,6 @@ async function sharePost(postId, postText) {
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // 8. MAGNET SPONSOR
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
           weeklyNewMembers.forEach(m => {
@@ -2136,6 +2205,7 @@ async function sharePost(postId, postText) {
       const myEmail = currentUser ? currentUser.email : guestId;
       const isSelf = (p.user_email === myEmail);
       const isFollowing = followingSet.has(p.user_email);
+      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
 
       const safeContent = (p.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
 
@@ -2164,15 +2234,28 @@ async function sharePost(postId, postText) {
               <button class="btn-more-options" onclick="togglePostMenu('${p.id}', event)">⋮</button>
               
               <div class="post-menu-dropdown" id="post-dropdown-${p.id}">
+                ${isSelf ? `
+                  <button class="post-menu-item" onclick="openEditPostModal('${p.id}')">
+                    <span>✏️</span> Edit Postingan
+                  </button>
+                ` : ''}
+                
                 <button class="post-menu-item" onclick="promotePost('${p.id}')">
                   <span>🚀</span> Promosikan Post
                 </button>
                 <button class="post-menu-item" onclick="sharePost('${p.id}', '${safeContent}')">
                   <span>🔗</span> Bagikan Post
                 </button>
-                <button class="post-menu-item danger" onclick="reportPost('${p.id}')">
-                  <span>🚩</span> Laporkan Post
-                </button>
+                
+                ${isAdmin ? `
+                  <button class="post-menu-item danger" onclick="deletePostByAdmin('${p.id}')">
+                    <span>🗑️</span> Hapus (Admin)
+                  </button>
+                ` : `
+                  <button class="post-menu-item danger" onclick="reportPost('${p.id}')">
+                    <span>🚩</span> Laporkan Post
+                  </button>
+                `}
               </div>
             </div>
           </div>
@@ -2260,7 +2343,7 @@ async function sharePost(postId, postText) {
       }
 
       const strPostId = String(postId);
-      const currentPost = allPostsCache.find(p => String(p.id) === strPostId);
+      const currentPost = allPostsCache.find(p => String(p.id) === String(strPostId));
       if (!currentPost) return;
 
       const isAlreadyLiked = userLikedPostsSet.has(strPostId);
@@ -2285,6 +2368,13 @@ async function sharePost(postId, postText) {
         ]);
 
       } else {
+        if (freeCoins < 1) {
+          return alert('Saldo Koin Gratisan kamu habis! Tonton video Misi Reels FB untuk menambah koin gratisan agar bisa memberikan Like.');
+        }
+
+        freeCoins -= 1;
+        updateCoinUI();
+
         userLikedPostsSet.add(strPostId);
         const newLikeCount = (currentPost.likes_count || 0) + 1;
         currentPost.likes_count = newLikeCount;
@@ -2300,10 +2390,12 @@ async function sharePost(postId, postText) {
         const { error } = await supabaseClient.from('post_likes').insert([payload]);
 
         if (error) {
+          freeCoins += 1;
+          updateCoinUI();
           userLikedPostsSet.delete(strPostId);
           currentPost.likes_count = Math.max(0, newLikeCount - 1);
           renderFilteredFeed();
-          alert("Gagal menyimpan Like ke database: " + error.message);
+          alert("Gagal menyimpan Like: " + error.message);
           return;
         }
 
@@ -2362,11 +2454,14 @@ async function sharePost(postId, postText) {
       const comm = input.value.trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
+      if (freeCoins < 1) {
+        return alert('Saldo Koin Gratisan kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
+      }
+
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const authorEmail = currentUser ? currentUser.email : guestId;
 
-      // 1. Kirim komentar
       const { error } = await supabaseClient.from('comments').insert([
         {
           post_id: activeCommentPostId,
@@ -2379,7 +2474,9 @@ async function sharePost(postId, postText) {
 
       if (error) return alert('Gagal mengirim komentar: ' + error.message);
 
-      // 2. Cek apakah postingan ini memiliki Koin Beruntung
+      freeCoins -= 1;
+      updateCoinUI();
+
       const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
       
       if (currentPost && currentPost.remaining_reward_coins > 0) {
@@ -2404,7 +2501,6 @@ async function sharePost(postId, postText) {
               .update({ remaining_reward_coins: newRemaining })
               .eq('id', activeCommentPostId);
 
-            // Tambahkan +1 Koin Berbayar ke pemenang
             paidCoins += 1;
             updateCoinUI();
 
@@ -2421,7 +2517,6 @@ async function sharePost(postId, postText) {
         }
       }
 
-      // 3. Update jumlah komentar postingan & muat ulang tampilan
       const newCount = ((currentPost && currentPost.comments_count) || 0) + 1;
       if (currentPost) currentPost.comments_count = newCount;
       await supabaseClient.from('curhat').update({ comments_count: newCount }).eq('id', activeCommentPostId);
@@ -2754,38 +2849,33 @@ async function sharePost(postId, postText) {
     }
 
     function openThankYouDraft(senderName, giftDetail) {
-  // 1. Tutup modal notifikasi
-  const notifModal = document.getElementById('notificationsModal');
-  if (notifModal) notifModal.style.display = 'none';
+      const notifModal = document.getElementById('notificationsModal');
+      if (notifModal) notifModal.style.display = 'none';
 
-  // 2. Format teks ucapan terima kasih otomatis
-  const defaultText = `Terima kasih banyak ya Kak @${senderName} atas kiriman ${giftDetail} nya! Ditunggu support-nya lagi, sehat dan sukses selalu ya! 🙏✨`;
-  
-  // 3. Masukkan teks & atur perasaan ke "Bersyukur"
-  const postInput = document.getElementById('postContent');
-  const feelingSelect = document.getElementById('postFeeling');
-  
-  if (postInput) {
-    postInput.value = defaultText;
-    if (typeof updateCharCount === 'function') updateCharCount(postInput);
-  }
-  if (feelingSelect) {
-    feelingSelect.value = 'Bersyukur';
-  }
+      const defaultText = `Terima kasih banyak ya Kak @${senderName} atas kiriman ${giftDetail} nya! Ditunggu support-nya lagi, sehat dan sukses selalu ya! 🙏✨`;
+      
+      const postInput = document.getElementById('postContent');
+      const feelingSelect = document.getElementById('postFeeling');
+      
+      if (postInput) {
+        postInput.value = defaultText;
+        if (typeof updateCharCount === 'function') updateCharCount(postInput);
+      }
+      if (feelingSelect) {
+        feelingSelect.value = 'Bersyukur';
+      }
 
-  // 4. Buka halaman Buat Curhat secara langsung
-  document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-  document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
 
-  const createPage = document.getElementById('pageCreate');
-  if (createPage) createPage.classList.add('active');
+      const createPage = document.getElementById('pageCreate');
+      if (createPage) createPage.classList.add('active');
 
-  const createNavBtn = document.querySelectorAll('.nav-bar .nav-item')[2];
-  if (createNavBtn) createNavBtn.classList.add('active');
+      const createNavBtn = document.querySelectorAll('.nav-bar .nav-item')[2];
+      if (createNavBtn) createNavBtn.classList.add('active');
 
-  // Focus otomatis ke teks area agar keyboard langsung naik
-  if (postInput) postInput.focus();
-}
+      if (postInput) postInput.focus();
+    }
 
     async function deleteSingleNotif(notifId) {
       await supabaseClient.from('user_notifications').delete().eq('id', notifId);
@@ -3925,17 +4015,34 @@ async function sharePost(postId, postText) {
       const content = document.getElementById('postContent').value.trim();
       const feeling = document.getElementById('postFeeling').value;
       const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
+      const coinType = document.getElementById('curhatCoinType') ? document.getElementById('curhatCoinType').value : 'free';
 
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
 
+      const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
+
+      if (coinType === 'paid') {
+        if (paidCoins < requiredCoins) {
+          return alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${requiredCoins} Koin Berbayar.`);
+        }
+        paidCoins -= requiredCoins;
+        usedPaidCoins += requiredCoins;
+      } else {
+        if (freeCoins < requiredCoins) {
+          return alert(`Saldo Koin Gratisan kamu tidak cukup! Kamu butuh ${requiredCoins} Koin Gratisan. Tonton Misi Video Reels untuk koin tambahan!`);
+        }
+        freeCoins -= requiredCoins;
+      }
+
       if (rewardCoins > 0) {
         if (paidCoins < rewardCoins) {
-          return alert(`Saldo Bank Koin kamu tidak cukup! Memasang fitur ini butuh ${rewardCoins} Koin Berbayar.`);
+          return alert(`Saldo Bank Koin kamu tidak cukup! Memasang Koin Beruntung butuh ${rewardCoins} Koin Berbayar.`);
         }
         paidCoins -= rewardCoins;
         usedPaidCoins += rewardCoins;
-        updateCoinUI();
       }
+
+      updateCoinUI();
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
@@ -3956,8 +4063,10 @@ async function sharePost(postId, postText) {
       if (!error) {
         document.getElementById('postContent').value = '';
         document.getElementById('postRewardCoins').value = '';
-        alert(rewardCoins > 0 ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung untuk ${rewardCoins} komentator tercepat!` : 'Curhatan berhasil diterbitkan!');
-        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+        alert(rewardCoins > 0 
+          ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` 
+          : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin ${coinType === 'paid' ? 'Berbayar' : 'Gratisan'})`);
+        switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
         loadPosts();
       } else {
         alert('Gagal menerbitkan: ' + error.message);
