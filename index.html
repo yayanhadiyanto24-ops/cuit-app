@@ -4165,19 +4165,23 @@ async function copyMySponsorLink() {
   const user = (await supabaseClient.auth.getUser()).data.user;
   if (!user) return alert('Silakan login terlebih dahulu!');
 
-  const customerName = customDisplayName || user.email.split('@')[0];
-  const orderId = 'CUIT-' + Date.now();
-
-  const setuju = await confirm(`Top-Up ${koinAmount} Paid Coins seharga Rp ${amount.toLocaleString('id-ID')} via DOKU?`);
+  const setuju = await confirm(`Top-Up ${koinAmount.toLocaleString('id-ID')} Paid Coins seharga Rp ${amount.toLocaleString('id-ID')} via DOKU?`);
   if (!setuju) return;
 
-  const dokuClientId = 'BRN-0224-1792291591522';
-  const checkoutUrl = `https://checkout.doku.com/checkout/link?client_id=${dokuClientId}&order_id=${orderId}&amount=${amount}&name=${encodeURIComponent(customerName)}&email=${encodeURIComponent(user.email)}`;
+  const dokuLinks = {
+    1000: 'https://pay.doku.com/p-link/p/5Lr8cjwDYy',
+    5000: 'https://pay.doku.com/p-link/p/q4afclsZ3r',
+    10000: 'https://pay.doku.com/p-link/p/aRzht7C0Ex',
+    20000: 'https://pay.doku.com/p-link/p/U7sCOZOH2n',
+    50000: 'https://pay.doku.com/p-link/p/NE9tiuqt2x',
+    100000: 'https://pay.doku.com/p-link/p/w4z9HUHsgx'
+  };
+
+  const checkoutUrl = dokuLinks[amount] || dokuLinks[1000];
 
   await alert('Mengarahkan ke halaman pembayaran DOKU...');
   window.location.href = checkoutUrl;
 }
-
 
     checkUser();
   </script>
