@@ -1411,9 +1411,9 @@
     let isUserJoinedComm = false;
 
     let freeCoins = 20;
-    let paidCoins = 102326;
-    let gems = 8167;
-    let usedPaidCoins = 20076;
+    let paidCoins = 0;
+    let gems = 0;
+    let usedPaidCoins = 0;
 
     let activeVideoSlot = null;
     let videoTimerInterval = null;
@@ -1680,72 +1680,36 @@
       const { data } = await supabaseClient.auth.getUser();
       currentUser = data.user;
 
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const savedName = customDisplayName || 'Penilik Bageur';
+      if (currentUser) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', currentUser.id)
+          .maybeSingle();
 
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .or(`email.eq.${myEmail},username.eq.${savedName}`)
-        .maybeSingle();
+        if (profile) {
+          freeCoins = profile.free_coins ?? 20;
+          paidCoins = profile.paid_coins ?? 0;
+          gems = profile.gems ?? 0;
+          usedPaidCoins = profile.used_paid_coins ?? 0;
 
-      if (profile) {
-        freeCoins = profile.free_coins ?? 20;
-        paidCoins = profile.paid_coins ?? 102326;
-        gems = profile.gems ?? 8167;
-        usedPaidCoins = profile.used_paid_coins ?? 20076;
-
-        if (profile.username) customDisplayName = profile.username;
-        if (profile.sponsor) mySponsorCode = profile.sponsor;
-
-        localStorage.setItem('cuit_free_coins', freeCoins);
-        localStorage.setItem('cuit_paid_coins', paidCoins);
-        localStorage.setItem('cuit_gems', gems);
-        localStorage.setItem('cuit_user_exp', usedPaidCoins);
+          if (profile.username) customDisplayName = profile.username;
+          if (profile.sponsor) mySponsorCode = profile.sponsor;
+        }
       } else {
+        const guestId = localStorage.getItem('cuit_guest_identifier');
         if (!guestId) {
           const newGuestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
           localStorage.setItem('cuit_guest_identifier', newGuestId);
         }
+        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+        paidCoins = 0;
+        gems = 0;
+        usedPaidCoins = 0;
       }
 
-      async function updateCoinUI() {
-  // 1. Tentukan ID unik pengguna (Guest atau User Login)
-  const userId = currentUser ? currentUser.id : (localStorage.getItem('cuit_guest_identifier') || 'guest');
+      updateCoinUI();
 
-  try {
-    // 2. Ambil data koin & berlian langsung dari database Supabase sesuai ID user
-    if (currentUser && currentUser.id) {
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('coins, diamonds')
-        .eq('id', currentUser.id)
-        .single();
-
-      if (data && !error) {
-        // Simpan ke storage khusus user ini
-        localStorage.setItem(`cuit_coins_${userId}`, data.coins || 0);
-        localStorage.setItem(`cuit_gems_${userId}`, data.diamonds || 0);
-      }
-    }
-
-    // 3. Tampilkan koin & berlian yang sesuai dengan user yang sedang aktif
-    const userCoins = localStorage.getItem(`cuit_coins_${userId}`) || '0';
-    const userGems = localStorage.getItem(`cuit_gems_${userId}`) || '0';
-
-    const coinEl = document.getElementById('userCoins') || document.querySelector('.coin-count');
-    const gemEl = document.getElementById('userGems') || document.querySelector('.gem-count');
-
-    if (coinEl) coinEl.innerText = userCoins;
-    if (gemEl) gemEl.innerText = userGems;
-
-  } catch (err) {
-    console.error('Gagal memperbarui UI Koin:', err);
-  }
-}
-
-      
       await Promise.all([
         loadUserLikes(),
         loadFollows(),
@@ -1786,23 +1750,19 @@
     }
 
     async function syncCoinsToSupabase() {
+      if (!currentUser) return;
+      
       try {
-        localStorage.setItem('cuit_free_coins', freeCoins);
-        localStorage.setItem('cuit_paid_coins', paidCoins);
-        localStorage.setItem('cuit_gems', gems);
-        localStorage.setItem('cuit_user_exp', usedPaidCoins);
-
-        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-        const myEmail = currentUser ? currentUser.email : guestId;
-
+        const myEmail = currentUser.email;
         const myOwnReferralCode = (customDisplayName || 'PENILIKBAGEUR').replace(/\s+/g, '').toUpperCase();
-
         let activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        
         if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
           mySponsorCode = activeSponsorRef;
         }
 
         const profilePayload = {
+          id: currentUser.id,
           email: myEmail,
           username: customDisplayName || 'Penilik Bageur',
           referral_code: myOwnReferralCode,
@@ -1813,17 +1773,31 @@
           used_paid_coins: usedPaidCoins
         };
 
-        if (currentUser && currentUser.id) {
-          profilePayload.id = currentUser.id;
-        }
-
-        await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' });
+        await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'id' });
       } catch (err) {
         console.error("Gagal sync ke Supabase:", err);
       }
     }
 
-    function updateCoinUI() {
+    async function updateCoinUI() {
+      if (currentUser) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('free_coins, paid_coins, gems')
+            .eq('id', currentUser.id)
+            .single();
+
+          if (data && !error) {
+            freeCoins = data.free_coins ?? freeCoins;
+            paidCoins = data.paid_coins ?? paidCoins;
+            gems = data.gems ?? gems;
+          }
+        } catch (err) {
+          console.error('Gagal memperbarui koin:', err);
+        }
+      }
+
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
       document.getElementById('gemsCount').innerText = gems;
@@ -3990,30 +3964,17 @@
         document.getElementById('adminReelsModal').style.display = 'none';
 
       } catch (err) {
-        alert('Terjadi kesalahan saat menyimpan: ' + error.message);
+        alert('Terjadi kesalahan saat menyimpan: ' + err.message);
       }
     }
 
     function handleAuthAction() {
-  if (currentUser) {
-    supabaseClient.auth.signOut().then(() => {
-      // Hapus data pengguna & cache koin/gems
-      localStorage.removeItem('cuit_user_id');
-      localStorage.removeItem('cuit_free_coins');
-      localStorage.removeItem('cuit_paid_coins');
-      localStorage.removeItem('cuit_gems');
-      localStorage.removeItem('cuit_user_coins');
-      
-      // TAMBAHKAN 2 BARIS INI:
-      localStorage.removeItem('cuit_coins');
-      localStorage.removeItem('cuit_user_data');
-
-      alert('Berhasil keluar akun!');
-      location.reload();
-    });
-  } else {
-    // ...
-
+      if (currentUser) {
+        supabaseClient.auth.signOut().then(() => {
+          localStorage.clear();
+          alert('Berhasil keluar akun!');
+          location.reload();
+        });
       } else {
         const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
         document.getElementById('referralCodeInput').value = activeSponsor;
@@ -4042,12 +4003,6 @@
       
       if (!error) {
         const defaultUsername = email.split('@')[0];
-
-        localStorage.removeItem('cuit_user_name');
-        localStorage.setItem('cuit_free_coins', 20);
-        localStorage.setItem('cuit_paid_coins', 0);
-        localStorage.setItem('cuit_gems', 0);
-        localStorage.setItem('cuit_user_exp', 0);
 
         customDisplayName = defaultUsername;
         freeCoins = 20;
@@ -4203,40 +4158,35 @@
       await prompt("Salin link sponsor kamu di bawah ini:", fullSponsorLink);
     }
 
-    // --- FUNGSI TOP-UP DOKU DIPERBAIKI (LANGSUNG TERLEMPAR TANPA POP-UP BANYAK) ---
+    // --- FUNGSI TOP-UP DOKU PAYMENT LINK ---
     function topUpWithDoku(amount, koinAmount) {
-  // 1. Tutup modal pilihan koin
-  const modal = document.getElementById('dokuTopUpModal');
-  if (modal) modal.style.display = 'none';
+      const modal = document.getElementById('dokuTopUpModal');
+      if (modal) modal.style.display = 'none';
 
-  // 2. MAPPING LINK DOKU PAYMENT LINK
-  const dokuLinks = {
-    1000: 'https://pay.doku.com/p-link/p/5Lr8cjwDYy',
-    5000: 'https://pay.doku.com/p-link/p/q4afclsZ3r',
-    10000: 'https://pay.doku.com/p-link/p/aRzht7C0Ex',
-    20000: 'https://pay.doku.com/p-link/p/U7sCOZOH2n',
-    50000: 'https://pay.doku.com/p-link/p/NE9tiuqt2x',
-    100000: 'https://pay.doku.com/p-link/p/w4z9HUHsgx'
-  };
+      const dokuLinks = {
+        1000: 'https://pay.doku.com/p-link/p/5Lr8cjwDYy',
+        5000: 'https://pay.doku.com/p-link/p/q4afclsZ3r',
+        10000: 'https://pay.doku.com/p-link/p/aRzht7C0Ex',
+        20000: 'https://pay.doku.com/p-link/p/U7sCOZOH2n',
+        50000: 'https://pay.doku.com/p-link/p/NE9tiuqt2x',
+        100000: 'https://pay.doku.com/p-link/p/w4z9HUHsgx'
+      };
 
-  let checkoutUrl = dokuLinks[amount] || dokuLinks[1000];
+      let checkoutUrl = dokuLinks[amount] || dokuLinks[1000];
 
-  // 3. AMBIL DATA USER AKTIF UNTUK PRE-FILL DOKU
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const userEmail = currentUser ? currentUser.email : guestId;
-  const userName = customDisplayName || 'Pengguna CUIT';
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const userEmail = currentUser ? currentUser.email : guestId;
+      const userName = customDisplayName || 'Pengguna CUIT';
 
-  // 4. TAMBAHKAN PARAMETER QUERY PRE-FILL UNTUK DOKU
-  const params = new URLSearchParams({
-    name: userName,
-    email: userEmail,
-    customer_name: userName,
-    customer_email: userEmail
-  });
+      const params = new URLSearchParams({
+        name: userName,
+        email: userEmail,
+        customer_name: userName,
+        customer_email: userEmail
+      });
 
-  // 5. ARAHKAN KE URL DOKU DENGAN PARAMETER
-  window.location.href = `${checkoutUrl}?${params.toString()}`;
-}
+      window.location.href = `${checkoutUrl}?${params.toString()}`;
+    }
 
     checkUser();
   </script>
