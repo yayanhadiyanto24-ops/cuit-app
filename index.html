@@ -1002,9 +1002,9 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN -->
+    <!-- MODAL DETAIL PROFIL ANGGOTA LAIN (VERSI LENGKAP) -->
   <div id="userProfileModal" class="modal" style="z-index: 120;">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
         <h3 style="font-size:15px; font-weight:900;">Profil Anggota</h3>
         <button onclick="document.getElementById('userProfileModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
@@ -1016,23 +1016,48 @@
         <span class="btn-sm-badge" id="mBadge" style="margin-top: 4px; background:#e2e7f5; color:#333;">🌱 Cuiter Baru</span>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 12px; text-align: center;">
-        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
-          <div style="font-size:13px; font-weight:900;" id="mExp">0</div>
-          <div style="font-size:9px; color:var(--text-sub);">Jam Terbang (EXP)</div>
+      <!-- GRID STATISTIK UTAMA -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; text-align: center;">
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900;" id="mExp">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">EXP Digunakan</div>
         </div>
-        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
-          <div style="font-size:13px; font-weight:900;" id="mFollowers">0</div>
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900;" id="mFollowers">0</div>
           <div style="font-size:9px; color:var(--text-sub);">Pengikut</div>
         </div>
-        <div style="background:#f8f9fe; padding:8px; border-radius:10px;">
-          <div style="font-size:13px; font-weight:900;" id="mFollowing">0</div>
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900;" id="mFollowing">0</div>
           <div style="font-size:9px; color:var(--text-sub);">Mengikuti</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900;" id="mDownlines">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Downline</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900;" id="mPostsCount">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Postingan</div>
+        </div>
+        <div style="background:#f8f9fe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900; color:#d97706;" id="mFreeCoins">0</div>
+          <div style="font-size:9px; color:var(--text-sub);">Koin Gratis</div>
+        </div>
+      </div>
+
+      <!-- GRID DOMPET / KOIN & PERMATA -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; text-align: center;">
+        <div style="background:#ecfdf5; border:1px solid #a7f3d0; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900; color:#059669;" id="mPaidCoins">0 🪙</div>
+          <div style="font-size:9px; color:#047857;">Koin Berbayar</div>
+        </div>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:8px 4px; border-radius:10px;">
+          <div style="font-size:12px; font-weight:900; color:#2563eb;" id="mGems">0 💎</div>
+          <div style="font-size:9px; color:#1d4ed8;">Permata CUIT</div>
         </div>
       </div>
 
       <div style="background: #f8f9fe; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 12px; border: 1px solid #eef1f8;">
-        <b>👥 Sponsor:</b> <span id="mSponsorName">ADMINCUIT</span>
+        <b>👥 Sponsor / Referral:</b> <span id="mSponsorName">ADMINCUIT</span>
       </div>
 
       <div id="mFollowActionContainer"></div>
@@ -4198,7 +4223,7 @@
 
       window.location.href = `${checkoutUrl}?${params.toString()}`;
     }
-// --- FUNGSI TAMPILKAN PROFIL DETAIL USER SAAT NAMA DIKETUK ---
+// --- FUNGSI TAMPILKAN PROFIL DETAIL LENGKAP USER ---
 async function openUserProfileModal(userEmail, userName, userExp) {
   const modal = document.getElementById('userProfileModal');
   if (!modal) return;
@@ -4209,18 +4234,34 @@ async function openUserProfileModal(userEmail, userName, userExp) {
   document.getElementById('mBadge').innerText = lvl.title;
   document.getElementById('mBadge').style.background = lvl.color;
   document.getElementById('mBadge').style.color = '#fff';
-  document.getElementById('mExp').innerText = `${userExp || 0} EXP`;
+  document.getElementById('mExp').innerText = `${userExp || 0}`;
 
+  // 1. Ambil data profil user dari Supabase
   const { data: prof } = await supabaseClient
     .from('profiles')
-    .select('followers_count, following_count, sponsor')
+    .select('username, followers_count, following_count, sponsor, free_coins, paid_coins, gems, used_paid_coins')
     .eq('email', userEmail)
     .maybeSingle();
 
+  const userSponsorCode = (prof && prof.username ? prof.username : userName || '').replace(/\s+/g, '').toUpperCase();
+
+  // 2. Query paralel untuk menghitung Downline langsung & Jumlah Postingan
+  const [{ count: downlineCount }, { count: postCount }] = await Promise.all([
+    supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${userSponsorCode},sponsor.ilike.${userName}`),
+    supabaseClient.from('curhat').select('*', { count: 'exact', head: true }).eq('user_email', userEmail)
+  ]);
+
+  // 3. Masukkan data ke tampilan modal
   document.getElementById('mFollowers').innerText = prof?.followers_count || 0;
   document.getElementById('mFollowing').innerText = prof?.following_count || 0;
+  document.getElementById('mDownlines').innerText = downlineCount || 0;
+  document.getElementById('mPostsCount').innerText = postCount || 0;
+  document.getElementById('mFreeCoins').innerText = prof?.free_coins || 0;
+  document.getElementById('mPaidCoins').innerText = `${(prof?.paid_coins || 0).toLocaleString('id-ID')} 🪙`;
+  document.getElementById('mGems').innerText = `${(prof?.gems || 0).toLocaleString('id-ID')} 💎`;
   document.getElementById('mSponsorName').innerText = prof?.sponsor || 'ADMINCUIT';
 
+  // 4. Tombol aksi Ikuti
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
   const myEmail = currentUser ? currentUser.email : guestId;
   const isSelf = (userEmail === myEmail);
@@ -4239,34 +4280,6 @@ async function openUserProfileModal(userEmail, userName, userExp) {
   }
 
   modal.style.display = 'flex';
-}
-
-// --- FUNGSI EDIT PROFIL ---
-function openEditProfileModal() {
-  document.getElementById('editDisplayName').value = customDisplayName || 'ADMINCUIT';
-  document.getElementById('editProfileModal').style.display = 'flex';
-}
-
-async function saveProfileChanges() {
-  const newName = document.getElementById('editDisplayName').value.trim();
-  if (!newName) return alert('Nama tampilan tidak boleh kosong!');
-
-  customDisplayName = newName;
-  localStorage.setItem('cuit_user_name', newName);
-
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
-
-  await supabaseClient
-    .from('profiles')
-    .update({ username: newName, updated_at: new Date().toISOString() })
-    .eq('email', myEmail);
-
-  document.getElementById('editProfileModal').style.display = 'none';
-  alert('✅ Profil berhasil diperbarui!');
-  
-  renderProfileData();
-  loadPosts();
 }
 
     checkUser();
