@@ -4107,7 +4107,7 @@
         gems = 0;
         usedPaidCoins = 0;
 
-        await supabaseClient.from('profiles').upsert([
+                await supabaseClient.from('profiles').upsert([
           {
             id: data.user ? data.user.id : undefined,
             email: email,
@@ -4116,9 +4116,11 @@
             free_coins: 20,
             paid_coins: 0,
             gems: 0,
-            used_paid_coins: 0
+            used_paid_coins: 0,
+            created_at: new Date().toISOString() // <-- Tambahkan baris ini
           }
         ], { onConflict: 'email' });
+
 
         document.getElementById('authModal').style.display = 'none';
         await alert(`🎉 Pendaftaran berhasil! Akun baru (${defaultUsername}) berhasil dibuat di bawah sponsor: ${sponsorCode}.`);
