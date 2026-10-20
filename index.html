@@ -1813,23 +1813,42 @@
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
-        // 3. KOLEKTOR KOIN
-        if (weeklyGifts && weeklyGifts.length > 0) {
-          const collectorMap = {};
-          weeklyGifts.forEach(g => { 
-            const target = g.recipient_email ? g.recipient_email.split('@')[0] : 'Kreator';
-            collectorMap[target] = (collectorMap[target] || 0) + (g.coins_amount || 0); 
-          });
-          const topCollector = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
-          
-          currentChampKoinData = { name: topCollector, coins: collectorMap[topCollector] };
-          document.getElementById('champPermataName').innerText = topCollector;
-          document.getElementById('champPermataScore').innerText = `${collectorMap[topCollector].toLocaleString('id-ID')} 🪙`;
-        } else {
-          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-          document.getElementById('champPermataName').innerText = 'Belum Ada';
-          document.getElementById('champPermataScore').innerText = '0 🪙';
-        }
+        // 3. KOLEKTOR KOIN MINGGU INI
+if (weeklyGifts && weeklyGifts.length > 0) {
+  const collectorMap = {};
+  weeklyGifts.forEach(g => { 
+    if (g.recipient_email) {
+      collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0); 
+    }
+  });
+
+  if (Object.keys(collectorMap).length > 0) {
+    const topCollectorEmail = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
+    const topCoins = collectorMap[topCollectorEmail];
+
+    // Ambil username asli dari tabel profiles berdasarkan email
+    const { data: prof } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('email', topCollectorEmail)
+      .maybeSingle();
+
+    const displayName = prof && prof.username ? prof.username : topCollectorEmail.split('@')[0];
+
+    currentChampKoinData = { name: displayName, coins: topCoins };
+    document.getElementById('champPermataName').innerText = displayName;
+    document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
+  } else {
+    currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+    document.getElementById('champPermataName').innerText = 'Belum Ada';
+    document.getElementById('champPermataScore').innerText = '0 🪙';
+  }
+} else {
+  currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+  document.getElementById('champPermataName').innerText = 'Belum Ada';
+  document.getElementById('champPermataScore').innerText = '0 🪙';
+}
+
 
         // 4. BINTANG CURHAT
         if (data && data.length > 0) {
