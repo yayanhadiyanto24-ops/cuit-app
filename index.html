@@ -3346,7 +3346,7 @@
       if (userLvl.title === '🌱 Cuiter Baru') return alert('Syarat membuat Live Teks minimal level 💙 Cuiter Setia!');
       if (paidCoins < 10) return alert('Minimal saldo 10 Koin Berbayar untuk siaran Live Teks!');
 
-      const title = prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
+      const title = await prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
       if (!title) return;
 
       paidCoins -= 10;
