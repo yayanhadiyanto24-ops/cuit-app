@@ -948,7 +948,7 @@
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
+      <div class="menu-btn-item" onclick="document.getElementById('dokuTopUpModal').style.display='flex'">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
       <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
       <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
@@ -4214,7 +4214,7 @@ async function copyMySponsorLink() {
       <button class="btn-primary" onclick="topUpWithDoku(100000, 100000)">100.000 Koin<br><b>Rp 100.000</b></button>
     </div>
 
-    <button class="btn-primary" style="margin: 15px auto; display: block;" onclick="document.getElementById('dokuTopUpModal').style.display='flex'">Top-Up Koin DOKU</button>
+    <button onclick="document.getElementById('dokuTopUpModal').style.display='none'" style="background:#eee; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Tutup</button>
   </div>
 </div>
 
