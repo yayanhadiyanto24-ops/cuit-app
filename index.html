@@ -4161,6 +4161,23 @@ async function copyMySponsorLink() {
 
   await prompt("Salin link sponsor kamu di bawah ini:", fullSponsorLink);
 }
+    async function topUpWithDoku(amount, koinAmount) {
+  const user = (await supabaseClient.auth.getUser()).data.user;
+  if (!user) return alert('Silakan login terlebih dahulu!');
+
+  const customerName = customDisplayName || user.email.split('@')[0];
+  const orderId = 'CUIT-' + Date.now();
+
+  const setuju = await confirm(`Top-Up ${koinAmount} Paid Coins seharga Rp ${amount.toLocaleString('id-ID')} via DOKU?`);
+  if (!setuju) return;
+
+  const dokuClientId = 'BRN-0224-1792291591522';
+  const checkoutUrl = `https://checkout.doku.com/checkout/link?client_id=${dokuClientId}&order_id=${orderId}&amount=${amount}&name=${encodeURIComponent(customerName)}&email=${encodeURIComponent(user.email)}`;
+
+  await alert('Mengarahkan ke halaman pembayaran DOKU...');
+  window.location.href = checkoutUrl;
+}
+
 
     checkUser();
   </script>
