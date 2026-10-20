@@ -1577,7 +1577,6 @@
       const myEmail = currentUser ? currentUser.email : guestId;
       const savedName = customDisplayName || 'ADMINCUIT';
 
-      // Tarik profil langsung dari Supabase
       const { data: profile } = await supabaseClient
         .from('profiles')
         .select('*')
@@ -1585,7 +1584,6 @@
         .maybeSingle();
 
       if (profile) {
-        // Utamakan data dari Supabase
         freeCoins = profile.free_coins ?? 20;
         paidCoins = profile.paid_coins ?? 102326;
         gems = profile.gems ?? 8167;
@@ -1594,7 +1592,6 @@
         if (profile.username) customDisplayName = profile.username;
         if (profile.sponsor) mySponsorCode = profile.sponsor;
 
-        // Simpan ke cache lokal
         localStorage.setItem('cuit_free_coins', freeCoins);
         localStorage.setItem('cuit_paid_coins', paidCoins);
         localStorage.setItem('cuit_gems', gems);
@@ -1710,302 +1707,285 @@
       return { title: '🌱 Cuiter Baru', icon: '🌱', next: '💙 Cuiter Setia', target: 1000, prev: 0, color: '#8e8e93' };
     }
 
-    async function openUserProfileModal(email, name, poin) {
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const isSelf = (email === myEmail);
-      
-      const lvl = getUserLevel(poin);
-      
-      document.getElementById('mName').innerText = name;
-      document.getElementById('mBadge').innerText = lvl.title;
-      document.getElementById('mBadge').style.background = lvl.color;
-      document.getElementById('mBadge').style.color = '#fff';
-      document.getElementById('mExp').innerText = `${poin} EXP`;
+    async function loadPosts() {
+      const container = document.getElementById('postsList');
+      const promotedCarousel = document.getElementById('promotedCarousel');
+      const promotedSection = document.getElementById('promotedSection');
 
-      const { data: profile } = await supabaseClient.from('profiles').select('sponsor').eq('email', email).maybeSingle();
-      document.getElementById('mSponsorName').innerText = (profile && profile.sponsor) ? profile.sponsor : CONFIG.DEFAULT_SPONSOR;
+      try {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        const day = startOfWeek.getDay();
+        const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+        startOfWeek.setDate(diffToMonday);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfWeekISO = startOfWeek.toISOString();
 
-      const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', email),
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail)
-      ]);
+        // 1. Ambil data curhatan utama
+        const { data, error } = await supabaseClient
+          .from('curhat')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      document.getElementById('mFollowers').innerText = followersCount || 0;
-      document.getElementById('mFollowing').innerText = followingCount || 0;
+        if (error) throw error;
 
-      const followContainer = document.getElementById('mFollowActionContainer');
-      if (!isSelf) {
-        const isFollowing = followingSet.has(email);
-        followContainer.innerHTML = `
-          <button class="btn-primary" style="width:100%; ${isFollowing ? 'background:#eef1f8; color:#555;' : ''}" onclick="toggleFollowFromModal('${email}', '${name}', ${poin})">
-            ${isFollowing ? '✓ Sudah Mengikuti (Klik untuk Batal)' : '+ Ikuti Anggota Ini'}
-          </button>
-        `;
-      } else {
-        followContainer.innerHTML = `<button class="btn-secondary" style="width:100%; background:#eee;" onclick="document.getElementById('userProfileModal').style.display='none'">Tutup (Ini Akun Kamu)</button>`;
+        // 2. Ambil profil & transaksi pendukung
+        const [
+          { data: profilesData },
+          { data: activeLivePromos },
+          { data: weeklyGifts },
+          { data: weeklyLives },
+          { data: weeklyLiveMsgs },
+          { data: weeklyComments },
+          { data: weeklyFollows },
+          { data: weeklyNewMembers }
+        ] = await Promise.all([
+          supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
+          supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
+          supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
+          supabaseClient.from('lives').select('*').gte('created_at', startOfWeekISO),
+          supabaseClient.from('live_messages').select('*').gte('created_at', startOfWeekISO),
+          supabaseClient.from('comments').select('username, user_email').gte('created_at', startOfWeekISO),
+          supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
+          supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
+        ]);
+
+        if (profilesData) {
+          profilesMap = {};
+          profilesData.forEach(pr => {
+            if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
+            if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
+          });
+        }
+
+        // --- AMBIL SEMUA DATA KATEGORI MINGGU INI ---
+
+        // 1. RAJA SAWER
+        if (weeklyGifts && weeklyGifts.length > 0) {
+          const sawerMap = {};
+          weeklyGifts.forEach(g => { 
+            const name = g.sender_name || 'Sultan';
+            sawerMap[name] = (sawerMap[name] || 0) + (g.coins_amount || 0); 
+          });
+          const topSawer = Object.keys(sawerMap).reduce((a, b) => sawerMap[a] > sawerMap[b] ? a : b);
+          document.getElementById('champSawerName').innerText = topSawer;
+          document.getElementById('champSawerScore').innerText = `${sawerMap[topSawer].toLocaleString('id-ID')} 🪙`;
+        } else {
+          document.getElementById('champSawerName').innerText = 'Belum Ada';
+          document.getElementById('champSawerScore').innerText = '0 🪙';
+        }
+
+        // 2. LIVE TERMEGAH (Hitung dari Live & Live Messages)
+        let liveCoinMap = {};
+        if (weeklyLives && weeklyLives.length > 0) {
+          weeklyLives.forEach(l => {
+            if (l.host_name) {
+              liveCoinMap[l.host_name] = (liveCoinMap[l.host_name] || 0) + (l.total_coins_received || 0);
+            }
+          });
+        }
+        if (weeklyLiveMsgs && weeklyLiveMsgs.length > 0) {
+          weeklyLiveMsgs.forEach(m => {
+            if (m.content && m.content.includes('🎁 Mengirimkan Gift')) {
+              const matchCoins = m.content.match(/\((\d+)\s*🪙\)/);
+              if (matchCoins) {
+                const coins = parseInt(matchCoins[1]) || 0;
+                const matchTarget = m.content.match(/untuk\s+@(.+)/);
+                const targetHost = matchTarget ? matchTarget[1].trim() : 'Host';
+                liveCoinMap[targetHost] = (liveCoinMap[targetHost] || 0) + coins;
+              }
+            }
+          });
+        }
+
+        const topHosts = Object.keys(liveCoinMap);
+        if (topHosts.length > 0) {
+          const topHost = topHosts.reduce((a, b) => liveCoinMap[a] > liveCoinMap[b] ? a : b);
+          if (liveCoinMap[topHost] > 0) {
+            document.getElementById('champLiveName').innerText = topHost;
+            document.getElementById('champLiveScore').innerText = `${liveCoinMap[topHost].toLocaleString('id-ID')} 🪙`;
+          } else {
+            document.getElementById('champLiveName').innerText = 'Belum Ada';
+            document.getElementById('champLiveScore').innerText = '0 🪙';
+          }
+        } else {
+          document.getElementById('champLiveName').innerText = 'Belum Ada';
+          document.getElementById('champLiveScore').innerText = '0 🪙';
+        }
+
+        // 3. KOLEKTOR KOIN
+        if (weeklyGifts && weeklyGifts.length > 0) {
+          const collectorMap = {};
+          weeklyGifts.forEach(g => { 
+            const target = g.recipient_email ? g.recipient_email.split('@')[0] : 'Kreator';
+            collectorMap[target] = (collectorMap[target] || 0) + (g.coins_amount || 0); 
+          });
+          const topCollector = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
+          
+          currentChampKoinData = { name: topCollector, coins: collectorMap[topCollector] };
+          document.getElementById('champPermataName').innerText = topCollector;
+          document.getElementById('champPermataScore').innerText = `${collectorMap[topCollector].toLocaleString('id-ID')} 🪙`;
+        } else {
+          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+          document.getElementById('champPermataName').innerText = 'Belum Ada';
+          document.getElementById('champPermataScore').innerText = '0 🪙';
+        }
+
+        // 4. BINTANG CURHAT
+        if (data && data.length > 0) {
+          const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
+          if (topPost && ((topPost.likes_count||0) + (topPost.comments_count||0)) > 0) {
+            document.getElementById('champCurhatName').innerText = topPost.username || topPost.user_email.split('@')[0];
+            document.getElementById('champCurhatScore').innerText = `${topPost.likes_count||0} ♥ + ${topPost.comments_count||0} 💬`;
+          } else {
+            document.getElementById('champCurhatName').innerText = 'Belum Ada';
+            document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+          }
+        } else {
+          document.getElementById('champCurhatName').innerText = 'Belum Ada';
+          document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
+        }
+
+        // 5. PUJANGGA UTAMA
+        if (data && data.length > 0) {
+          const postCounts = {};
+          data.forEach(p => { const name = p.username || p.user_email.split('@')[0]; postCounts[name] = (postCounts[name] || 0) + 1; });
+          const topPujangga = Object.keys(postCounts).reduce((a, b) => postCounts[a] > postCounts[b] ? a : b);
+          document.getElementById('champPujanggaName').innerText = topPujangga;
+          document.getElementById('champPujanggaScore').innerText = `${postCounts[topPujangga]} Post`;
+        } else {
+          document.getElementById('champPujanggaName').innerText = 'Belum Ada';
+          document.getElementById('champPujanggaScore').innerText = '0 Post';
+        }
+
+        // 6. RAJA KOMENTAR
+        if (weeklyComments && weeklyComments.length > 0) {
+          const commentCounts = {};
+          weeklyComments.forEach(c => { const name = c.username || (c.user_email ? c.user_email.split('@')[0] : 'Komentator'); commentCounts[name] = (commentCounts[name] || 0) + 1; });
+          const topKomentator = Object.keys(commentCounts).reduce((a, b) => commentCounts[a] > commentCounts[b] ? a : b);
+          document.getElementById('champKomentarName').innerText = topKomentator;
+          document.getElementById('champKomentarScore').innerText = `${commentCounts[topKomentator]} Komen`;
+        } else {
+          document.getElementById('champKomentarName').innerText = 'Belum Ada';
+          document.getElementById('champKomentarScore').innerText = '0 Komen';
+        }
+
+        // 7. PENGIKUT TERBANYAK
+        if (weeklyFollows && weeklyFollows.length > 0) {
+          const followCounts = {};
+          weeklyFollows.forEach(f => {
+            if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
+          });
+          if (Object.keys(followCounts).length > 0) {
+            const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
+            document.getElementById('champFollowersName').innerText = topEmail.split('@')[0];
+            document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
+          }
+        } else {
+          document.getElementById('champFollowersName').innerText = 'Belum Ada';
+          document.getElementById('champFollowersScore').innerText = '0 Pengikut';
+        }
+
+        // 8. MAGNET SPONSOR
+        if (weeklyNewMembers && weeklyNewMembers.length > 0) {
+          const sponsorCounts = {};
+          weeklyNewMembers.forEach(m => {
+            if (m.sponsor) {
+              const sp = m.sponsor.toUpperCase();
+              sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
+            }
+          });
+          if (Object.keys(sponsorCounts).length > 0) {
+            const topSponsor = Object.keys(sponsorCounts).reduce((a, b) => sponsorCounts[a] > sponsorCounts[b] ? a : b);
+            document.getElementById('champSponsorName').innerText = topSponsor;
+            document.getElementById('champSponsorScore').innerText = `+${sponsorCounts[topSponsor]} Member`;
+          }
+        } else {
+          document.getElementById('champSponsorName').innerText = 'Belum Ada';
+          document.getElementById('champSponsorScore').innerText = '0 Member';
+        }
+
+        // --- RENDER SOROTAN PROMOSI & BERANDA ---
+        const nowMs = Date.now();
+        let sorotanItems = [];
+
+        if (activeLivePromos && activeLivePromos.length > 0) {
+          activeLivePromos.forEach(live => {
+            sorotanItems.push({
+              type: 'live',
+              id: live.id,
+              title: live.title,
+              username: live.host_name,
+              user_email: live.host_email,
+              promoted_until: live.promoted_until,
+              updated_at: live.updated_at || live.created_at
+            });
+          });
+        }
+
+        data.filter(p => p.is_promoted && p.promoted_until && new Date(p.promoted_until).getTime() > nowMs)
+          .forEach(post => {
+            sorotanItems.push({
+              type: 'post',
+              id: post.id,
+              title: post.content,
+              username: post.username,
+              user_email: post.user_email,
+              promoted_until: post.promoted_until,
+              updated_at: post.updated_at || post.created_at,
+              rawPost: post
+            });
+          });
+
+        if (sorotanItems.length > 0) {
+          let cardsHTML = '';
+          sorotanItems.forEach(item => {
+            let rawName = item.username || 'Pengguna';
+            let snippet = item.title.length > 45 ? item.title.substring(0, 45) + '...' : item.title;
+            const isLive = (item.type === 'live');
+
+            cardsHTML += `
+              <div onclick="${isLive ? `joinLiveRoomDirect('${item.id}')` : `openPromotedDetail('${item.id}')`}" 
+                   style="min-width: 100px; width: 100px; height: 145px; background: ${isLive ? 'linear-gradient(180deg, #ff4757 0%, #2f3542 100%)' : 'linear-gradient(180deg, #6c5ce7 0%, #341f97 100%)'}; border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div style="width: 24px; height: 24px; border-radius: 50%; background: #fff; color:#333; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ffd700;">🤍</div>
+                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800;">🔴 LIVE</span>` : ''}
+                </div>
+                <div style="font-size: 9.5px; color: #ffffff; line-height: 1.25; font-weight: 600; overflow: hidden; margin: 4px 0;">${snippet}</div>
+                <div style="font-size: 9px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
+              </div>
+            `;
+          });
+          promotedSection.style.display = 'block';
+          promotedCarousel.innerHTML = cardsHTML;
+        } else {
+          promotedSection.style.display = 'none';
+        }
+
+        allPostsCache = data;
+        renderFilteredFeed();
+
+      } catch (err) {
+        console.error("Error loading posts:", err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan tekan tombol Refresh.</p>';
+      }
+    }
+
+    function renderFilteredFeed() {
+      const container = document.getElementById('postsList');
+      let filteredData = allPostsCache;
+
+      if (currentFeedFilter === 'mengikuti') {
+        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
       }
 
-      document.getElementById('userProfileModal').style.display = 'flex';
-    }
-
-    async function toggleFollowFromModal(email, name, poin) {
-      await toggleFollow(email, null);
-      openUserProfileModal(email, name, poin);
-    }
-
-    function openEditProfileModal() {
-      const currentName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'ADMINCUIT');
-      document.getElementById('editDisplayName').value = currentName;
-      document.getElementById('editProfileModal').style.display = 'flex';
-    }
-
-    async function saveProfileChanges() {
-      const newName = document.getElementById('editDisplayName').value.trim();
-      if (!newName) return alert('Nama tidak boleh kosong!');
-      
-      customDisplayName = newName;
-      localStorage.setItem('cuit_user_name', newName);
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      let curhatUpdateQuery = supabaseClient.from('curhat').update({ username: newName });
-      if (currentUser) {
-        curhatUpdateQuery = curhatUpdateQuery.eq('user_id', currentUser.id);
-      } else {
-        curhatUpdateQuery = curhatUpdateQuery.eq('user_email', myEmail);
-      }
-      await curhatUpdateQuery;
-
-      document.getElementById('editProfileModal').style.display = 'none';
-      
-      updateCoinUI();
-      await syncCoinsToSupabase();
-      await loadPosts();
-      
-      alert(`Profil berhasil diperbarui!\nNama Tampilan: ${newName}`);
-    }
-
-    function copyMySponsorLink() {
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
-      
-      const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (customDisplayName.replace(/\s+/g, '').toUpperCase() || 'ADMINCUIT');
-      const myLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
-      
-      navigator.clipboard.writeText(myLink).then(() => {
-        alert(`Link sponsor resmi kamu berhasil disalin:\n${myLink}`);
-      }).catch(() => {
-        prompt('Salin link sponsor kamu di bawah ini:', myLink);
-      });
-    }
-
-    function downloadAPK() {
-      window.open('https://github.com/yayanhadiyanto24-ops/cuit-app/raw/refs/heads/main/cuit.apk', '_blank');
-    }
-
-    function saveDraftLocally() {
-      const content = document.getElementById('postContent').value.trim();
-      if (!content) return alert('Teks curhatan masih kosong!');
-      localStorage.setItem('cuit_draft_content', content);
-      alert('Draf berhasil disimpan di HP!');
-    }
-
-    function loadDraftLocally() {
-      const draft = localStorage.getItem('cuit_draft_content');
-      if (draft && !document.getElementById('postContent').value) {
-        document.getElementById('postContent').value = draft;
-        updateCharCount(document.getElementById('postContent'));
-      }
-    }
-
-    function toggleCurhatLimit() {
-      const textarea = document.getElementById('postContent');
-      const coins = Math.ceil((textarea.value.length || 1) / 1200);
-      const type = document.getElementById('curhatCoinType').value;
-      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
-      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
-    }
-
-    function updateCharCount(textarea) {
-      const coins = Math.ceil(textarea.value.length / 1200) || 1;
-      const type = document.getElementById('curhatCoinType').value;
-      const label = type === 'free' ? 'Koin Gratisan' : 'Bank Koin Berbayar';
-      document.getElementById('charCount').innerText = `${textarea.value.length} karakter (Biaya: ${coins} ${label})`;
-    }
-
-    async function submitNewPost() {
-      if (!currentUser) {
-        const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
-        document.getElementById('referralCodeInput').value = activeSponsor;
-        document.getElementById('authModal').style.display = 'flex';
-        alert('Yuk buat akun atau masuk dulu untuk menerbitkan curhatanmu!');
+      if (filteredData.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">${currentFeedFilter === 'mengikuti' ? 'Belum ada curhatan dari member yang kamu ikuti.' : 'Belum ada curhatan di beranda.'}</p>`;
         return;
       }
 
-      const type = document.getElementById('curhatCoinType').value;
-      const content = document.getElementById('postContent').value.trim();
-      const feeling = document.getElementById('postFeeling').value;
-
-      if (!content) return alert('Isi cerita tidak boleh kosong!');
-
-      const coinsNeeded = Math.ceil(content.length / 1200);
-
-      if (type === 'free') {
-        if (freeCoins < coinsNeeded) {
-          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Gratisan. Saldo koin gratisan kamu tidak cukup!`);
-        }
-        freeCoins -= coinsNeeded;
-      } else {
-        if (paidCoins < coinsNeeded) {
-          return alert(`Untuk menerbitkan ${content.length} karakter, kamu membutuhkan ${coinsNeeded} Koin Berbayar. Saldo Bank Koin kamu tidak cukup!`);
-        }
-        paidCoins -= coinsNeeded;
-        usedPaidCoins += coinsNeeded;
-      }
-
-      updateCoinUI();
-
-      const authorName = customDisplayName || currentUser.email.split('@')[0];
-
-      const { error } = await supabaseClient.from('curhat').insert([
-        { content, user_id: currentUser.id, user_email: currentUser.email, username: authorName, feeling, likes_count: 0, comments_count: 0, gifts_count: 0 }
-      ]);
-
-      if (!error) {
-        localStorage.removeItem('cuit_draft_content');
-        alert(`Curhatan berhasil diterbitkan!`);
-        document.getElementById('postContent').value = '';
-        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
-      } else {
-        alert('Gagal mengirim: ' + error.message);
-      }
+      container.innerHTML = filteredData.map(p => renderCardHTML(p)).join('');
     }
-           
-    async function loadPosts() {
-  const container = document.getElementById('postsList');
-  const promotedCarousel = document.getElementById('promotedCarousel');
-  const promotedSection = document.getElementById('promotedSection');
-
-  try {
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    const day = startOfWeek.getDay();
-    const diffToMonday = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
-    startOfWeek.setDate(diffToMonday);
-    startOfWeek.setHours(0, 0, 0, 0);
-    const startOfWeekISO = startOfWeek.toISOString();
-
-    // Ambil data curhatan utama dulu agar halaman tidak macet
-    const { data, error } = await supabaseClient
-      .from('curhat')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    // Ambil data pendukung secara aman
-    const [
-      { data: weeklyGifts },
-      { data: weeklyLives },
-      { data: weeklyComments },
-      { data: weeklyFollows },
-      { data: weeklyNewMembers }
-    ] = await Promise.all([
-      supabaseClient.from('gift_transactions').select('sender_name, recipient_email, coins_amount').gte('created_at', startOfWeekISO),
-      supabaseClient.from('lives').select('host_name, total_coins_received').gte('created_at', startOfWeekISO),
-      supabaseClient.from('comments').select('username, user_email').gte('created_at', startOfWeekISO),
-      supabaseClient.from('follows').select('following_email').gte('created_at', startOfWeekISO),
-      supabaseClient.from('profiles').select('sponsor').gte('created_at', startOfWeekISO)
-    ]);
-
-    // 1. RAJA SAWER
-    if (weeklyGifts && weeklyGifts.length > 0) {
-      const sawerMap = {};
-      weeklyGifts.forEach(g => { sawerMap[g.sender_name] = (sawerMap[g.sender_name] || 0) + (g.coins_amount || 0); });
-      const topSawer = Object.keys(sawerMap).reduce((a, b) => sawerMap[a] > sawerMap[b] ? a : b);
-      document.getElementById('champSawerName').innerText = topSawer;
-      document.getElementById('champSawerScore').innerText = `${sawerMap[topSawer].toLocaleString('id-ID')} 🪙`;
-    } else {
-      document.getElementById('champSawerName').innerText = 'Belum Ada';
-      document.getElementById('champSawerScore').innerText = '0 🪙';
-    }
-
-    // 2. LIVE TERMEGAH
-    if (weeklyLives && weeklyLives.length > 0) {
-      const liveMap = {};
-      weeklyLives.forEach(l => { liveMap[l.host_name] = (liveMap[l.host_name] || 0) + (l.total_coins_received || 0); });
-      const topHost = Object.keys(liveMap).reduce((a, b) => liveMap[a] > liveMap[b] ? a : b);
-      document.getElementById('champLiveName').innerText = topHost;
-      document.getElementById('champLiveScore').innerText = `${liveMap[topHost].toLocaleString('id-ID')} 🪙`;
-    } else {
-      document.getElementById('champLiveName').innerText = 'Belum Ada';
-      document.getElementById('champLiveScore').innerText = '0 🪙';
-    }
-
-    // 3. KOLEKTOR KOIN
-    if (weeklyGifts && weeklyGifts.length > 0) {
-      const collectorMap = {};
-      weeklyGifts.forEach(g => { collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0); });
-      const topCollector = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
-      document.getElementById('champPermataName').innerText = topCollector.split('@')[0];
-      document.getElementById('champPermataScore').innerText = `${collectorMap[topCollector].toLocaleString('id-ID')} 🪙`;
-    } else {
-      document.getElementById('champPermataName').innerText = 'Belum Ada';
-      document.getElementById('champPermataScore').innerText = '0 🪙';
-    }
-
-    // 4. BINTANG CURHAT
-    if (data && data.length > 0) {
-      const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
-      if (topPost && ((topPost.likes_count||0) + (topPost.comments_count||0)) > 0) {
-        document.getElementById('champCurhatName').innerText = topPost.username || topPost.user_email.split('@')[0];
-        document.getElementById('champCurhatScore').innerText = `${topPost.likes_count||0} ♥ + ${topPost.comments_count||0} 💬`;
-      } else {
-        document.getElementById('champCurhatName').innerText = 'Belum Ada';
-        document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-      }
-    }
-
-    // 5. PUJANGGA UTAMA
-    if (data && data.length > 0) {
-      const postCounts = {};
-      data.forEach(p => { const name = p.username || p.user_email.split('@')[0]; postCounts[name] = (postCounts[name] || 0) + 1; });
-      const topPujangga = Object.keys(postCounts).reduce((a, b) => postCounts[a] > postCounts[b] ? a : b);
-      document.getElementById('champPujanggaName').innerText = topPujangga;
-      document.getElementById('champPujanggaScore').innerText = `${postCounts[topPujangga]} Post`;
-    }
-
-    // 6. RAJA KOMENTAR
-    if (weeklyComments && weeklyComments.length > 0) {
-      const commentCounts = {};
-      weeklyComments.forEach(c => { const name = c.username || c.user_email.split('@')[0]; commentCounts[name] = (commentCounts[name] || 0) + 1; });
-      const topKomentator = Object.keys(commentCounts).reduce((a, b) => commentCounts[a] > commentCounts[b] ? a : b);
-      document.getElementById('champKomentarName').innerText = topKomentator;
-      document.getElementById('champKomentarScore').innerText = `${commentCounts[topKomentator]} Komen`;
-    } else {
-      document.getElementById('champKomentarName').innerText = 'Belum Ada';
-      document.getElementById('champKomentarScore').innerText = '0 Komen';
-    }
-
-    // Render postingan utama
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
-      allPostsCache = [];
-      return;
-    }
-
-    allPostsCache = data;
-    renderFilteredFeed();
-
-  } catch (err) {
-    console.error("Error loading posts:", err);
-    container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan muat ulang.</p>';
-  }
-}
-
 
     function openPromotedDetail(postId) {
       const post = allPostsCache.find(p => String(p.id) === String(postId));
