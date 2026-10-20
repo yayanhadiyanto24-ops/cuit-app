@@ -1710,7 +1710,41 @@
         }
       }
 
-      updateCoinUI();
+      async function updateCoinUI() {
+  // 1. Tentukan ID unik pengguna (Guest atau User Login)
+  const userId = currentUser ? currentUser.id : (localStorage.getItem('cuit_guest_identifier') || 'guest');
+
+  try {
+    // 2. Ambil data koin & berlian langsung dari database Supabase sesuai ID user
+    if (currentUser && currentUser.id) {
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('coins, diamonds')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (data && !error) {
+        // Simpan ke storage khusus user ini
+        localStorage.setItem(`cuit_coins_${userId}`, data.coins || 0);
+        localStorage.setItem(`cuit_gems_${userId}`, data.diamonds || 0);
+      }
+    }
+
+    // 3. Tampilkan koin & berlian yang sesuai dengan user yang sedang aktif
+    const userCoins = localStorage.getItem(`cuit_coins_${userId}`) || '0';
+    const userGems = localStorage.getItem(`cuit_gems_${userId}`) || '0';
+
+    const coinEl = document.getElementById('userCoins') || document.querySelector('.coin-count');
+    const gemEl = document.getElementById('userGems') || document.querySelector('.gem-count');
+
+    if (coinEl) coinEl.innerText = userCoins;
+    if (gemEl) gemEl.innerText = userGems;
+
+  } catch (err) {
+    console.error('Gagal memperbarui UI Koin:', err);
+  }
+}
+
       
       await Promise.all([
         loadUserLikes(),
