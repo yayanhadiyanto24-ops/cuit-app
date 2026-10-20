@@ -2212,6 +2212,8 @@
       usedPaidCoins += hours;
       updateCoinUI(true);
 
+      await addCoinsToPlatformPool(hours);
+
       alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
       loadPosts();
     }
@@ -2247,6 +2249,8 @@
       paidCoins -= minutes;
       usedPaidCoins += minutes;
       updateCoinUI(true);
+
+      await addCoinsToPlatformPool(minutes);
 
       alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
       loadPosts();
@@ -2443,6 +2447,7 @@
         if (!success) {
           return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis! Tonton video Misi Reels FB untuk isi koin.');
         }
+        if (freeCoins === 0) await addCoinsToPlatformPool(1);
 
         userLikedPostsSet.add(strPostId);
         const newLikeCount = (currentPost.likes_count || 0) + 1;
@@ -2530,6 +2535,7 @@
       if (!success) {
         return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
       }
+      if (freeCoins === 0) await addCoinsToPlatformPool(1);
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
@@ -3487,6 +3493,7 @@
       if (!success) {
         return alert('Koin kamu habis! Tonton video Misi Reels untuk mendapatkan koin tambahan.');
       }
+      if (freeCoins === 0) await addCoinsToPlatformPool(1);
 
       await supabaseClient.from('live_messages').insert([
         { live_id: currentActiveLive.id, username: myName, content: msg }
