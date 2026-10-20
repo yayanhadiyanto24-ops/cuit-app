@@ -3995,16 +3995,25 @@
     }
 
     function handleAuthAction() {
-      if (currentUser) {
-        supabaseClient.auth.signOut().then(() => {
-          localStorage.removeItem('cuit_user_name');
-          localStorage.removeItem('cuit_free_coins');
-          localStorage.removeItem('cuit_paid_coins');
-          localStorage.removeItem('cuit_gems');
-          localStorage.removeItem('cuit_user_exp');
-          alert('Berhasil keluar akun!');
-          location.reload();
-        });
+  if (currentUser) {
+    supabaseClient.auth.signOut().then(() => {
+      // Hapus data pengguna & cache koin/gems
+      localStorage.removeItem('cuit_user_id');
+      localStorage.removeItem('cuit_free_coins');
+      localStorage.removeItem('cuit_paid_coins');
+      localStorage.removeItem('cuit_gems');
+      localStorage.removeItem('cuit_user_coins');
+      
+      // TAMBAHKAN 2 BARIS INI:
+      localStorage.removeItem('cuit_coins');
+      localStorage.removeItem('cuit_user_data');
+
+      alert('Berhasil keluar akun!');
+      location.reload();
+    });
+  } else {
+    // ...
+
       } else {
         const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
         document.getElementById('referralCodeInput').value = activeSponsor;
