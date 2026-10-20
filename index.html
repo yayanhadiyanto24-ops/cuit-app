@@ -3991,29 +3991,52 @@ async function promoteLiveSession() {
     }
 
     async function submitSignUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const sponsorCode = document.getElementById('referralCodeInput').value || CONFIG.DEFAULT_SPONSOR;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const sponsorCode = document.getElementById('referralCodeInput').value || CONFIG.DEFAULT_SPONSOR;
 
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if (!error) {
-        const username = email.split('@')[0];
-        await supabaseClient.from('profiles').upsert([
-          {
-            id: data.user ? data.user.id : undefined,
-            email: email,
-            username: username,
-            sponsor: sponsorCode,
-            free_coins: 20,
-            paid_coins: 0,
-            gems: 0,
-            used_paid_coins: 0
-          }
-        ]);
+  if (!email || !password) return alert('Email dan password wajib diisi!');
 
-        alert(`Pendaftaran berhasil! Sponsor kamu: ${sponsorCode}. Silakan masuk.`);
-      } else alert('Error: ' + error.message);
-    }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  
+  if (!error) {
+    const defaultUsername = email.split('@')[0];
+
+    // Bersihkan data lokal lama agar tidak terbawa ke akun baru
+    localStorage.removeItem('cuit_user_name');
+    localStorage.setItem('cuit_free_coins', 20);
+    localStorage.setItem('cuit_paid_coins', 0);
+    localStorage.setItem('cuit_gems', 0);
+    localStorage.setItem('cuit_user_exp', 0);
+
+    customDisplayName = defaultUsername;
+    freeCoins = 20;
+    paidCoins = 0;
+    gems = 0;
+    usedPaidCoins = 0;
+
+    await supabaseClient.from('profiles').upsert([
+      {
+        id: data.user ? data.user.id : undefined,
+        email: email,
+        username: defaultUsername,
+        sponsor: sponsorCode,
+        free_coins: 20,
+        paid_coins: 0,
+        gems: 0,
+        used_paid_coins: 0
+      }
+    ], { onConflict: 'email' });
+
+    document.getElementById('authModal').style.display = 'none';
+    await alert(`🎉 Pendaftaran berhasil! Akun baru (${defaultUsername}) berhasil dibuat di bawah sponsor: ${sponsorCode}.`);
+    
+    location.reload();
+  } else {
+    alert('Gagal mendaftar: ' + error.message);
+  }
+}
+
 
     async function submitNewPost() {
       const content = document.getElementById('postContent').value.trim();
