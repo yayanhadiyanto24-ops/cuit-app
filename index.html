@@ -2055,38 +2055,63 @@
         }
 
         if (weeklyFollows && weeklyFollows.length > 0) {
-          const followCounts = {};
-          weeklyFollows.forEach(f => {
-            if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
-          });
-          if (Object.keys(followCounts).length > 0) {
-            const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
-            document.getElementById('champFollowersName').innerText = topEmail.split('@')[0];
-            document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
-          }
-        } else {
-          document.getElementById('champFollowersName').innerText = 'Belum Ada';
-          document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-        }
+  const followCounts = {};
+  weeklyFollows.forEach(f => {
+    if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
+  });
+  if (Object.keys(followCounts).length > 0) {
+    const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
+    
+    // Ambil nama akun (username) berdasarkan topEmail
+    const { data: topUserProf } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('email', topEmail)
+      .maybeSingle();
+
+    const displayName = (topUserProf && topUserProf.username) 
+      ? topUserProf.username 
+      : topEmail.split('@')[0];
+
+    document.getElementById('champFollowersName').innerText = displayName;
+    document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
+  }
+} else {
+  document.getElementById('champFollowersName').innerText = 'Belum Ada';
+  document.getElementById('champFollowersScore').innerText = '0 Pengikut';
+}
 
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
           weeklyNewMembers.forEach(m => {
             if (m.sponsor) {
-              const sp = m.sponsor.toUpperCase();
+              const sp = m.sponsor.trim();
               sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
             }
           });
+          
           if (Object.keys(sponsorCounts).length > 0) {
-            const topSponsor = Object.keys(sponsorCounts).reduce((a, b) => sponsorCounts[a] > sponsorCounts[b] ? a : b);
-            document.getElementById('champSponsorName').innerText = topSponsor;
-            document.getElementById('champSponsorScore').innerText = `+${sponsorCounts[topSponsor]} Member`;
+            const topSponsorKey = Object.keys(sponsorCounts).reduce((a, b) => sponsorCounts[a] > sponsorCounts[b] ? a : b);
+
+            // Cari nama profil yang sesuai dengan kode/email/username sponsor
+            const { data: sponsorProf } = await supabaseClient
+              .from('profiles')
+              .select('username')
+              .or(`referral_code.ilike.${topSponsorKey},email.ilike.${topSponsorKey},username.ilike.${topSponsorKey}`)
+              .maybeSingle();
+
+            const sponsorDisplayName = (sponsorProf && sponsorProf.username) 
+              ? sponsorProf.username 
+              : (topSponsorKey.includes('@') ? topSponsorKey.split('@')[0] : topSponsorKey);
+
+            document.getElementById('champSponsorName').innerText = sponsorDisplayName;
+            document.getElementById('champSponsorScore').innerText = `+${sponsorCounts[topSponsorKey]} Member`;
           }
         } else {
           document.getElementById('champSponsorName').innerText = 'Belum Ada';
           document.getElementById('champSponsorScore').innerText = '0 Member';
         }
-
+        
         // --- RENDER SOROTAN PROMOSI & BERANDA ---
         const nowMs = Date.now();
         let sorotanItems = [];
