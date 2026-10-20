@@ -2117,69 +2117,73 @@
     }
 
     async function promotePost(postId) {
-      closeAllPostMenus();
-      const hours = parseInt(prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1")) || 0;
-      if (hours <= 0) return;
+  closeAllPostMenus();
+  
+  // Gunakan await untuk menunggu jawaban dari Modal Custom CUIT
+  const inputVal = await prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1");
+  const hours = parseInt(inputVal) || 0;
+  
+  if (hours <= 0) return;
 
-      if (paidCoins < hours) {
-        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
-      }
+  if (paidCoins < hours) {
+    return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
+  }
 
-      const nowMs = Date.now();
-      const expiryMs = nowMs + (hours * 3600 * 1000);
-      const expiryISO = new Date(expiryMs).toISOString();
+  const nowMs = Date.now();
+  const expiryMs = nowMs + (hours * 3600 * 1000);
+  const expiryISO = new Date(expiryMs).toISOString();
 
-      const { error } = await supabaseClient
-        .from('curhat')
-        .update({ is_promoted: true, promoted_until: expiryISO, updated_at: new Date().toISOString() })
-        .eq('id', postId);
+  const { error } = await supabaseClient
+    .from('curhat')
+    .update({ is_promoted: true, promoted_until: expiryISO, updated_at: new Date().toISOString() })
+    .eq('id', postId);
 
-      if (error) return alert('Gagal mempromosikan postingan: ' + error.message);
+  if (error) return alert('Gagal mempromosikan postingan: ' + error.message);
 
-      paidCoins -= hours;
-      usedPaidCoins += hours;
-      updateCoinUI();
+  paidCoins -= hours;
+  usedPaidCoins += hours;
+  updateCoinUI();
 
-      alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
-      loadPosts();
-    }
+  alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
+  loadPosts();
+}
 
-    async function promoteLiveSession() {
-      if (!currentActiveLive || !currentActiveLive.id) {
-        return alert('Tidak ada Live aktif yang dapat dipromosikan!');
-      }
+async function promoteLiveSession() {
+  if (!currentActiveLive || !currentActiveLive.id) {
+    return alert('Tidak ada Live aktif yang dapat dipromosikan!');
+  }
 
-      const minutes = parseInt(prompt("Berapa menit ingin mempromosikan Sesi Live ini ke Feed Beranda? (1 Koin Berbayar = 1 Menit Promosi):", "10")) || 0;
-      if (minutes <= 0) return;
+  // Gunakan await untuk menunggu jawaban dari Modal Custom CUIT
+  const inputVal = await prompt("Berapa menit ingin mempromosikan Sesi Live ini ke Feed Beranda? (1 Koin Berbayar = 1 Menit Promosi):", "10");
+  const minutes = parseInt(inputVal) || 0;
+  
+  if (minutes <= 0) return;
 
-      if (paidCoins < minutes) {
-        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${minutes} menit membutuhkan ${minutes} Koin Berbayar.`);
-      }
+  if (paidCoins < minutes) {
+    return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${minutes} menit membutuhkan ${minutes} Koin Berbayar.`);
+  }
 
-      const nowMs = Date.now();
-      const expiryMs = nowMs + (minutes * 60 * 1000);
-      const expiryISO = new Date(expiryMs).toISOString();
+  const nowMs = Date.now();
+  const expiryMs = nowMs + (minutes * 60 * 1000);
+  const expiryISO = new Date(expiryMs).toISOString();
 
-      const { error } = await supabaseClient
-        .from('lives')
-        .update({ 
-          promoted_until: expiryISO, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', currentActiveLive.id);
+  const { error } = await supabaseClient
+    .from('lives')
+    .update({ 
+      promoted_until: expiryISO, 
+      updated_at: new Date().toISOString() 
+    })
+    .eq('id', currentActiveLive.id);
 
-      if (error) {
-        console.error("Gagal mempromosikan Sesi Live:", error);
-        return alert('Gagal mempromosikan Sesi Live: ' + error.message);
-      }
+  if (error) return alert('Gagal mempromosikan Sesi Live: ' + error.message);
 
-      paidCoins -= minutes;
-      usedPaidCoins += minutes;
-      updateCoinUI();
+  paidCoins -= minutes;
+  usedPaidCoins += minutes;
+  updateCoinUI();
 
-      alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
-      loadPosts();
-    }
+  alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
+  loadPosts();
+}
 
     function renderCardHTML(p) {
       let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
