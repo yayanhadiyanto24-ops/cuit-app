@@ -4072,8 +4072,70 @@
         alert('Gagal menerbitkan: ' + error.message);
       }
     }
+// --- OVERRIDE OTOMATIS POP-UP ALERT & PROMPT SISTEM DENGAN CUIT ---
+window.alert = function(message) {
+  return new Promise((resolve) => {
+    document.getElementById('cuitModalText').innerText = message;
+    document.getElementById('cuitModalInput').style.display = 'none';
+    document.getElementById('cuitModalCancelBtn').style.display = 'none';
+    
+    const modal = document.getElementById('cuitSystemModal');
+    modal.style.display = 'flex';
+
+    document.getElementById('cuitModalOkBtn').onclick = function() {
+      modal.style.display = 'none';
+      resolve(true);
+    };
+  });
+};
+
+window.prompt = function(message, defaultValue = "") {
+  return new Promise((resolve) => {
+    document.getElementById('cuitModalText').innerText = message;
+    
+    const input = document.getElementById('cuitModalInput');
+    input.style.display = 'block';
+    input.value = defaultValue;
+    
+    const cancelBtn = document.getElementById('cuitModalCancelBtn');
+    cancelBtn.style.display = 'block';
+
+    const modal = document.getElementById('cuitSystemModal');
+    modal.style.display = 'flex';
+    input.focus();
+
+    document.getElementById('cuitModalOkBtn').onclick = function() {
+      const res = input.value;
+      modal.style.display = 'none';
+      resolve(res);
+    };
+
+    cancelBtn.onclick = function() {
+      modal.style.display = 'none';
+      resolve(null);
+    };
+  });
+};
 
     checkUser();
   </script>
+  <!-- MODAL POP-UP CUSTOM AUTOMATIC OVERRIDE CUIT -->
+<div id="cuitSystemModal" class="modal" style="z-index: 9999;">
+  <div class="modal-content" style="max-width: 360px;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+      <span style="font-size: 16px;">💬</span>
+      <h3 style="font-size: 15px; font-weight: 900; color: var(--primary);">CUIT</h3>
+    </div>
+    
+    <div id="cuitModalText" style="font-size: 12px; color: var(--text-main); margin-bottom: 12px; line-height: 1.4; word-break: break-word;"></div>
+    <input type="text" id="cuitModalInput" style="display: none; margin-bottom: 12px;">
+
+    <div style="display: flex; gap: 6px;">
+      <button class="btn-primary" style="flex: 1;" id="cuitModalOkBtn">OK</button>
+      <button class="btn-secondary" style="flex: 1; background: #eee; display: none;" id="cuitModalCancelBtn">BATAL</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
