@@ -365,6 +365,25 @@
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
+  <!-- WIDGET POOL HADIAH MINGGU INI -->
+<div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #059669, #047857); border-radius: 16px; padding: 10px 12px; color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
+  <div>
+    <div style="font-size: 10px; font-weight: 800; color: #a7f3d0; text-transform: uppercase; letter-spacing: 0.5px;">
+      🎁 Total Pool Hadiah Mingguan
+    </div>
+    <div style="font-size: 18px; font-weight: 900; color: #ffffff; margin-top: 1px;" id="weeklyPoolCoinsDisplay">
+      0 🪙
+    </div>
+    <div style="font-size: 8.5px; color: #d1fae5; margin-top: 1px;">
+      Dibagi rata otomatis (1/8) ke 8 Juara setiap Minggu 23:59 WIB
+    </div>
+  </div>
+  <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 800; text-align: right; backdrop-filter: blur(4px);">
+    <span style="display: block; font-size: 8.5px; color: #a7f3d0;">Jatah per Juara:</span>
+    <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">0 🪙</span>
+  </div>
+</div>
+
   <!-- PANGGUNG JUARA MINGGU INI -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 2px;">
@@ -4327,6 +4346,50 @@ async function saveProfileChanges() {
   renderProfileData();
   loadPosts();
 }
+
+    // ==========================================
+// KODE POOL HADIAH MINGGUAN (SIMPAN DI PALING BAWAH)
+// ==========================================
+
+// 1. Fungsi memuat data pool dari Supabase ke UI
+async function updateWeeklyRewardPoolUI() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('platform_reward_pool')
+      .select('amount')
+      .eq('id', 1)
+      .maybeSingle();
+
+    const totalPool = (data && data.amount) ? data.amount : 0;
+    const sharePerWinner = Math.floor(totalPool / 8);
+
+    const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
+    const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
+
+    if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
+    if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
+  } catch (err) {
+    console.error('Gagal memuat reward pool:', err);
+  }
+}
+
+// 2. Fungsi menambah koin ke pool platform
+async function addCoinsToPlatformPool(amount) {
+  if (!amount || amount <= 0) return;
+  try {
+    await supabaseClient.rpc('add_to_platform_pool', { p_amount: amount });
+    updateWeeklyRewardPoolUI();
+  } catch (err) {
+    console.error('Gagal menambah koin ke platform pool:', err);
+  }
+}
+
+// 3. Jalankan pemutakhiran pool otomatis saat halaman selesai dimuat
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(() => {
+    updateWeeklyRewardPoolUI();
+  }, 1000);
+});
 
     checkUser();
   </script>
