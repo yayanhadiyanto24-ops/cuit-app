@@ -4120,6 +4120,24 @@ window.prompt = function(message, defaultValue = "") {
     };
   });
 };
+async function copyMySponsorLink() {
+  const isAdmin = (currentUser && currentUser.email === 'mantanperamal@gmail.com');
+  const displayName = customDisplayName || 'Penilik Bageur';
+  const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : displayName.replace(/\s+/g, '').toUpperCase();
+  const fullSponsorLink = `${window.location.origin}${window.location.pathname}?ref=${sponsorCodeToUse}`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(fullSponsorLink);
+      await alert("📋 Link sponsor berhasil disalin ke clipboard!");
+      return;
+    } catch (err) {
+      console.warn("Gagal otomatis menyalin, beralih ke prompt:", err);
+    }
+  }
+
+  await prompt("Salin link sponsor kamu di bawah ini:", fullSponsorLink);
+}
 
     checkUser();
   </script>
