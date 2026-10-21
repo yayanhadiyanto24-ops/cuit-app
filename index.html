@@ -2107,7 +2107,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-                  // --- 7. KOLEKTOR KOIN ---
+        // --- 7. KOLEKTOR KOIN (VERSI LANGSUNG MATCH) ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -2129,15 +2129,18 @@
               .or(`email.ilike.${key},id.eq.${key},username.ilike.${key}`)
               .maybeSingle();
 
-            if (prof && prof.username) {
-              topCollectorName = prof.username;
+            if (prof) {
+              topCollectorName = prof.username || (prof.email ? prof.email.split('@')[0] : key);
               topCoins = collectorMap[key];
               break; 
-            } else if (prof && prof.email) {
-              topCollectorName = prof.email.split('@')[0];
-              topCoins = collectorMap[key];
-              break;
             }
+          }
+
+          // Fallback jika tidak ditemukan di tabel profiles
+          if (!topCollectorName && sortedCollectors.length > 0) {
+            const topKey = sortedCollectors[0];
+            topCollectorName = topKey.includes('@') ? topKey.split('@')[0] : topKey;
+            topCoins = collectorMap[topKey];
           }
 
           if (topCollectorName && topCoins > 0) {
@@ -2154,7 +2157,6 @@
           document.getElementById('champPermataName').innerText = 'Belum Ada';
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
-
 
         // --- 8. MAGNET SPONSOR ---
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
