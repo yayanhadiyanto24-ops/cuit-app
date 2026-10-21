@@ -4345,15 +4345,20 @@
     const userEmail = currentUser ? currentUser.email : guestId;
     const gameKey = `${postId}_${userEmail}`;
 
-    // Inisialisasi 3x kesempatan awal jika baru pertama kali mengetuk
-    if (userWordGameChances[gameKey] === undefined) {
-      userWordGameChances[gameKey] = 3;
+        // Baca sisa kesempatan dari localStorage (default 3x)
+    let currentChances = localStorage.getItem('game_chances_' + gameKey);
+    if (currentChances === null) {
+      currentChances = 3;
+      localStorage.setItem('game_chances_' + gameKey, 3);
+    } else {
+      currentChances = parseInt(currentChances);
     }
 
     // Cek jika kesempatan sudah 0
-    if (userWordGameChances[gameKey] <= 0) {
+    if (currentChances <= 0) {
       return alert("❌ Kesempatan kamu sudah habis di postingan Tebak Kata ini!");
     }
+
 
     // Ambil data postingan dari cache lokal
     let post = allPostsCache.find(p => String(p.id) === String(postId));
@@ -4373,19 +4378,22 @@
     let currentCoinsDistribution = reshuffleCoinsToWords(words, remainingCoins);
     let coinsWon = currentCoinsDistribution[clickedWordIndex] || 0;
 
-    if (coinsWon > 0) {
+        if (coinsWon > 0) {
       remainingCoins -= coinsWon;
       post.word_game_data.remaining_coins = remainingCoins;
 
       paidCoins += coinsWon;
-      userWordGameChances[gameKey] += coinsWon; // Tambah kesempatan sesuai jumlah koin
+      currentChances += coinsWon;
+      localStorage.setItem('game_chances_' + gameKey, currentChances);
       updateCoinUI(true);
 
-      alert(`🎉 DAPAT ${coinsWon} KOIN! Kata "${wordText}" berisi koin! Sisa kesempatan kamu bertambah menjadi ${userWordGameChances[gameKey]}x.`);
+      alert(`🎉 DAPAT ${coinsWon} KOIN! Kata "${wordText}" berisi koin! Sisa kesempatan kamu bertambah menjadi ${currentChances}x.`);
     } else {
-      userWordGameChances[gameKey] -= 1;
-      alert(`😭 ZONK! Kata "${wordText}" tidak berisi koin. Sisa kesempatan kamu: ${userWordGameChances[gameKey]}x.`);
+      currentChances -= 1;
+      localStorage.setItem('game_chances_' + gameKey, currentChances);
+      alert(`😭 ZONK! Kata "${wordText}" tidak berisi koin. Sisa kesempatan kamu: ${currentChances}x.`);
     }
+
 
     // Jika koin habis total
     if (remainingCoins <= 0) {
