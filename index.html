@@ -2107,7 +2107,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // --- 7. KOLEKTOR KOIN (VERSI LANGSUNG MATCH) ---
+                // --- 7. KOLEKTOR KOIN (PENCARIAN EMAIL AKURAT) ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -2123,24 +2123,28 @@
           let topCoins = 0;
 
           for (const key of sortedCollectors) {
-            const { data: prof } = await supabaseClient
+            // Search 1: Cek berdasarkan Email Persis
+            let { data: prof } = await supabaseClient
               .from('profiles')
               .select('username, email')
-              .or(`email.ilike.${key},id.eq.${key},username.ilike.${key}`)
+              .eq('email', key)
               .maybeSingle();
+
+            // Search 2: Jika tidak ketemu, coba cek berdasarkan ID atau Username
+            if (!prof) {
+              const { data: profAlt } = await supabaseClient
+                .from('profiles')
+                .select('username, email')
+                .or(`id.eq.${key},username.ilike.${key}`)
+                .maybeSingle();
+              prof = profAlt;
+            }
 
             if (prof) {
               topCollectorName = prof.username || (prof.email ? prof.email.split('@')[0] : key);
               topCoins = collectorMap[key];
               break; 
             }
-          }
-
-          // Fallback jika tidak ditemukan di tabel profiles
-          if (!topCollectorName && sortedCollectors.length > 0) {
-            const topKey = sortedCollectors[0];
-            topCollectorName = topKey.includes('@') ? topKey.split('@')[0] : topKey;
-            topCoins = collectorMap[topKey];
           }
 
           if (topCollectorName && topCoins > 0) {
