@@ -4557,15 +4557,22 @@ async function handleTopUp(amount) {
 
     const data = await response.json();
 
-    // Cek jika QRIS berhasil didapat (baik dari objek qris atau response DOKU langsung)
-    const qrImage = data.qr_string || data.qr_content || data.qr_image_url || (data.qris_data ? data.qris_data.qr_content : null);
+    // Deteksi otomatis format balasan QRIS dari berbagai skema DOKU
+    const qrData = data.qrUrl || data.qrContent || data.qrCode || data.qr_string || data.qr_content || data.qr_image_url || (data.qris_data ? data.qris_data.qr_content : null);
 
-    if (qrImage) {
+    if (qrData) {
       const qrisContainer = document.getElementById('qrisContainer');
-      qrisContainer.innerHTML = `<img src="${qrImage}" style="width:200px; height:200px;" />`;
+      
+      // Jika kembaliannya berbentuk URL gambar
+      if (qrData.startsWith('http')) {
+        qrisContainer.innerHTML = `<img src="${qrData}" style="width:220px; height:220px; margin:0 auto;" />`;
+      } else {
+        // Jika kembaliannya berbentuk string QRIS (pakai API generator QR)
+        qrisContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}" style="width:220px; height:220px; margin:0 auto;" />`;
+      }
+      
       document.getElementById('qrisModal').style.display = 'flex';
     } else {
-      // Menampilkan pesan error asli dari server di dalam alert
       alert('Gagal: ' + JSON.stringify(data));
     }
   } catch (error) {
