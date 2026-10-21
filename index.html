@@ -4541,10 +4541,8 @@
 <script>
 async function handleTopUp(amount) {
   try {
-    // Tutup modal pilihan top up lama jika ada
     document.getElementById('dokuTopUpModal').style.display = 'none';
 
-    // Panggil Edge Function doku-generate-qris
     const response = await fetch('https://ozakuxlktqweembeqgyh.supabase.co/functions/v1/doku-generate-qris', {
       method: 'POST',
       headers: {
@@ -4559,19 +4557,20 @@ async function handleTopUp(amount) {
 
     const data = await response.json();
 
-    if (data.qr_content || data.qr_image_url) {
-      // Tampilkan QRIS di modal
+    // Cek jika QRIS berhasil didapat (baik dari objek qris atau response DOKU langsung)
+    const qrImage = data.qr_image_url || data.qr_content || (data.qris_data ? data.qris_data.qr_content : null);
+
+    if (qrImage) {
       const qrisContainer = document.getElementById('qrisContainer');
-      qrisContainer.innerHTML = `<img src="${data.qr_image_url || data.qr_content}" style="width:200px; height:200px;" />`;
-      
-      // Buka Modal QRIS
+      qrisContainer.innerHTML = `<img src="${qrImage}" style="width:200px; height:200px;" />`;
       document.getElementById('qrisModal').style.display = 'flex';
     } else {
-      alert('Gagal mengambil QRIS, silakan coba lagi.');
+      // Menampilkan pesan error asli dari server di dalam alert
+      alert('Gagal: ' + JSON.stringify(data));
     }
   } catch (error) {
     console.error(error);
-    alert('Terjadi kesalahan koneksi.');
+    alert('Terjadi kesalahan koneksi: ' + error.message);
   }
 }
 
