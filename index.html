@@ -2107,13 +2107,14 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // --- 7. KOLEKTOR KOIN ---
+                // --- 7. KOLEKTOR KOIN (DETEKSI EMAIL/USERNAME/ID PENERIMA) ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
-            if (g.recipient_email) {
-              const rec = g.recipient_email.trim();
-              collectorMap[rec] = (collectorMap[rec] || 0) + (g.coins_amount || 0); 
+            const rec = g.recipient_email || g.recipient_id || g.recipient_name;
+            if (rec) {
+              const cleanRec = rec.trim();
+              collectorMap[cleanRec] = (collectorMap[cleanRec] || 0) + (g.coins_amount || 0); 
             }
           });
 
@@ -2134,6 +2135,22 @@
               break; 
             }
           }
+
+          if (topCollectorProf) {
+            const displayName = topCollectorProf.username || topCollectorProf.email.split('@')[0];
+            currentChampKoinData = { name: displayName, coins: topCoins };
+            document.getElementById('champPermataName').innerText = displayName;
+            document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
+          } else {
+            currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+            document.getElementById('champPermataName').innerText = 'Belum Ada';
+            document.getElementById('champPermataScore').innerText = '0 🪙';
+          }
+        } else {
+          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
+          document.getElementById('champPermataName').innerText = 'Belum Ada';
+          document.getElementById('champPermataScore').innerText = '0 🪙';
+        }
 
           if (topCollectorProf) {
             const displayName = topCollectorProf.username || topCollectorProf.email.split('@')[0];
