@@ -2152,22 +2152,6 @@
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
 
-          if (topCollectorProf) {
-            const displayName = topCollectorProf.username || topCollectorProf.email.split('@')[0];
-            currentChampKoinData = { name: displayName, coins: topCoins };
-            document.getElementById('champPermataName').innerText = displayName;
-            document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
-          } else {
-            currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-            document.getElementById('champPermataName').innerText = 'Belum Ada';
-            document.getElementById('champPermataScore').innerText = '0 🪙';
-          }
-        } else {
-          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-          document.getElementById('champPermataName').innerText = 'Belum Ada';
-          document.getElementById('champPermataScore').innerText = '0 🪙';
-        }
-
         // --- 8. MAGNET SPONSOR ---
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
