@@ -366,23 +366,23 @@
   </div>
 
   <!-- WIDGET POOL HADIAH MINGGU INI -->
-<div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #059669, #047857); border-radius: 16px; padding: 10px 12px; color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
-  <div>
-    <div style="font-size: 10px; font-weight: 800; color: #a7f3d0; text-transform: uppercase; letter-spacing: 0.5px;">
-      🎁 Total Pool Hadiah Mingguan
+  <div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #059669, #047857); border-radius: 16px; padding: 10px 12px; color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
+    <div>
+      <div style="font-size: 10px; font-weight: 800; color: #a7f3d0; text-transform: uppercase; letter-spacing: 0.5px;">
+        🎁 Total Pool Hadiah Mingguan
+      </div>
+      <div style="font-size: 18px; font-weight: 900; color: #ffffff; margin-top: 1px;" id="weeklyPoolCoinsDisplay">
+        0 🪙
+      </div>
+      <div style="font-size: 8.5px; color: #d1fae5; margin-top: 1px;">
+        Dibagi rata otomatis (1/8) ke 8 Juara setiap Minggu 23:59 WIB
+      </div>
     </div>
-    <div style="font-size: 18px; font-weight: 900; color: #ffffff; margin-top: 1px;" id="weeklyPoolCoinsDisplay">
-      0 🪙
-    </div>
-    <div style="font-size: 8.5px; color: #d1fae5; margin-top: 1px;">
-      Dibagi rata otomatis (1/8) ke 8 Juara setiap Minggu 23:59 WIB
+    <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 800; text-align: right; backdrop-filter: blur(4px);">
+      <span style="display: block; font-size: 8.5px; color: #a7f3d0;">Jatah per Juara:</span>
+      <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">0 🪙</span>
     </div>
   </div>
-  <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 800; text-align: right; backdrop-filter: blur(4px);">
-    <span style="display: block; font-size: 8.5px; color: #a7f3d0;">Jatah per Juara:</span>
-    <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">0 🪙</span>
-  </div>
-</div>
 
   <!-- PANGGUNG JUARA MINGGU INI -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 16px; padding: 10px 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
@@ -650,63 +650,6 @@
     </div>
   </div>
 
-  <!-- MODAL KOMUNITAS INTERAKTIF -->
-  <div id="communityModal" class="modal">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
-        <h3 style="font-size:15px; font-weight:900;">👥 Komunitas CUIT</h3>
-        <button onclick="document.getElementById('communityModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="background:#f8f9fe; padding:10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:12px;">
-        <label style="font-size:11px; font-weight:800; display:block; margin-bottom:4px;">➕ Buat Komunitas Baru</label>
-        <input type="text" id="newCommName" placeholder="Nama Komunitas (contoh: Penulis Seni Rancagé)" style="margin-bottom:6px;">
-        <textarea id="newCommDesc" rows="2" placeholder="Deskripsi singkat komunitas..." style="margin-bottom:6px;"></textarea>
-        <button class="btn-primary" style="width:100%; font-size:11px; padding:7px;" onclick="createNewCommunity()">Terbitkan Komunitas</button>
-      </div>
-
-      <label style="font-size:11px; font-weight:800; display:block; margin-bottom:6px;">🌐 Daftar Komunitas Terdaftar:</label>
-      <div id="communityListContainer" style="max-height:200px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
-        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>
-      </div>
-
-      <button class="btn-secondary" style="width:100%; margin-top:12px; background:#eee;" onclick="document.getElementById('communityModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL RUANG KOMUNITAS LENGKAP -->
-  <div id="communityDetailModal" class="modal">
-    <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column; padding: 14px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:10px;">
-        <h3 style="font-size:15px; font-weight:900; color:var(--primary);" id="cdTitle">👥 Ruang Komunitas</h3>
-        <button onclick="document.getElementById('communityDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
-      </div>
-
-      <div style="background:#ece8ff; padding:10px; border-radius:12px; border:1px solid #dcd6ff; margin-bottom:10px;">
-        <div style="font-size:11.5px; color:#2c2e43; line-height:1.4;" id="cdDesc">Deskripsi...</div>
-        <div style="font-size:10px; font-weight:800; color:var(--primary); margin-top:6px;" id="cdCreator">👑 Pembuat: -</div>
-      </div>
-
-      <div style="background:#f8f9fe; padding:8px 10px; border-radius:12px; border:1px solid #eef1f8; margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <span style="font-size:11px; font-weight:800; color:#1c1d36;" id="cdMemberCount">👥 Anggota (0)</span>
-          <button id="btnJoinCommAction" class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="toggleJoinCommunity()">+ Bergabung</button>
-        </div>
-        <div id="cdMemberList" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;"></div>
-      </div>
-
-      <div id="commPostForm" style="display:none; background:#fff; border:1px solid #6c5ce7; padding:8px; border-radius:12px; margin-bottom:10px;">
-        <textarea id="commInputText" rows="2" placeholder="Tulis obrolan khusus komunitas ini..." style="margin-bottom:6px; font-size:11.5px;"></textarea>
-        <button class="btn-primary" style="width:100%; padding:6px; font-size:11px;" onclick="sendCommunityMessage()">Kirim Postingan Komunitas</button>
-      </div>
-
-      <div style="font-size:11px; font-weight:800; margin-bottom:6px; color:#333;">💬 Obrolan Komunitas:</div>
-      <div id="communityPostsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;">
-        <p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat obrolan...</p>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL PEMUTAR VIDEO EMBEDDED -->
   <div id="videoPlayerModal" class="modal" style="z-index: 200;">
     <div class="video-modal-container">
@@ -754,7 +697,7 @@
       </div>
     </div>
 
-    <input type="text" id="searchInput" placeholder="Cari curhatan, anggota, komunitas..." onkeyup="searchPosts()" style="margin-top: 4px;">
+    <input type="text" id="searchInput" placeholder="Cari curhatan atau anggota..." onkeyup="searchPosts()" style="margin-top: 4px;">
     
     <label style="font-size: 11px; font-weight: 700; color: #333; margin-top: 4px; display: block;">Filter Kategori & Rangking</label>
     <select id="mainSearchFilter" onchange="searchPosts()">
@@ -963,9 +906,8 @@
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
       <div class="menu-btn-item" onclick="document.getElementById('dokuTopUpModal').style.display='flex'">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
-      <div class="menu-btn-item" onclick="openCommunityModal()">👥 Komunitas</div>
       <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
-      <div class="menu-btn-item" style="grid-column: span 2;" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
+      <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
     </div>
 
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
@@ -1021,7 +963,7 @@
     </div>
   </div>
 
-    <!-- MODAL DETAIL PROFIL ANGGOTA LAIN (VERSI LENGKAP) -->
+  <!-- MODAL DETAIL PROFIL ANGGOTA LAIN -->
   <div id="userProfileModal" class="modal" style="z-index: 120;">
     <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
@@ -1444,9 +1386,6 @@
     let isLeaderboardOpen = true;
     let userHasLeftLive = false;
     let userHasCheckedInLive = {}; 
-    
-    let currentCommData = null;
-    let isUserJoinedComm = false;
 
     let freeCoins = 20;
     let paidCoins = 0;
@@ -1888,8 +1827,7 @@
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
 
-                try {
-        // Hitung batas Senin minggu ini jam 00:00:00 WIB (UTC Offset Handling)
+      try {
         const now = new Date();
         const day = now.getDay();
         const diffToMonday = now.getDate() - day + (day === 0 ? -6 : 1);
@@ -2107,7 +2045,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-                // --- 7. KOLEKTOR KOIN (PENCARIAN EMAIL AKURAT) ---
+        // --- 7. KOLEKTOR KOIN ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -2123,14 +2061,12 @@
           let topCoins = 0;
 
           for (const key of sortedCollectors) {
-            // Search 1: Cek berdasarkan Email Persis
             let { data: prof } = await supabaseClient
               .from('profiles')
               .select('username, email')
               .eq('email', key)
               .maybeSingle();
 
-            // Search 2: Jika tidak ketemu, coba cek berdasarkan ID atau Username
             if (!prof) {
               const { data: profAlt } = await supabaseClient
                 .from('profiles')
@@ -3080,200 +3016,6 @@
       openNotificationsModal();
     }
 
-    async function openCommunityModal() {
-      const userLvl = getUserLevel();
-      if (userLvl.title === '🌱 Cuiter Baru') {
-        return alert('Fitur membuat Komunitas terbuka mulai dari Level 💙 Cuiter Setia!');
-      }
-
-      document.getElementById('communityModal').style.display = 'flex';
-      loadCommunityList();
-    }
-
-    async function loadCommunityList() {
-      const container = document.getElementById('communityListContainer');
-      container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat komunitas...</p>';
-
-      const { data: communities, error } = await supabaseClient
-        .from('communities')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error || !communities || communities.length === 0) {
-        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Belum ada komunitas. Buat yang pertama di atas!</p>';
-        return;
-      }
-
-      container.innerHTML = communities.map(c => `
-        <div onclick="openCommunityDetail('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'")}', '${c.creator_name}')" 
-             style="background:#fff; border:1px solid #e2e7f5; padding:10px; border-radius:10px; cursor:pointer; transition:background 0.2s;"
-             onmouseover="this.style.background='#f0f3fa'" onmouseout="this.style.background='#fff'">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:800; font-size:12px; color:var(--primary);">${c.name}</span>
-            <span style="font-size:10px; color:var(--primary); font-weight:700;">Buka →</span>
-          </div>
-          <div style="font-size:11px; color:#444; margin-top:3px;">${c.description || '-'}</div>
-          <div style="font-size:9px; color:var(--text-sub); margin-top:2px;">Oleh: ${c.creator_name}</div>
-        </div>
-      `).join('');
-    }
-
-    async function openCommunityDetail(id, name, desc, creator) {
-      currentCommData = { id, name, desc, creator };
-      
-      document.getElementById('cdTitle').innerText = `👥 ${name}`;
-      document.getElementById('cdDesc').innerText = desc || 'Tidak ada deskripsi.';
-      document.getElementById('cdCreator').innerText = `👑 Pembuat / Pemilik: ${creator}`;
-      
-      document.getElementById('communityModal').style.display = 'none';
-      document.getElementById('communityDetailModal').style.display = 'flex';
-
-      await Promise.all([
-        loadCommunityMembers(id),
-        loadCommunityPosts(name)
-      ]);
-    }
-
-    async function loadCommunityMembers(commId) {
-      const listContainer = document.getElementById('cdMemberList');
-      const countLabel = document.getElementById('cdMemberCount');
-      const btnJoin = document.getElementById('btnJoinCommAction');
-      const postForm = document.getElementById('commPostForm');
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      const { data: members } = await supabaseClient
-        .from('community_members')
-        .select('*')
-        .eq('community_id', commId);
-
-      const memberList = members || [];
-      countLabel.innerText = `👥 Anggota (${memberList.length})`;
-
-      isUserJoinedComm = memberList.some(m => m.user_email === myEmail);
-
-      if (isUserJoinedComm) {
-        btnJoin.innerText = '✓ Sudah Bergabung';
-        btnJoin.style.background = '#eef1f8';
-        btnJoin.style.color = '#555';
-        postForm.style.display = 'block';
-      } else {
-        btnJoin.innerText = '+ Bergabung';
-        btnJoin.style.background = 'var(--primary-gradient)';
-        btnJoin.style.color = '#fff';
-        postForm.style.display = 'none';
-      }
-
-      if (memberList.length === 0) {
-        listContainer.innerHTML = '<span style="font-size:10px; color:var(--text-sub);">Belum ada anggota. Jadilah yang pertama!</span>';
-        return;
-      }
-
-      listContainer.innerHTML = memberList.map(m => `
-        <span style="background:#ece8ff; color:var(--primary); padding:3px 8px; border-radius:10px; font-size:10px; font-weight:800; white-space:nowrap;">
-          👤 ${m.username || 'Anggota'}
-        </span>
-      `).join('');
-    }
-
-    async function toggleJoinCommunity() {
-      if (!currentCommData) return;
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'Penilik Bageur';
-
-      if (isUserJoinedComm) {
-        await supabaseClient.from('community_members').delete().eq('community_id', currentCommData.id).eq('user_email', myEmail);
-        alert('Anda telah keluar dari komunitas ini.');
-      } else {
-        await supabaseClient.from('community_members').insert([
-          { community_id: currentCommData.id, user_email: myEmail, username: myName }
-        ]);
-        alert(`Selamat! Anda telah resmi bergabung dengan komunitas "${currentCommData.name}".`);
-      }
-
-      loadCommunityMembers(currentCommData.id);
-    }
-
-    async function loadCommunityPosts(communityName) {
-      const container = document.getElementById('communityPostsList');
-      container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub);">Memuat postingan...</p>';
-
-      const { data: posts } = await supabaseClient
-        .from('curhat')
-        .select('*')
-        .ilike('content', `%[Komunitas ${communityName}]%`)
-        .order('created_at', { ascending: false });
-
-      if (!posts || posts.length === 0) {
-        container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub); margin-top:15px;">Belum ada postingan di komunitas ini.</p>';
-        return;
-      }
-
-      container.innerHTML = posts.map(p => renderCardHTML(p)).join('');
-    }
-
-    async function sendCommunityMessage() {
-      const input = document.getElementById('commInputText');
-      const msg = input.value.trim();
-      
-      if (!msg || !currentCommData) return alert('Pesan tidak boleh kosong!');
-
-      const authorName = customDisplayName || 'Penilik Bageur';
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const authorEmail = currentUser ? currentUser.email : guestId;
-
-      const { error } = await supabaseClient.from('curhat').insert([
-        {
-          content: `[Komunitas ${currentCommData.name}] ${msg}`,
-          user_id: currentUser ? currentUser.id : 'demo_id',
-          user_email: authorEmail,
-          username: authorName,
-          feeling: 'Bahagia'
-        }
-      ]);
-
-      if (!error) {
-        input.value = '';
-        alert('Postingan komunitas berhasil diterbitkan!');
-        loadCommunityPosts(currentCommData.name);
-        loadPosts();
-      } else {
-        alert('Gagal mengirim: ' + error.message);
-      }
-    }
-
-    async function createNewCommunity() {
-      const name = document.getElementById('newCommName').value.trim();
-      const desc = document.getElementById('newCommDesc').value.trim();
-
-      if (!name) return alert('Nama Komunitas wajib diisi!');
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'Penilik Bageur';
-
-      const { error } = await supabaseClient.from('communities').insert([
-        {
-          name: name,
-          description: desc,
-          creator_email: myEmail,
-          creator_name: myName
-        }
-      ]);
-
-      if (!error) {
-        alert(`Komunitas "${name}" berhasil dibuat!`);
-        document.getElementById('newCommName').value = '';
-        document.getElementById('newCommDesc').value = '';
-        loadCommunityList();
-      } else {
-        alert('Gagal membuat komunitas: ' + error.message);
-      }
-    }
-
     async function loadGiftHistoryLedger() {
       const container = document.getElementById('giftHistoryListContainer');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
@@ -3636,30 +3378,6 @@
       const filterType = document.getElementById('mainSearchFilter').value;
       const container = document.getElementById('searchResults');
 
-      if (query) {
-        const { data: comms } = await supabaseClient
-          .from('communities')
-          .select('*')
-          .ilike('name', `%${query}%`);
-
-        if (comms && comms.length > 0) {
-          let commHTML = comms.map(c => `
-            <div onclick="openCommunityDetail('${c.id}', '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'")}', '${c.creator_name}')" 
-                 style="background:#fff; border:1px solid #6c5ce7; padding:10px; border-radius:12px; margin-bottom:8px; cursor:pointer;">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:900; color:var(--primary); font-size:13px;">👥 Komunitas: ${c.name}</span>
-                <span style="font-size:10px; color:var(--primary); font-weight:700;">Buka →</span>
-              </div>
-              <div style="font-size:11px; color:#444; margin:3px 0;">${c.description || '-'}</div>
-              <div style="font-size:9.5px; color:var(--text-sub);">Pembuat: ${c.creator_name}</div>
-            </div>
-          `).join('');
-
-          container.innerHTML = commHTML;
-          return;
-        }
-      }
-
       if (filterType === 'top_level' || filterType === 'top_sawer') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
         const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
@@ -3724,7 +3442,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tidak ditemukan curhatan atau komunitas yang sesuai.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tidak ditemukan curhatan yang sesuai.</p>';
       } else {
         container.innerHTML = filtered.map(p => renderCardHTML(p)).join('');
       }
@@ -4197,7 +3915,7 @@
         gems = 0;
         usedPaidCoins = 0;
 
-                await supabaseClient.from('profiles').upsert([
+        await supabaseClient.from('profiles').upsert([
           {
             id: data.user ? data.user.id : undefined,
             email: email,
@@ -4207,10 +3925,9 @@
             paid_coins: 0,
             gems: 0,
             used_paid_coins: 0,
-            created_at: new Date().toISOString() // <-- Tambahkan baris ini
+            created_at: new Date().toISOString()
           }
         ], { onConflict: 'email' });
-
 
         document.getElementById('authModal').style.display = 'none';
         await alert(`🎉 Pendaftaran berhasil! Akun baru (${defaultUsername}) berhasil dibuat di bawah sponsor: ${sponsorCode}.`);
@@ -4366,154 +4083,147 @@
 
       window.location.href = `${checkoutUrl}?${params.toString()}`;
     }
-// --- FUNGSI TAMPILKAN PROFIL DETAIL LENGKAP USER ---
-async function openUserProfileModal(userEmail, userName, userExp) {
-  const modal = document.getElementById('userProfileModal');
-  if (!modal) return;
 
-  const lvl = getUserLevel(userExp || 0);
-  
-  document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
-  document.getElementById('mBadge').innerText = lvl.title;
-  document.getElementById('mBadge').style.background = lvl.color;
-  document.getElementById('mBadge').style.color = '#fff';
-  document.getElementById('mExp').innerText = `${userExp || 0}`;
+    // --- FUNGSI TAMPILKAN PROFIL DETAIL LENGKAP USER ---
+    async function openUserProfileModal(userEmail, userName, userExp) {
+      const modal = document.getElementById('userProfileModal');
+      if (!modal) return;
 
-  // 1. Ambil data profil user dari Supabase
-  const { data: prof } = await supabaseClient
-    .from('profiles')
-    .select('username, followers_count, following_count, sponsor, free_coins, paid_coins, gems, used_paid_coins')
-    .eq('email', userEmail)
-    .maybeSingle();
+      const lvl = getUserLevel(userExp || 0);
+      
+      document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
+      document.getElementById('mBadge').innerText = lvl.title;
+      document.getElementById('mBadge').style.background = lvl.color;
+      document.getElementById('mBadge').style.color = '#fff';
+      document.getElementById('mExp').innerText = `${userExp || 0}`;
 
-  const userSponsorCode = (prof && prof.username ? prof.username : userName || '').replace(/\s+/g, '').toUpperCase();
+      const { data: prof } = await supabaseClient
+        .from('profiles')
+        .select('username, followers_count, following_count, sponsor, free_coins, paid_coins, gems, used_paid_coins')
+        .eq('email', userEmail)
+        .maybeSingle();
 
-  // 2. Query paralel untuk menghitung Downline langsung & Jumlah Postingan
-  const [{ count: downlineCount }, { count: postCount }] = await Promise.all([
-    supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${userSponsorCode},sponsor.ilike.${userName}`),
-    supabaseClient.from('curhat').select('*', { count: 'exact', head: true }).eq('user_email', userEmail)
-  ]);
+      const userSponsorCode = (prof && prof.username ? prof.username : userName || '').replace(/\s+/g, '').toUpperCase();
 
-  // 3. Masukkan data ke tampilan modal
-  document.getElementById('mFollowers').innerText = prof?.followers_count || 0;
-  document.getElementById('mFollowing').innerText = prof?.following_count || 0;
-  document.getElementById('mDownlines').innerText = downlineCount || 0;
-  document.getElementById('mPostsCount').innerText = postCount || 0;
-  document.getElementById('mFreeCoins').innerText = prof?.free_coins || 0;
-  document.getElementById('mPaidCoins').innerText = `${(prof?.paid_coins || 0).toLocaleString('id-ID')} 🪙`;
-  document.getElementById('mGems').innerText = `${(prof?.gems || 0).toLocaleString('id-ID')} 💎`;
-  document.getElementById('mSponsorName').innerText = prof?.sponsor || 'ADMINCUIT';
+      const [{ count: downlineCount }, { count: postCount }] = await Promise.all([
+        supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${userSponsorCode},sponsor.ilike.${userName}`),
+        supabaseClient.from('curhat').select('*', { count: 'exact', head: true }).eq('user_email', userEmail)
+      ]);
 
-  // 4. Tombol aksi Ikuti
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
-  const isSelf = (userEmail === myEmail);
-  const isFollowing = followingSet.has(userEmail);
+      document.getElementById('mFollowers').innerText = prof?.followers_count || 0;
+      document.getElementById('mFollowing').innerText = prof?.following_count || 0;
+      document.getElementById('mDownlines').innerText = downlineCount || 0;
+      document.getElementById('mPostsCount').innerText = postCount || 0;
+      document.getElementById('mFreeCoins').innerText = prof?.free_coins || 0;
+      document.getElementById('mPaidCoins').innerText = `${(prof?.paid_coins || 0).toLocaleString('id-ID')} 🪙`;
+      document.getElementById('mGems').innerText = `${(prof?.gems || 0).toLocaleString('id-ID')} 💎`;
+      document.getElementById('mSponsorName').innerText = prof?.sponsor || 'ADMINCUIT';
 
-  const followContainer = document.getElementById('mFollowActionContainer');
-  if (!isSelf) {
-    followContainer.innerHTML = `
-      <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eef1f8' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};" 
-              onclick="toggleFollow('${userEmail}', this); openUserProfileModal('${userEmail}', '${userName}', ${userExp});">
-        ${isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini'}
-      </button>
-    `;
-  } else {
-    followContainer.innerHTML = `<div style="text-align:center; font-size:11px; color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>`;
-  }
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const isSelf = (userEmail === myEmail);
+      const isFollowing = followingSet.has(userEmail);
 
-  modal.style.display = 'flex';
-}
-// --- FUNGSI BUKA MODAL EDIT PROFIL ---
-function openEditProfileModal() {
-  const input = document.getElementById('editDisplayName');
-  if (input) {
-    input.value = customDisplayName || 'ADMINCUIT';
-  }
-  const modal = document.getElementById('editProfileModal');
-  if (modal) {
-    modal.style.display = 'flex';
-  }
-}
+      const followContainer = document.getElementById('mFollowActionContainer');
+      if (!isSelf) {
+        followContainer.innerHTML = `
+          <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eef1f8' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};" 
+                  onclick="toggleFollow('${userEmail}', this); openUserProfileModal('${userEmail}', '${userName}', ${userExp});">
+            ${isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini'}
+          </button>
+        `;
+      } else {
+        followContainer.innerHTML = `<div style="text-align:center; font-size:11px; color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>`;
+      }
 
-// --- FUNGSI SIMPAN PERUBAHAN PROFIL ---
-async function saveProfileChanges() {
-  const inputElem = document.getElementById('editDisplayName');
-  const newName = inputElem ? inputElem.value.trim() : '';
+      modal.style.display = 'flex';
+    }
 
-  if (!newName) return alert('Nama tampilan tidak boleh kosong!');
+    // --- FUNGSI BUKA MODAL EDIT PROFIL ---
+    function openEditProfileModal() {
+      const input = document.getElementById('editDisplayName');
+      if (input) {
+        input.value = customDisplayName || 'ADMINCUIT';
+      }
+      const modal = document.getElementById('editProfileModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
 
-  customDisplayName = newName;
-  localStorage.setItem('cuit_user_name', newName);
+    // --- FUNGSI SIMPAN PERUBAHAN PROFIL ---
+    async function saveProfileChanges() {
+      const inputElem = document.getElementById('editDisplayName');
+      const newName = inputElem ? inputElem.value.trim() : '';
 
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
+      if (!newName) return alert('Nama tampilan tidak boleh kosong!');
 
-  // Update ke database Supabase
-  const { error } = await supabaseClient
-    .from('profiles')
-    .update({ 
-      username: newName, 
-      referral_code: newName.replace(/\s+/g, '').toUpperCase(),
-      updated_at: new Date().toISOString() 
-    })
-    .eq('email', myEmail);
+      customDisplayName = newName;
+      localStorage.setItem('cuit_user_name', newName);
 
-  if (error) {
-    console.error('Gagal update di Supabase:', error);
-  }
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
 
-  document.getElementById('editProfileModal').style.display = 'none';
-  alert('✅ Profil berhasil diperbarui!');
-  
-  // Refresh tampilan profil & postingan
-  renderProfileData();
-  loadPosts();
-}
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ 
+          username: newName, 
+          referral_code: newName.replace(/\s+/g, '').toUpperCase(),
+          updated_at: new Date().toISOString() 
+        })
+        .eq('email', myEmail);
+
+      if (error) {
+        console.error('Gagal update di Supabase:', error);
+      }
+
+      document.getElementById('editProfileModal').style.display = 'none';
+      alert('✅ Profil berhasil diperbarui!');
+      
+      renderProfileData();
+      loadPosts();
+    }
 
     // ==========================================
-// KODE POOL HADIAH MINGGUAN (SIMPAN DI PALING BAWAH)
-// ==========================================
+    // KODE POOL HADIAH MINGGUAN (SIMPAN DI PALING BAWAH)
+    // ==========================================
 
-// 1. Fungsi memuat data pool dari Supabase ke UI
-async function updateWeeklyRewardPoolUI() {
-  try {
-    const { data, error } = await supabaseClient
-      .from('platform_reward_pool')
-      .select('amount')
-      .eq('id', 1)
-      .maybeSingle();
+    async function updateWeeklyRewardPoolUI() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('platform_reward_pool')
+          .select('amount')
+          .eq('id', 1)
+          .maybeSingle();
 
-    const totalPool = (data && data.amount) ? data.amount : 0;
-    const sharePerWinner = Math.floor(totalPool / 8);
+        const totalPool = (data && data.amount) ? data.amount : 0;
+        const sharePerWinner = Math.floor(totalPool / 8);
 
-    const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
-    const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
+        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
+        const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
 
-    if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
-    if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
-  } catch (err) {
-    console.error('Gagal memuat reward pool:', err);
-  }
-}
+        if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
+        if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
+      } catch (err) {
+        console.error('Gagal memuat reward pool:', err);
+      }
+    }
 
-// 2. Fungsi menambah koin ke pool platform
-async function addCoinsToPlatformPool(amount) {
-  if (!amount || amount <= 0) return;
-  try {
-    await supabaseClient.rpc('add_to_platform_pool', { p_amount: amount });
-    updateWeeklyRewardPoolUI();
-  } catch (err) {
-    console.error('Gagal menambah koin ke platform pool:', err);
-  }
-}
+    async function addCoinsToPlatformPool(amount) {
+      if (!amount || amount <= 0) return;
+      try {
+        await supabaseClient.rpc('add_to_platform_pool', { p_amount: amount });
+        updateWeeklyRewardPoolUI();
+      } catch (err) {
+        console.error('Gagal menambah koin ke platform pool:', err);
+      }
+    }
 
-// 3. Jalankan pemutakhiran pool otomatis saat halaman selesai dimuat
-document.addEventListener("DOMContentLoaded", function() {
-  setTimeout(() => {
-    updateWeeklyRewardPoolUI();
-  }, 1000);
-});
+    document.addEventListener("DOMContentLoaded", function() {
+      setTimeout(() => {
+        updateWeeklyRewardPoolUI();
+      }, 1000);
+    });
 
     checkUser();
   </script>
