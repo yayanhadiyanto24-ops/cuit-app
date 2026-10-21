@@ -4504,24 +4504,24 @@
   </div>
 
   <!-- MODAL TOP-UP KOIN DOKU -->
-  <div id="dokuTopUpModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
-    <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; text-align:center;">
-      <h3 style="margin-top:0;">Top-Up Paid Coins</h3>
-      <p style="font-size:13px; color:#666;">Pilih nominal koin yang ingin dibeli (1 Koin = Rp 1):</p>
-      
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-  <button class="btn-primary" onclick="handleTopUp(1000)">1.000 Koin<br>Rp 1.000</button>
-  <button class="btn-primary" onclick="handleTopUp(5000)">5.000 Koin<br>Rp 5.000</button>
-  <button class="btn-primary" onclick="handleTopUp(10000)">10.000 Koin<br>Rp 10.000</button>
-  <button class="btn-primary" onclick="handleTopUp(20000)">20.000 Koin<br>Rp 20.000</button>
-  <button class="btn-primary" onclick="handleTopUp(50000)">50.000 Koin<br>Rp 50.000</button>
-  <button class="btn-primary" onclick="handleTopUp(100000)">100.000 Koin<br>Rp 100.000</button>
+<div id="dokuTopUpModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; text-align:center;">
+    <h3 style="margin-top:0;">Top-Up Paid Coins</h3>
+    <p style="font-size:13px; color:#666;">Pilih nominal koin yang ingin dibeli (1 Koin = Rp 1):</p>
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <button class="btn-primary" onclick="handleTopUp(1000)">1.000 Koin<br>Rp 1.000</button>
+      <button class="btn-primary" onclick="handleTopUp(5000)">5.000 Koin<br>Rp 5.000</button>
+      <button class="btn-primary" onclick="handleTopUp(10000)">10.000 Koin<br>Rp 10.000</button>
+      <button class="btn-primary" onclick="handleTopUp(20000)">20.000 Koin<br>Rp 20.000</button>
+      <button class="btn-primary" onclick="handleTopUp(50000)">50.000 Koin<br>Rp 50.000</button>
+      <button class="btn-primary" onclick="handleTopUp(100000)">100.000 Koin<br>Rp 100.000</button>
+    </div>
+
+    <button onclick="document.getElementById('dokuTopUpModal').style.display='none'" style="margin-top:15px; background:#eee; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; width:100%;">Tutup</button>
+  </div>
 </div>
 
-
-      <button onclick="document.getElementById('dokuTopUpModal').style.display='none'" style="background:#eee; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Tutup</button>
-    </div>
-  </div>
 <!-- MODAL TAMPILAN QRIS DIRECT -->
 <div id="qrisModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; max-width:320px; width:90%;">
@@ -4537,7 +4537,7 @@
     <button onclick="closeQRISModal()" style="margin-top:10px; width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">Batal</button>
   </div>
 </div>
-<script>
+
 <script>
 async function handleTopUp(amount) {
   try {
@@ -4582,4 +4582,5 @@ function closeQRISModal() {
 
 </body>
 </html>
+
 
