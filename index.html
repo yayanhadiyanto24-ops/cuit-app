@@ -1984,6 +1984,7 @@
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
+                // --- 7. KOLEKTOR KOIN ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -1996,13 +1997,16 @@
             const topCollectorEmail = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
             const topCoins = collectorMap[topCollectorEmail];
 
+            // Cari nama profil (username) berdasarkan email atau ID penerima
             const { data: prof } = await supabaseClient
               .from('profiles')
               .select('username')
               .eq('email', topCollectorEmail)
               .maybeSingle();
 
-            const displayName = prof && prof.username ? prof.username : topCollectorEmail.split('@')[0];
+            const displayName = (prof && prof.username && prof.username.trim() !== '') 
+              ? prof.username 
+              : (topCollectorEmail.includes('@') ? topCollectorEmail.split('@')[0] : topCollectorEmail);
 
             currentChampKoinData = { name: displayName, coins: topCoins };
             document.getElementById('champPermataName').innerText = displayName;
@@ -2017,6 +2021,7 @@
           document.getElementById('champPermataName').innerText = 'Belum Ada';
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
+
 
         if (data && data.length > 0) {
           const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
