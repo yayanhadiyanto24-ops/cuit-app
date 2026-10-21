@@ -4217,6 +4217,265 @@
 
     checkUser();
   </script>
+<!-- ========================================== -->
+<!-- FITUR TEBAK KATA CUIT (SINGLE-BLOCK SCRIPT) -->
+<!-- ========================================== -->
+
+<!-- 1. MODAL PEMBUATAN POSTINGAN TEBAK KATA -->
+<div id="wordGameModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width: 420px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
+      <h3 style="font-size:15px; font-weight:900; color:var(--primary);">🧩 Buat Tebak Kata CUIT</h3>
+      <button onclick="document.getElementById('wordGameModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-sub); margin-bottom:10px;">
+      Tulis kalimat antara <b>20 - 30 kata</b>. Jumlah koin yang terpasang otomatis sama dengan jumlah kata (1 kata = 1 koin Berbayar).
+    </div>
+
+    <textarea id="wordGameInputText" rows="4" placeholder="Tulis kalimat tebak kata kamu di sini (20-30 kata)..." oninput="updateWordGameCounter(this)"></textarea>
+    
+    <div style="display:flex; justify-content:space-between; font-size:10.5px; font-weight:800; color:#4a4d65; margin-bottom:12px;">
+      <span>Jumlah Kata: <b id="wordGameCountDisplay">0</b> / 30</span>
+      <span>Biaya Koin: <b id="wordGameCoinDisplay">0</b> 🪙</span>
+    </div>
+
+    <div style="display:flex; gap:6px;">
+      <button class="btn-primary" style="flex:1;" onclick="submitNewWordGamePost()">Terbitkan Tebak Kata</button>
+      <button class="btn-secondary" style="flex:1; background:#eee;" onclick="document.getElementById('wordGameModal').style.display='none'">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Objek lokal pelacak sisa kesempatan member di setiap postingan
+  let userWordGameChances = {};
+
+  // 1. Fungsi Hitung Kata & Koin di Modal
+  function updateWordGameCounter(textareaElem) {
+    const text = textareaElem.value.trim();
+    const words = text ? text.split(/\s+/).filter(w => w.length > 0) : [];
+    const count = words.length;
+
+    document.getElementById('wordGameCountDisplay').innerText = count;
+    document.getElementById('wordGameCoinDisplay').innerText = count;
+
+    if (count < 20 || count > 30) {
+      document.getElementById('wordGameCountDisplay').style.color = '#e74c3c';
+    } else {
+      document.getElementById('wordGameCountDisplay').style.color = '#2ecc71';
+    }
+  }
+
+  // 2. Fungsi Buka Modal Buat Tebak Kata
+  function openWordGameModal() {
+    document.getElementById('wordGameInputText').value = '';
+    document.getElementById('wordGameCountDisplay').innerText = '0';
+    document.getElementById('wordGameCoinDisplay').innerText = '0';
+    document.getElementById('wordGameModal').style.display = 'flex';
+  }
+
+  // 3. Fungsi Terbitkan Postingan Tebak Kata
+  async function submitNewWordGamePost() {
+    const text = document.getElementById('wordGameInputText').value.trim();
+    const words = text ? text.split(/\s+/).filter(w => w.length > 0) : [];
+    const totalWords = words.length;
+
+    if (totalWords < 20 || totalWords > 30) {
+      return alert(`Jumlah kata harus antara 20 hingga 30 kata! (Saat ini: ${totalWords} kata)`);
+    }
+
+    if (paidCoins < totalWords) {
+      return alert(`Saldo Bank Koin kamu tidak cukup! Memasang Tebak Kata ini membutuhkan ${totalWords} Koin Berbayar.`);
+    }
+
+    // Potong Koin Berbayar milik pembuat postingan
+    paidCoins -= totalWords;
+    usedPaidCoins += totalWords;
+    updateCoinUI(true);
+
+    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+    const myEmail = currentUser ? currentUser.email : guestId;
+    const myName = customDisplayName || 'Penilik Bageur';
+
+    const gamePayload = {
+      total_coins: totalWords,
+      remaining_coins: totalWords,
+      words: words,
+      is_active: true
+    };
+
+    const { error } = await supabaseClient.from('curhat').insert([
+      {
+        content: text,
+        feeling: 'Humor',
+        user_id: currentUser ? currentUser.id : 'demo_id',
+        user_email: myEmail,
+        username: myName,
+        word_game_data: gamePayload
+      }
+    ]);
+
+    if (!error) {
+      document.getElementById('wordGameModal').style.display = 'none';
+      alert(`🎉 Postingan Tebak Kata berhasil diterbitkan dengan ${totalWords} Koin Berbayar!`);
+      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+      loadPosts();
+    } else {
+      alert('Gagal menerbitkan Tebak Kata: ' + error.message);
+    }
+  }
+
+  // 4. Fungsi Acak Ulang Koin ke Kata (Auto-Reshuffle)
+  function reshuffleCoinsToWords(wordsArray, remainingCoins) {
+    let distribution = new Array(wordsArray.length).fill(0);
+    let pool = remainingCoins;
+
+    while (pool > 0) {
+      const randomIdx = Math.floor(Math.random() * wordsArray.length);
+      distribution[randomIdx] += 1;
+      pool -= 1;
+    }
+    return distribution;
+  }
+
+  // 5. Fungsi Mengetuk Kata oleh Member (Tap Word Game)
+  async function playWordGameAction(postId, clickedWordIndex, wordText) {
+    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+    const userEmail = currentUser ? currentUser.email : guestId;
+    const gameKey = `${postId}_${userEmail}`;
+
+    // Inisialisasi 3x kesempatan awal jika baru pertama kali mengetuk
+    if (userWordGameChances[gameKey] === undefined) {
+      userWordGameChances[gameKey] = 3;
+    }
+
+    // Cek jika kesempatan sudah 0
+    if (userWordGameChances[gameKey] <= 0) {
+      return alert("❌ Kesempatan kamu sudah habis di postingan Tebak Kata ini!");
+    }
+
+    // Ambil data postingan dari cache lokal
+    let post = allPostsCache.find(p => String(p.id) === String(postId));
+    if (!post || !post.word_game_data || !post.word_game_data.is_active) {
+      return alert("⚠️ Permainan di postingan ini telah berakhir atau koin sudah habis!");
+    }
+
+    // Potong 1 Koin Gratisan/Berbayar milik pengetuk untuk biaya komentar
+    const success = await deductCoin(1);
+    if (!success) return alert("Koin kamu habis untuk mengetuk kata!");
+    if (freeCoins === 0) await addCoinsToPlatformPool(1);
+
+    let remainingCoins = post.word_game_data.remaining_coins;
+    let words = post.word_game_data.words;
+
+    // Acak posisi koin secara real-time pada saat ketukan dilakukan
+    let currentCoinsDistribution = reshuffleCoinsToWords(words, remainingCoins);
+    let coinsWon = currentCoinsDistribution[clickedWordIndex] || 0;
+
+    if (coinsWon > 0) {
+      remainingCoins -= coinsWon;
+      post.word_game_data.remaining_coins = remainingCoins;
+
+      paidCoins += coinsWon;
+      userWordGameChances[gameKey] += coinsWon; // Tambah kesempatan sesuai jumlah koin
+      updateCoinUI(true);
+
+      alert(`🎉 DAPAT ${coinsWon} KOIN! Kata "${wordText}" berisi koin! Sisa kesempatan kamu bertambah menjadi ${userWordGameChances[gameKey]}x.`);
+    } else {
+      userWordGameChances[gameKey] -= 1;
+      alert(`😭 ZONK! Kata "${wordText}" tidak berisi koin. Sisa kesempatan kamu: ${userWordGameChances[gameKey]}x.`);
+    }
+
+    // Jika koin habis total
+    if (remainingCoins <= 0) {
+      post.word_game_data.is_active = false;
+      post.word_game_data.remaining_coins = 0;
+      alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata di postingan ini resmi berakhir.");
+    }
+
+    // Simpan ke Supabase & Kirim Komentar Otomatis
+    const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
+    
+    await Promise.all([
+      supabaseClient.from('curhat').update({ word_game_data: post.word_game_data }).eq('id', postId),
+      supabaseClient.from('comments').insert([{
+        post_id: postId,
+        content: `🎯 Mengulik kata: "${wordText}"`,
+        user_id: currentUser ? currentUser.id : 'demo_id',
+        user_email: userEmail,
+        username: authorName
+      }])
+    ]);
+
+    // Update jumlah komentar postingan
+    const newCommCount = (post.comments_count || 0) + 1;
+    post.comments_count = newCommCount;
+    await supabaseClient.from('curhat').update({ comments_count: newCommCount }).eq('id', postId);
+
+    loadPosts();
+  }
+
+  // 6. Override Rendering Card Postingan untuk Menampilkan Tombol Kata
+  const originalRenderCardHTML = renderCardHTML;
+  renderCardHTML = function(p) {
+    let cardHTML = originalRenderCardHTML(p);
+
+    if (p.word_game_data && p.word_game_data.words && p.word_game_data.words.length > 0) {
+      const gData = p.word_game_data;
+      const isActive = gData.is_active && gData.remaining_coins > 0;
+      
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const gameKey = `${p.id}_${myEmail}`;
+      const myChances = userWordGameChances[gameKey] !== undefined ? userWordGameChances[gameKey] : 3;
+
+      let chipsHTML = `<div style="display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; background:#f0f3fa; padding:8px; border-radius:12px; border:1px solid #e2e7f5;">`;
+      
+      gData.words.forEach((w, idx) => {
+        const safeWord = w.replace(/'/g, "\\'");
+        chipsHTML += `
+          <button 
+            onclick="playWordGameAction('${p.id}', ${idx}, '${safeWord}')" 
+            ${(!isActive || myChances <= 0) ? 'disabled' : ''} 
+            style="background:#fff; border:1px solid #dcd6ff; color:var(--primary); padding:4px 8px; border-radius:8px; font-size:10.5px; font-weight:800; cursor:${(isActive && myChances > 0) ? 'pointer' : 'not-allowed'}; opacity:${(isActive && myChances > 0) ? '1' : '0.5'};">
+            ${w}
+          </button>
+        `;
+      });
+      chipsHTML += `</div>`;
+
+      const gameHeader = `
+        <div style="background:linear-gradient(135deg, #6c5ce7, #513cd8); color:#fff; padding:6px 10px; border-radius:12px; font-size:10.5px; font-weight:800; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+          <span>🧩 Tebak Kata Berhadiah! (Sisa Kesempatan: ${myChances}x)</span>
+          <span style="color:#fde047;">🎁 ${gData.remaining_coins} / ${gData.total_coins} 🪙</span>
+        </div>
+      `;
+
+      cardHTML = cardHTML.replace('<div class="post-body">', gameHeader + '<div class="post-body">');
+      cardHTML = cardHTML.replace('</div>\n          \n          ', '</div>' + chipsHTML);
+    }
+
+    return cardHTML;
+  };
+
+  // 7. Tambahkan Tombol "Tebak Kata" di Halaman Buat Curhatan
+  document.addEventListener("DOMContentLoaded", function() {
+    const createPage = document.getElementById('pageCreate');
+    if (createPage) {
+      const btnGroup = createPage.querySelector('div[style*="display: flex; gap: 6px;"]');
+      if (btnGroup && !document.getElementById('btnOpenWordGame')) {
+        const btnWordGame = document.createElement('button');
+        btnWordGame.id = 'btnOpenWordGame';
+        btnWordGame.className = 'btn-secondary';
+        btnWordGame.style.cssText = 'background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; font-weight: 800;';
+        btnWordGame.innerText = '🧩 + Tebak Kata';
+        btnWordGame.onclick = openWordGameModal;
+        btnGroup.appendChild(btnWordGame);
+      }
+    }
+  });
+</script>
 
   <!-- MODAL POP-UP CUSTOM AUTOMATIC OVERRIDE CUIT -->
   <div id="cuitSystemModal" class="modal" style="z-index: 9999;">
