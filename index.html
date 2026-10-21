@@ -4343,7 +4343,7 @@
   }
 
   // 5. Beli Kesempatan Ekstra via Gift
-      async function buyExtraChancesViaGift(postId, giftAmount) {
+        async function buyExtraChancesViaGift(postId, giftAmount) {
     if (paidCoins < giftAmount) {
       return alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
     }
@@ -4369,9 +4369,19 @@
     localStorage.setItem('game_chances_' + gameKey, currentChances);
 
     if (isOwnPost) {
-      // Beli di postingan sendiri -> Masuk 100% ke Pool Hadiah Mingguan
+      // 3A. Beli di postingan sendiri -> Tambahkan ke Pool Lokal & UI Browser
+      let localPool = parseInt(localStorage.getItem('cuit_weekly_pool_coins') || '0');
+      localPool += giftAmount;
+      localStorage.setItem('cuit_weekly_pool_coins', localPool);
+
+      // Update Tampilan Widget Pool
+      const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
+      const poolPerWinnerElem = document.getElementById('weeklyPoolPerWinnerDisplay');
+      if (poolElem) poolElem.innerText = `${localPool.toLocaleString('id-ID')} 🪙`;
+      if (poolPerWinnerElem) poolPerWinnerElem.innerText = `${Math.floor(localPool / 8).toLocaleString('id-ID')} 🪙`;
+
+      // Simpan ke riwayat transaksi Supabase
       await Promise.all([
-        // Tambahkan koin ke pool mingguan di Supabase (sesuaikan nama RPC/tabel pool kamu)
         supabaseClient.rpc('add_to_weekly_pool', { p_coins: parseInt(giftAmount) }),
         supabaseClient.from('gift_transactions').insert([{ 
           recipient_email: 'SYSTEM_WEEKLY_POOL', 
@@ -4382,11 +4392,11 @@
         }])
       ]);
 
-      await updateCoinUI(false);
-      await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin dialihkan ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
+      await updateCoinUI(true);
+      await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
 
     } else {
-      // Beli di postingan orang lain -> Bagi hasil biasa (50% Creator, 10% Sponsor, 40% Platform)
+      // 3B. Beli di postingan orang lain -> Bagi hasil biasa (50% Creator, 10% Sponsor, 40% Platform)
       const targetIdentifier = post.user_id || post.user_email;
       await Promise.all([
         supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
@@ -4398,7 +4408,7 @@
       await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
     }
 
-    // 3. Muat Ulang Feed & Tampilan
+    // 4. Muat Ulang Feed
     loadPosts();
   }
 
