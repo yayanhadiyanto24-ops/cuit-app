@@ -4437,20 +4437,38 @@
       alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata resmi berakhir.");
     }
 
+        // KODE PERBAIKAN BARU:
     const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
     
+    // 1. Simpan komentar baru ke database
+    await supabaseClient.from('comments').insert([{
+      post_id: postId,
+      content: `🎯 Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Dapat ${coinsWon} 🪙` : 'Zonk'})`,
+      user_id: currentUser ? currentUser.id : 'demo_id',
+      user_email: userEmail,
+      username: authorName
+    }]);
+
+    // 2. Hitung jumlah total komentar riil dari database untuk post ini
+    const { count: realCommentCount } = await supabaseClient
+      .from('comments')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    // 3. Update nilai comments_count ke tabel curhat & cache lokal
+    const totalCount = realCommentCount || ((post.comments_count || 0) + 1);
+    post.comments_count = totalCount;
+
     await Promise.all([
-      supabaseClient.from('curhat').update({ word_game_data: gData }).eq('id', postId),
-      supabaseClient.from('comments').insert([{
-        post_id: postId,
-        content: `🎯 Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Dapat ${coinsWon} 🪙` : 'Zonk'})`,
-        user_id: currentUser ? currentUser.id : 'demo_id',
-        user_email: userEmail,
-        username: authorName
-      }])
+      supabaseClient.from('curhat').update({ 
+        word_game_data: gData,
+        comments_count: totalCount 
+      }).eq('id', postId)
     ]);
 
+    // 4. Muat ulang feed agar angka Komentar (X) langsung berubah
     loadPosts();
+
   }
 
   // 7. Render Chip Kata di Card Postingan
