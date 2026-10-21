@@ -1984,29 +1984,31 @@
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
-                // --- 7. KOLEKTOR KOIN ---
+                       // --- 7. KOLEKTOR KOIN (PERBAIKAN NAMA NONGTOL) ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
             if (g.recipient_email) {
-              collectorMap[g.recipient_email] = (collectorMap[g.recipient_email] || 0) + (g.coins_amount || 0); 
+              const rec = g.recipient_email.trim();
+              collectorMap[rec] = (collectorMap[rec] || 0) + (g.coins_amount || 0); 
             }
           });
 
           if (Object.keys(collectorMap).length > 0) {
-            const topCollectorEmail = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
-            const topCoins = collectorMap[topCollectorEmail];
+            const topCollectorKey = Object.keys(collectorMap).reduce((a, b) => collectorMap[a] > collectorMap[b] ? a : b);
+            const topCoins = collectorMap[topCollectorKey];
 
-            // Cari nama profil (username) berdasarkan email atau ID penerima
+            // Pencarian ganda: Cek apakah key merupakan ID atau Email
             const { data: prof } = await supabaseClient
               .from('profiles')
               .select('username')
-              .eq('email', topCollectorEmail)
+              .or(`email.ilike.${topCollectorKey},id.eq.${topCollectorKey}`)
               .maybeSingle();
 
+            // Gunakan username profil jika ada, kalau tidak ada baru ambil nama depan
             const displayName = (prof && prof.username && prof.username.trim() !== '') 
               ? prof.username 
-              : (topCollectorEmail.includes('@') ? topCollectorEmail.split('@')[0] : topCollectorEmail);
+              : (topCollectorKey.includes('@') ? topCollectorKey.split('@')[0] : topCollectorKey);
 
             currentChampKoinData = { name: displayName, coins: topCoins };
             document.getElementById('champPermataName').innerText = displayName;
@@ -2021,7 +2023,6 @@
           document.getElementById('champPermataName').innerText = 'Belum Ada';
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
-
 
         if (data && data.length > 0) {
           const topPost = [...data].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
