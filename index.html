@@ -2107,7 +2107,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-                // --- 7. KOLEKTOR KOIN ---
+                        // --- 7. KOLEKTOR KOIN (DETEKSI FLEKSIBEL EMAIL / USERNAME / ID) ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -2119,10 +2119,11 @@
           });
 
           const sortedCollectors = Object.keys(collectorMap).sort((a, b) => collectorMap[b] - collectorMap[a]);
-          let topCollectorProf = null;
+          let topCollectorName = null;
           let topCoins = 0;
 
           for (const key of sortedCollectors) {
+            // Cari profil berdasarkan Email, ID, atau Username secara case-insensitive
             const { data: prof } = await supabaseClient
               .from('profiles')
               .select('username, email')
@@ -2130,16 +2131,25 @@
               .maybeSingle();
 
             if (prof) {
-              topCollectorProf = prof;
+              topCollectorName = prof.username || prof.email.split('@')[0];
               topCoins = collectorMap[key];
               break; 
+            } else if (key.includes('@')) {
+              // Jika profil tidak ditemukan di database tapi key berupa email valid
+              topCollectorName = key.split('@')[0];
+              topCoins = collectorMap[key];
+              break;
+            } else {
+              // Jika key berupa username langsung
+              topCollectorName = key;
+              topCoins = collectorMap[key];
+              break;
             }
           }
 
-          if (topCollectorProf) {
-            const displayName = topCollectorProf.username || topCollectorProf.email.split('@')[0];
-            currentChampKoinData = { name: displayName, coins: topCoins };
-            document.getElementById('champPermataName').innerText = displayName;
+          if (topCollectorName && topCoins > 0) {
+            currentChampKoinData = { name: topCollectorName, coins: topCoins };
+            document.getElementById('champPermataName').innerText = topCollectorName;
             document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
           } else {
             currentChampKoinData = { name: 'Belum Ada', coins: 0 };
@@ -2151,6 +2161,7 @@
           document.getElementById('champPermataName').innerText = 'Belum Ada';
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
+
 
         // --- 8. MAGNET SPONSOR ---
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
