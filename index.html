@@ -893,8 +893,6 @@
           <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
         </div>
       </div>
-
-      <button class="btn-secondary" style="width: 100%; text-align: center; margin-top: 10px;" onclick="openModerationPanel()">Panel Moderasi</button>
     </div>
 
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eef2ff; border-radius: 14px; border: 1px solid #c7d2fe;">
@@ -3588,14 +3586,6 @@
       } catch (err) {
         alert('Terjadi kesalahan proses penarikan: ' + err.message);
       }
-    }
-
-    function openModerationPanel() {
-      const userLvl = getUserLevel();
-      if (userLvl.title === '🌱 Cuiter Baru' || userLvl.title === '💙 Cuiter Setia') {
-        return alert('Akses Panel Moderasi terbuka mulai dari Level 🔥 Cuiter Aktif!');
-      }
-      alert('Panel Moderasi Aktif: Anda memiliki hak akses meninjau laporan curhatan!');
     }
 
     function openConfigModal() {
