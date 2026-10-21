@@ -2107,7 +2107,7 @@
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-                        // --- 7. KOLEKTOR KOIN (DETEKSI FLEKSIBEL EMAIL / USERNAME / ID) ---
+                  // --- 7. KOLEKTOR KOIN ---
         if (weeklyGifts && weeklyGifts.length > 0) {
           const collectorMap = {};
           weeklyGifts.forEach(g => { 
@@ -2123,25 +2123,18 @@
           let topCoins = 0;
 
           for (const key of sortedCollectors) {
-            // Cari profil berdasarkan Email, ID, atau Username secara case-insensitive
             const { data: prof } = await supabaseClient
               .from('profiles')
               .select('username, email')
               .or(`email.ilike.${key},id.eq.${key},username.ilike.${key}`)
               .maybeSingle();
 
-            if (prof) {
-              topCollectorName = prof.username || prof.email.split('@')[0];
+            if (prof && prof.username) {
+              topCollectorName = prof.username;
               topCoins = collectorMap[key];
               break; 
-            } else if (key.includes('@')) {
-              // Jika profil tidak ditemukan di database tapi key berupa email valid
-              topCollectorName = key.split('@')[0];
-              topCoins = collectorMap[key];
-              break;
-            } else {
-              // Jika key berupa username langsung
-              topCollectorName = key;
+            } else if (prof && prof.email) {
+              topCollectorName = prof.email.split('@')[0];
               topCoins = collectorMap[key];
               break;
             }
