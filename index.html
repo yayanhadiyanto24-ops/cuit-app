@@ -4343,7 +4343,7 @@
   }
 
   // 5. Beli Kesempatan Ekstra via Gift
-    async function buyExtraChancesViaGift(postId, giftAmount) {
+      async function buyExtraChancesViaGift(postId, giftAmount) {
     if (paidCoins < giftAmount) {
       return alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
     }
@@ -4351,34 +4351,54 @@
     const post = allPostsCache.find(p => String(p.id) === String(postId));
     if (!post) return;
 
-    // 1. Potong koin pembeli
-    paidCoins -= giftAmount;
-    usedPaidCoins += giftAmount;
-
     const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
     const myEmail = currentUser ? currentUser.email : guestId;
     const myName = customDisplayName || 'Penilik Bageur';
     const gameKey = `${postId}_${myEmail}`;
 
-    // 2. Tambah kesempatan main
+    // Cek apakah postingan ini milik sendiri
+    const isOwnPost = (post.user_email === myEmail) || (currentUser && post.user_id === currentUser.id);
+
+    // 1. Potong Koin Pembeli
+    paidCoins -= giftAmount;
+    usedPaidCoins += giftAmount;
+
+    // 2. Tambah Kesempatan ke LocalStorage
     let currentChances = parseInt(localStorage.getItem('game_chances_' + gameKey) || '0');
     currentChances += giftAmount;
     localStorage.setItem('game_chances_' + gameKey, currentChances);
 
-    // 3. Proses Pembagian Hasil (50% Creator, 10% Sponsor, 40% Platform)
-    const targetIdentifier = post.user_id || post.user_email;
-    await Promise.all([
-      supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
-      supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` }]),
-      supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
-    ]);
+    if (isOwnPost) {
+      // Beli di postingan sendiri -> Masuk 100% ke Pool Hadiah Mingguan
+      await Promise.all([
+        // Tambahkan koin ke pool mingguan di Supabase (sesuaikan nama RPC/tabel pool kamu)
+        supabaseClient.rpc('add_to_weekly_pool', { p_coins: parseInt(giftAmount) }),
+        supabaseClient.from('gift_transactions').insert([{ 
+          recipient_email: 'SYSTEM_WEEKLY_POOL', 
+          sender_name: myName, 
+          gift_name: `Beli Kesempatan Sendiri (${giftAmount}x -> Pool)`, 
+          coins_amount: giftAmount, 
+          post_id: String(postId) 
+        }])
+      ]);
 
-    // 4. PEMBARUAN UTAMA: Tarik ulang data koin & permata terbaru dari Supabase
-    await updateCoinUI(false);
+      await updateCoinUI(false);
+      await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin dialihkan ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
 
-    await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
-    
-    // 5. Muat ulang feed postingan
+    } else {
+      // Beli di postingan orang lain -> Bagi hasil biasa (50% Creator, 10% Sponsor, 40% Platform)
+      const targetIdentifier = post.user_id || post.user_email;
+      await Promise.all([
+        supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
+        supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` }]),
+        supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
+      ]);
+
+      await updateCoinUI(false);
+      await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+    }
+
+    // 3. Muat Ulang Feed & Tampilan
     loadPosts();
   }
 
