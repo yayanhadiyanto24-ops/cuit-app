@@ -4558,7 +4558,7 @@ async function handleTopUp(amount) {
     const data = await response.json();
 
     // Cek jika QRIS berhasil didapat (baik dari objek qris atau response DOKU langsung)
-    const qrImage = data.qrUrl || data.qrContent || data.qr_image_url || data.qr_content || (data.qris_data ? data.qris_data.qr_content : null);
+    const qrImage = data.qr_string || data.qr_content || data.qr_image_url || (data.qris_data ? data.qris_data.qr_content : null);
 
     if (qrImage) {
       const qrisContainer = document.getElementById('qrisContainer');
