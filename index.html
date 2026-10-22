@@ -4490,109 +4490,116 @@ try {
     return alert("Pembelian kesempatan tambahan sudah dinonaktifkan. Silakan gunakan Gift biasa.");
   }
 
-  async function playWordGameAction(postId, clickedWordIndex, wordText) {
-    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-    const userEmail = currentUser ? currentUser.email : guestId;
-    const gameKey = `${postId}_${userEmail}`;
+  
+async function playWordGameAction(postId, clickedWordIndex, wordText) {
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const userEmail = currentUser ? currentUser.email : guestId;
+  const gameKey = `${postId}_${userEmail}`;
 
-    let currentChances = localStorage.getItem('game_chances_' + gameKey);
-    currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
+  let currentChances = localStorage.getItem('game_chances_' + gameKey);
+  currentChances = currentChances === null ? 3 : parseInt(currentChances, 10);
 
-        if (currentChances <= 0) {
-      // Kesempatan habis: buka pilihan Gift biasa saja.
-      // Pembelian kesempatan tambahan sengaja dinonaktifkan.
-      const targetPost = allPostsCache.find(p => String(p.id) === String(postId));
-      if (!targetPost) return alert("Postingan tidak ditemukan. Silakan muat ulang halaman.");
-      activeTargetPostId = postId;
-      isLiveGiftContext = false;
-      selectedLiveRecipient = null;
-      const giftModal = document.getElementById('giftModal');
-      if (giftModal) {
-        giftModal.style.display = 'flex';
-      } else {
-        alert("Menu Gift belum tersedia. Silakan muat ulang halaman.");
-      }
-      return;
-    }
-
-    let post = allPostsCache.find(p => String(p.id) === String(postId));
-    if (!post || !post.word_game_data || !post.word_game_data.is_active) {
-      return alert("⚠️ Permainan di postingan ini telah berakhir!");
-    }
-
-    let gData = post.word_game_data;
-    if (!gData.claimed_indexes) gData.claimed_indexes = [];
-
-    if (gData.claimed_indexes.includes(clickedWordIndex)) {
-      return alert("Kata ini sudah berhasil dijebol koinnya dan terkunci!");
-    }
-
-    const success = await deductCoin(1);
-    if (!success) return alert("Koin kamu habis!");
-    if (freeCoins === 0) await addCoinsToPlatformPool(1);
-
-    let activeIndexes = [];
-    gData.words.forEach((_, i) => {
-      if (!gData.claimed_indexes.includes(i)) activeIndexes.push(i);
-    });
-
-    let currentGachaMap = reshuffleCoinsGacha(activeIndexes, gData.remaining_coins);
-    let coinsWon = currentGachaMap[clickedWordIndex] || 0;
-
-    if (coinsWon > 0) {
-      gData.remaining_coins -= coinsWon;
-      gData.claimed_indexes.push(clickedWordIndex);
-
-      paidCoins += coinsWon;
-      currentChances -= 1;
-      localStorage.setItem('game_chances_' + gameKey, currentChances);
-      updateCoinUI(true);
-
-      alert(`🎉 MANTAP! Kata "${wordText}" menyimpan ${coinsWon} KOIN!\nKoin masuk ke dompetmu & kata TERKUNCI. Sisa kesempatan: ${currentChances}x.`);
-    } else {
-      currentChances -= 1;
-      localStorage.setItem('game_chances_' + gameKey, currentChances);
-      alert(`😭 ZONK! Kata "${wordText}" tidak berisi koin pada kocokan ini. Sisa kesempatan: ${currentChances}x.`);
-    }
-
-    if (gData.remaining_coins <= 0) {
-      gData.is_active = false;
-      alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata resmi berakhir.");
-    }
-
-        // KODE PERBAIKAN BARU:
-    const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-    
-    // 1. Simpan komentar baru ke database
-    await supabaseClient.from('comments').insert([{
-      post_id: postId,
-      content: `🎯 Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Dapat ${coinsWon} 🪙` : 'Zonk'})`,
-      user_id: currentUser ? currentUser.id : 'demo_id',
-      user_email: userEmail,
-      username: authorName
-    }]);
-
-    // 2. Hitung jumlah total komentar riil dari database untuk post ini
-    const { count: realCommentCount } = await supabaseClient
-      .from('comments')
-      .select('*', { count: 'exact', head: true })
-      .eq('post_id', postId);
-
-    // 3. Update nilai comments_count ke tabel curhat & cache lokal
-    const totalCount = realCommentCount || ((post.comments_count || 0) + 1);
-    post.comments_count = totalCount;
-
-    await Promise.all([
-      supabaseClient.from('curhat').update({ 
-        word_game_data: gData,
-        comments_count: totalCount 
-      }).eq('id', postId)
-    ]);
-
-    // 4. Muat ulang feed agar angka Komentar (X) langsung berubah
-    loadPosts();
-
+  const post = allPostsCache.find(p => String(p.id) === String(postId));
+  if (!post || !post.word_game_data || !post.word_game_data.is_active) {
+    return alert('Permainan ini telah berakhir.');
   }
+
+  const gData = post.word_game_data;
+  if (!Array.isArray(gData.words) || clickedWordIndex < 0 ||
+      clickedWordIndex >= gData.words.length) {
+    return alert('Kata tidak valid. Silakan muat ulang halaman.');
+  }
+
+  gData.claimed_indexes = Array.isArray(gData.claimed_indexes)
+    ? gData.claimed_indexes : [];
+  gData.opened_indexes = Array.isArray(gData.opened_indexes)
+    ? gData.opened_indexes : [];
+
+  if (gData.opened_indexes.includes(clickedWordIndex) ||
+      gData.claimed_indexes.includes(clickedWordIndex)) {
+    return alert('Kata ini sudah terbuka dan tidak dapat dicoba lagi.');
+  }
+
+  if (currentChances <= 0) {
+    return alert('Kesempatan gratis habis. Pembelian kesempatan berbayar perlu diaktifkan.');
+  }
+
+  if (currentUser && post.user_id === currentUser.id) {
+    return alert('Kreator tidak dapat memainkan permainan sendiri.');
+  }
+
+  const success = await deductCoin(1);
+  if (!success) return alert('Koin kamu tidak cukup.');
+
+  // Hanya kata yang masih tertutup yang ikut pengacakan.
+  const activeIndexes = gData.words
+    .map((_, i) => i)
+    .filter(i =>
+      !gData.opened_indexes.includes(i) &&
+      !gData.claimed_indexes.includes(i)
+    );
+
+  if (!activeIndexes.includes(clickedWordIndex)) {
+    return alert('Kata ini sudah tidak tersedia.');
+  }
+
+  const currentGachaMap = reshuffleCoinsGacha(
+    activeIndexes,
+    gData.remaining_coins
+  );
+  const coinsWon = currentGachaMap[clickedWordIndex] || 0;
+
+  // Setiap ketukan membuka kata secara permanen.
+  gData.opened_indexes.push(clickedWordIndex);
+  currentChances -= 1;
+  localStorage.setItem('game_chances_' + gameKey, currentChances);
+
+  if (coinsWon > 0) {
+    gData.remaining_coins -= coinsWon;
+    gData.claimed_indexes.push(clickedWordIndex);
+    paidCoins += coinsWon;
+    updateCoinUI(true);
+
+    alert(`MANTAP! Kata "${wordText}" mendapat ${coinsWon} koin. Sisa kesempatan: ${currentChances}.`);
+  } else {
+    alert(`ZONK! Kata "${wordText}" tetap terbuka dan tidak bisa dicoba lagi. Sisa kesempatan: ${currentChances}.`);
+  }
+
+  if (gData.remaining_coins <= 0) {
+    gData.remaining_coins = 0;
+    gData.is_active = false;
+    alert('Hadiah koin telah habis. Permainan berakhir.');
+  }
+
+  const authorName = customDisplayName ||
+    (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
+
+  const { error: commentError } = await supabaseClient.from('comments').insert([{
+    post_id: postId,
+    content: `Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Mendapat ${coinsWon} koin` : 'ZONK'})`,
+    user_id: currentUser ? currentUser.id : 'demo_id',
+    user_email: userEmail,
+    username: authorName
+  }]);
+
+  if (commentError) console.error('Gagal menyimpan komentar permainan:', commentError);
+
+  // Simpan tampilan permainan; ini masih memakai jalur update lama.
+  // Validasi saldo dan hadiah yang aman wajib dipindahkan ke RPC server
+  // sebelum versi ini dipakai untuk permainan berhadiah sungguhan.
+  const { error: saveError } = await supabaseClient
+    .from('curhat')
+    .update({ word_game_data: gData })
+    .eq('id', postId);
+
+  if (saveError) {
+    alert('Perubahan permainan gagal disimpan. Muat ulang sebelum bermain lagi.');
+    console.error(saveError);
+    return;
+  }
+
+  loadPosts();
+}
 
   // 7. Render Chip Kata di Card Postingan
   const originalRenderCardHTML = renderCardHTML;
