@@ -4610,7 +4610,7 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
       const gData = p.word_game_data;
       const isActive = gData.is_active && gData.remaining_coins > 0;
       const claimedList = gData.claimed_indexes || [];
-
+const openedList = gData.opened_indexes || [];
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const gameKey = `${p.id}_${myEmail}`;
@@ -4622,26 +4622,34 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
       
       gData.words.forEach((w, idx) => {
         const isClaimed = claimedList.includes(idx);
+const isOpened = openedList.includes(idx);
         const safeWord = w.replace(/'/g, "\\'");
 
+        
         if (isClaimed) {
           chipsHTML += `
             <button disabled style="background:#e2e8f0; border:1px solid #cbd5e1; color:#94a3b8; padding:4px 8px; border-radius:8px; font-size:10.5px; font-weight:800; cursor:not-allowed; text-decoration:line-through;">
               🔒 ${w}
             </button>
           `;
+        } else if (isOpened) {
+          chipsHTML += `
+            <button disabled
+              style="background:#fff7ed; border:1px solid #fdba74; color:#9a3412; padding:4px 8px; border-radius:8px; font-size:10.5px; font-weight:800; cursor:not-allowed;">
+              ◉ ${w} — ZONK
+            </button>
+          `;
         } else {
           chipsHTML += `
-            <button 
-              onclick="playWordGameAction('${p.id}', ${idx}, '${safeWord}')" 
-              ${!isActive ? 'disabled' : ''} 
+            <button
+              onclick="playWordGameAction('${p.id}', ${idx}, '${safeWord}')"
+              ${!isActive ? 'disabled' : ''}
               style="background:#fff; border:1px solid #dcd6ff; color:var(--primary); padding:4px 8px; border-radius:8px; font-size:10.5px; font-weight:800; cursor:${isActive ? 'pointer' : 'not-allowed'}; opacity:${isActive ? '1' : '0.5'};">
               ${w}
             </button>
           `;
         }
-      });
-      chipsHTML += `</div>`;
+
 
       const gameHeader = `
         <div style="background:linear-gradient(135deg, #6c5ce7, #513cd8); color:#fff; padding:6px 10px; border-radius:12px; font-size:10.5px; font-weight:800; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
