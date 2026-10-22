@@ -4587,8 +4587,16 @@ if (weeklyGifts && weeklyGifts.length > 0) {
     return cardHTML;
   };
 
-  // 8. Tombol Pemicu di Halaman Buat
-  document.addEventListener("DOMContentLoaded", function() {
+    // 1. Fungsi Buka Form Buat Tebak Kata
+  function openWordGameModal() {
+    document.getElementById('wordGameInputText').value = '';
+    document.getElementById('wordGameCountDisplay').innerText = '0';
+    document.getElementById('wordGameCoinDisplay').innerText = '0';
+    document.getElementById('wordGameModal').style.display = 'flex';
+  }
+
+  // 2. Fungsi Otomatis untuk Memastikan Tombol "+ Tebak Kata" MUNCUL
+  function injectWordGameButton() {
     const createPage = document.getElementById('pageCreate');
     if (createPage) {
       const btnGroup = createPage.querySelector('div[style*="display: flex; gap: 6px;"]');
@@ -4596,13 +4604,22 @@ if (weeklyGifts && weeklyGifts.length > 0) {
         const btnWordGame = document.createElement('button');
         btnWordGame.id = 'btnOpenWordGame';
         btnWordGame.className = 'btn-secondary';
-        btnWordGame.style.cssText = 'background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; font-weight: 800;';
+        btnWordGame.type = 'button';
+        btnWordGame.style.cssText = 'background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; font-weight: 800; flex: 1.2;';
         btnWordGame.innerText = '🧩 + Tebak Kata';
         btnWordGame.onclick = openWordGameModal;
         btnGroup.appendChild(btnWordGame);
       }
     }
-  });
+  }
+
+  // Langsung jalankan agar tombol pasti muncul
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectWordGameButton);
+  } else {
+    injectWordGameButton();
+  }
+
 </script>
 
   <!-- MODAL POP-UP CUSTOM AUTOMATIC OVERRIDE CUIT -->
