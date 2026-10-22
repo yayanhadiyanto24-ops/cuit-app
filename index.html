@@ -2787,16 +2787,18 @@ if (weeklyGifts && weeklyGifts.length > 0) {
         triggerGiftAnimation(myName, giftName, cost, targetName);
         loadPosts();
 
-      } else if (activeTargetPostId) {
+            } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
 
         if (currentPost) {
           const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
           currentPost.gifts_count = newGiftCoinsCount;
 
-          const targetIdentifier = currentPost.user_id || currentPost.user_email;
+          // PASTIKAN MENGGUNAKAN EMAIL KREATOR (Paling Stabil untuk Supabase)
+          const targetIdentifier = currentPost.user_email;
           const targetName = currentPost.username || "Pembuat Curhat";
 
+          // 1. Jalankan Transaksi di Supabase
           await Promise.all([
             supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
             supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
@@ -2804,7 +2806,7 @@ if (weeklyGifts && weeklyGifts.length > 0) {
             supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
           ]);
 
-          // Otomatis tambah kesempatan tebak kata saat gift dikirim
+          // 2. Tambah Kesempatan jika Postingan Tebak Kata
           if (currentPost.word_game_data) {
             const gameKey = `${activeTargetPostId}_${myEmail}`;
             let currentChances = parseInt(localStorage.getItem('game_chances_' + gameKey) || '0');
@@ -2814,7 +2816,8 @@ if (weeklyGifts && weeklyGifts.length > 0) {
             alert(`🎁 Terima kasih! Gift (${cost} 🪙) berhasil dikirim.\nKesempatan tebak kamu bertambah +${cost}x (Total: ${currentChances}x)!`);
           }
 
-          await updateCoinUI(true);
+          // 3. PAKSA TARIK DATA TERBARU DARI SUPABASE (Jangan Pakai 'true' agar Saldo Langsung Berubah)
+          await updateCoinUI(false); 
           triggerGiftAnimation(myName, giftName, cost, targetName);
           loadPosts();
         }
