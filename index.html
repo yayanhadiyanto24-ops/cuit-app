@@ -4386,14 +4386,11 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
 
         if (currentChances <= 0) {
-      const buyMore = await confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
-      if (buyMore) {
-        const inputCoins = await prompt("Masukkan jumlah koin untuk beli kesempatan (contoh: 1 atau 10):", "1");
-        const coinsToSpend = parseInt(inputCoins) || 0;
-        if (coinsToSpend > 0) {
-          await buyExtraChancesViaGift(postId, coinsToSpend);
-        }
-      }
+      // Kesempatan habis: arahkan langsung ke pilihan Gift reguler.
+      // Tidak lagi membuka prompt pembelian kesempatan khusus.
+      const postForGift = allPostsCache.find(p => String(p.id) === String(postId));
+      if (!postForGift) return alert("Postingan tidak ditemukan. Muat ulang halaman lalu coba lagi.");
+      openGiftModal(postId);
       return;
     }
 
