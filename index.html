@@ -4426,13 +4426,19 @@ if (weeklyGifts && weeklyGifts.length > 0) {
   }
 
   // 6. Aksi Mengetuk Kata
-  async function playWordGameAction(postId, clickedWordIndex, wordText) {
+    async function playWordGameAction(postId, clickedWordIndex, wordText) {
     const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
     const userEmail = currentUser ? currentUser.email : guestId;
-    const gameKey = `${postId}_${userEmail}`;
 
-    let currentChances = localStorage.getItem('game_chances_' + gameKey);
-    currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
+    let post = allPostsCache.find(p => String(p.id) === String(postId));
+    
+    // RESTRIKSI KREATOR: Langsung cegah sebelum proses apapun
+    if (post && (post.user_email === userEmail || (currentUser && post.user_id === currentUser.id))) {
+      return alert("⚠️ Kamu tidak dapat bermain atau membeli kesempatan pada postingan milik sendiri!");
+    }
+
+    // ... (sisa kode playWordGameAction ke bawah tetap sama)
+
 
         if (currentChances <= 0) {
       const buyMore = await confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
