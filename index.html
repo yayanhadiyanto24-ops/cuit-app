@@ -1167,7 +1167,7 @@
   <div id="giftModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
-      <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Dukungan Koin Berbayar (50% Kreator, 10% Sponsor, 40% CUIT)</div>
+      <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Koin Berbayar: 50% untuk Kreator, 10% untuk Sponsor; 40% tidak dibagikan</div>
       
       <div style="background: #ece8ff; border: 1.5px dashed #6c5ce7; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
         <span style="font-weight: 900; font-size: 12px; color: var(--primary); display: block;">📌 Kirim Gift Absen (1 🪙)</span>
@@ -2796,35 +2796,15 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
           const targetName = currentPost.username || "Pembuat Curhat";
 
-          // Proses bonus terlebih dahulu dan periksa error dari Supabase.
-          const { error: rewardError } = await supabaseClient.rpc('process_gift_rewards', {
-            p_creator_identifier: String(targetIdentifier),
-            p_cost: parseInt(cost, 10)
-          });
+          await Promise.all([
+  supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
+  supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+  supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
+  supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
+]);
 
-          if (rewardError) {
-            // Pulihkan pengurangan saldo lokal jika bonus gagal diproses.
-            paidCoins += Number(cost);
-            usedPaidCoins = Math.max(0, usedPaidCoins - Number(cost));
-            await updateCoinUI(true);
-            pendingGiftData = null;
-            selectedLiveRecipient = null;
-            return alert('Bonus Gift gagal diproses. Saldo lokal dipulihkan. Detail: ' + rewardError.message);
-          }
-
-          const results = await Promise.all([
-            supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
-            supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
-            supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
-          ]);
-
-          const failedResult = results.find(result => result && result.error);
-          if (failedResult) {
-            console.error('Gift tercatat sebagian:', failedResult.error);
-            await alert('Bonus berhasil diproses, tetapi sebagian catatan Gift gagal disimpan. Silakan periksa riwayat transaksi.');
-          }
-
-          await updateCoinUI(true);
+// Tarik data koin terbaru dari database agar saldo sponsor 10% langsung bertambah di layar
+await updateCoinUI(true);
 
 triggerGiftAnimation(myName, giftName, cost, targetName);
         loadPosts();
@@ -4370,13 +4350,11 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
 
           // 5. Beli Kesempatan Ekstra via Gift
   async function buyExtraChancesViaGift(postId, giftAmount) {
-    // Fitur pembelian kesempatan khusus dinonaktifkan sepenuhnya.
-    // Keluar sebelum memotong saldo atau menambah kesempatan permainan.
-    await alert('Fitur pembelian kesempatan khusus sudah dinonaktifkan. Silakan gunakan Gift reguler pada postingan anggota lain.');
-    return;
+    // Fitur pembelian kesempatan tambahan dinonaktifkan.
+    // Gift hanya dapat dikirim melalui pilihan Gift reguler.
+    return alert("Pembelian kesempatan tambahan sudah dinonaktifkan. Silakan gunakan Gift biasa.");
   }
 
-  // 6. Aksi Mengetuk Kata
   async function playWordGameAction(postId, clickedWordIndex, wordText) {
     const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
     const userEmail = currentUser ? currentUser.email : guestId;
@@ -4386,11 +4364,19 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
 
         if (currentChances <= 0) {
-      // Kesempatan habis: arahkan langsung ke pilihan Gift reguler.
-      // Tidak lagi membuka prompt pembelian kesempatan khusus.
-      const postForGift = allPostsCache.find(p => String(p.id) === String(postId));
-      if (!postForGift) return alert("Postingan tidak ditemukan. Muat ulang halaman lalu coba lagi.");
-      openGiftModal(postId);
+      // Kesempatan habis: buka pilihan Gift biasa saja.
+      // Pembelian kesempatan tambahan sengaja dinonaktifkan.
+      const targetPost = allPostsCache.find(p => String(p.id) === String(postId));
+      if (!targetPost) return alert("Postingan tidak ditemukan. Silakan muat ulang halaman.");
+      activeTargetPostId = postId;
+      isLiveGiftContext = false;
+      selectedLiveRecipient = null;
+      const giftModal = document.getElementById('giftModal');
+      if (giftModal) {
+        giftModal.style.display = 'flex';
+      } else {
+        alert("Menu Gift belum tersedia. Silakan muat ulang halaman.");
+      }
       return;
     }
 
@@ -4650,3 +4636,4 @@ function closeQRISModal() {
 
 </body>
 </html>
+
