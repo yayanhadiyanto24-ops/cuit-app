@@ -4347,8 +4347,8 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     return distribution;
   }
 
-  // 5. Beli Kesempatan Ekstra via Gift
-        async function buyExtraChancesViaGift(postId, giftAmount) {
+    // 5. Beli Kesempatan Ekstra via Gift (Sudah Diperbaiki Sintaks & Jatah Sponsornya)
+  async function buyExtraChancesViaGift(postId, giftAmount) {
     if (paidCoins < giftAmount) {
       return alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
     }
@@ -4374,7 +4374,7 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     localStorage.setItem('game_chances_' + gameKey, currentChances);
 
     if (isOwnPost) {
-      // 3A. Beli di postingan sendiri -> Tambahkan ke Pool Lokal & UI Browser
+      // 3A. Beli di postingan sendiri -> Tambahkan ke Pool Lokal & Database Pool
       let localPool = parseInt(localStorage.getItem('cuit_weekly_pool_coins') || '0');
       localPool += giftAmount;
       localStorage.setItem('cuit_weekly_pool_coins', localPool);
@@ -4385,7 +4385,7 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       if (poolElem) poolElem.innerText = `${localPool.toLocaleString('id-ID')} 🪙`;
       if (poolPerWinnerElem) poolPerWinnerElem.innerText = `${Math.floor(localPool / 8).toLocaleString('id-ID')} 🪙`;
 
-      // Simpan ke riwayat transaksi Supabase
+      // Simpan ke riwayat transaksi Supabase (Murni Pool, Tidak Masuk ke Kolektor Koin)
       await Promise.all([
         supabaseClient.rpc('add_to_weekly_pool', { p_coins: parseInt(giftAmount) }),
         supabaseClient.from('gift_transactions').insert([{ 
@@ -4401,7 +4401,7 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
 
     } else {
-      // 3B. Beli di postingan orang lain -> Bagi hasil biasa (50% Creator, 10% Sponsor, 40% Platform)
+      // 3B. Beli di postingan orang lain / downline -> Panggil RPC Bagi Hasil (50% Creator, 10% Sponsor ADMINCUIT, 40% Platform)
       const targetIdentifier = post.user_id || post.user_email;
       await Promise.all([
         supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
@@ -4409,9 +4409,10 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
         supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
       ]);
 
-      // Paksa ambil data koin terbaru dari Supabase server
-await updateCoinUI(true);
-await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+      // Paksa ambil data koin terbaru dari Supabase server agar 10% jatah sponsor ADMINCUIT langsung bertambah!
+      await updateCoinUI(true);
+      await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+    }
 
     // 4. Muat Ulang Feed
     loadPosts();
