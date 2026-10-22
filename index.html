@@ -4407,9 +4407,9 @@ if (weeklyGifts && weeklyGifts.length > 0) {
         supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
       ]);
 
-      await updateCoinUI(false);
-      await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
-    }
+      // Paksa ambil data koin terbaru dari Supabase server
+await updateCoinUI(true);
+await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
 
     // 4. Muat Ulang Feed
     loadPosts();
