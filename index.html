@@ -2797,14 +2797,16 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           const targetName = currentPost.username || "Pembuat Curhat";
 
           await Promise.all([
-            supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
-            supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
-            supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
-            supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
-          ]);
+  supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
+  supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+  supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
+  supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
+]);
 
-          triggerGiftAnimation(myName, giftName, cost, targetName);
-        }
+// Tarik data koin terbaru dari database agar saldo sponsor 10% langsung bertambah di layar
+await updateCoinUI(true);
+
+triggerGiftAnimation(myName, giftName, cost, targetName);
         loadPosts();
       }
 
