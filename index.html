@@ -2735,19 +2735,20 @@ if (weeklyGifts && weeklyGifts.length > 0) {
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-    async function executeSendGift() {
+        async function executeSendGift() {
       if (!pendingGiftData) return;
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
 
+      // Restriksi: Kreator dilarang kirim gift ke postingan sendiri
       if (!isLiveGiftContext && activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
         if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
           document.getElementById('confirmGiftModal').style.display = 'none';
           pendingGiftData = null;
-          return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
+          return alert('⚠️ Kamu tidak dapat mengirimkan Gift / membeli kesempatan pada postingan milik sendiri!');
         }
       }
 
@@ -2797,23 +2798,32 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           const targetName = currentPost.username || "Pembuat Curhat";
 
           await Promise.all([
-  supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
-  supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
-  supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
-  supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
-]);
+            supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
+            supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+            supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
+            supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
+          ]);
 
-// Tarik data koin terbaru dari database agar saldo sponsor 10% langsung bertambah di layar
-await updateCoinUI(true);
+          // Otomatis tambah kesempatan tebak kata saat gift dikirim
+          if (currentPost.word_game_data) {
+            const gameKey = `${activeTargetPostId}_${myEmail}`;
+            let currentChances = parseInt(localStorage.getItem('game_chances_' + gameKey) || '0');
+            currentChances += cost;
+            localStorage.setItem('game_chances_' + gameKey, currentChances);
 
-triggerGiftAnimation(myName, giftName, cost, targetName);
-        loadPosts();
+            alert(`🎁 Terima kasih! Gift (${cost} 🪙) berhasil dikirim.\nKesempatan tebak kamu bertambah +${cost}x (Total: ${currentChances}x)!`);
+          }
+
+          await updateCoinUI(true);
+          triggerGiftAnimation(myName, giftName, cost, targetName);
+          loadPosts();
         }
       }
 
       pendingGiftData = null;
       selectedLiveRecipient = null;
     }
+
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
