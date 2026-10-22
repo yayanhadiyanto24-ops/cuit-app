@@ -2793,24 +2793,78 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
           currentPost.gifts_count = newGiftCoinsCount;
 
-          const targetIdentifier = currentPost.user_id || currentPost.user_email;
-          const targetName = currentPost.username || "Pembuat Curhat";
+          
+const targetIdentifier = currentPost.user_id || currentPost.user_email;
+const targetName = currentPost.username || "Pembuat Curhat";
 
-          await Promise.all([
-  supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
-  supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
-  supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
-  supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
-]);
+try {
+  // Proses pembagian permata harus berhasil terlebih dahulu.
+  const { data: rewardData, error: rewardError } =
+    await supabaseClient.rpc('process_gift_rewards', {
+      p_creator_identifier: String(targetIdentifier),
+      p_cost: parseInt(cost, 10)
+    });
 
-// Tarik data koin terbaru dari database agar saldo sponsor 10% langsung bertambah di layar
-await updateCoinUI(true);
+  if (rewardError) {
+    throw rewardError;
+  }
 
-triggerGiftAnimation(myName, giftName, cost, targetName);
-        loadPosts();
-        }
-      }
+  // Simpan transaksi Gift dan notifikasi.
+  const { error: transactionError } = await supabaseClient
+    .from('gift_transactions')
+    .insert([{
+      recipient_email: String(currentPost.user_email),
+      sender_name: myName,
+      gift_name: giftName,
+      coins_amount: parseInt(cost, 10),
+      post_id: String(activeTargetPostId)
+    }]);
 
+  if (transactionError) {
+    console.error('Gagal menyimpan transaksi Gift:', transactionError);
+  }
+
+  const { error: notificationError } = await supabaseClient
+    .from('user_notifications')
+    .insert([{
+      recipient_email: String(currentPost.user_email),
+      sender_name: myName,
+      message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!`
+    }]);
+
+  if (notificationError) {
+    console.error('Gagal menyimpan notifikasi:', notificationError);
+  }
+
+  const { error: postError } = await supabaseClient
+    .from('curhat')
+    .update({
+      gifts_count: (currentPost.gifts_count || 0) + parseInt(cost, 10)
+    })
+    .eq('id', activeTargetPostId);
+
+  if (postError) {
+    console.error('Gagal memperbarui jumlah Gift:', postError);
+  } else {
+    currentPost.gifts_count =
+      (currentPost.gifts_count || 0) + parseInt(cost, 10);
+  }
+
+  await updateCoinUI(true);
+  triggerGiftAnimation(myName, giftName, cost, targetName);
+  loadPosts();
+
+} catch (error) {
+  console.error('Gagal memproses pembagian permata Gift:', error);
+
+  // Segarkan saldo dari server; jangan menambah saldo secara manual.
+  await updateCoinUI(true);
+
+  alert(
+    'Gift belum dapat diproses. Silakan periksa saldo dan coba lagi. ' +
+    'Jika saldo sudah berkurang, jangan kirim ulang sebelum diperiksa.'
+  );
+}
       pendingGiftData = null;
       selectedLiveRecipient = null;
     }
