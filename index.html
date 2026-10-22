@@ -2735,20 +2735,19 @@ if (weeklyGifts && weeklyGifts.length > 0) {
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
-        async function executeSendGift() {
+    async function executeSendGift() {
       if (!pendingGiftData) return;
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
 
-      // Restriksi: Kreator dilarang kirim gift ke postingan sendiri
       if (!isLiveGiftContext && activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
         if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
           document.getElementById('confirmGiftModal').style.display = 'none';
           pendingGiftData = null;
-          return alert('⚠️ Kamu tidak dapat mengirimkan Gift / membeli kesempatan pada postingan milik sendiri!');
+          return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
         }
       }
 
@@ -2787,46 +2786,34 @@ if (weeklyGifts && weeklyGifts.length > 0) {
         triggerGiftAnimation(myName, giftName, cost, targetName);
         loadPosts();
 
-            } else if (activeTargetPostId) {
+      } else if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
 
         if (currentPost) {
           const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
           currentPost.gifts_count = newGiftCoinsCount;
 
-          // PASTIKAN MENGGUNAKAN EMAIL KREATOR (Paling Stabil untuk Supabase)
-          const targetIdentifier = currentPost.user_email;
+          const targetIdentifier = currentPost.user_id || currentPost.user_email;
           const targetName = currentPost.username || "Pembuat Curhat";
 
-          // 1. Jalankan Transaksi di Supabase
           await Promise.all([
-            supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
-            supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
-            supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
-            supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
-          ]);
+  supabaseClient.from('curhat').update({ gifts_count: newGiftCoinsCount }).eq('id', activeTargetPostId),
+  supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(cost) }),
+  supabaseClient.from('user_notifications').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!` }]),
+  supabaseClient.from('gift_transactions').insert([{ recipient_email: String(currentPost.user_email), sender_name: myName, gift_name: giftName, coins_amount: cost, post_id: String(activeTargetPostId) }])
+]);
 
-          // 2. Tambah Kesempatan jika Postingan Tebak Kata
-          if (currentPost.word_game_data) {
-            const gameKey = `${activeTargetPostId}_${myEmail}`;
-            let currentChances = parseInt(localStorage.getItem('game_chances_' + gameKey) || '0');
-            currentChances += cost;
-            localStorage.setItem('game_chances_' + gameKey, currentChances);
+// Tarik data koin terbaru dari database agar saldo sponsor 10% langsung bertambah di layar
+await updateCoinUI(true);
 
-            alert(`🎁 Terima kasih! Gift (${cost} 🪙) berhasil dikirim.\nKesempatan tebak kamu bertambah +${cost}x (Total: ${currentChances}x)!`);
-          }
-
-          // 3. PAKSA TARIK DATA TERBARU DARI SUPABASE (Jangan Pakai 'true' agar Saldo Langsung Berubah)
-          await updateCoinUI(false); 
-          triggerGiftAnimation(myName, giftName, cost, targetName);
-          loadPosts();
+triggerGiftAnimation(myName, giftName, cost, targetName);
+        loadPosts();
         }
       }
 
       pendingGiftData = null;
       selectedLiveRecipient = null;
     }
-
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
@@ -4361,29 +4348,23 @@ if (weeklyGifts && weeklyGifts.length > 0) {
     return distribution;
   }
 
-            // 5. Beli Kesempatan Ekstra via Gift
+          // 5. Beli Kesempatan Ekstra via Gift
   async function buyExtraChancesViaGift(postId, giftAmount) {
     try {
+      if (paidCoins < giftAmount) {
+        await alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
+        return;
+      }
+
       const post = allPostsCache.find(p => String(p.id) === String(postId));
       if (!post) return;
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || 'Penilik Bageur';
-
-      // RESTRIKSI: Kreator dilarang membeli kesempatan di postingannya sendiri
-      const isOwnPost = (post.user_email === myEmail) || (currentUser && post.user_id === currentUser.id);
-      if (isOwnPost) {
-        await alert("⚠️ Kamu tidak dapat membeli kesempatan pada postingan milik sendiri!");
-        return;
-      }
-
-      if (paidCoins < giftAmount) {
-        await alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
-        return;
-      }
-
       const gameKey = `${postId}_${myEmail}`;
+
+      const isOwnPost = (post.user_email === myEmail) || (currentUser && post.user_id === currentUser.id);
 
       // 1. Potong Koin Pembeli
       paidCoins -= giftAmount;
@@ -4394,29 +4375,43 @@ if (weeklyGifts && weeklyGifts.length > 0) {
       currentChances += giftAmount;
       localStorage.setItem('game_chances_' + gameKey, currentChances);
 
-      // 3. Bagi hasil transaksi (50% Creator, 10% Sponsor, 40% Platform)
-      const targetIdentifier = post.user_id || post.user_email;
-      await Promise.all([
-        supabaseClient.rpc('process_gift_rewards', { 
-          p_creator_identifier: String(targetIdentifier), 
-          p_cost: parseInt(giftAmount) 
-        }),
-        supabaseClient.from('user_notifications').insert([{ 
-          recipient_email: String(post.user_email), 
-          sender_name: myName, 
-          message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` 
-        }]),
-        supabaseClient.from('gift_transactions').insert([{ 
-          recipient_email: String(post.user_email), 
-          sender_name: myName, 
-          gift_name: `Beli Kesempatan (${giftAmount}x)`, 
-          coins_amount: giftAmount, 
-          post_id: String(postId) 
-        }])
-      ]);
+      if (isOwnPost) {
+        // 3A. Beli di postingan sendiri -> Masuk Pool Hadiah Mingguan
+        let localPool = parseInt(localStorage.getItem('cuit_weekly_pool_coins') || '0');
+        localPool += giftAmount;
+        localStorage.setItem('cuit_weekly_pool_coins', localPool);
 
-      await updateCoinUI(true);
-      await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
+        const poolPerWinnerElem = document.getElementById('weeklyPoolPerWinnerDisplay');
+        if (poolElem) poolElem.innerText = `${localPool.toLocaleString('id-ID')} 🪙`;
+        if (poolPerWinnerElem) poolPerWinnerElem.innerText = `${Math.floor(localPool / 8).toLocaleString('id-ID')} 🪙`;
+
+        await Promise.all([
+          supabaseClient.rpc('add_to_weekly_pool', { p_coins: parseInt(giftAmount) }),
+          supabaseClient.from('gift_transactions').insert([{ 
+            recipient_email: 'SYSTEM_WEEKLY_POOL', 
+            sender_name: myName, 
+            gift_name: `Beli Kesempatan Sendiri (${giftAmount}x -> Pool)`, 
+            coins_amount: giftAmount, 
+            post_id: String(postId) 
+          }])
+        ]);
+
+        await updateCoinUI(true);
+        await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
+
+      } else {
+        // 3B. Beli di postingan orang lain / downline -> Bagi hasil (50% Creator, 10% Sponsor ADMINCUIT, 40% Platform)
+        const targetIdentifier = post.user_id || post.user_email;
+        await Promise.all([
+          supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
+          supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` }]),
+          supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
+        ]);
+
+        await updateCoinUI(true);
+        await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+      }
 
       await loadPosts();
     } catch (err) {
@@ -4426,19 +4421,13 @@ if (weeklyGifts && weeklyGifts.length > 0) {
   }
 
   // 6. Aksi Mengetuk Kata
-    async function playWordGameAction(postId, clickedWordIndex, wordText) {
+  async function playWordGameAction(postId, clickedWordIndex, wordText) {
     const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
     const userEmail = currentUser ? currentUser.email : guestId;
+    const gameKey = `${postId}_${userEmail}`;
 
-    let post = allPostsCache.find(p => String(p.id) === String(postId));
-    
-    // RESTRIKSI KREATOR: Langsung cegah sebelum proses apapun
-    if (post && (post.user_email === userEmail || (currentUser && post.user_id === currentUser.id))) {
-      return alert("⚠️ Kamu tidak dapat bermain atau membeli kesempatan pada postingan milik sendiri!");
-    }
-
-    // ... (sisa kode playWordGameAction ke bawah tetap sama)
-
+    let currentChances = localStorage.getItem('game_chances_' + gameKey);
+    currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
 
         if (currentChances <= 0) {
       const buyMore = await confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
@@ -4587,16 +4576,8 @@ if (weeklyGifts && weeklyGifts.length > 0) {
     return cardHTML;
   };
 
-    // 1. Fungsi Buka Form Buat Tebak Kata
-  function openWordGameModal() {
-    document.getElementById('wordGameInputText').value = '';
-    document.getElementById('wordGameCountDisplay').innerText = '0';
-    document.getElementById('wordGameCoinDisplay').innerText = '0';
-    document.getElementById('wordGameModal').style.display = 'flex';
-  }
-
-  // 2. Fungsi Otomatis untuk Memastikan Tombol "+ Tebak Kata" MUNCUL
-  function injectWordGameButton() {
+  // 8. Tombol Pemicu di Halaman Buat
+  document.addEventListener("DOMContentLoaded", function() {
     const createPage = document.getElementById('pageCreate');
     if (createPage) {
       const btnGroup = createPage.querySelector('div[style*="display: flex; gap: 6px;"]');
@@ -4604,22 +4585,13 @@ if (weeklyGifts && weeklyGifts.length > 0) {
         const btnWordGame = document.createElement('button');
         btnWordGame.id = 'btnOpenWordGame';
         btnWordGame.className = 'btn-secondary';
-        btnWordGame.type = 'button';
-        btnWordGame.style.cssText = 'background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; font-weight: 800; flex: 1.2;';
+        btnWordGame.style.cssText = 'background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; font-weight: 800;';
         btnWordGame.innerText = '🧩 + Tebak Kata';
         btnWordGame.onclick = openWordGameModal;
         btnGroup.appendChild(btnWordGame);
       }
     }
-  }
-
-  // Langsung jalankan agar tombol pasti muncul
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectWordGameButton);
-  } else {
-    injectWordGameButton();
-  }
-
+  });
 </script>
 
   <!-- MODAL POP-UP CUSTOM AUTOMATIC OVERRIDE CUIT -->
@@ -4725,4 +4697,3 @@ function closeQRISModal() {
 
 </body>
 </html>
-
