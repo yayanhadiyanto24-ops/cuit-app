@@ -2044,15 +2044,18 @@
         }
 
         // --- 7. KOLEKTOR KOIN ---
-        if (weeklyGifts && weeklyGifts.length > 0) {
-          const collectorMap = {};
-          weeklyGifts.forEach(g => { 
-            const rec = g.recipient_email || g.recipient_id || g.recipient_name;
-            if (rec) {
-              const cleanRec = rec.trim();
-              collectorMap[cleanRec] = (collectorMap[cleanRec] || 0) + (g.coins_amount || 0); 
-            }
-          });
+if (weeklyGifts && weeklyGifts.length > 0) {
+  const collectorMap = {};
+  weeklyGifts.forEach(g => { 
+    // ABAIKAN jika transaksi ditujukan ke Pool Mingguan
+    if (g.recipient_email === 'SYSTEM_WEEKLY_POOL') return;
+
+    const rec = g.recipient_email || g.recipient_id || g.recipient_name;
+    if (rec) {
+      const cleanRec = rec.trim();
+      collectorMap[cleanRec] = (collectorMap[cleanRec] || 0) + (g.coins_amount || 0); 
+    }
+  });
 
           const sortedCollectors = Object.keys(collectorMap).sort((a, b) => collectorMap[b] - collectorMap[a]);
           let topCollectorName = null;
