@@ -1752,7 +1752,19 @@
       try {
         const myEmail = currentUser.email;
         const myOwnReferralCode = (customDisplayName || 'PENILIKBAGEUR').replace(/\s+/g, '').toUpperCase();
-        let activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        const isPrimaryAdmin =
+  String(myEmail || '').trim().toLowerCase() === 'mantanperamal@gmail.com' ||
+  myOwnReferralCode === 'ADMINCUIT';
+
+let activeSponsorRef =
+  localStorage.getItem('cuit_active_sponsor_ref') ||
+  CONFIG.DEFAULT_SPONSOR;
+
+if (isPrimaryAdmin) {
+  mySponsorCode = null;
+} else if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
+  mySponsorCode = activeSponsorRef;
+    }
         
         if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
           mySponsorCode = activeSponsorRef;
