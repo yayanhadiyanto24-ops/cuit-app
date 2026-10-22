@@ -4347,16 +4347,16 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     return distribution;
   }
 
-          // 5. Beli Kesempatan Ekstra via Gift
+            // 5. Beli Kesempatan Ekstra via Gift
   async function buyExtraChancesViaGift(postId, giftAmount) {
     try {
       if (paidCoins < giftAmount) {
-        await alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
-        return;
+        alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
+        return false;
       }
 
       const post = allPostsCache.find(p => String(p.id) === String(postId));
-      if (!post) return;
+      if (!post) return false;
 
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
@@ -4397,11 +4397,11 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
         ]);
 
         await updateCoinUI(true);
-        await alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
+        alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
 
       } else {
         // 3B. Beli di postingan orang lain / downline -> Bagi hasil (50% Creator, 10% Sponsor ADMINCUIT, 40% Platform)
-        const targetIdentifier = post.user_id || post.user_email;
+        const targetIdentifier = post.user_email || post.user_id;
         await Promise.all([
           supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
           supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` }]),
@@ -4409,17 +4409,19 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
         ]);
 
         await updateCoinUI(true);
-        await alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+        alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
       }
 
       await loadPosts();
+      return true;
     } catch (err) {
       console.error("Error buyExtraChancesViaGift:", err);
-      await alert("Terjadi kesalahan transaksi: " + err.message);
+      alert("Terjadi kesalahan transaksi: " + err.message);
+      return false;
     }
   }
 
-  // 6. Aksi Mengetuk Kata
+  // 6. Aksi Mengetuk Kata (Sudah Dihapus kata `await` di `confirm` & `prompt` agar TIDAK MACET)
   async function playWordGameAction(postId, clickedWordIndex, wordText) {
     const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
     const userEmail = currentUser ? currentUser.email : guestId;
@@ -4428,10 +4430,10 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     let currentChances = localStorage.getItem('game_chances_' + gameKey);
     currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
 
-        if (currentChances <= 0) {
-      const buyMore = await confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
+    if (currentChances <= 0) {
+      const buyMore = confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
       if (buyMore) {
-        const inputCoins = await prompt("Masukkan jumlah koin untuk beli kesempatan (contoh: 1 atau 10):", "1");
+        const inputCoins = prompt("Masukkan jumlah koin untuk beli kesempatan (contoh: 1 atau 10):", "1");
         const coinsToSpend = parseInt(inputCoins) || 0;
         if (coinsToSpend > 0) {
           await buyExtraChancesViaGift(postId, coinsToSpend);
@@ -4471,7 +4473,7 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       paidCoins += coinsWon;
       currentChances -= 1;
       localStorage.setItem('game_chances_' + gameKey, currentChances);
-      updateCoinUI(true);
+      await updateCoinUI(true);
 
       alert(`🎉 MANTAP! Kata "${wordText}" menyimpan ${coinsWon} KOIN!\nKoin masuk ke dompetmu & kata TERKUNCI. Sisa kesempatan: ${currentChances}x.`);
     } else {
@@ -4485,10 +4487,8 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata resmi berakhir.");
     }
 
-        // KODE PERBAIKAN BARU:
     const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
     
-    // 1. Simpan komentar baru ke database
     await supabaseClient.from('comments').insert([{
       post_id: postId,
       content: `🎯 Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Dapat ${coinsWon} 🪙` : 'Zonk'})`,
@@ -4497,26 +4497,20 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       username: authorName
     }]);
 
-    // 2. Hitung jumlah total komentar riil dari database untuk post ini
     const { count: realCommentCount } = await supabaseClient
       .from('comments')
       .select('*', { count: 'exact', head: true })
       .eq('post_id', postId);
 
-    // 3. Update nilai comments_count ke tabel curhat & cache lokal
     const totalCount = realCommentCount || ((post.comments_count || 0) + 1);
     post.comments_count = totalCount;
 
-    await Promise.all([
-      supabaseClient.from('curhat').update({ 
-        word_game_data: gData,
-        comments_count: totalCount 
-      }).eq('id', postId)
-    ]);
+    await supabaseClient.from('curhat').update({ 
+      word_game_data: gData,
+      comments_count: totalCount 
+    }).eq('id', postId);
 
-    // 4. Muat ulang feed agar angka Komentar (X) langsung berubah
     loadPosts();
-
   }
 
   // 7. Render Chip Kata di Card Postingan
