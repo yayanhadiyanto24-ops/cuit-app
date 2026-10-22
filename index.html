@@ -4347,11 +4347,11 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
     return distribution;
   }
 
-            // 5. Beli Kesempatan Ekstra via Gift
+    // 5. Beli Kesempatan Ekstra via Gift (Bypass Modal Custom)
   async function buyExtraChancesViaGift(postId, giftAmount) {
     try {
       if (paidCoins < giftAmount) {
-        alert(`Saldo Koin Berbayar kamu tidak cukup! Kamu butuh ${giftAmount} Koin.`);
+        window.alert("Saldo Koin Berbayar kamu tidak cukup! Kamu butuh " + giftAmount + " Koin.");
         return false;
       }
 
@@ -4361,156 +4361,150 @@ triggerGiftAnimation(myName, giftName, cost, targetName);
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || 'Penilik Bageur';
-      const gameKey = `${postId}_${myEmail}`;
+      const gameKey = postId + '_' + myEmail;
 
       const isOwnPost = (post.user_email === myEmail) || (currentUser && post.user_id === currentUser.id);
 
-      // 1. Potong Koin Pembeli
+      // Potong Koin
       paidCoins -= giftAmount;
       usedPaidCoins += giftAmount;
 
-      // 2. Tambah Kesempatan ke LocalStorage
       let currentChances = parseInt(localStorage.getItem('game_chances_' + gameKey) || '0');
       currentChances += giftAmount;
       localStorage.setItem('game_chances_' + gameKey, currentChances);
 
       if (isOwnPost) {
-        // 3A. Beli di postingan sendiri -> Masuk Pool Hadiah Mingguan
         let localPool = parseInt(localStorage.getItem('cuit_weekly_pool_coins') || '0');
         localPool += giftAmount;
         localStorage.setItem('cuit_weekly_pool_coins', localPool);
-
-        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
-        const poolPerWinnerElem = document.getElementById('weeklyPoolPerWinnerDisplay');
-        if (poolElem) poolElem.innerText = `${localPool.toLocaleString('id-ID')} 🪙`;
-        if (poolPerWinnerElem) poolPerWinnerElem.innerText = `${Math.floor(localPool / 8).toLocaleString('id-ID')} 🪙`;
 
         await Promise.all([
           supabaseClient.rpc('add_to_weekly_pool', { p_coins: parseInt(giftAmount) }),
           supabaseClient.from('gift_transactions').insert([{ 
             recipient_email: 'SYSTEM_WEEKLY_POOL', 
             sender_name: myName, 
-            gift_name: `Beli Kesempatan Sendiri (${giftAmount}x -> Pool)`, 
+            gift_name: 'Beli Kesempatan Sendiri (' + giftAmount + 'x -> Pool)', 
             coins_amount: giftAmount, 
             post_id: String(postId) 
           }])
         ]);
 
         await updateCoinUI(true);
-        alert(`🎁 Berhasil beli kesempatan di postingan sendiri!\n\n${giftAmount} Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: ${currentChances}x.`);
+        window.alert("🎁 Berhasil beli kesempatan di postingan sendiri!\n\n" + giftAmount + " Koin masuk ke Pool Hadiah Mingguan 🏆.\nSisa kesempatan kamu: " + currentChances + "x.");
 
       } else {
-        // 3B. Beli di postingan orang lain / downline -> Bagi hasil (50% Creator, 10% Sponsor ADMINCUIT, 40% Platform)
         const targetIdentifier = post.user_email || post.user_id;
         await Promise.all([
           supabaseClient.rpc('process_gift_rewards', { p_creator_identifier: String(targetIdentifier), p_cost: parseInt(giftAmount) }),
-          supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: `🎁 ${myName} membeli ${giftAmount} kesempatan tebak kata di postinganmu!` }]),
-          supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: `Beli Kesempatan (${giftAmount}x)`, coins_amount: giftAmount, post_id: String(postId) }])
+          supabaseClient.from('user_notifications').insert([{ recipient_email: String(post.user_email), sender_name: myName, message: "🎁 " + myName + " membeli " + giftAmount + " kesempatan tebak kata di postinganmu!" }]),
+          supabaseClient.from('gift_transactions').insert([{ recipient_email: String(post.user_email), sender_name: myName, gift_name: "Beli Kesempatan (" + giftAmount + "x)", coins_amount: giftAmount, post_id: String(postId) }])
         ]);
 
         await updateCoinUI(true);
-        alert(`🎁 Berhasil mengirim Gift ${giftAmount} Koin!\nSisa kesempatan kamu bertambah +${giftAmount}x (Total: ${currentChances}x).`);
+        window.alert("🎁 Berhasil mengirim Gift " + giftAmount + " Koin!\nSisa kesempatan kamu bertambah +" + giftAmount + "x (Total: " + currentChances + "x).");
       }
 
       await loadPosts();
       return true;
     } catch (err) {
       console.error("Error buyExtraChancesViaGift:", err);
-      alert("Terjadi kesalahan transaksi: " + err.message);
+      window.alert("Terjadi kesalahan transaksi: " + err.message);
       return false;
     }
   }
 
-  // 6. Aksi Mengetuk Kata (Sudah Dihapus kata `await` di `confirm` & `prompt` agar TIDAK MACET)
+  // 6. Aksi Mengetuk Kata (Bypass Modal Custom -> Dijamin Lancar)
   async function playWordGameAction(postId, clickedWordIndex, wordText) {
-    const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-    const userEmail = currentUser ? currentUser.email : guestId;
-    const gameKey = `${postId}_${userEmail}`;
+    try {
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const userEmail = currentUser ? currentUser.email : guestId;
+      const gameKey = postId + '_' + userEmail;
 
-    let currentChances = localStorage.getItem('game_chances_' + gameKey);
-    currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
+      let currentChances = localStorage.getItem('game_chances_' + gameKey);
+      currentChances = (currentChances === null) ? 3 : parseInt(currentChances);
 
-    if (currentChances <= 0) {
-      const buyMore = confirm("❌ Kesempatan tebak kamu habis!\n\nBeli kesempatan ekstra dengan Gift Koin? (1 Koin = 1 Kesempatan)");
-      if (buyMore) {
-        const inputCoins = prompt("Masukkan jumlah koin untuk beli kesempatan (contoh: 1 atau 10):", "1");
+      if (currentChances <= 0) {
+        const inputCoins = window.prompt("❌ Kesempatan tebak kamu habis!\n\nMasukkan jumlah koin untuk beli kesempatan ekstra (1 Koin = 1 Kesempatan):", "1");
         const coinsToSpend = parseInt(inputCoins) || 0;
         if (coinsToSpend > 0) {
           await buyExtraChancesViaGift(postId, coinsToSpend);
         }
+        return;
       }
-      return;
+
+      let post = allPostsCache.find(p => String(p.id) === String(postId));
+      if (!post || !post.word_game_data || !post.word_game_data.is_active) {
+        return window.alert("⚠️ Permainan di postingan ini telah berakhir!");
+      }
+
+      let gData = post.word_game_data;
+      if (!gData.claimed_indexes) gData.claimed_indexes = [];
+
+      if (gData.claimed_indexes.includes(clickedWordIndex)) {
+        return window.alert("Kata ini sudah berhasil dijebol koinnya dan terkunci!");
+      }
+
+      const success = await deductCoin(1);
+      if (!success) return window.alert("Koin kamu habis!");
+      if (freeCoins === 0) await addCoinsToPlatformPool(1);
+
+      let activeIndexes = [];
+      gData.words.forEach((_, i) => {
+        if (!gData.claimed_indexes.includes(i)) activeIndexes.push(i);
+      });
+
+      let currentGachaMap = reshuffleCoinsGacha(activeIndexes, gData.remaining_coins);
+      let coinsWon = currentGachaMap[clickedWordIndex] || 0;
+
+      if (coinsWon > 0) {
+        gData.remaining_coins -= coinsWon;
+        gData.claimed_indexes.push(clickedWordIndex);
+
+        paidCoins += coinsWon;
+        currentChances -= 1;
+        localStorage.setItem('game_chances_' + gameKey, currentChances);
+        await updateCoinUI(true);
+
+        window.alert("🎉 MANTAP! Kata \"" + wordText + "\" menyimpan " + coinsWon + " KOIN!\nKoin masuk ke dompetmu & kata TERKUNCI. Sisa kesempatan: " + currentChances + "x.");
+      } else {
+        currentChances -= 1;
+        localStorage.setItem('game_chances_' + gameKey, currentChances);
+        window.alert("😭 ZONK! Kata \"" + wordText + "\" tidak berisi koin pada kocokan ini. Sisa kesempatan: " + currentChances + "x.");
+      }
+
+      if (gData.remaining_coins <= 0) {
+        gData.is_active = false;
+        window.alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata resmi berakhir.");
+      }
+
+      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
+      
+      await supabaseClient.from('comments').insert([{
+        post_id: postId,
+        content: "🎯 Mengetuk kata: \"" + wordText + "\" (" + (coinsWon > 0 ? "Dapat " + coinsWon + " 🪙" : "Zonk") + ")",
+        user_id: currentUser ? currentUser.id : 'demo_id',
+        user_email: userEmail,
+        username: authorName
+      }]);
+
+      const { count: realCommentCount } = await supabaseClient
+        .from('comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId);
+
+      const totalCount = realCommentCount || ((post.comments_count || 0) + 1);
+      post.comments_count = totalCount;
+
+      await supabaseClient.from('curhat').update({ 
+        word_game_data: gData,
+        comments_count: totalCount 
+      }).eq('id', postId);
+
+      loadPosts();
+    } catch (e) {
+      console.error(e);
+      window.alert("Error: " + e.message);
     }
-
-    let post = allPostsCache.find(p => String(p.id) === String(postId));
-    if (!post || !post.word_game_data || !post.word_game_data.is_active) {
-      return alert("⚠️ Permainan di postingan ini telah berakhir!");
-    }
-
-    let gData = post.word_game_data;
-    if (!gData.claimed_indexes) gData.claimed_indexes = [];
-
-    if (gData.claimed_indexes.includes(clickedWordIndex)) {
-      return alert("Kata ini sudah berhasil dijebol koinnya dan terkunci!");
-    }
-
-    const success = await deductCoin(1);
-    if (!success) return alert("Koin kamu habis!");
-    if (freeCoins === 0) await addCoinsToPlatformPool(1);
-
-    let activeIndexes = [];
-    gData.words.forEach((_, i) => {
-      if (!gData.claimed_indexes.includes(i)) activeIndexes.push(i);
-    });
-
-    let currentGachaMap = reshuffleCoinsGacha(activeIndexes, gData.remaining_coins);
-    let coinsWon = currentGachaMap[clickedWordIndex] || 0;
-
-    if (coinsWon > 0) {
-      gData.remaining_coins -= coinsWon;
-      gData.claimed_indexes.push(clickedWordIndex);
-
-      paidCoins += coinsWon;
-      currentChances -= 1;
-      localStorage.setItem('game_chances_' + gameKey, currentChances);
-      await updateCoinUI(true);
-
-      alert(`🎉 MANTAP! Kata "${wordText}" menyimpan ${coinsWon} KOIN!\nKoin masuk ke dompetmu & kata TERKUNCI. Sisa kesempatan: ${currentChances}x.`);
-    } else {
-      currentChances -= 1;
-      localStorage.setItem('game_chances_' + gameKey, currentChances);
-      alert(`😭 ZONK! Kata "${wordText}" tidak berisi koin pada kocokan ini. Sisa kesempatan: ${currentChances}x.`);
-    }
-
-    if (gData.remaining_coins <= 0) {
-      gData.is_active = false;
-      alert("🏁 HADIAH KOIN HABIS! Permainan Tebak Kata resmi berakhir.");
-    }
-
-    const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-    
-    await supabaseClient.from('comments').insert([{
-      post_id: postId,
-      content: `🎯 Mengetuk kata: "${wordText}" (${coinsWon > 0 ? `Dapat ${coinsWon} 🪙` : 'Zonk'})`,
-      user_id: currentUser ? currentUser.id : 'demo_id',
-      user_email: userEmail,
-      username: authorName
-    }]);
-
-    const { count: realCommentCount } = await supabaseClient
-      .from('comments')
-      .select('*', { count: 'exact', head: true })
-      .eq('post_id', postId);
-
-    const totalCount = realCommentCount || ((post.comments_count || 0) + 1);
-    post.comments_count = totalCount;
-
-    await supabaseClient.from('curhat').update({ 
-      word_game_data: gData,
-      comments_count: totalCount 
-    }).eq('id', postId);
-
-    loadPosts();
   }
 
   // 7. Render Chip Kata di Card Postingan
