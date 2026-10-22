@@ -2753,9 +2753,17 @@ if (weeklyGifts && weeklyGifts.length > 0) {
 
       const { cost, giftName } = pendingGiftData;
 
-      paidCoins -= cost;
-      usedPaidCoins += cost;
-      updateCoinUI(true);
+      if (!Number.isFinite(Number(cost)) || Number(cost) <= 0) {
+  document.getElementById('confirmGiftModal').style.display = 'none';
+  pendingGiftData = null;
+  return alert('Jumlah koin Gift tidak valid.');
+}
+
+if (paidCoins < Number(cost)) {
+  document.getElementById('confirmGiftModal').style.display = 'none';
+  pendingGiftData = null;
+  return alert('Saldo Koin Berbayar tidak mencukupi.');
+}
 
       document.getElementById('confirmGiftModal').style.display = 'none';
 
