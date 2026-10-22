@@ -3958,44 +3958,103 @@ try {
     }
 
     async function submitSignUp() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const sponsorCode = document.getElementById('referralCodeInput').value || CONFIG.DEFAULT_SPONSOR;
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
 
-      if (!email || !password) return alert('Email dan password wajib diisi!');
+  let sponsorCode = (
+    document.getElementById('referralCodeInput').value ||
+    CONFIG.DEFAULT_SPONSOR ||
+    'ADMINCUIT'
+  ).trim().replace(/\s+/g, '').toUpperCase();
 
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      
-      if (!error) {
-        const defaultUsername = email.split('@')[0];
+  if (!email || !password) {
+    return alert('Email dan password wajib diisi!');
+  }
 
-        customDisplayName = defaultUsername;
-        freeCoins = 20;
-        paidCoins = 0;
-        gems = 0;
-        usedPaidCoins = 0;
+  // Validasi sponsor agar referral yang tidak ditemukan
+  // otomatis menggunakan ADMINCUIT.
+  try {
+    const { data: profiles, error: profileError } =
+      await supabaseClient
+        .from('profiles')
+        .select('id, username, referral_code, email');
 
-        await supabaseClient.from('profiles').upsert([
-          {
-            id: data.user ? data.user.id : undefined,
-            email: email,
-            username: defaultUsername,
-            sponsor: sponsorCode,
-            free_coins: 20,
-            paid_coins: 0,
-            gems: 0,
-            used_paid_coins: 0,
-            created_at: new Date().toISOString()
-          }
-        ], { onConflict: 'email' });
+    if (profileError) {
+      console.error('Validasi sponsor:', profileError);
+      sponsorCode = 'ADMINCUIT';
+    } else {
+      const normalizedSponsor = (value) =>
+        String(value || '')
+          .trim()
+          .replace(/\s+/g, '')
+          .toUpperCase();
 
-        document.getElementById('authModal').style.display = 'none';
-        await alert(`🎉 Pendaftaran berhasil! Akun baru (${defaultUsername}) berhasil dibuat di bawah sponsor: ${sponsorCode}.`);
-        
-        location.reload();
-      } else {
-        alert('Gagal mendaftar: ' + error.message);
+      const sponsorFound = (profiles || []).some((profile) =>
+        normalizedSponsor(profile.referral_code) === sponsorCode ||
+        normalizedSponsor(profile.username) === sponsorCode ||
+        normalizedSponsor(profile.email) === sponsorCode
+      );
+
+      if (!sponsorFound) {
+        sponsorCode = 'ADMINCUIT';
       }
+    }
+  } catch (err) {
+    console.error('Gagal memvalidasi sponsor:', err);
+    sponsorCode = 'ADMINCUIT';
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (!error) {
+    const defaultUsername = email.split('@')[0];
+
+    customDisplayName = defaultUsername;
+    freeCoins = 20;
+    paidCoins = 0;
+    gems = 0;
+    usedPaidCoins = 0;
+
+    const { error: saveError } = await supabaseClient
+      .from('profiles')
+      .upsert(
+        [{
+          id: data.user ? data.user.id : undefined,
+          email: email,
+          username: defaultUsername,
+          sponsor: sponsorCode,
+          free_coins: 20,
+          paid_coins: 0,
+          gems: 0,
+          used_paid_coins: 0,
+          created_at: new Date().toISOString()
+        }],
+        { onConflict: 'email' }
+      );
+
+    if (saveError) {
+      console.error('Gagal menyimpan profil:', saveError);
+      alert(
+        'Akun autentikasi berhasil dibuat, tetapi profil belum tersimpan. ' +
+        'Jangan daftar ulang. Hubungi admin untuk memeriksa akun.'
+      );
+      return;
+    }
+
+    document.getElementById('authModal').style.display = 'none';
+
+    alert(
+      `Pendaftaran berhasil! Akun ${defaultUsername} ` +
+      `menggunakan sponsor ${sponsorCode}.`
+    );
+
+    location.reload();
+  } else {
+    alert('Gagal mendaftar: ' + error.message);
+  }
     }
 
     async function submitNewPost() {
