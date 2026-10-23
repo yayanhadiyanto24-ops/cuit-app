@@ -4615,21 +4615,127 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
       gData.claimed_indexes.includes(clickedWordIndex)) {
     return alert('Kata ini sudah terbuka dan tidak dapat dicoba lagi.');
   }
+ 
+if (currentChances <= 0) {
+  if (!currentUser) {
+    return alert('Silakan masuk terlebih dahulu untuk membeli kesempatan.');
+  }
 
-  
-  if (currentChances <= 0) {
-    const pilihan = prompt(
-      'Kesempatan gratis habis.\n' +
-      'Ketik 2 untuk membeli 1 kesempatan seharga 2 koin,\n' +
-      'atau 3 untuk membeli 1 kesempatan seharga 3 koin.'
-    );
+  if (String(post.user_id) === String(currentUser.id)) {
+    return alert('Kreator tidak dapat memainkan permainan sendiri.');
+  }
 
-    if (pilihan === null || !['2', '3'].includes(pilihan.trim())) {
-      return;
+  const oldModal = document.getElementById('cuit-extra-chance-modal');
+  if (oldModal) oldModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'cuit-extra-chance-modal';
+  modal.style.cssText =
+    'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);' +
+    'display:flex;align-items:center;justify-content:center;padding:16px;';
+
+  modal.innerHTML = `
+    <div style="background:white;color:#1f2937;width:100%;max-width:360px;
+      border-radius:16px;padding:20px;box-sizing:border-box;
+      box-shadow:0 12px 40px rgba(0,0,0,.2);">
+      <h3 style="margin:0 0 6px;font-size:20px;">Kesempatan Tambahan</h3>
+      <p style="margin:0 0 16px;color:#6b7280;font-size:13px;">
+        Kesempatan gratis kamu sudah habis.
+      </p>
+
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button type="button" data-cost="2"
+          style="flex:1;padding:12px;border:2px solid #16a34a;
+          border-radius:10px;background:#dcfce7;font-weight:800;">
+          2 koin
+        </button>
+        <button type="button" data-cost="3"
+          style="flex:1;padding:12px;border:2px solid #d1d5db;
+          border-radius:10px;background:white;font-weight:800;">
+          3 koin
+        </button>
+      </div>
+
+      <label for="cuit-extra-quantity"
+        style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;">
+        Jumlah kesempatan
+      </label>
+      <input id="cuit-extra-quantity" type="number" min="1" max="50"
+        step="1" value="1"
+        style="width:100%;box-sizing:border-box;padding:12px;
+        border:1px solid #d1d5db;border-radius:9px;font-size:16px;">
+
+      <p style="margin:12px 0 18px;font-size:15px;">
+        Total: <strong id="cuit-extra-total">2 koin</strong>
+      </p>
+
+      <button type="button" id="cuit-extra-buy"
+        style="width:100%;padding:13px;border:0;border-radius:10px;
+        background:#16a34a;color:white;font-weight:800;font-size:15px;">
+        Beli Kesempatan
+      </button>
+      <button type="button" id="cuit-extra-cancel"
+        style="width:100%;padding:11px;margin-top:7px;border:0;
+        background:white;color:#6b7280;font-weight:700;">
+        Batal
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  let selectedCost = 2;
+  const quantityInput = modal.querySelector('#cuit-extra-quantity');
+  const totalLabel = modal.querySelector('#cuit-extra-total');
+  const buyButton = modal.querySelector('#cuit-extra-buy');
+
+  function updateExtraTotal() {
+    const qty = Math.max(0, Number(quantityInput.value) || 0);
+    totalLabel.textContent = `${qty * selectedCost} koin`;
+  }
+
+  modal.querySelectorAll('[data-cost]').forEach(button => {
+    button.addEventListener('click', () => {
+      selectedCost = Number(button.dataset.cost);
+
+      modal.querySelectorAll('[data-cost]').forEach(item => {
+        const active = Number(item.dataset.cost) === selectedCost;
+        item.style.borderColor = active ? '#16a34a' : '#d1d5db';
+        item.style.background = active ? '#dcfce7' : 'white';
+      });
+
+      updateExtraTotal();
+    });
+  });
+
+  quantityInput.addEventListener('input', updateExtraTotal);
+
+  modal.querySelector('#cuit-extra-cancel').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  buyButton.addEventListener('click', async () => {
+    const qty = Number(quantityInput.value);
+
+    if (!Number.isInteger(qty) || qty < 1 || qty > 50) {
+      return alert('Masukkan jumlah kesempatan antara 1 sampai 50.');
     }
 
-    return buyExtraChancesViaGift(postId, Number(pilihan.trim()));
-  }
+    buyButton.disabled = true;
+    buyButton.textContent = 'Memproses...';
+
+    const success = await buyExtraChancesViaGift(
+      postId, selectedCost, qty, modal
+    );
+
+    if (!success && modal.isConnected) {
+      buyButton.disabled = false;
+      buyButton.textContent = 'Beli Kesempatan';
+    }
+  });
+
+  return;
+}
 
   if (currentUser && post.user_id === currentUser.id) {
     return alert('Kreator tidak dapat memainkan permainan sendiri.');
