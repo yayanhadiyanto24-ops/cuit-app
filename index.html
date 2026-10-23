@@ -4675,6 +4675,7 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
 }
 
   
+  
   // 7. Render Chip Kata di Card Postingan
   const originalRenderCardHTML = renderCardHTML;
 
@@ -4689,24 +4690,21 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
       const gData = p.word_game_data;
       const isActive = gData.is_active && gData.remaining_coins > 0;
       const claimedList = Array.isArray(gData.claimed_indexes)
-        ? gData.claimed_indexes
-        : [];
+        ? gData.claimed_indexes : [];
       const openedList = Array.isArray(gData.opened_indexes)
-        ? gData.opened_indexes
-        : [];
+        ? gData.opened_indexes : [];
 
       const guestId =
         localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
       const gameKey = `${p.id}_${myEmail}`;
       const storedChances = localStorage.getItem('game_chances_' + gameKey);
-      const myChances =
-        storedChances !== null ? parseInt(storedChances, 10) : 3;
+      const myChances = storedChances !== null
+        ? parseInt(storedChances, 10) : 3;
 
-      
-let chipsHTML = `
-        <div style="display:flex; flex-wrap:wrap; gap:4px; margin:6px 0;
-          background:#f0f3fa; padding:6px; border-radius:10px;
+      let chipsHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0;
+          background:#f0f3fa;padding:6px;border-radius:10px;
           border:1px solid #e2e7f5;">
       `;
 
@@ -4720,21 +4718,19 @@ let chipsHTML = `
           .replace(/'/g, "\\'")
           .replace(/"/g, '&quot;');
 
+        const compactStyle = 'padding:1px 8px;height:24px;line-height:20px;white-space:nowrap;box-sizing:border-box;border-radius:6px;font-size:11px;font-weight:800;';
+
         if (isClaimed) {
           chipsHTML += `
             <button disabled
-              style="background:#e2e8f0;border:1px solid #cbd5e1;
-              color:#64748b;padding:6px 9px;border-radius:8px;
-              font-size:11px;font-weight:800;cursor:not-allowed;">
+              style="${compactStyle}background:#e2e8f0;border:1px solid #cbd5e1;color:#64748b;cursor:not-allowed;">
               🔒 ${safeWord}
             </button>
           `;
         } else if (isOpened) {
           chipsHTML += `
             <button disabled
-              style="background:#fff7ed;border:1px solid #fdba74;
-              color:#9a3412;padding:6px 9px;border-radius:8px;
-              font-size:11px;font-weight:800;cursor:not-allowed;">
+              style="${compactStyle}background:#fff7ed;border:1px solid #fdba74;color:#9a3412;cursor:not-allowed;">
               ◉ ${safeWord} — ZONK
             </button>
           `;
@@ -4743,11 +4739,7 @@ let chipsHTML = `
             <button
               onclick="playWordGameAction('${p.id}', ${idx}, '${safeWord}')"
               ${!isActive ? 'disabled' : ''}
-              style="background:#fff;border:1px solid #dcd6ff;
-              color:var(--primary);padding:6px 9px;border-radius:8px;
-              font-size:11px;font-weight:800;
-              cursor:${isActive ? 'pointer' : 'not-allowed'};
-              opacity:${isActive ? '1' : '0.5'};">
+              style="${compactStyle}background:#fff;border:1px solid #dcd6ff;color:var(--primary);cursor:${isActive ? 'pointer' : 'not-allowed'};opacity:${isActive ? '1' : '0.5'};">
               ${safeWord}
             </button>
           `;
@@ -4758,10 +4750,9 @@ let chipsHTML = `
 
       const gameHeader = `
         <div style="background:linear-gradient(135deg,#6c5ce7,#513cd8);
-          color:#fff;padding:8px 10px;border-radius:12px;
+          color:#fff;padding:6px 10px;border-radius:10px;
           font-size:11px;font-weight:800;margin-bottom:6px;
-          display:flex;justify-content:space-between;align-items:center;
-          gap:8px;">
+          display:flex;justify-content:space-between;align-items:center;gap:8px;">
           <span>🧩 Tebak Kata (Kesempatan: ${myChances}x)</span>
           <span style="color:#fde047;">
             🎁 Sisa ${gData.remaining_coins} / ${gData.total_coins} 🪙
