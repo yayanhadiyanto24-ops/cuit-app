@@ -4412,30 +4412,37 @@ async function updateWeeklyRewardPoolUI() {
 }
 
 // --- LOGIKA KALKULASI 10 RAJA DI DALAM loadPosts() ---
-// Masukkan/perbarui blok berikut di dalam fungsi loadPosts():
-const [
-  { data: profilesData },
-  { data: activeLivePromos },
-  { data: weeklyGifts },
-  { data: weeklyLives },
-  { data: weeklyLiveMsgs },
-  { data: weeklyComments },
-  { data: weeklyFollows },
-  { data: weeklyNewMembers },
-  { data: weeklyLikes },      // Query Baru untuk Raja Like
-  { data: weeklyReelsClaims } // Query Baru untuk Raja Nonton
-] = await Promise.all([
-  supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-  supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
-  supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
-  supabaseClient.from('lives').select('*').gte('created_at', startOfWeekISO),
-  supabaseClient.from('live_messages').select('*').gte('created_at', startOfWeekISO),
-  supabaseClient.from('comments').select('username, user_email, created_at').gte('created_at', startOfWeekISO),
-  supabaseClient.from('follows').select('following_email, created_at').gte('created_at', startOfWeekISO),
-  supabaseClient.from('profiles').select('sponsor, username, email, created_at').gte('created_at', startOfWeekISO),
-  supabaseClient.from('post_likes').select('user_id, guest_token, created_at').gte('created_at', startOfWeekISO),
-  supabaseClient.from('reels_claims').select('user_id, user_email, created_at').gte('created_at', startOfWeekISO)
-]);
+// Gantilah bagian Promise.all di dalam fungsi loadPosts() dengan kode aman ini:
+let profilesData, activeLivePromos, weeklyGifts, weeklyLives, weeklyLiveMsgs, 
+    weeklyComments, weeklyFollows, weeklyNewMembers, weeklyLikes, weeklyReelsClaims;
+
+try {
+  const results = await Promise.all([
+    supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
+    supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
+    supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
+    supabaseClient.from('lives').select('*').gte('created_at', startOfWeekISO),
+    supabaseClient.from('live_messages').select('*').gte('created_at', startOfWeekISO),
+    supabaseClient.from('comments').select('username, user_email, created_at').gte('created_at', startOfWeekISO),
+    supabaseClient.from('follows').select('following_email, created_at').gte('created_at', startOfWeekISO),
+    supabaseClient.from('profiles').select('sponsor, username, email, created_at').gte('created_at', startOfWeekISO),
+    supabaseClient.from('post_likes').select('user_id, guest_token, created_at').gte('created_at', startOfWeekISO),
+    supabaseClient.from('reels_claims').select('user_id, user_email, created_at').gte('created_at', startOfWeekISO)
+  ]);
+
+  profilesData = results[0].data;
+  activeLivePromos = results[1].data;
+  weeklyGifts = results[2].data;
+  weeklyLives = results[3].data;
+  weeklyLiveMsgs = results[4].data;
+  weeklyComments = results[5].data;
+  weeklyFollows = results[6].data;
+  weeklyNewMembers = results[7].data;
+  weeklyLikes = results[8].data;
+  weeklyReelsClaims = results[9].data;
+} catch (err) {
+  console.warn("Peringatan saat mengambil data panggung raja:", err);
+}
 
 // --- 9. RAJA NONTON ---
 if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
