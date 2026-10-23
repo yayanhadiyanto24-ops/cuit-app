@@ -3943,21 +3943,37 @@ try {
       }
     }
 
-    function claimVideoRewardAndClose() {
-      const btnClose = document.getElementById('btnCloseVideo');
-      if (btnClose.disabled) return;
+    async function claimVideoRewardAndClose() {
+  const btnClose = document.getElementById('btnCloseVideo');
+  if (btnClose.disabled) return;
 
-      document.getElementById('videoPlayerModal').style.display = 'none';
-      document.getElementById('videoFrameContainer').innerHTML = '';
+  document.getElementById('videoPlayerModal').style.display = 'none';
+  document.getElementById('videoFrameContainer').innerHTML = '';
 
-      freeCoins += 10;
-      updateCoinUI(true);
+  freeCoins += 10;
+  updateCoinUI(true);
 
-      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+  // Catat riwayat ke Supabase untuk penghitungan skor Raja Nonton
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
 
-      videoSecondsLeft = 10;
-      openReelsModal();
-    }
+  try {
+    await supabaseClient.from('reels_claims').insert([
+      {
+        user_id: currentUser ? currentUser.id : null,
+        user_email: myEmail,
+        slot_key: activeVideoSlot || 'v1'
+      }
+    ]);
+  } catch (err) {
+    console.error("Gagal mencatat klaim reels:", err);
+  }
+
+  alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+
+  videoSecondsLeft = 10;
+  openReelsModal();
+}
 
     async function openAdminModal() {
       try {
