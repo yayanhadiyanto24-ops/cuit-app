@@ -1976,7 +1976,7 @@ if (isPrimaryAdmin) {
           document.getElementById('champSawerScore').innerText = '0 🪙';
         }
 
-        // --- 2. LIVE TERMEGAH ---
+        // --- 2. RAJA LIVE ---
         let liveCoinMap = {};
         if (weeklyLives && weeklyLives.length > 0) {
           weeklyLives.forEach(l => {
@@ -2025,7 +2025,7 @@ if (isPrimaryAdmin) {
           document.getElementById('champLiveScore').innerText = '0 🪙';
         }
 
-        // --- 3. BINTANG CURHAT ---
+        // --- 3. RAJA CURHAT ---
         if (data && data.length > 0) {
           const weeklyPosts = data.filter(p => new Date(p.created_at) >= startOfWeek);
           if (weeklyPosts.length > 0) {
@@ -2047,7 +2047,7 @@ if (isPrimaryAdmin) {
           document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
         }
 
-        // --- 4. PUJANGGA UTAMA ---
+        // --- 4. RAJA PUJANGGA ---
         if (data && data.length > 0) {
           const weeklyPosts = data.filter(p => new Date(p.created_at) >= startOfWeek);
           if (weeklyPosts.length > 0) {
@@ -2083,7 +2083,7 @@ if (isPrimaryAdmin) {
           document.getElementById('champKomentarScore').innerText = '0 Komen';
         }
 
-        // --- 6. PENGIKUT TERBANYAK ---
+        // --- 6. RAJA JARINGAN ---
         if (weeklyFollows && weeklyFollows.length > 0) {
           const followCounts = {};
           weeklyFollows.forEach(f => {
@@ -2113,7 +2113,7 @@ if (isPrimaryAdmin) {
           document.getElementById('champFollowersScore').innerText = '0 Pengikut';
         }
 
-        // --- 7. KOLEKTOR KOIN ---
+        // --- 7. RAJA KOIN ---
 if (weeklyGifts && weeklyGifts.length > 0) {
   const collectorMap = {};
   weeklyGifts.forEach(g => { 
@@ -2169,7 +2169,7 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           document.getElementById('champPermataScore').innerText = '0 🪙';
         }
 
-        // --- 8. MAGNET SPONSOR ---
+        // --- 8. RAJA SPONSOR ---
         if (weeklyNewMembers && weeklyNewMembers.length > 0) {
           const sponsorCounts = {};
           weeklyNewMembers.forEach(m => {
@@ -2208,6 +2208,81 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           document.getElementById('champSponsorName').innerText = 'Belum Ada';
           document.getElementById('champSponsorScore').innerText = '0 Member';
         }
+// --- 9. KALKULASI RAJA NONTON ---
+if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
+  const nontonCounts = {};
+  weeklyReelsClaims.forEach(r => {
+    const key = r.user_email || r.user_id;
+    if (key) nontonCounts[key] = (nontonCounts[key] || 0) + 1;
+  });
+
+  const sortedNonton = Object.keys(nontonCounts).sort((a, b) => nontonCounts[b] - nontonCounts[a]);
+  let topNontonName = null;
+  let topNontonScore = 0;
+
+  for (const key of sortedNonton) {
+    const { data: prof } = await supabaseClient
+      .from('profiles')
+      .select('username, email')
+      .or(`email.eq.${key},id.eq.${key}`)
+      .maybeSingle();
+
+    if (prof) {
+      topNontonName = prof.username || prof.email.split('@')[0];
+      topNontonScore = nontonCounts[key];
+      break;
+    }
+  }
+
+  if (topNontonName) {
+    document.getElementById('champNontonName').innerText = topNontonName;
+    document.getElementById('champNontonScore').innerText = `${topNontonScore} Video`;
+  } else {
+    document.getElementById('champNontonName').innerText = 'Belum Ada';
+    document.getElementById('champNontonScore').innerText = '0 Video';
+  }
+} else {
+  document.getElementById('champNontonName').innerText = 'Belum Ada';
+  document.getElementById('champNontonScore').innerText = '0 Video';
+}
+
+// --- 10. KALKULASI RAJA LIKE ---
+if (weeklyLikes && weeklyLikes.length > 0) {
+  const likeCounts = {};
+  weeklyLikes.forEach(l => {
+    const key = l.user_id || l.guest_token;
+    if (key) likeCounts[key] = (likeCounts[key] || 0) + 1;
+  });
+
+  const sortedLikes = Object.keys(likeCounts).sort((a, b) => likeCounts[b] - likeCounts[a]);
+  let topLikeName = null;
+  let topLikeScore = 0;
+
+  for (const key of sortedLikes) {
+    const { data: prof } = await supabaseClient
+      .from('profiles')
+      .select('username, email')
+      .eq('id', key)
+      .maybeSingle();
+
+    if (prof) {
+      topLikeName = prof.username || prof.email.split('@')[0];
+      topLikeScore = likeCounts[key];
+      break;
+    }
+  }
+
+  if (topLikeName) {
+    document.getElementById('champLikeName').innerText = topLikeName;
+    document.getElementById('champLikeScore').innerText = `${topLikeScore} Like`;
+  } else {
+    document.getElementById('champLikeName').innerText = 'Belum Ada';
+    document.getElementById('champLikeScore').innerText = '0 Like';
+  }
+} else {
+  document.getElementById('champLikeName').innerText = 'Belum Ada';
+  document.getElementById('champLikeScore').innerText = '0 Like';
+}
 
         // --- RENDER SOROTAN PROMOSI & BERANDA ---
         const nowMs = Date.now();
