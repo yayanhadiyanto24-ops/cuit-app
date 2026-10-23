@@ -4483,86 +4483,109 @@ try {
     return distribution;
   }
          
-  // 5. Beli Kesempatan Ekstra via Gift
-  async function buyExtraChancesViaGift(postId, giftAmount) {
-    if (!currentUser) {
-      return alert('Silakan masuk terlebih dahulu untuk membeli kesempatan.');
-    }
+  
+async function buyExtraChancesViaGift(postId, giftAmount, quantity = 1, modal = null) {
+  if (!currentUser) {
+    alert('Silakan masuk terlebih dahulu untuk membeli kesempatan.');
+    return false;
+  }
 
-    const cost = Number(giftAmount);
+  const cost = Number(giftAmount);
+  const qty = Number(quantity);
 
-    if (![2, 3].includes(cost)) {
-      return alert('Pilih biaya 2 atau 3 koin.');
-    }
+  if (![2, 3].includes(cost) ||
+      !Number.isInteger(qty) || qty < 1 || qty > 50) {
+    alert('Harga harus 2 atau 3 koin, dan jumlah 1–50 kesempatan.');
+    return false;
+  }
 
-    const post = allPostsCache.find(
-      p => String(p.id) === String(postId)
+  const post = allPostsCache.find(
+    p => String(p.id) === String(postId)
+  );
+
+  if (!post || !post.word_game_data ||
+      !post.word_game_data.is_active) {
+    alert('Permainan ini sudah tidak aktif.');
+    return false;
+  }
+
+  if (String(post.user_id) === String(currentUser.id)) {
+    alert('Kreator tidak dapat membeli kesempatan di permainan sendiri.');
+    return false;
+  }
+
+  const total = cost * qty;
+
+  if (!confirm(
+    `Beli ${qty} kesempatan dengan harga ${cost} koin per kesempatan?\n\n` +
+    `Total biaya: ${total} koin`
+  )) {
+    return false;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      'purchase_word_game_chances_bulk',
+      {
+        p_post_id: Number(postId),
+        p_cost: cost,
+        p_quantity: qty
+      }
     );
 
-    if (!post || !post.word_game_data || !post.word_game_data.is_active) {
-      return alert('Permainan ini sudah tidak aktif.');
+    if (error) {
+      console.error('Pembelian kesempatan gagal:', error);
+      alert('Pembelian gagal. Periksa saldo atau coba lagi.');
+      return false;
     }
 
-    if (post.user_id === currentUser.id) {
-      return alert('Kreator tidak dapat membeli kesempatan di permainan sendiri.');
+    const result = Array.isArray(data) ? data[0] : data;
+
+    if (!result || result.success !== true) {
+      alert(result?.message || 'Pembelian belum berhasil.');
+      return false;
     }
 
-    if (!confirm(`Beli 1 kesempatan tambahan dengan ${cost} koin?`)) {
-      return;
+    const guestId =
+      localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+    const userEmail = currentUser.email || guestId;
+    const gameKey = `${postId}_${userEmail}`;
+    const storageKey = 'game_chances_' + gameKey;
+
+    const oldValue = localStorage.getItem(storageKey);
+    const oldChances = oldValue === null
+      ? 3
+      : Math.max(0, parseInt(oldValue, 10) || 0);
+
+    localStorage.setItem(
+      storageKey,
+      oldChances + Number(result.chances_added || qty)
+    );
+
+    if (modal) modal.remove();
+
+    alert(
+      `Pembelian berhasil!\n` +
+      `${result.chances_added || qty} kesempatan ditambahkan.\n` +
+      `Total biaya: ${result.total_cost || total} koin.`
+    );
+
+    if (typeof updateCoinUI === 'function') {
+      updateCoinUI(true);
     }
 
-    try {
-      const { data, error } = await supabaseClient.rpc(
-        'purchase_word_game_chance',
-        {
-          p_post_id: Number(postId),
-          p_cost: cost
-        }
-      );
-
-      if (error) {
-        console.error('Pembelian kesempatan gagal:', error);
-        return alert('Pembelian gagal. Silakan coba lagi.');
-      }
-
-      const result = Array.isArray(data) ? data[0] : data;
-
-      if (!result || result.success !== true) {
-        return alert(
-          result && result.message
-            ? result.message
-            : 'Pembelian belum berhasil. Saldo dan status permainan perlu diperiksa.'
-        );
-      }
-
-      const guestId =
-        localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const userEmail = currentUser.email || guestId;
-      const gameKey = `${postId}_${userEmail}`;
-
-      const oldChances = localStorage.getItem('game_chances_' + gameKey);
-      const currentChances =
-        oldChances === null ? 3 : parseInt(oldChances, 10);
-
-      localStorage.setItem(
-        'game_chances_' + gameKey,
-        currentChances + 1
-      );
-
-      alert('Pembelian berhasil! Kesempatan tambahan sudah ditambahkan.');
-
-      if (typeof updateCoinUI === 'function') {
-        updateCoinUI(true);
-      }
-
-      if (typeof loadPosts === 'function') {
-        await loadPosts();
-      }
-    } catch (err) {
-      console.error('Kesalahan pembelian kesempatan:', err);
-      alert('Terjadi kesalahan saat membeli kesempatan. Silakan muat ulang aplikasi.');
+    if (typeof loadPosts === 'function') {
+      await loadPosts();
     }
+
+    return true;
+  } catch (err) {
+    console.error('Kesalahan pembelian kesempatan:', err);
+    alert('Terjadi kesalahan. Silakan muat ulang aplikasi.');
+    return false;
   }
+}
+
   
 async function playWordGameAction(postId, clickedWordIndex, wordText) {
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
