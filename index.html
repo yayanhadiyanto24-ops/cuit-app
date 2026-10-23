@@ -4373,46 +4373,129 @@ try {
       loadPosts();
     }
 
-    // ==========================================
-    // KODE POOL HADIAH MINGGUAN (SIMPAN DI PALING BAWAH)
-    // ==========================================
+    // --- FUNGSI UPDATE POOL WIDGET HADIAH (DIUBAH KE 1/10) ---
+async function updateWeeklyRewardPoolUI() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('platform_reward_pool')
+      .select('amount')
+      .eq('id', 1)
+      .maybeSingle();
 
-    async function updateWeeklyRewardPoolUI() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('platform_reward_pool')
-          .select('amount')
-          .eq('id', 1)
-          .maybeSingle();
+    const totalPool = (data && data.amount) ? data.amount : 0;
+    const sharePerWinner = Math.floor(totalPool / 10); // Bagi 10 Juara
 
-        const totalPool = (data && data.amount) ? data.amount : 0;
-        const sharePerWinner = Math.floor(totalPool / 8);
+    const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
+    const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
 
-        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
-        const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
+    if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
+    if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
+  } catch (err) {
+    console.error('Gagal memuat reward pool:', err);
+  }
+}
 
-        if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
-        if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
-      } catch (err) {
-        console.error('Gagal memuat reward pool:', err);
-      }
+// --- LOGIKA KALKULASI 10 RAJA DI DALAM loadPosts() ---
+// Masukkan/perbarui blok berikut di dalam fungsi loadPosts():
+const [
+  { data: profilesData },
+  { data: activeLivePromos },
+  { data: weeklyGifts },
+  { data: weeklyLives },
+  { data: weeklyLiveMsgs },
+  { data: weeklyComments },
+  { data: weeklyFollows },
+  { data: weeklyNewMembers },
+  { data: weeklyLikes },      // Query Baru untuk Raja Like
+  { data: weeklyReelsClaims } // Query Baru untuk Raja Nonton
+] = await Promise.all([
+  supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
+  supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
+  supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
+  supabaseClient.from('lives').select('*').gte('created_at', startOfWeekISO),
+  supabaseClient.from('live_messages').select('*').gte('created_at', startOfWeekISO),
+  supabaseClient.from('comments').select('username, user_email, created_at').gte('created_at', startOfWeekISO),
+  supabaseClient.from('follows').select('following_email, created_at').gte('created_at', startOfWeekISO),
+  supabaseClient.from('profiles').select('sponsor, username, email, created_at').gte('created_at', startOfWeekISO),
+  supabaseClient.from('post_likes').select('user_id, guest_token, created_at').gte('created_at', startOfWeekISO),
+  supabaseClient.from('reels_claims').select('user_id, user_email, created_at').gte('created_at', startOfWeekISO)
+]);
+
+// --- 9. RAJA NONTON ---
+if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
+  const nontonCounts = {};
+  weeklyReelsClaims.forEach(r => {
+    const key = r.user_email || r.user_id;
+    if (key) nontonCounts[key] = (nontonCounts[key] || 0) + 1;
+  });
+
+  const sortedNonton = Object.keys(nontonCounts).sort((a, b) => nontonCounts[b] - nontonCounts[a]);
+  let topNontonName = null;
+  let topNontonScore = 0;
+
+  for (const key of sortedNonton) {
+    const { data: prof } = await supabaseClient
+      .from('profiles')
+      .select('username, email')
+      .or(`email.eq.${key},id.eq.${key}`)
+      .maybeSingle();
+
+    if (prof) {
+      topNontonName = prof.username || prof.email.split('@')[0];
+      topNontonScore = nontonCounts[key];
+      break;
     }
+  }
 
-    async function addCoinsToPlatformPool(amount) {
-      if (!amount || amount <= 0) return;
-      try {
-        await supabaseClient.rpc('add_to_platform_pool', { p_amount: amount });
-        updateWeeklyRewardPoolUI();
-      } catch (err) {
-        console.error('Gagal menambah koin ke platform pool:', err);
-      }
+  if (topNontonName) {
+    document.getElementById('champNontonName').innerText = topNontonName;
+    document.getElementById('champNontonScore').innerText = `${topNontonScore} Video`;
+  } else {
+    document.getElementById('champNontonName').innerText = 'Belum Ada';
+    document.getElementById('champNontonScore').innerText = '0 Video';
+  }
+} else {
+  document.getElementById('champNontonName').innerText = 'Belum Ada';
+  document.getElementById('champNontonScore').innerText = '0 Video';
+}
+
+// --- 10. RAJA LIKE ---
+if (weeklyLikes && weeklyLikes.length > 0) {
+  const likeCounts = {};
+  weeklyLikes.forEach(l => {
+    const key = l.user_id || l.guest_token;
+    if (key) likeCounts[key] = (likeCounts[key] || 0) + 1;
+  });
+
+  const sortedLikes = Object.keys(likeCounts).sort((a, b) => likeCounts[b] - likeCounts[a]);
+  let topLikeName = null;
+  let topLikeScore = 0;
+
+  for (const key of sortedLikes) {
+    const { data: prof } = await supabaseClient
+      .from('profiles')
+      .select('username, email')
+      .eq('id', key)
+      .maybeSingle();
+
+    if (prof) {
+      topLikeName = prof.username || prof.email.split('@')[0];
+      topLikeScore = likeCounts[key];
+      break;
     }
+  }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      setTimeout(() => {
-        updateWeeklyRewardPoolUI();
-      }, 1000);
-    });
+  if (topLikeName) {
+    document.getElementById('champLikeName').innerText = topLikeName;
+    document.getElementById('champLikeScore').innerText = `${topLikeScore} Like`;
+  } else {
+    document.getElementById('champLikeName').innerText = 'Belum Ada';
+    document.getElementById('champLikeScore').innerText = '0 Like';
+  }
+} else {
+  document.getElementById('champLikeName').innerText = 'Belum Ada';
+  document.getElementById('champLikeScore').innerText = '0 Like';
+}
 
     checkUser();
   </script>
