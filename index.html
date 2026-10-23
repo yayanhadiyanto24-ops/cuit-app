@@ -4570,8 +4570,9 @@ async function buyExtraChancesViaGift(postId, giftAmount, quantity = 1, modal = 
       `Total biaya: ${result.total_cost || total} koin.`
     );
 
+    
     if (typeof updateCoinUI === 'function') {
-      updateCoinUI(true);
+      await updateCoinUI(false);
     }
 
     if (typeof loadPosts === 'function') {
@@ -4585,7 +4586,6 @@ async function buyExtraChancesViaGift(postId, giftAmount, quantity = 1, modal = 
     return false;
   }
 }
-
   
 async function playWordGameAction(postId, clickedWordIndex, wordText) {
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
