@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  
   <title>CUIT – Curhat dapat Duit</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
@@ -22,13 +20,8 @@
       --text-main: #082f6b;
       --text-sub: #42658a;
       --border-color: #edf7ff;
-      
       --cuit-blue: #0754b8;
       --cuit-blue-deep: #082f6b;
-      --cuit-blue-bright: #168be8;
-      --cuit-sky: #eaf6ff;
-      --cuit-gold: #ffd21f;
-      --cuit-gold-deep: #e9a900;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -47,36 +40,27 @@
     .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 6px 10px; background: #e8f0fe; }
     .stat-badge { background: #ffffff; padding: 3px 8px; border-radius: 16px; font-size: 10.5px; font-weight: 800; display: flex; align-items: center; gap: 3px; color: #23233c; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 
-    .cuit-banner-container { 
-      width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); overflow: hidden; max-height: 250px;
-    }
-    .cuit-banner-container.collapsed { max-height: 0px !important; border-bottom: none !important; opacity: 0; }
+    .cuit-banner-container { width: 100%; border-bottom: 1px solid #e2e8f5; line-height: 0; background: #fff; overflow: hidden; max-height: 250px; }
     .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
 
     .page-section { display: none; padding: 10px 14px; }
     .page-section.active { display: block; }
 
     .back-btn { width: 32px; height: 32px; background: #e8f5ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 14px; margin-bottom: 8px; border: none; cursor: pointer; }
-
     .section-title { font-size: 20px; font-weight: 900; color: #082f6b; margin-bottom: 2px; }
-    .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; }
 
-    button, .btn-primary, .btn-secondary, input[type="submit"] { transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease; }
-    .btn-primary, button.btn-primary { 
-      background: var(--cuit-blue) !important; color: #fff !important; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(7, 84, 184, 0.2); 
-    }
-    .btn-primary:hover, button.btn-primary:hover { background-color: var(--cuit-blue-deep) !important; }
+    button, .btn-primary, .btn-secondary { transition: all .18s ease; }
+    .btn-primary { background: var(--cuit-blue) !important; color: #fff !important; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; box-shadow: 0 3px 10px rgba(7, 84, 184, 0.2); }
     .btn-secondary { background: #edf7ff; color: #333; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
-    .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
-    .btn-follow.following { background: #eaf5ff; color: var(--text-sub); }
     .btn-sm-badge { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; }
 
     .pills-group { display: flex; gap: 6px; overflow-x: auto; }
-    .pill-btn { padding: 5px 12px; border-radius: 14px; background: #eaf5ff; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; width: auto !important; }
+    .pill-btn { padding: 5px 12px; border-radius: 14px; background: #eaf5ff; color: #5a5e75; font-size: 11px; font-weight: 700; border: none; cursor: pointer; white-space: nowrap; }
     .pill-btn.active { background: var(--primary); color: #ffffff; }
 
     .quick-chat-grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 8px; background: #edf7ff; padding: 8px; border-radius: 12px; border: 1px solid #d7ebff; }
-    .quick-chip { background: #ffffff; color: var(--primary); border: 1px solid #c8e8ff; padding: 6px 4px; border-radius: 8px; font-size: 10px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .quick-chip { background: #ffffff; color: var(--primary); border: 1px solid #c8e8ff; padding: 6px 4px; border-radius: 8px; font-size: 10px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 
     .tag-Bahagia { background: #E8F8F0; color: #2ECC71; }
     .tag-Bersyukur { background: #E0F2F1; color: #00897B; }
@@ -95,37 +79,18 @@
     .tag-Lelah { background: #EFEBE9; color: #4E342E; }
     .tag-Ragu { background: #E0F7FA; color: #00838F; }
 
-    .feelings-card { background: #ffffff; padding: 10px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-top: 10px; margin-bottom: 10px; }
-    .feelings-card h3 { font-size: 12px; font-weight: 800; color: #1e1e38; margin-bottom: 6px; }
+    .feelings-card { background: #ffffff; padding: 10px; border-radius: 16px; border: 1px solid var(--border-color); margin-top: 10px; margin-bottom: 10px; }
     .tags-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag-item { padding: 4px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; border: none; }
+    .tag-item { padding: 4px 9px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; border: none; }
 
     .feed-container { display: flex; flex-direction: column; gap: 10px; }
-    .post-card { position: relative; background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .post-card { position: relative; background: #ffffff; border-radius: 18px; padding: 14px; border: 1px solid var(--border-color); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     
-    .avatar-container { position: relative; width: 40px; height: 40px; }
-    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #06449a; box-shadow: 0 2px 5px rgba(108, 92, 231, 0.25); }
-    
-    .cuit-rank-badge { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px #0005); }
-    .cuit-main-badge { display: flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; color: transparent !important; overflow: visible !important; }
-    .cuit-main-badge .cuit-rank-badge { width: 100%; height: 100%; }
-
-    .profile-main-avatar-wrap { width: 82px !important; height: 82px !important; flex-shrink: 0; }
-    .profile-main-avatar-wrap .cuit-main-badge { width: 82px !important; height: 82px !important; }
-
-    .cuit-post-main-wrap { width: 58px !important; height: 58px !important; flex-shrink: 0; }
-    .cuit-post-main-wrap .cuit-main-badge { width: 58px !important; height: 58px !important; background: transparent !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; }
-    .cuit-post-main-wrap .cuit-rank-badge { width: 100%; height: 100%; }
-
-    .cuit-rank-badge .aura { animation: cuitBadgePulse 3s ease-in-out infinite; transform-origin: center; }
-    .cuit-rank-badge .spark { animation: cuitBadgeTwinkle 2.4s ease-in-out infinite; transform-origin: center; }
-    .cuit-rank-badge .floatgem { animation: cuitBadgeFloat 3.2s ease-in-out infinite; transform-origin: center; }
-
-    @keyframes cuitBadgePulse { 0%, 100% { opacity: .42; transform: scale(.97); } 50% { opacity: .82; transform: scale(1.035); } }
-    @keyframes cuitBadgeTwinkle { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
-    @keyframes cuitBadgeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+    .avatar-container { position: relative; width: 42px; height: 42px; }
+    .cuit-rank-badge { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+    .cuit-main-badge { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
@@ -133,7 +98,6 @@
     .post-time { font-size: 10px; color: var(--text-sub); }
 
     .post-body { font-size: 13px; line-height: 1.45; color: #153d70; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
-
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4faff; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; }
 
@@ -148,11 +112,15 @@
     .stat-card-item .val { font-size: 14px; font-weight: 900; color: var(--text-main); }
     .stat-card-item .lbl { font-size: 9.5px; color: var(--text-sub); margin-top: 1px; }
 
+    .level-progress-container { background: #edf7ff; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
+    .progress-bar-bg { width: 100%; height: 8px; background: #d7ebff; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
+    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
+
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
     .nav-bar { 
-      position: fixed !important; bottom: 0 !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; max-width: 480px !important; background: #ffffff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 6px 0 !important; padding-bottom: max(6px, env(safe-area-inset-bottom)) !important; border-top: 1px solid var(--border-color) !important; z-index: 99999 !important; box-shadow: 0 -2px 10px rgba(0,0,0,0.05) !important;
+      position: fixed !important; bottom: 0 !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; max-width: 480px !important; background: #ffffff !important; display: flex !important; justify-content: space-around !important; align-items: center !important; padding: 6px 0 !important; border-top: 1px solid var(--border-color) !important; z-index: 99999 !important;
     }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
@@ -162,29 +130,24 @@
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 18px; border-radius: 18px; width: 92%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
 
+    .live-chat-fullscreen { display: flex; flex-direction: column; width: 100%; max-width: 100%; }
+    .live-chat-messages-area { flex: 1; overflow-y: auto; background: #f3faff; border: 1px solid #eaf5ff; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; min-height: 180px; max-height: 240px; }
+
     .gift-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; max-height: 380px; overflow-y: auto; }
     .gift-card-item { background: #f3faff; border: 1px solid #eaf5ff; padding: 6px 4px; border-radius: 10px; text-align: center; cursor: pointer; font-size: 10px; font-weight: 800; color: #082f6b; }
-    .gift-card-item:hover { border-color: var(--primary); background: #e8f5ff; }
-
-    .live-chat-messages-area { flex: 1; overflow-y: auto; background: #f3faff; border: 1px solid #eaf5ff; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; min-height: 200px; max-height: 260px; }
-
-    @media screen and (max-width: 768px) {
-      .profile-stats-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
-      .profile-menu-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-    }
   </style>
 </head>
 <body>
 
   <!-- Top Bar -->
   <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#0754b8; box-shadow:0 1px 4px rgba(0,0,0,0.1);">🔄 Refresh</button>
+    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#0754b8;">🔄 Refresh</button>
     <div class="stat-badge">FREE <span id="freeCoinCount">20</span></div>
     <div class="stat-badge">🪙 <span id="paidCoinCount">0</span></div>
     <div class="stat-badge">💎 <span id="gemsCount">0</span></div>
   </div>
 
-  <!-- Banner -->
+  <!-- Hero Banner -->
   <div class="cuit-banner-container" id="cuitMainBanner">
     <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
@@ -192,7 +155,7 @@
   <!-- WIDGET POOL HADIAH MINGGU INI -->
   <div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #0879d9, #0754b8); border-radius: 16px; padding: 10px 12px; color: #fff; display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
     <div>
-      <div style="font-size: 10px; font-weight: 800; color: #b9e2ff; text-transform: uppercase;">🎁 Total Pool Hadiah Mingguan</div>
+      <div style="font-size: 10px; font-weight: 800; color: #b9e2ff;">🎁 TOTAL POOL HADIAH MINGGUAN</div>
       <div style="font-size: 18px; font-weight: 900; color: #ffffff;" id="weeklyPoolCoinsDisplay">0 🪙</div>
     </div>
     <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; text-align: right;">
@@ -201,7 +164,7 @@
     </div>
   </div>
 
-  <!-- PANGGUNG 10 RAJA MINGGU INI (10 RAJA LENGKAP) -->
+  <!-- PANGGUNG 10 RAJA MINGGU INI -->
   <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #082f6b, #312e81); border-radius: 16px; padding: 10px; color: #fff;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <span style="font-size: 11px; font-weight: 900; color: #fde047;">🏆 PANGGUNG 10 RAJA MINGGU INI</span>
@@ -239,7 +202,7 @@
         <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champFollowersName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #bae6fd;" id="champFollowersScore">0 Pengikut</div>
       </div>
-      <div onclick="openCoinCollectorCalcModal()" style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; cursor: pointer;">
+      <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; cursor: pointer;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbbf24;">🪙 Raja Koin</div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champPermataName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #fef08a;" id="champPermataScore">0 🪙</div>
@@ -277,7 +240,7 @@
 
     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: #ffffff; padding: 6px 10px; border-radius: 16px; border: 1px solid var(--border-color);">
       <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
-        <div class="avatar-circle cuit-main-badge" id="homeQuickUserBadge" style="width: 32px; height: 32px;"></div>
+        <div class="avatar-circle cuit-main-badge" id="homeQuickUserBadge"></div>
       </div>
       <input type="text" placeholder="Apa yang ingin kamu curhatkan?" readonly onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])" style="margin-bottom: 0; background: #f3faff; border: 1px solid #eaf5ff; cursor: pointer; border-radius: 20px; padding: 7px 12px; font-size: 11.5px;">
       <button class="btn-primary" style="padding: 7px 12px; border-radius: 18px; width: auto !important;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
@@ -290,7 +253,7 @@
     </div>
   </div>
 
-  <!-- 2. HALAMAN CARI (LENGKAP 16 PERASAAN & FILTER SANGAT DETAIL) -->
+  <!-- 2. HALAMAN CARI -->
   <div id="pageSearch" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title">Jelajahi CUIT</h2>
@@ -353,7 +316,7 @@
     <div class="feed-container" id="searchResults" style="margin-top: 8px;"></div>
   </div>
 
-  <!-- 3. HALAMAN BUAT CURHATAN (LENGKAP 16 PERASAAN, KOIN BERUNTUNG, BIAYA, DRAF) -->
+  <!-- 3. HALAMAN BUAT CURHATAN -->
   <div id="pageCreate" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title">Buat Curhatan</h2>
@@ -387,9 +350,6 @@
         🎁 Pasang Koin Beruntung untuk Komentator Tercepat (Opsional):
       </label>
       <input type="number" id="postRewardCoins" min="0" placeholder="Contoh: 5 (5 komentar pertama dapat 1 Koin Berbayar)" style="margin-bottom: 4px;">
-      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;">
-        *Setiap komentator tercepat mendapat 1 Koin Berbayar (dipotong dari Bank Koin milikmu).
-      </div>
 
       <div style="display: flex; gap: 6px; margin-top: 12px;">
         <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
@@ -399,7 +359,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS (LENGKAP FULLSCREEN LIVE CHAT, SUPPORTER LEADERBOARD, KONTROL & GIFT) -->
+  <!-- 4. HALAMAN LIVE TEKS (DENGAN TAMPILAN PRESISI LENGKAP) -->
   <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -409,11 +369,9 @@
       <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live Baru</button>
     </div>
 
-    <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <div id="activeLivesListContainer" style="margin-bottom: 10px;"></div>
-
+    <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color); width: 100%;">
       <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
-        Belum ada sesi Live Teks aktif saat ini.
+        Belum ada sesi Live Teks aktif saat ini. Klik tombol di atas untuk memulai!
       </div>
 
       <div id="liveChatBox" style="display: none;" class="live-chat-fullscreen">
@@ -426,16 +384,24 @@
 
         <div id="liveMessagesList" class="live-chat-messages-area"></div>
 
+        <div class="quick-chat-grid-container">
+          <div class="quick-chip" onclick="sendQuickLiveMsg('Halo semuanya! 👋')">👋 Halo</div>
+          <div class="quick-chip" onclick="sendQuickLiveMsg('Semangat ya! 🔥')">🔥 Semangat</div>
+          <div class="quick-chip" onclick="sendQuickLiveMsg('Terima kasih! 🙏')">🙏 Makasih</div>
+        </div>
+
         <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
           <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1; min-width: 120px;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
           <button class="btn-primary" style="padding: 8px 10px;" onclick="sendLiveMessage()">Kirim</button>
-          <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 10px; font-weight:800;" onclick="openGiftModal('live')">🎁 Gift</button>
+          <button class="btn-secondary" style="background: #e8f5ff; color: #0754b8; border: 1px solid #c8e8ff; padding: 8px 8px; font-weight:800;" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">0</span>)</button>
+          <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 8px; font-weight:800;" onclick="openGiftModal('live')">🎁 Gift</button>
+          <button class="btn-secondary" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 8px 8px; font-weight:900;" onclick="openSpecialGiftModal()">👑 Sultan</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 5. HALAMAN PROFIL (LENGKAP 5 STATISTIK, LINK SPONSOR REFERRAL, KEMAJUAN LEVEL & MENU) -->
+  <!-- 5. HALAMAN PROFIL (LENGKAP PROGRESS EXP, LINK SPONSOR & FITUR ADMIN) -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
@@ -443,7 +409,7 @@
     <div class="profile-card">
       <div class="profile-header-flex">
         <div class="user-info" style="cursor:default;">
-          <div class="avatar-container profile-main-avatar-wrap">
+          <div class="avatar-container profile-main-avatar-wrap" style="width:58px; height:58px;">
             <div class="avatar-circle cuit-main-badge" id="profMainBadge"></div>
           </div>
           <div>
@@ -451,7 +417,7 @@
             <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #d7ebff; color: #333;">🌱 Cuiter Baru</span>
           </div>
         </div>
-        <button class="btn-secondary" style="padding: 5px 12px; width: auto !important;" onclick="openEditProfileModal()">Edit</button>
+        <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
       </div>
 
       <div class="profile-stats-grid">
@@ -477,14 +443,31 @@
         </div>
       </div>
 
+      <div class="level-progress-container">
+        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #082f6b;">
+          <span>Kemajuan Level Cuiter</span>
+          <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="levelProgressBar" style="width: 15%;"></div>
+        </div>
+      </div>
+
       <div style="background: #f3faff; padding: 12px; border-radius: 14px; border: 1px solid #d7ebff; margin-top: 10px;">
         <div style="font-size: 11px; font-weight: 800; color: #082f6b; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
         <div style="font-size: 10px; color: #42658a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
         
         <div style="display: flex; gap: 6px;">
           <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
+          <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
         </div>
       </div>
+    </div>
+
+    <div id="adminPanelSection" style="margin-bottom: 12px; padding: 14px; background: #eaf6ff; border-radius: 14px; border: 1px solid #bfdefb;">
+      <h4 style="margin: 0 0 6px 0; color: #0754b8; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
+      <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
+      <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
@@ -497,11 +480,29 @@
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
   </div>
 
+  <!-- MODAL ADMIN EDIT 10 LINK REELS -->
+  <div id="adminReelsModal" class="modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola 10 Link Reels FB</h3>
+      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Tempelkan tautan FB Reels harian untuk 10 slot video:</div>
+
+      <div style="max-height: 260px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 1:</label><input type="text" id="adminVideo1" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 2:</label><input type="text" id="adminVideo2" placeholder="https://facebook.com/reel/..."></div>
+      </div>
+
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-primary" style="flex: 1;" onclick="saveAdminReelsLinks()">💾 Simpan Semua</button>
+        <button class="btn-secondary" onclick="document.getElementById('adminReelsModal').style.display='none'">Batal</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL MISI REELS FB -->
   <div id="reelsModal" class="modal">
     <div class="modal-content" style="text-align: center;">
       <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah (10 Video)</h3>
-      <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.4;">Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!</p>
+      <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px;">Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!</p>
       <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;"></div>
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
     </div>
@@ -516,9 +517,7 @@
         <button class="btn-primary" onclick="handleTopUp(1000)">1.000 Koin<br>Rp 1.000</button>
         <button class="btn-primary" onclick="handleTopUp(5000)">5.000 Koin<br>Rp 5.000</button>
         <button class="btn-primary" onclick="handleTopUp(10000)">10.000 Koin<br>Rp 10.000</button>
-        <button class="btn-primary" onclick="handleTopUp(20000)">20.000 Koin<br>Rp 20.000</button>
         <button class="btn-primary" onclick="handleTopUp(50000)">50.000 Koin<br>Rp 50.000</button>
-        <button class="btn-primary" onclick="handleTopUp(100000)">100.000 Koin<br>Rp 100.000</button>
       </div>
       <button onclick="document.getElementById('dokuTopUpModal').style.display='none'" class="btn-secondary" style="margin-top:15px; width:100%;">Tutup</button>
     </div>
@@ -571,13 +570,10 @@
       <div class="gift-grid">
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk')">🫂 Peluk (2 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang')">👑 Bintang (10 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(50, 'Raja')">👑 Raja (50 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Super')">🚀 Super (100 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova (500 🪙)</div>
       </div>
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
     </div>
@@ -607,7 +603,7 @@
     </div>
   </div>
 
-  <!-- LOGIKA JAVASCRIPT LENGKAP BERSAMA SUPABASE -->
+  <!-- JAVASCRIPT UTAMA -->
   <script>
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
@@ -616,35 +612,20 @@
     let currentUser = null;
     let allPostsCache = [];
     let userLikedPostsSet = new Set();
+    let liveLikesCount = 0;
     let cuitBadgeSerial = 0;
-    let activeCommentPostId = null;
-    let activeGiftPostId = null;
-
-    function cuitStarPoints(cx, cy, ro = 6.4, ri = 2.8) {
-      const points = [];
-      for (let i = 0; i < 10; i++) {
-        const angle = -Math.PI / 2 + i * Math.PI / 5;
-        const radius = i % 2 ? ri : ro;
-        points.push(`${(cx + Math.cos(angle) * radius).toFixed(2)},${(cy + Math.sin(angle) * radius).toFixed(2)}`);
-      }
-      return points.join(' ');
-    }
 
     function cuitBadgeSvg(level) {
-      const title = typeof level === 'string' ? level : (level?.title || '');
-      const idx = title.includes('Maestro') ? 4 : title.includes('Sultan') ? 3 : title.includes('Aktif') ? 2 : title.includes('Setia') ? 1 : 0;
-      const colors = [['#ffdda0', '#a94e23', '#ff9b49'], ['#e8f6ff', '#467bb9', '#75d7ff'], ['#fff0a1', '#b66b13', '#ffd54d'], ['#fff4bc', '#a96a0c', '#ffbb35'], ['#ffd5ff', '#7137c5', '#b46aff']];
-      const [light, deep, glow] = colors[idx];
       const uid = 'cuitBadge' + (++cuitBadgeSerial);
-
       return `<svg class="cuit-rank-badge" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="${uid}rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffde0"/><stop offset="1" stop-color="${deep}"/></linearGradient>
-          <linearGradient id="${uid}inside" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#284a77"/><stop offset="1" stop-color="#050c1d"/></linearGradient>
+          <linearGradient id="${uid}rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe082"/><stop offset="1" stop-color="#b45309"/></linearGradient>
+          <linearGradient id="${uid}inside" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1e3a8a"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
         </defs>
-        <circle class="aura" cx="50" cy="49" r="45" fill="${glow}" opacity="0.3"/>
-        <path d="M50 5 C57 13 69 14 79 19 L88 36 Q93 50 85 66 Q73 83 50 94 Q27 83 15 66 Q7 50 12 36 L21 19 C31 14 43 13 50 5Z" fill="url(#${uid}rim)"/>
-        <path d="M50 10 C58 17 69 18 76 23 L83 38 Q87 50 80 63 Q69 78 50 88 Q31 78 20 63 Q13 50 17 38 L24 23 C31 18 42 17 50 10Z" fill="url(#${uid}inside)"/>
+        <circle cx="50" cy="50" r="45" fill="#38bdf8" opacity="0.3"/>
+        <path d="M50 5 L85 20 L85 60 L50 95 L15 60 L15 20 Z" fill="url(#${uid}rim)"/>
+        <path d="M50 12 L78 24 L78 56 L50 85 L22 56 L22 24 Z" fill="url(#${uid}inside)"/>
+        <polygon points="50,28 55,40 68,40 57,48 61,60 50,52 39,60 43,48 32,40 45,40" fill="#fde047"/>
       </svg>`;
     }
 
@@ -703,8 +684,8 @@
             <div class="post-card" id="post-${p.id}">
               <div class="post-header">
                 <div class="user-info">
-                  <div class="avatar-container cuit-post-main-wrap">
-                    <div class="avatar-circle cuit-main-badge">${cuitBadgeSvg(userLvl.title)}</div>
+                  <div class="avatar-container">
+                    <div class="cuit-main-badge">${cuitBadgeSvg(userLvl.title)}</div>
                   </div>
                   <div class="user-details">
                     <span class="user-name">${rawName}</span>
@@ -808,6 +789,20 @@
       msgList.scrollTop = msgList.scrollHeight;
     }
 
+    function sendQuickLiveMsg(msg) {
+      document.getElementById('liveInputMessage').value = msg;
+      sendLiveMessage();
+    }
+
+    function toggleLikeLive() {
+      liveLikesCount++;
+      document.getElementById('liveLikesCount').innerText = liveLikesCount;
+    }
+
+    function openSpecialGiftModal() {
+      alert('👑 Menu Sultan Gift Spesial dibuka!');
+    }
+
     function toggleLike(postId) {
       if (userLikedPostsSet.has(String(postId))) {
         userLikedPostsSet.delete(String(postId));
@@ -818,7 +813,6 @@
     }
 
     function openCommentsModal(postId) {
-      activeCommentPostId = postId;
       document.getElementById('commentsModal').style.display = 'flex';
       document.getElementById('commentsList').innerHTML = '<p style="font-size:11px; text-align:center;">Belum ada komentar.</p>';
     }
@@ -831,8 +825,7 @@
       document.getElementById('commentsModal').style.display = 'none';
     }
 
-    function openGiftModal(postId) {
-      activeGiftPostId = postId;
+    function openGiftModal() {
       document.getElementById('giftModal').style.display = 'flex';
     }
 
@@ -847,9 +840,11 @@
       alert('📋 Link Sponsor disalin!');
     }
 
+    function downloadAPK() { alert('📱 Memulai pengunduhan APK CUIT...'); }
     function openEditProfileModal() { alert('Edit profil dapat dikustomisasi.'); }
     function openReelsModal() { document.getElementById('reelsModal').style.display = 'flex'; }
-    function openCoinCollectorCalcModal() { alert('Kalkulator Transparansi Kolektor Koin.'); }
+    function openAdminModal() { document.getElementById('adminReelsModal').style.display = 'flex'; }
+    function saveAdminReelsLinks() { alert('💾 Link Reels berhasil disimpan!'); document.getElementById('adminReelsModal').style.display='none'; }
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -857,7 +852,6 @@
       
       const targetPage = document.getElementById(pageId);
       if (targetPage) targetPage.classList.add('active');
-      if (navElement) navElement.classList.active;
       if (navElement && navElement.classList) navElement.classList.add('active');
     }
 
@@ -866,7 +860,6 @@
       btn.classList.add('active');
     }
 
-    function closeAllPostMenus() {}
     function handleTopUp(amount) { alert('Top-up QRIS sejumlah Rp ' + amount.toLocaleString('id-ID')); }
     function handleAuthAction() { alert('Menu Masuk / Daftar Akun.'); }
 
