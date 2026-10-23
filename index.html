@@ -4411,27 +4411,6 @@ async function updateWeeklyRewardPoolUI() {
   }
 }
 
-    async function updateWeeklyRewardPoolUI() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('platform_reward_pool')
-          .select('amount')
-          .eq('id', 1)
-          .maybeSingle();
-
-        const totalPool = (data && data.amount) ? data.amount : 0;
-        const sharePerWinner = Math.floor(totalPool / 10);
-
-        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
-        const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
-
-        if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
-        if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
-      } catch (err) {
-        console.error('Gagal memuat reward pool:', err);
-      }
-    }
-
         updateWeeklyRewardPoolUI();
     checkUser();
   </script>
