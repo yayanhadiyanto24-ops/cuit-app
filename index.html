@@ -445,6 +445,30 @@
 
     .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; z-index: 998; pointer-events: none; top: -10px; animation: confettiFall 3s linear forwards; }
     @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+ 
+/* Pulihkeun menu navigasi CUIT */
+.nav-bar {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  z-index: 99999 !important;
+  background: #fff !important;
+}
+.nav-bar .nav-item {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body {
+  padding-bottom: 72px !important;
+}
+
   </style>
 
 <!-- CUIT theme alignment: banner palette (blue, gold, sky) -->
