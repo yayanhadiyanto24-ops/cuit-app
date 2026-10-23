@@ -2219,43 +2219,56 @@ if (weeklyGifts && weeklyGifts.length > 0) {
           document.getElementById('champSponsorName').innerText = 'Belum Ada';
           document.getElementById('champSponsorScore').innerText = '0 Member';
         }
-// --- 9. KALKULASI RAJA NONTON ---
-if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
-  const nontonCounts = {};
-  weeklyReelsClaims.forEach(r => {
-    const key = r.user_email || r.user_id;
-    if (key) nontonCounts[key] = (nontonCounts[key] || 0) + 1;
-  });
 
-  const sortedNonton = Object.keys(nontonCounts).sort((a, b) => nontonCounts[b] - nontonCounts[a]);
-  let topNontonName = null;
-  let topNontonScore = 0;
+        // --- 9. KALKULASI RAJA NONTON ---
+        if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
+          const nontonCounts = {};
 
-  for (const key of sortedNonton) {
-    const { data: prof } = await supabaseClient
-      .from('profiles')
-      .select('username, email')
-      .or(`email.eq.${key},id.eq.${key}`)
-      .maybeSingle();
+          weeklyReelsClaims.forEach(r => {
+            // Utamakan ID akun agar tontonan dihitung per pengguna.
+            const key = r.user_id || (r.user_email ? r.user_email.toLowerCase() : null);
 
-    if (prof) {
-      topNontonName = prof.username || prof.email.split('@')[0];
-      topNontonScore = nontonCounts[key];
-      break;
-    }
-  }
+            if (key) {
+              nontonCounts[key] = (nontonCounts[key] || 0) + 1;
+            }
+          });
 
-  if (topNontonName) {
-    document.getElementById('champNontonName').innerText = topNontonName;
-    document.getElementById('champNontonScore').innerText = `${topNontonScore} Video`;
-  } else {
-    document.getElementById('champNontonName').innerText = 'Belum Ada';
-    document.getElementById('champNontonScore').innerText = '0 Video';
-  }
-} else {
-  document.getElementById('champNontonName').innerText = 'Belum Ada';
-  document.getElementById('champNontonScore').innerText = '0 Video';
-}
+          const sortedNonton = Object.keys(nontonCounts).sort(
+            (a, b) => nontonCounts[b] - nontonCounts[a]
+          );
+
+          let topNontonName = null;
+          let topNontonScore = 0;
+
+          for (const key of sortedNonton) {
+            // Cari profil dari data yang sudah dimuat sebelumnya.
+            const prof = (profilesData || []).find(p =>
+              p.id === key ||
+              (p.email && p.email.toLowerCase() === String(key).toLowerCase())
+            );
+
+            if (prof) {
+              topNontonName =
+                prof.username ||
+                (prof.email ? prof.email.split('@')[0] : 'Pengguna');
+
+              topNontonScore = nontonCounts[key];
+              break;
+            }
+          }
+
+          if (topNontonName) {
+            document.getElementById('champNontonName').innerText = topNontonName;
+            document.getElementById('champNontonScore').innerText =
+              `${topNontonScore} Video`;
+          } else {
+            document.getElementById('champNontonName').innerText = 'Belum Ada';
+            document.getElementById('champNontonScore').innerText = '0 Video';
+          }
+        } else {
+          document.getElementById('champNontonName').innerText = 'Belum Ada';
+          document.getElementById('champNontonScore').innerText = '0 Video';
+        }
 
 // --- 10. KALKULASI RAJA LIKE ---
 if (weeklyLikes && weeklyLikes.length > 0) {
