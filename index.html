@@ -3993,7 +3993,8 @@ try {
     let videoSecondsLeft = 10;
 
     async function startVideoTimerAuto() {
-  const btnClose = document.getElementById('btnCloseVideoModal');
+  videoSecondsLeft = 10;
+      const btnClose = document.getElementById('btnCloseVideoModal');
   document.getElementById('videoTimerStatusText').innerText = '';
 
   if (videoTimerInterval) clearInterval(videoTimerInterval);
