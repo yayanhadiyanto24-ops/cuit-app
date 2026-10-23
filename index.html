@@ -3995,7 +3995,7 @@ try {
       const myEmail = currentUser ? currentUser.email : guestId;
 
       document.getElementById('profName').innerText = displayName;
-      document.getElementById('profBadgeIcon').innerText = userLvl.icon;
+      document.getElementById('profBadgeIcon').innerHTML = cuitBadgeSvg(userLvl.title);
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profLevelTitle').style.background = userLvl.color;
       document.getElementById('profLevelTitle').style.color = '#fff';
