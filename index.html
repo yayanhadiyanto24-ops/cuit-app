@@ -4858,6 +4858,22 @@ function closeQRISModal() {
   document.getElementById('qrisModal').style.display = 'none';
 }
 </script>
-
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const nav = document.querySelector('.nav-bar');
+  if (nav) {
+    document.body.appendChild(nav);
+    nav.style.setProperty('display', 'flex', 'important');
+    nav.style.setProperty('visibility', 'visible', 'important');
+    nav.style.setProperty('opacity', '1', 'important');
+    nav.style.setProperty('position', 'fixed', 'important');
+    nav.style.setProperty('bottom', '0', 'important');
+    nav.style.setProperty('left', '50%', 'important');
+    nav.style.setProperty('transform', 'translateX(-50%)', 'important');
+    nav.style.setProperty('z-index', '99999', 'important');
+    nav.style.setProperty('background', '#fff', 'important');
+  }
+});
+      </script>
 </body>
 </html>
