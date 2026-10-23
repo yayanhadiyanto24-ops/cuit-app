@@ -4593,8 +4593,19 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
     return alert('Kata ini sudah terbuka dan tidak dapat dicoba lagi.');
   }
 
+  
   if (currentChances <= 0) {
-    return alert('Kesempatan gratis habis. Pembelian kesempatan berbayar perlu diaktifkan.');
+    const pilihan = prompt(
+      'Kesempatan gratis habis.\n' +
+      'Ketik 2 untuk membeli 1 kesempatan seharga 2 koin,\n' +
+      'atau 3 untuk membeli 1 kesempatan seharga 3 koin.'
+    );
+
+    if (pilihan === null || !['2', '3'].includes(pilihan.trim())) {
+      return;
+    }
+
+    return buyExtraChancesViaGift(postId, Number(pilihan.trim()));
   }
 
   if (currentUser && post.user_id === currentUser.id) {
