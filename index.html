@@ -3993,42 +3993,44 @@ try {
     let videoSecondsLeft = 10;
 
     async function startVideoTimerAuto() {
-      const btnClose = document.getElementById('btnCloseVideo');
-      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar!';
+  const btnClose = document.getElementById('btnCloseVideoModal');
+  document.getElementById('videoTimerStatusText').innerText = '';
 
-      if (videoTimerInterval) clearInterval(videoTimerInterval);
+  if (videoTimerInterval) clearInterval(videoTimerInterval);
 
-      videoTimerInterval = setInterval(async() => {
-        videoSecondsLeft--;
-        if (btnClose && videoSecondsLeft > 0) {
-          btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)`;
-        } else {
-          clearInterval(videoTimerInterval);
-          videoTimerInterval = null;
-          if (btnClose) {
-            btnClose.disabled = false;
-            btnClose.style.opacity = '1';
-            btnClose.style.cursor = 'pointer';
-            btnClose.style.background = '#2ecc71';
-            btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
-          }
-          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai!';
-        // --- CATAT KE TABEL REELS_CLAIMS SUPABASE ---
-try {
-  await supabaseClient
-    .from('reels_claims')
-    .insert([
-      { 
-        user_id: currentUser ? currentUser.id : null,
-        user_email: currentUser ? currentUser.email : null,
-        created_at: new Date().toISOString()
+  videoTimerInterval = setInterval(async () => {
+    videoSecondsLeft--;
+    if (btnClose && videoSecondsLeft > 0) {
+      btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)...`;
+    } else {
+      clearInterval(videoTimerInterval);
+      videoTimerInterval = null;
+      if (btnClose) {
+        btnClose.disabled = false;
+        btnClose.style.opacity = '1';
+        btnClose.style.cursor = 'pointer';
+        btnClose.style.background = '#2ecc71';
+        btnClose.innerText = '✕ Tutup & Klaim';
       }
-    ]);
-} catch (err) {
-  console.error("Gagal mencatat klaim nonton:", err);
-}
-      }, 1000);
+      document.getElementById('videoTimerStatusText').innerText = '🎉 Berhasil!';
+
+      // --- CATAT KE TABEL REELS_CLAIMS SUPABASE ---
+      try {
+        await supabaseClient
+          .from('reels_claims')
+          .insert([
+            { 
+              user_id: currentUser ? currentUser.id : null,
+              user_email: currentUser ? currentUser.email : null,
+              created_at: new Date().toISOString()
+            }
+          ]);
+      } catch (err) {
+        console.error("Gagal mencatat klaim nonton:", err);
+      }
     }
+  }, 1000);
+}
 
     function pauseVideoTimerAuto() {
       if (videoTimerInterval) {
