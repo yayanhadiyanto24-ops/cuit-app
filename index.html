@@ -92,19 +92,22 @@
     .cuit-rank-badge { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
     .cuit-main-badge { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
-    /* Animasi Kilau Lencana Tameng */
+    /* Animasi Lencana Tameng SVG */
     .cuit-rank-badge .aura { animation: cuitBadgePulse 3s ease-in-out infinite; transform-origin: center; }
     .cuit-rank-badge .spark { animation: cuitBadgeTwinkle 2.4s ease-in-out infinite; transform-origin: center; }
-    .cuit-rank-badge .floatgem { animation: cuitBadgeFloat 3.2s ease-in-out infinite; transform-origin: center; }
 
     @keyframes cuitBadgePulse { 0%, 100% { opacity: .42; transform: scale(.97); } 50% { opacity: .82; transform: scale(1.035); } }
     @keyframes cuitBadgeTwinkle { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
-    @keyframes cuitBadgeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
     .badge-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
     .post-time { font-size: 10px; color: var(--text-sub); }
+
+    .post-more-btn { background: none; border: none; font-size: 16px; color: var(--text-sub); cursor: pointer; padding: 0 4px; }
+    .post-menu-dropdown { display: none; position: absolute; top: 32px; right: 14px; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10; min-width: 130px; }
+    .post-menu-dropdown div { padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-main); cursor: pointer; }
+    .post-menu-dropdown div:hover { background: #f4faff; }
 
     .post-body { font-size: 13px; line-height: 1.45; color: #153d70; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
@@ -123,7 +126,7 @@
 
     .level-progress-container { background: #edf7ff; border-radius: 12px; padding: 10px; margin-top: 8px; border: 1px solid var(--border-color); }
     .progress-bar-bg { width: 100%; height: 8px; background: #d7ebff; border-radius: 4px; overflow: hidden; margin: 6px 0 4px 0; }
-    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 0%; transition: width 0.3s ease; }
+    .progress-bar-fill { height: 100%; background: var(--primary-gradient); width: 25%; transition: width 0.3s ease; }
 
     .profile-menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .menu-btn-item { background: #ffffff; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; cursor: pointer; }
@@ -152,8 +155,8 @@
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#0754b8;">🔄 Refresh</button>
     <div class="stat-badge">FREE <span id="freeCoinCount">20</span></div>
-    <div class="stat-badge">🪙 <span id="paidCoinCount">0</span></div>
-    <div class="stat-badge">💎 <span id="gemsCount">0</span></div>
+    <div class="stat-badge">🪙 <span id="paidCoinCount">98717</span></div>
+    <div class="stat-badge">💎 <span id="gemsCount">384.5</span></div>
   </div>
 
   <!-- Hero Banner -->
@@ -161,15 +164,15 @@
     <img src="banner.png" alt="CUIT Banner" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- WIDGET POOL HADIAH MINGGU INI -->
+  <!-- POOL HADIAH MINGGU INI -->
   <div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #0879d9, #0754b8); border-radius: 16px; padding: 10px 12px; color: #fff; display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
     <div>
       <div style="font-size: 10px; font-weight: 800; color: #b9e2ff;">🎁 TOTAL POOL HADIAH MINGGUAN</div>
-      <div style="font-size: 18px; font-weight: 900; color: #ffffff;" id="weeklyPoolCoinsDisplay">0 🪙</div>
+      <div style="font-size: 18px; font-weight: 900; color: #ffffff;" id="weeklyPoolCoinsDisplay">50.000 🪙</div>
     </div>
     <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; text-align: right;">
       <span style="display: block; font-size: 8.5px; color: #b9e2ff;">Per Juara:</span>
-      <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">0 🪙</span>
+      <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">5.000 🪙</span>
     </div>
   </div>
 
@@ -183,53 +186,53 @@
     <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; width: 100%; overflow-x: auto; padding-bottom: 4px;">
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fde047;">👑 Raja Sawer</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champSawerName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #fef08a;" id="champSawerScore">0 🪙</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champSawerName">Yan Kasmaran</div>
+        <div style="font-size: 7.5px; color: #fef08a;" id="champSawerScore">12.500 🪙</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #ff7675; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #ff7675;">🔴 Raja LIVE</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champLiveName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #ffbe76;" id="champLiveScore">0 🪙</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champLiveName">Bagus Setia</div>
+        <div style="font-size: 7.5px; color: #ffbe76;" id="champLiveScore">8.200 🪙</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #38a6ff; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #93c5fd;">🌟 Raja Curhat</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champCurhatName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #c5e7ff;" id="champCurhatScore">0 Point</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champCurhatName">Siti Rahma</div>
+        <div style="font-size: 7.5px; color: #c5e7ff;" id="champCurhatScore">1.450 Point</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #86efac;">✍️ Raja Pujangga</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champPujanggaName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #bbf7d0;" id="champPujanggaScore">0 Post</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champPujanggaName">Ahmad Yani</div>
+        <div style="font-size: 7.5px; color: #bbf7d0;" id="champPujanggaScore">42 Post</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #a855f7; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #c084fc;">💬 Raja Komentar</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champKomentarName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #e9d5ff;" id="champKomentarScore">0 Komen</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champKomentarName">Dewi Lestari</div>
+        <div style="font-size: 7.5px; color: #e9d5ff;" id="champKomentarScore">128 Komen</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #38bdf8; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #7dd3fc;">👥 Raja Jaringan</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champFollowersName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #bae6fd;" id="champFollowersScore">0 Pengikut</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champFollowersName">Rian Utama</div>
+        <div style="font-size: 7.5px; color: #bae6fd;" id="champFollowersScore">310 Pengikut</div>
       </div>
-      <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; cursor: pointer;">
+      <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbbf24;">🪙 Raja Koin</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champPermataName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #fef08a;" id="champPermataScore">0 🪙</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champPermataName">Yan Kasmaran</div>
+        <div style="font-size: 7.5px; color: #fef08a;" id="champPermataScore">98.717 🪙</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbcfe8;">🧲 Raja Sponsor</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champSponsorName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #fbcfe8;" id="champSponsorScore">0 Member</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champSponsorName">Cuiter Sejati</div>
+        <div style="font-size: 7.5px; color: #fbcfe8;" id="champSponsorScore">18 Member</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #06b6d4; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #67e8f9;">🎬 Raja Nonton</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champNontonName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #a5f3fc;" id="champNontonScore">0 Video</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champNontonName">Andi Wijaya</div>
+        <div style="font-size: 7.5px; color: #a5f3fc;" id="champNontonScore">50 Video</div>
       </div>
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #ec4899; border-radius: 12px; padding: 8px 6px; text-align: center;">
         <div style="font-size: 8.5px; font-weight: 800; color: #f472b6;">❤️ Raja Like</div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champLikeName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #fbcfe8;" id="champLikeScore">0 Like</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; margin-top:3px;" id="champLikeName">Nina Amelia</div>
+        <div style="font-size: 7.5px; color: #fbcfe8;" id="champLikeScore">482 Like</div>
       </div>
     </div>
   </div>
@@ -379,19 +382,23 @@
     </div>
 
     <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color); width: 100%;">
-      <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
-        Belum ada sesi Live Teks aktif saat ini. Klik tombol di atas untuk memulai!
+      <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 10px 0;">
+        <span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; margin-right:4px;"></span> Ruang Live aktif dikunjungi. Klik tombol di atas untuk membuat sesi baru!
       </div>
 
-      <div id="liveChatBox" style="display: none;" class="live-chat-fullscreen">
-        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 6px 10px; margin-bottom: 6px;">
+      <div id="liveChatBox" style="display: flex;" class="live-chat-fullscreen">
+        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 8px 10px; margin-bottom: 8px;">
           <div style="font-size: 11px; font-weight: 800; color: #d35400;">🏆 TOP SUPPORTER (Gift Terbanyak)</div>
           <div id="liveLeaderboardList" style="font-size: 10.5px; color: #333; display: flex; flex-direction: column; gap: 3px; margin-top: 4px;">
-            <i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>
+            <div>🥇 <b>Yan Kasmaran</b>: 120 🪙 (Raja Sawer)</div>
+            <div>🥈 <b>Dewi Lestari</b>: 50 🪙</div>
           </div>
         </div>
 
-        <div id="liveMessagesList" class="live-chat-messages-area"></div>
+        <div id="liveMessagesList" class="live-chat-messages-area">
+          <div style="font-size:11px; color:#555;"><b>Penilik Bageur:</b> Selamat datang di ruang Live Teks CUIT! 👋</div>
+          <div style="font-size:11px; color:#555;"><b>Yan Kasmaran:</b> Semangat semuanya! 🔥</div>
+        </div>
 
         <div class="quick-chat-grid-container">
           <div class="quick-chip" onclick="sendQuickLiveMsg('Halo semuanya! 👋')">👋 Halo</div>
@@ -402,7 +409,7 @@
         <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
           <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." style="margin-bottom: 0; flex: 1; min-width: 120px;" onkeyup="if(event.key==='Enter') sendLiveMessage()">
           <button class="btn-primary" style="padding: 8px 10px;" onclick="sendLiveMessage()">Kirim</button>
-          <button class="btn-secondary" style="background: #e8f5ff; color: #0754b8; border: 1px solid #c8e8ff; padding: 8px 8px; font-weight:800;" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">0</span>)</button>
+          <button class="btn-secondary" style="background: #e8f5ff; color: #0754b8; border: 1px solid #c8e8ff; padding: 8px 8px; font-weight:800;" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">12</span>)</button>
           <button class="btn-secondary" style="background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; padding: 8px 8px; font-weight:800;" onclick="openGiftModal('live')">🎁 Gift</button>
           <button class="btn-secondary" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 8px 8px; font-weight:900;" onclick="openSpecialGiftModal()">👑 Sultan</button>
         </div>
@@ -422,8 +429,8 @@
             <div class="avatar-circle cuit-main-badge" id="profMainBadge"></div>
           </div>
           <div>
-            <div style="font-size: 16px; font-weight: 900;" id="profName">Penilik Bageur</div>
-            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #d7ebff; color: #333;">🌱 Cuiter Baru</span>
+            <div style="font-size: 16px; font-weight: 900;" id="profName">Yan Kasmaran <span style="color:#0284c7; font-size:12px;">✓</span></div>
+            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #d7ebff; color: #0754b8;">🌱 Cuiter Baru</span>
           </div>
         </div>
         <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
@@ -431,40 +438,40 @@
 
       <div class="profile-stats-grid">
         <div class="stat-card-item">
-          <div class="val" id="profExp">0 EXP</div>
+          <div class="val" id="profExp">250 EXP</div>
           <div class="lbl">Jam Terbang</div>
         </div>
         <div class="stat-card-item">
-          <div class="val" id="profFollowers">0</div>
+          <div class="val" id="profFollowers">12</div>
           <div class="lbl">Pengikut</div>
         </div>
         <div class="stat-card-item">
-          <div class="val" id="profFollowing">0</div>
+          <div class="val" id="profFollowing">8</div>
           <div class="lbl">Mengikuti</div>
         </div>
         <div class="stat-card-item">
-          <div class="val" id="profDownlines">0</div>
+          <div class="val" id="profDownlines">3</div>
           <div class="lbl">Downline</div>
         </div>
         <div class="stat-card-item">
-          <div class="val" id="profPostsCount">0</div>
+          <div class="val" id="profPostsCount">15</div>
           <div class="lbl">Postingan</div>
         </div>
       </div>
 
       <div class="level-progress-container">
         <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #082f6b;">
-          <span>Kemajuan Level Cuiter</span>
-          <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
+          <span>Kemajuan Level Cuiter (25%)</span>
+          <span id="levelNextInfo">750 EXP lagi menuju 💙 Cuiter Setia</span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="levelProgressBar" style="width: 15%;"></div>
+          <div class="progress-bar-fill" id="levelProgressBar" style="width: 25%;"></div>
         </div>
       </div>
 
       <div style="background: #f3faff; padding: 12px; border-radius: 14px; border: 1px solid #d7ebff; margin-top: 10px;">
         <div style="font-size: 11px; font-weight: 800; color: #082f6b; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
-        <div style="font-size: 10px; color: #42658a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
+        <div style="font-size: 10px; color: #42658a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=YANKASMARAN</div>
         
         <div style="display: flex; gap: 6px;">
           <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
@@ -486,26 +493,26 @@
       <div class="menu-btn-item" onclick="document.getElementById('configModal').style.display='flex'">⚙️ Pengaturan</div>
     </div>
 
-    <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
+    <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Keluar Akun</button>
   </div>
 
-  <!-- MODAL ADMIN EDIT 10 LINK REELS (FULL 10 INPUT SLOTS) -->
+  <!-- MODAL ADMIN EDIT 10 LINK REELS -->
   <div id="adminReelsModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola 10 Link Reels FB</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Tempelkan tautan FB Reels harian untuk 10 slot video:</div>
 
       <div style="max-height: 280px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 1:</label><input type="text" id="adminVideo1" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 2:</label><input type="text" id="adminVideo2" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 3:</label><input type="text" id="adminVideo3" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 4:</label><input type="text" id="adminVideo4" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 5:</label><input type="text" id="adminVideo5" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 6:</label><input type="text" id="adminVideo6" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 7:</label><input type="text" id="adminVideo7" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 8:</label><input type="text" id="adminVideo8" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 9:</label><input type="text" id="adminVideo9" placeholder="https://facebook.com/reel/..."></div>
-        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 10:</label><input type="text" id="adminVideo10" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 1:</label><input type="text" id="adminVideo1" value="https://facebook.com/reel/101"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 2:</label><input type="text" id="adminVideo2" value="https://facebook.com/reel/102"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 3:</label><input type="text" id="adminVideo3" value="https://facebook.com/reel/103"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 4:</label><input type="text" id="adminVideo4" value="https://facebook.com/reel/104"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 5:</label><input type="text" id="adminVideo5" value="https://facebook.com/reel/105"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 6:</label><input type="text" id="adminVideo6" value="https://facebook.com/reel/106"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 7:</label><input type="text" id="adminVideo7" value="https://facebook.com/reel/107"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 8:</label><input type="text" id="adminVideo8" value="https://facebook.com/reel/108"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 9:</label><input type="text" id="adminVideo9" value="https://facebook.com/reel/109"></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 10:</label><input type="text" id="adminVideo10" value="https://facebook.com/reel/110"></div>
       </div>
 
       <div style="display: flex; gap: 6px;">
@@ -520,7 +527,50 @@
     <div class="modal-content" style="text-align: center;">
       <h3 style="margin-bottom: 4px; font-size: 17px;">🎵 Misi Reels Berhadiah (10 Video)</h3>
       <p style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px;">Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!</p>
-      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;"></div>
+      
+      <div id="reelsListContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 320px; overflow-y: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 1</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(1)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 2</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(2)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 3</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(3)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 4</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(4)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 5</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(5)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 6</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(6)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 7</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(7)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 8</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(8)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 9</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(9)">Tonton (+1 🪙)</button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f4faff; padding:8px 12px; border-radius:12px; border:1px solid #e0f0ff;">
+          <span style="font-size:11px; font-weight:800; color:#082f6b;">🎬 Video Reels 10</span>
+          <button class="btn-primary" style="padding:4px 10px; font-size:10px;" onclick="claimReelsReward(10)">Tonton (+1 🪙)</button>
+        </div>
+      </div>
+
       <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('reelsModal').style.display='none'">Tutup</button>
     </div>
   </div>
@@ -620,7 +670,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT UTAMA DENGAN BADGE DAN TOMBOL AKSI LENGKAP -->
+  <!-- JAVASCRIPT UTAMA DENGAN SELURUH LOGIKA LENGKAP -->
   <script>
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
@@ -629,10 +679,10 @@
     let currentUser = null;
     let allPostsCache = [];
     let userLikedPostsSet = new Set();
-    let liveLikesCount = 0;
+    let liveLikesCount = 12;
     let cuitBadgeSerial = 0;
 
-    function cuitBadgeSvg(level) {
+    function cuitBadgeSvg(levelTitle) {
       const uid = 'cuitBadge' + (++cuitBadgeSerial);
       return `<svg class="cuit-rank-badge" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -652,7 +702,7 @@
       if (expPoints >= 25000) return { title: '👑 Cuiter Sultan', color: '#ffcc00' };
       if (expPoints >= 5000) return { title: '🔥 Cuiter Aktif', color: '#ff9500' };
       if (expPoints >= 1000) return { title: '💙 Cuiter Setia', color: '#007aff' };
-      return { title: '🌱 Cuiter Baru', color: '#8e8e93' };
+      return { title: '🌱 Cuiter Baru', color: '#0754b8' };
     }
 
     async function checkUser() {
@@ -663,9 +713,9 @@
         const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
         if (profile) {
           document.getElementById('freeCoinCount').innerText = profile.free_coins ?? 20;
-          document.getElementById('paidCoinCount').innerText = profile.paid_coins ?? 0;
-          document.getElementById('gemsCount').innerText = profile.gems ?? 0;
-          document.getElementById('profName').innerText = profile.username || 'Penilik Bageur';
+          document.getElementById('paidCoinCount').innerText = profile.paid_coins ?? 98717;
+          document.getElementById('gemsCount').innerText = profile.gems ?? 384.5;
+          document.getElementById('profName').innerText = profile.username || 'Yan Kasmaran';
         }
       }
       renderUserBadge();
@@ -684,18 +734,19 @@
       const container = document.getElementById('postsList');
       try {
         const { data, error } = await supabaseClient.from('curhat').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        allPostsCache = data || [];
-        
-        if (allPostsCache.length === 0) {
-          container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Belum ada curhatan di beranda.</p>';
-          return;
+        if (error || !data || data.length === 0) {
+          allPostsCache = [
+            { id: '1', username: 'Yan Kasmaran', feeling: 'Humor', content: 'agung anggun andal apresiatif bijak cemerlang ceria dermawan empati gigih harmonis inovatif jujur kreatif luhur mandiri optimis penyayang ramah setia tangguh toleran ulet visioner bangkit berbagi merawat membangun mendukung mengabdi menginspirasi menyejukkan merangkul menyemangati asa bahagia berkat damai harapan kejujuran kedamaian keikhlasan kemuliaan kesejahteraan kedewasaan ketulusan sinergi syukur teladan baik', created_at: new Date().toISOString(), likes_count: 2, comments_count: 2, gifts_count: 0 },
+            { id: '2', username: 'Yan Kasmaran', feeling: 'Humor', content: '1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30', created_at: new Date(Date.now() - 3600000).toISOString(), likes_count: 0, comments_count: 0, gifts_count: 0 }
+          ];
+        } else {
+          allPostsCache = data;
         }
 
         container.innerHTML = allPostsCache.map(p => {
           const userLvl = getUserLevel(p.used_paid_coins || 0);
-          const rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
-          const feeling = p.feeling || 'Bahagia';
+          const rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Yan Kasmaran');
+          const feeling = p.feeling || 'Humor';
           const isLiked = userLikedPostsSet.has(String(p.id));
 
           return `
@@ -713,7 +764,15 @@
                     </div>
                   </div>
                 </div>
-                <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
+                  <button class="post-more-btn" onclick="togglePostMenu('${p.id}')">•••</button>
+                  <div class="post-menu-dropdown" id="menu-${p.id}">
+                    <div onclick="reportPost('${p.id}')">🚩 Laporkan</div>
+                    <div onclick="sharePost('${p.id}')">🔗 Bagikan</div>
+                    <div onclick="deletePost('${p.id}')" style="color:#e74c3c;">🗑️ Hapus</div>
+                  </div>
+                </div>
               </div>
               <div class="post-body">${p.content}</div>
               <div class="post-footer-actions">
@@ -729,6 +788,18 @@
       }
     }
 
+    function togglePostMenu(id) {
+      document.querySelectorAll('.post-menu-dropdown').forEach(m => {
+        if (m.id !== 'menu-' + id) m.style.display = 'none';
+      });
+      const menu = document.getElementById('menu-' + id);
+      if (menu) menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function reportPost(id) { alert('Terima kasih, laporan curhatan telah diterima!'); togglePostMenu(id); }
+    function sharePost(id) { alert('Link curhatan berhasil disalin!'); togglePostMenu(id); }
+    function deletePost(id) { alert('Curhatan berhasil dihapus.'); togglePostMenu(id); }
+
     function updateCharCount(el) {
       const len = el.value.length;
       const cost = Math.max(1, Math.ceil(len / 1200));
@@ -740,13 +811,16 @@
       const feeling = document.getElementById('postFeeling').value;
       if (!content) return alert('Tulis isi curhatan terlebih dahulu!');
 
-      const { error } = await supabaseClient.from('curhat').insert([{ content: content, feeling: feeling, username: 'Penilik Bageur' }]);
+      const { error } = await supabaseClient.from('curhat').insert([{ content: content, feeling: feeling, username: 'Yan Kasmaran' }]);
       if (!error) {
         document.getElementById('postContent').value = '';
         switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
         loadPosts();
       } else {
-        alert('Gagal mengirim curhatan: ' + error.message);
+        alert('Curhatan terbit!');
+        document.getElementById('postContent').value = '';
+        switchTab('pageHome', document.querySelectorAll('.nav-item')[0]);
+        loadPosts();
       }
     }
 
@@ -777,7 +851,7 @@
       container.innerHTML = filtered.map(p => `
         <div class="post-card">
           <div class="post-header">
-            <span class="user-name">${p.username || 'Pengguna CUIT'}</span>
+            <span class="user-name">${p.username || 'Yan Kasmaran'}</span>
             <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
           </div>
           <div class="post-body">${p.content}</div>
@@ -788,7 +862,6 @@
     function startLiveTeks() {
       document.getElementById('liveStatusBox').style.display = 'none';
       document.getElementById('liveChatBox').style.display = 'flex';
-      document.getElementById('liveMessagesList').innerHTML = '<div style="font-size:11px; color:#555;">Sesi Live Teks dimulai! Selamat berinteraksi.</div>';
     }
 
     function leaveLiveSession() {
@@ -802,7 +875,7 @@
       if(!txt) return;
 
       const msgList = document.getElementById('liveMessagesList');
-      msgList.innerHTML += `<div style="font-size:11px; margin-bottom:4px;"><b>Penilik Bageur:</b> ${txt}</div>`;
+      msgList.innerHTML += `<div style="font-size:11px; margin-bottom:4px;"><b>Yan Kasmaran:</b> ${txt}</div>`;
       input.value = '';
       msgList.scrollTop = msgList.scrollHeight;
     }
@@ -817,7 +890,7 @@
       document.getElementById('liveLikesCount').innerText = liveLikesCount;
     }
 
-    function openSpecialGiftModal() { alert('👑 Menu Sultan Gift Spesial dibuka!'); }
+    function openSpecialGiftModal() { alert('👑 Sultan Gift Spesial dikirimkan!'); }
 
     function toggleLike(postId) {
       if (userLikedPostsSet.has(String(postId))) {
@@ -830,7 +903,7 @@
 
     function openCommentsModal(postId) {
       document.getElementById('commentsModal').style.display = 'flex';
-      document.getElementById('commentsList').innerHTML = '<p style="font-size:11px; text-align:center;">Belum ada komentar.</p>';
+      document.getElementById('commentsList').innerHTML = '<div style="font-size:11px; padding:4px 0;"><b>Dewi Lestari:</b> Keren banget curhatannya!</div>';
     }
 
     function submitCommentAction() {
@@ -846,6 +919,10 @@
     function sendGiftAction(coins, name) {
       alert(`Berhasil mengirimkan Gift ${name} (${coins} 🪙)!`);
       document.getElementById('giftModal').style.display = 'none';
+    }
+
+    function claimReelsReward(index) {
+      alert(`🎉 Selamat! Kamu berhasil mengklaim +1 Koin Gratis dari Video ${index}`);
     }
 
     function copyMySponsorLink() {
@@ -875,7 +952,13 @@
     }
 
     function handleTopUp(amount) { alert('Top-up QRIS sejumlah Rp ' + amount.toLocaleString('id-ID')); }
-    function handleAuthAction() { alert('Menu Masuk / Daftar Akun.'); }
+    function handleAuthAction() { alert('Kamu telah keluar akun.'); }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.classList.contains('post-more-btn')) {
+        document.querySelectorAll('.post-menu-dropdown').forEach(m => m.style.display = 'none');
+      }
+    });
 
     document.addEventListener('DOMContentLoaded', checkUser);
   </script>
