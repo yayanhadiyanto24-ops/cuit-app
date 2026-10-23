@@ -4703,9 +4703,10 @@ async function playWordGameAction(postId, clickedWordIndex, wordText) {
       const myChances =
         storedChances !== null ? parseInt(storedChances, 10) : 3;
 
-      let chipsHTML = `
-        <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;
-          background:#f0f3fa; padding:10px; border-radius:12px;
+      
+let chipsHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:4px; margin:6px 0;
+          background:#f0f3fa; padding:6px; border-radius:10px;
           border:1px solid #e2e7f5;">
       `;
 
