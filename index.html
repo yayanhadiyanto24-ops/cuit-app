@@ -3992,13 +3992,13 @@ try {
 
     let videoSecondsLeft = 10;
 
-    function startVideoTimerAuto() {
+    async function startVideoTimerAuto() {
       const btnClose = document.getElementById('btnCloseVideo');
       document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar!';
 
       if (videoTimerInterval) clearInterval(videoTimerInterval);
 
-      videoTimerInterval = setInterval(() => {
+      videoTimerInterval = setInterval(async() => {
         videoSecondsLeft--;
         if (btnClose && videoSecondsLeft > 0) {
           btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)`;
@@ -4013,7 +4013,20 @@ try {
             btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
           }
           document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai!';
-        }
+        // --- CATAT KE TABEL REELS_CLAIMS SUPABASE ---
+try {
+  await supabaseClient
+    .from('reels_claims')
+    .insert([
+      { 
+        user_id: currentUser ? currentUser.id : null,
+        user_email: currentUser ? currentUser.email : null,
+        created_at: new Date().toISOString()
+      }
+    ]);
+} catch (err) {
+  console.error("Gagal mencatat klaim nonton:", err);
+}
       }, 1000);
     }
 
