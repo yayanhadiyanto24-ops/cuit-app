@@ -2700,10 +2700,13 @@ if (weeklyLikes && weeklyLikes.length > 0) {
         <div class="post-card" id="post-${p.id}">
           <div class="post-header">
             <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
-              <div class="avatar-container">
-                <div class="avatar-circle">🤍</div>
-                <div class="level-badge-icon">${cuitBadgeSvg(userLvl.title)}</div>
-              </div>
+              
+<div class="avatar-container cuit-post-main-wrap">
+  <div class="avatar-circle cuit-main-badge">
+    ${cuitBadgeSvg(userLvl.title)}
+  </div>
+</div>
+
               <div class="user-details">
                 <div class="user-name-row">
                   <span class="user-name">${rawName}</span>
