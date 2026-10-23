@@ -4613,6 +4613,8 @@ try {
 
       const lvl = getUserLevel(userExp || 0);
       
+document.getElementById('mMainBadge').innerHTML = cuitBadgeSvg(lvl.title);
+
       document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
       document.getElementById('mBadge').innerText = lvl.title;
       document.getElementById('mBadge').style.background = lvl.color;
