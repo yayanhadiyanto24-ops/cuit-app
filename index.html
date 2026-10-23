@@ -4055,10 +4055,11 @@ try {
         console.error("Gagal mencatat klaim reels:", err);
       }
 
-      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+            alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
 
       videoSecondsLeft = 10;
       openReelsModal();
+      loadPosts(); // <--- TAMBAHKAN BARIS INI UNTUK UPDATE SKOR RAJA NONTON
     }
 
     async function openAdminModal() {
