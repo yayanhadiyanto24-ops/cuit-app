@@ -4795,7 +4795,11 @@ if (currentChances <= 0) {
     username: authorName
   }]);
 
-  if (commentError) console.error('Gagal menyimpan komentar permainan:', commentError);
+  if (commentError) {
+    console.error('Gagal menyimpan komentar permainan:', commentError);
+    alert('Kata sudah diketuk, tetapi komentar gagal disimpan: ' +
+      (commentError.message || 'Kesalahan database tidak diketahui.'));
+  }
 
   // Simpan tampilan permainan; ini masih memakai jalur update lama.
   // Validasi saldo dan hadiah yang aman wajib dipindahkan ke RPC server
