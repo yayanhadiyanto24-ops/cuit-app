@@ -3994,37 +3994,17 @@ try {
 
     async function startVideoTimerAuto() {
   const btnClose = document.getElementById('btnCloseVideoModal');
-  const statusText = document.getElementById('videoTimerStatusText');
-  if (statusText) statusText.innerText = '';
+  document.getElementById('videoTimerStatusText').innerText = '';
 
-  // 1. Hentikan timer lama jika masih berjalan
-  if (videoTimerInterval) {
-    clearInterval(videoTimerInterval);
-    videoTimerInterval = null;
-  }
+  if (videoTimerInterval) clearInterval(videoTimerInterval);
 
-  // 2. Reset durasi hitungan mundur ke 10 detik
-  videoSecondsLeft = 10;
-
-  // 3. Set tampilan awal tombol agar tidak bisa diklik sebelum 10 detik
-  if (btnClose) {
-    btnClose.disabled = true;
-    btnClose.style.opacity = '0.5';
-    btnClose.style.cursor = 'not-allowed';
-    btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)...`;
-  }
-
-  // 4. Jalankan interval 1 detik
   videoTimerInterval = setInterval(async () => {
     videoSecondsLeft--;
-
-    if (videoSecondsLeft > 0) {
-      if (btnClose) btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)...`;
+    if (btnClose && videoSecondsLeft > 0) {
+      btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)...`;
     } else {
-      // Hitungan mundur selesai
       clearInterval(videoTimerInterval);
       videoTimerInterval = null;
-
       if (btnClose) {
         btnClose.disabled = false;
         btnClose.style.opacity = '1';
@@ -4032,9 +4012,9 @@ try {
         btnClose.style.background = '#2ecc71';
         btnClose.innerText = '✕ Tutup & Klaim';
       }
-      if (statusText) statusText.innerText = '🎉 Berhasil!';
+      document.getElementById('videoTimerStatusText').innerText = '🎉 Berhasil!';
 
-      // Simpan riwayat nonton ke Supabase
+      // --- TAMBAHAN KHUSUS: SIMPAN DATA RAJA NONTON ---
       try {
         await supabaseClient
           .from('reels_claims')
@@ -4051,7 +4031,6 @@ try {
     }
   }, 1000);
 }
-
 
     function pauseVideoTimerAuto() {
       if (videoTimerInterval) {
