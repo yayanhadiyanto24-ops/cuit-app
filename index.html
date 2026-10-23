@@ -4482,14 +4482,87 @@ try {
     }
     return distribution;
   }
-
-          // 5. Beli Kesempatan Ekstra via Gift
+         
+  // 5. Beli Kesempatan Ekstra via Gift
   async function buyExtraChancesViaGift(postId, giftAmount) {
-    // Fitur pembelian kesempatan tambahan dinonaktifkan.
-    // Gift hanya dapat dikirim melalui pilihan Gift reguler.
-    return alert("Pembelian kesempatan tambahan sudah dinonaktifkan. Silakan gunakan Gift biasa.");
-  }
+    if (!currentUser) {
+      return alert('Silakan masuk terlebih dahulu untuk membeli kesempatan.');
+    }
 
+    const cost = Number(giftAmount);
+
+    if (![2, 3].includes(cost)) {
+      return alert('Pilih biaya 2 atau 3 koin.');
+    }
+
+    const post = allPostsCache.find(
+      p => String(p.id) === String(postId)
+    );
+
+    if (!post || !post.word_game_data || !post.word_game_data.is_active) {
+      return alert('Permainan ini sudah tidak aktif.');
+    }
+
+    if (post.user_id === currentUser.id) {
+      return alert('Kreator tidak dapat membeli kesempatan di permainan sendiri.');
+    }
+
+    if (!confirm(`Beli 1 kesempatan tambahan dengan ${cost} koin?`)) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        'purchase_word_game_chance',
+        {
+          p_post_id: Number(postId),
+          p_cost: cost
+        }
+      );
+
+      if (error) {
+        console.error('Pembelian kesempatan gagal:', error);
+        return alert('Pembelian gagal. Silakan coba lagi.');
+      }
+
+      const result = Array.isArray(data) ? data[0] : data;
+
+      if (!result || result.success !== true) {
+        return alert(
+          result && result.message
+            ? result.message
+            : 'Pembelian belum berhasil. Saldo dan status permainan perlu diperiksa.'
+        );
+      }
+
+      const guestId =
+        localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const userEmail = currentUser.email || guestId;
+      const gameKey = `${postId}_${userEmail}`;
+
+      const oldChances = localStorage.getItem('game_chances_' + gameKey);
+      const currentChances =
+        oldChances === null ? 3 : parseInt(oldChances, 10);
+
+      localStorage.setItem(
+        'game_chances_' + gameKey,
+        currentChances + 1
+      );
+
+      alert('Pembelian berhasil! Kesempatan tambahan sudah ditambahkan.');
+
+      if (typeof updateCoinUI === 'function') {
+        updateCoinUI(true);
+      }
+
+      if (typeof loadPosts === 'function') {
+        await loadPosts();
+      }
+    } catch (err) {
+      console.error('Kesalahan pembelian kesempatan:', err);
+      alert('Terjadi kesalahan saat membeli kesempatan. Silakan muat ulang aplikasi.');
+    }
+  }
   
 async function playWordGameAction(postId, clickedWordIndex, wordText) {
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
