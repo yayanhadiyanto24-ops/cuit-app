@@ -504,6 +504,50 @@ a { color: var(--cuit-blue); }
 .coin, .coins, .coin-badge, .points-badge {
   border-color: #f2bd18;
 }
+  /* FIX TAMPILAN PROFIL & WIDGET CUIT DI HP */
+@media screen and (max-width: 768px) {
+  
+  /* 1. Supaya widget Kemajuan Level, Link Sponsor, & Badge nggak melayang/numpuk */
+  [class*="kemajuan"], 
+  [class*="sponsor"], 
+  [class*="badge"],
+  [class*="level"] {
+    position: static !important;
+    width: 100% !important;
+    margin: 10px 0 !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+  }
+
+  /* 2. Supaya area Profil utama pas di layar HP */
+  .profile-card, 
+  [class*="profile"] {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    padding: 15px !important;
+  }
+
+  /* 3. Supaya statistik (EXP, Jam Terbang, Pengikut) berjejer 2 kolom rapi */
+  [class*="stats"], 
+  [class*="grid"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  /* 4. Tombol aksi biar pas dengan lebar HP */
+  [class*="btn"], 
+  [class*="button"] {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
 </style>
 
 </head>
