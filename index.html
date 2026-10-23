@@ -88,9 +88,18 @@
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     
-    .avatar-container { position: relative; width: 42px; height: 42px; }
-    .cuit-rank-badge { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+    .avatar-container { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
+    .cuit-rank-badge { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
     .cuit-main-badge { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+    /* Animasi Kilau Lencana Tameng */
+    .cuit-rank-badge .aura { animation: cuitBadgePulse 3s ease-in-out infinite; transform-origin: center; }
+    .cuit-rank-badge .spark { animation: cuitBadgeTwinkle 2.4s ease-in-out infinite; transform-origin: center; }
+    .cuit-rank-badge .floatgem { animation: cuitBadgeFloat 3.2s ease-in-out infinite; transform-origin: center; }
+
+    @keyframes cuitBadgePulse { 0%, 100% { opacity: .42; transform: scale(.97); } 50% { opacity: .82; transform: scale(1.035); } }
+    @keyframes cuitBadgeTwinkle { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+    @keyframes cuitBadgeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 
     .user-details { display: flex; flex-direction: column; gap: 1px; }
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
@@ -99,7 +108,7 @@
 
     .post-body { font-size: 13px; line-height: 1.45; color: #153d70; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
-    .action-chip { background: #f4faff; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; }
+    .action-chip { background: #f4faff; padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; border: 1px solid #e0f0ff; }
 
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { 
       width: 100%; padding: 10px 12px; border: 1px solid #c5e2fa; border-radius: 12px; font-size: 12px; outline: none; background: #fff; margin-bottom: 8px; 
@@ -359,7 +368,7 @@
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS (DENGAN TAMPILAN PRESISI LENGKAP) -->
+  <!-- 4. HALAMAN LIVE TEKS -->
   <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -401,7 +410,7 @@
     </div>
   </div>
 
-  <!-- 5. HALAMAN PROFIL (LENGKAP PROGRESS EXP, LINK SPONSOR & FITUR ADMIN) -->
+  <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
@@ -480,15 +489,23 @@
     <button id="authBtnLogout" class="btn-primary" style="width: 100%; background: #ff7675; text-align: center; margin-top: 10px;" onclick="handleAuthAction()">Masuk / Daftar</button>
   </div>
 
-  <!-- MODAL ADMIN EDIT 10 LINK REELS -->
+  <!-- MODAL ADMIN EDIT 10 LINK REELS (FULL 10 INPUT SLOTS) -->
   <div id="adminReelsModal" class="modal">
     <div class="modal-content">
       <h3 style="margin-bottom: 4px; font-size: 16px;">⚙️ Kelola 10 Link Reels FB</h3>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Tempelkan tautan FB Reels harian untuk 10 slot video:</div>
 
-      <div style="max-height: 260px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
+      <div style="max-height: 280px; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
         <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 1:</label><input type="text" id="adminVideo1" placeholder="https://facebook.com/reel/..."></div>
         <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 2:</label><input type="text" id="adminVideo2" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 3:</label><input type="text" id="adminVideo3" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 4:</label><input type="text" id="adminVideo4" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 5:</label><input type="text" id="adminVideo5" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 6:</label><input type="text" id="adminVideo6" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 7:</label><input type="text" id="adminVideo7" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 8:</label><input type="text" id="adminVideo8" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 9:</label><input type="text" id="adminVideo9" placeholder="https://facebook.com/reel/..."></div>
+        <div style="margin-bottom: 8px;"><label style="font-size: 10.5px; font-weight: 800;">Video 10:</label><input type="text" id="adminVideo10" placeholder="https://facebook.com/reel/..."></div>
       </div>
 
       <div style="display: flex; gap: 6px;">
@@ -603,7 +620,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT UTAMA -->
+  <!-- JAVASCRIPT UTAMA DENGAN BADGE DAN TOMBOL AKSI LENGKAP -->
   <script>
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
@@ -619,13 +636,14 @@
       const uid = 'cuitBadge' + (++cuitBadgeSerial);
       return `<svg class="cuit-rank-badge" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="${uid}rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe082"/><stop offset="1" stop-color="#b45309"/></linearGradient>
-          <linearGradient id="${uid}inside" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1e3a8a"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+          <linearGradient id="${uid}rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffde0"/><stop offset="0.5" stop-color="#fbbf24"/><stop offset="1" stop-color="#b45309"/></linearGradient>
+          <linearGradient id="${uid}inside" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1e3a8a"/><stop offset="1" stop-color="#0369a1"/></linearGradient>
+          <radialGradient id="${uid}halo"><stop stop-color="#38bdf8" stop-opacity="0.6"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></radialGradient>
         </defs>
-        <circle cx="50" cy="50" r="45" fill="#38bdf8" opacity="0.3"/>
-        <path d="M50 5 L85 20 L85 60 L50 95 L15 60 L15 20 Z" fill="url(#${uid}rim)"/>
+        <circle class="aura" cx="50" cy="50" r="45" fill="url(#${uid}halo)"/>
+        <path d="M50 5 L85 20 L85 60 L50 95 L15 60 L15 20 Z" fill="url(#${uid}rim)" stroke="#ffffff" stroke-width="1.5"/>
         <path d="M50 12 L78 24 L78 56 L50 85 L22 56 L22 24 Z" fill="url(#${uid}inside)"/>
-        <polygon points="50,28 55,40 68,40 57,48 61,60 50,52 39,60 43,48 32,40 45,40" fill="#fde047"/>
+        <polygon class="spark" points="50,28 55,40 68,40 57,48 61,60 50,52 39,60 43,48 32,40 45,40" fill="#fde047" stroke="#ffffff" stroke-width="0.8"/>
       </svg>`;
     }
 
@@ -799,9 +817,7 @@
       document.getElementById('liveLikesCount').innerText = liveLikesCount;
     }
 
-    function openSpecialGiftModal() {
-      alert('👑 Menu Sultan Gift Spesial dibuka!');
-    }
+    function openSpecialGiftModal() { alert('👑 Menu Sultan Gift Spesial dibuka!'); }
 
     function toggleLike(postId) {
       if (userLikedPostsSet.has(String(postId))) {
@@ -825,9 +841,7 @@
       document.getElementById('commentsModal').style.display = 'none';
     }
 
-    function openGiftModal() {
-      document.getElementById('giftModal').style.display = 'flex';
-    }
+    function openGiftModal() { document.getElementById('giftModal').style.display = 'flex'; }
 
     function sendGiftAction(coins, name) {
       alert(`Berhasil mengirimkan Gift ${name} (${coins} 🪙)!`);
@@ -844,7 +858,7 @@
     function openEditProfileModal() { alert('Edit profil dapat dikustomisasi.'); }
     function openReelsModal() { document.getElementById('reelsModal').style.display = 'flex'; }
     function openAdminModal() { document.getElementById('adminReelsModal').style.display = 'flex'; }
-    function saveAdminReelsLinks() { alert('💾 Link Reels berhasil disimpan!'); document.getElementById('adminReelsModal').style.display='none'; }
+    function saveAdminReelsLinks() { alert('💾 Tautan Reels berhasil disimpan!'); document.getElementById('adminReelsModal').style.display='none'; }
 
     function switchTab(pageId, navElement) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
