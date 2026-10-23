@@ -3990,47 +3990,32 @@ try {
       if (playerModal) playerModal.style.display = 'flex';
     }
 
-    let videoSecondsLeft = 10;
+        let videoSecondsLeft = 10;
 
-    async function startVideoTimerAuto() {
-  const btnClose = document.getElementById('btnCloseVideoModal');
-  document.getElementById('videoTimerStatusText').innerText = '';
+    function startVideoTimerAuto() {
+      const btnClose = document.getElementById('btnCloseVideo');
+      document.getElementById('videoTimerStatusText').innerText = '▶️ Video sedang diputar!';
 
-  if (videoTimerInterval) clearInterval(videoTimerInterval);
+      if (videoTimerInterval) clearInterval(videoTimerInterval);
 
-  videoTimerInterval = setInterval(async () => {
-    videoSecondsLeft--;
-    if (btnClose && videoSecondsLeft > 0) {
-      btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)...`;
-    } else {
-      clearInterval(videoTimerInterval);
-      videoTimerInterval = null;
-      if (btnClose) {
-        btnClose.disabled = false;
-        btnClose.style.opacity = '1';
-        btnClose.style.cursor = 'pointer';
-        btnClose.style.background = '#2ecc71';
-        btnClose.innerText = '✕ Tutup & Klaim';
-      }
-      document.getElementById('videoTimerStatusText').innerText = '🎉 Berhasil!';
-
-      // --- TAMBAHAN KHUSUS: SIMPAN DATA RAJA NONTON ---
-      try {
-        await supabaseClient
-          .from('reels_claims')
-          .insert([
-            { 
-              user_id: currentUser ? currentUser.id : null,
-              user_email: currentUser ? currentUser.email : null,
-              created_at: new Date().toISOString()
-            }
-          ]);
-      } catch (err) {
-        console.error("Gagal mencatat klaim nonton:", err);
-      }
+      videoTimerInterval = setInterval(() => {
+        videoSecondsLeft--;
+        if (btnClose && videoSecondsLeft > 0) {
+          btnClose.innerText = `⏳ Menonton (${videoSecondsLeft}s)`;
+        } else {
+          clearInterval(videoTimerInterval);
+          videoTimerInterval = null;
+          if (btnClose) {
+            btnClose.disabled = false;
+            btnClose.style.opacity = '1';
+            btnClose.style.cursor = 'pointer';
+            btnClose.style.background = '#2ecc71';
+            btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+          }
+          document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai!';
+        }
+      }, 1000);
     }
-  }, 1000);
-}
 
     function pauseVideoTimerAuto() {
       if (videoTimerInterval) {
@@ -4045,36 +4030,36 @@ try {
     }
 
     async function claimVideoRewardAndClose() {
-  const btnClose = document.getElementById('btnCloseVideo');
-  if (btnClose.disabled) return;
+      const btnClose = document.getElementById('btnCloseVideo');
+      if (btnClose.disabled) return;
 
-  document.getElementById('videoPlayerModal').style.display = 'none';
-  document.getElementById('videoFrameContainer').innerHTML = '';
+      document.getElementById('videoPlayerModal').style.display = 'none';
+      document.getElementById('videoFrameContainer').innerHTML = '';
 
-  freeCoins += 10;
-  updateCoinUI(true);
+      freeCoins += 10;
+      updateCoinUI(true);
 
-  // Catat riwayat ke Supabase untuk penghitungan skor Raja Nonton
-  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-  const myEmail = currentUser ? currentUser.email : guestId;
+      // --- CATAT KE SUPABASE UNTUK RAJA NONTON ---
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
 
-  try {
-    await supabaseClient.from('reels_claims').insert([
-      {
-        user_id: currentUser ? currentUser.id : null,
-        user_email: myEmail,
-        slot_key: activeVideoSlot || 'v1'
+      try {
+        await supabaseClient.from('reels_claims').insert([
+          {
+            user_id: currentUser ? currentUser.id : null,
+            user_email: myEmail,
+            slot_key: activeVideoSlot || 'v1'
+          }
+        ]);
+      } catch (err) {
+        console.error("Gagal mencatat klaim reels:", err);
       }
-    ]);
-  } catch (err) {
-    console.error("Gagal mencatat klaim reels:", err);
-  }
 
-  alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
 
-  videoSecondsLeft = 10;
-  openReelsModal();
-}
+      videoSecondsLeft = 10;
+      openReelsModal();
+    }
 
     async function openAdminModal() {
       try {
