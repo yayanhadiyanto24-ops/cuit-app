@@ -3407,17 +3407,22 @@ body.in-live-room main > div:nth-child(-n+3) {
         const myEmail = currentUser ? currentUser.email : guestId;
         const isHost = currentActiveLive.host_email === myEmail;
 
-        document.body.classList.add('is-in-live');
-        statusBox.innerHTML = `
-          <div style="font-weight: 800; font-size: 13px; color: #e74c3c; margin-bottom: 2px;">🔴 LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
-          <div style="font-size: 11px; color: #333;">Host: <b>${currentActiveLive.host_name}</b> (${currentActiveLive.title})</div>
-          <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
-            ${isHost ? `<button class="btn-primary" style="background:#ff7675; padding:4px 12px;" onclick="stopLiveSession('${currentActiveLive.id}')">Akhiri Live</button>` : ''}
-            <button class="btn-secondary" style="background:#e0e0e0; color:#333; padding:4px 12px;" onclick="leaveLiveSession()">🚪 Keluar Live</button>
-          </div>
-        `;
+        const isInLiveRoom = document.body.classList.contains('in-live-room');
 
-        chatBox.style.display = 'none';
+if (isInLiveRoom) {
+  statusBox.innerHTML = `
+    <div style="font-weight: 800; font-size: 11px;">
+    <div style="font-size: 11px; color: ...">
+    <div style="display: flex; gap: 6px;">
+      ${isHost ? `<button class="btn-primary"...` : ''}
+      <button class="btn-secondary" ...
+    </div>
+  `;
+  chatBox.style.display = 'flex';
+} else {
+  chatBox.style.display = 'none';
+}
+
         document.getElementById('liveLikesCount').innerText = currentActiveLive.likes_count || 0;
         
         renderQuickChatGrid(isHost);
