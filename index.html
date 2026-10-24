@@ -295,6 +295,63 @@
 .live-action-buttons button {
   width: auto !important;
 }
+/* --- FIX POP-UP & ANIMASI GIFT LIVE --- */
+#giftOverlayContainer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  height: 100% !important;
+  pointer-events: none !important; /* Agar tidak menghalangi sentuhan/klik tombol di bawahnya */
+  z-index: 99999 !important; /* Memaksa tampil paling depan di atas seluruh elemen */
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+/* Kartu / Item Gift Melayang */
+.gift-pop-item {
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: #ffffff !important;
+  padding: 10px 18px !important;
+  border-radius: 30px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5) !important;
+  border: 2px solid #ffd700 !important;
+  margin-bottom: 10px !important;
+  animation: giftPopAnim 2.5s ease-in-out forwards !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Animasi Muncul Membesar lalu Hilang Memudar */
+@keyframes giftPopAnim {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.1) translateY(0);
+  }
+  25% {
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) translateY(-30px);
+  }
+}
 
     </style>
 
