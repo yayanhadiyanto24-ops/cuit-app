@@ -352,12 +352,14 @@
     transform: scale(0.8) translateY(-30px);
   }
 }
-/* Penggulung Banner Atas & Panggung Raja */
+/* Sembunyikan Total Pool Hadiah & Panggung Raja saat masuk ruang live */
 body.in-live-room #topBarNav,
-body.in-live-room #panggungRajaContainer,
-body.in-live-room #poolHadiahContainer,
-body.in-live-room .panggung-raja-section,
-body.in-live-room .top-banner-container {
+body.in-live-room div:has(> #panggungRajaList),
+body.in-live-room div:has(> .panggung-raja-card),
+body.in-live-room div[style*="PANGGUNG 10 RAJA"],
+body.in-live-room div[style*="TOTAL POOL HADIAH"],
+body.in-live-room .panggung-raja-container,
+body.in-live-room .pool-hadiah-container {
   display: none !important;
 }
 
