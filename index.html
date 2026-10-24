@@ -3387,9 +3387,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
       btnHeader.style.display = 'block';
 
-      if (currentActiveLive) {
-        livesListContainer.style.display = 'none';
-        
+            if (currentActiveLive) {
         const nowMs = Date.now();
         const createdMs = new Date(currentActiveLive.created_at).getTime();
         const expiryMs = currentActiveLive.ended_at ? new Date(currentActiveLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
@@ -3399,6 +3397,7 @@ body.in-live-room main > div:nth-child(-n+3) {
           cleanupLiveSesssion();
           statusBox.innerHTML = `Sesi Live Teks telah berakhir otomatis (Batas waktu 60 menit tercapai).`;
           chatBox.style.display = 'none';
+          document.body.classList.remove('in-live-room');
           return;
         }
 
@@ -3409,19 +3408,34 @@ body.in-live-room main > div:nth-child(-n+3) {
 
         const isInLiveRoom = document.body.classList.contains('in-live-room');
 
-if (isInLiveRoom) {
-  statusBox.innerHTML = `
-    <div style="font-weight: 800; font-size: 11px;">
-    <div style="font-size: 11px; color: ...">
-    <div style="display: flex; gap: 6px;">
-      ${isHost ? `<button class="btn-primary"...` : ''}
-      <button class="btn-secondary" ...
-    </div>
-  `;
-  chatBox.style.display = 'flex';
-} else {
-  chatBox.style.display = 'none';
-}
+        if (isInLiveRoom) {
+          livesListContainer.style.display = 'none';
+          chatBox.style.display = 'flex';
+
+          statusBox.innerHTML = `
+            <div style="font-weight: 800; font-size: 11px;">
+            <div style="font-size: 11px; color: #444;">LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
+            <div style="font-size: 11px; color: #666;">Host: <b>${currentActiveLive.host_name}</b> (${currentActiveLive.title})</div>
+            <div style="display: flex; gap: 6px; margin-top:6px;">
+              ${isHost ? `<button class="btn-primary" onclick="endLiveSession('${currentActiveLive.id}')">Akhiri Live</button>` : ''}
+              <button class="btn-secondary" onclick="leaveLiveSession()">🚪 Keluar Live</button>
+            </div>
+          `;
+
+          const likesElem = document.getElementById('liveLikesCount');
+          if (likesElem) likesElem.innerText = currentActiveLive.likes_count || 0;
+          
+          renderQuickChatGrid(isHost);
+
+        } else {
+          livesListContainer.style.display = 'block';
+          chatBox.style.display = 'none';
+
+          const quickContainer = document.getElementById('quickChatContainer');
+          if (quickContainer) quickContainer.innerHTML = '';
+        }
+
+      }
 
         document.getElementById('liveLikesCount').innerText = currentActiveLive.likes_count || 0;
         
