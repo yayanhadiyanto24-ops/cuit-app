@@ -93,6 +93,86 @@
     .post-body { font-size: 13px; line-height: 1.45; color: #153d70; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #f4faff; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+/* --- KODE PERBAIKAN HEADER POSTINGAN & DROPDOWN --- */
+
+/* Memaksa header postingan rata kiri-kanan secara fleksibel */
+.post-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 8px !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+/* Memaksa jam & tombol titik 3 dorong penuh ke pojok kanan */
+.post-header-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  position: relative !important;
+  margin-left: auto !important;
+}
+
+/* Style tombol titik tiga */
+.btn-more-options {
+  background: transparent !important;
+  border: none !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: #42658a !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  line-height: 1 !important;
+  width: auto !important;
+}
+
+/* Style menu pop-up (melayang tepat di bawah titik 3) */
+.post-menu-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #d7ebff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+  z-index: 100 !important;
+  display: none; /* Sembunyi sebelum diklik */
+  flex-direction: column !important;
+  min-width: 160px !important;
+  overflow: hidden !important;
+  margin-top: 4px !important;
+}
+
+.post-menu-dropdown.show {
+  display: flex !important;
+}
+
+.post-menu-item {
+  padding: 8px 12px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #082f6b !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #edf7ff !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+}
+
+.post-menu-item:last-child {
+  border-bottom: none !important;
+}
+
+.post-menu-item.danger {
+  color: #e74c3c !important;
+}
 
     /* Form Controls */
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { 
