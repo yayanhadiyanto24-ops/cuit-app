@@ -9,20 +9,23 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <title>CUIT – Curhat dapat Duit</title>
+  <title>CUIT — Versi Baru (Audit Awal)</title>
+  <!-- Versi pengujian terpisah. Jangan timpa index.html produksi sebelum pengujian dan persetujuan. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
 
     <style>
     :root {
-      --bg: #f4faff;
+      --bg: #fffafa;
       --card-bg: #ffffff;
-      --primary: #0754b8;
-      --primary-light: #e8f5ff;
-      --primary-gradient: linear-gradient(135deg, #7451f8, #06449a);
-      --text-main: #082f6b;
-      --text-sub: #42658a;
-      --border-color: #edf7ff;
+      --primary: #c81e32;
+      --primary-light: #fff0f1;
+      --primary-gradient: linear-gradient(135deg, #e32636, #a80f24);
+      --text-main: #321016;
+      --text-sub: #77535a;
+      --border-color: #f5dfe2;
+      --cuit-gold: #d4a72c;
+      --cuit-gold-light: #fff7d6;
       --bottom-nav-height: 65px;
     }
 
@@ -40,7 +43,7 @@
     }
 
     /* Top Stats Bar Compact */
-    .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 8px 12px; background: #e8f0fe; }
+    .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 8px 12px; background: #fff1f2; }
     .stat-badge { background: #ffffff; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; color: #23233c; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
     /* Banner Container */
@@ -64,13 +67,13 @@
     .page-section { display: none; padding: 12px 14px; }
     .page-section.active { display: block; }
 
-    .back-btn { width: 32px; height: 32px; background: #e8f5ff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-size: 14px; margin-bottom: 8px; border: none; cursor: pointer; }
-    .section-title { font-size: 18px; font-weight: 900; color: #082f6b; margin-bottom: 2px; }
+    .back-btn { width: 32px; height: 32px; background: #fff0f1; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-size: 14px; margin-bottom: 8px; border: none; cursor: pointer; }
+    .section-title { font-size: 18px; font-weight: 900; color: #321016; margin-bottom: 2px; }
     .section-sub { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; }
 
     /* Tombol Spesifik (Mencegah Tombol Melar) */
     .btn-primary { background: var(--primary-gradient); color: #fff; border: none; padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: auto; }
-    .btn-secondary { background: #edf7ff; color: #333; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: auto; }
+    .btn-secondary { background: #f5dfe2; color: #333; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: auto; }
     .btn-follow { background: var(--primary-light); color: var(--primary); border: none; padding: 4px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: pointer; white-space: nowrap; width: auto !important; }
     .btn-follow.following { background: #eaf5ff; color: var(--text-sub); }
     .btn-sm-badge { padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; width: auto; }
@@ -90,9 +93,22 @@
     .badge-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     .post-time { font-size: 10px; color: var(--text-sub); }
 
-    .post-body { font-size: 13px; line-height: 1.45; color: #153d70; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
+
+    .post-style-editor{margin:12px 0;padding:11px;border:1px solid #f0d5da;border-radius:14px;background:linear-gradient(135deg,#fff,#fff8f8)}
+    .post-style-title{font-size:13px;font-weight:900;color:#b91c32;margin-bottom:4px}
+    .style-level-notice{font-size:10px;color:#77535a;margin-bottom:9px}
+    .style-control{display:grid;grid-template-columns:minmax(110px,1fr) minmax(130px,1.2fr);align-items:center;gap:8px;margin:7px 0}
+    .style-control label{font-size:11px;font-weight:800;color:#49343a}.style-control small{display:block;font-size:9px;color:#a33a4a;font-weight:700;margin-top:2px}
+    .style-control select{min-width:0;width:100%;padding:8px;border:1px solid #e8cbd0;border-radius:9px;background:#fff;font-size:11px;color:#43232a}
+    .style-buttons{display:flex;gap:6px}.style-buttons button{flex:1;border:1px solid #e8cbd0;border-radius:9px;background:#fff;padding:8px;color:#6d2430;font-size:11px}.style-buttons button.selected{background:#c81e32;color:#fff;border-color:#c81e32}.style-control [disabled],.style-buttons button:disabled{opacity:.45;cursor:not-allowed}
+    .post-style-preview{margin-top:10px;padding:12px;border:1px solid #e7d5d8;border-radius:12px;background:#fff;color:#4a2028;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.5}
+    .post-style-preview.decor-gold{border:3px double #d4a72c}.post-style-preview.decor-floral{border:2px solid #d98ba4;outline:2px dotted #e8bac9;outline-offset:-6px}.post-style-preview.decor-dashed-gold{border:2px dashed #c39a24}
+    .post-style-preview.bg-sunrise{background:linear-gradient(135deg,#fff3dc,#ffe5e8)}.post-style-preview.bg-garden{background:linear-gradient(135deg,#effbea,#e1f5e9)}.post-style-preview.bg-night{background:linear-gradient(135deg,#f0eaff,#e8edff)}
+    .style-editor-note{font-size:9px;color:#806a6f;line-height:1.4;margin-top:8px}
+
+    .post-body { font-size: 13px; line-height: 1.45; color: #4a2028; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
-    .action-chip { background: #f4faff; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .action-chip { background: #fffafa; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 /* --- KODE PERBAIKAN HEADER POSTINGAN & DROPDOWN --- */
 
 /* Memaksa header postingan rata kiri-kanan secara fleksibel */
@@ -120,7 +136,7 @@
   border: none !important;
   font-size: 18px !important;
   font-weight: 900 !important;
-  color: #42658a !important;
+  color: #77535a !important;
   cursor: pointer !important;
   padding: 2px 6px !important;
   border-radius: 6px !important;
@@ -134,7 +150,7 @@
   top: 100% !important;
   right: 0 !important;
   background: #ffffff !important;
-  border: 1px solid #d7ebff !important;
+  border: 1px solid #fff0f1 !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
   z-index: 100 !important;
@@ -153,10 +169,10 @@
   padding: 8px 12px !important;
   font-size: 11px !important;
   font-weight: 700 !important;
-  color: #082f6b !important;
+  color: #321016 !important;
   background: transparent !important;
   border: none !important;
-  border-bottom: 1px solid #edf7ff !important;
+  border-bottom: 1px solid #f5dfe2 !important;
   text-align: left !important;
   cursor: pointer !important;
   display: flex !important;
@@ -178,7 +194,7 @@
     input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { 
       width: 100%; 
       padding: 10px 12px; 
-      border: 1px solid #d7ebff; 
+      border: 1px solid #fff0f1; 
       border-radius: 12px; 
       font-size: 12px; 
       outline: none; 
@@ -214,88 +230,44 @@
     }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
+    .nav-add-button { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg,#e32636,#a80f24); color: #fff; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 4px 10px rgba(200,30,50,.24); margin-top:-14px; border:3px solid #fff; }
+    .achievement-panel { background:#fff; border:1px solid #f1d7db; border-radius:16px; padding:12px; margin:12px 0; box-shadow:0 3px 12px rgba(110,20,35,.04); }
+    .achievement-heading { display:flex; flex-direction:column; gap:3px; margin-bottom:10px; color:#9f1729; font-weight:900; font-size:14px; }
+    .achievement-heading small { color:#77535a; font-size:11px; font-weight:600; }
+    .achievement-list { display:flex; flex-direction:column; gap:7px; }
+    .achievement-row { display:flex; align-items:center; gap:9px; border:1px solid #f3e4e6; background:#fffdfd; border-radius:12px; padding:9px; min-width:0; }
+    .achievement-rank { min-width:25px; height:25px; display:flex; align-items:center; justify-content:center; background:#fff3c4; color:#8a5b00; border-radius:8px; font-weight:900; font-size:11px; }
+    .achievement-avatar { width:34px; height:34px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#fff0f1; border:1px solid #e9a8b0; font-size:18px; }
+    .achievement-member { min-width:0; flex:1; }
+    .achievement-name { font-size:12px; font-weight:850; color:#321016; overflow-wrap:anywhere; }
+    .achievement-meta { font-size:10px; color:#77535a; margin-top:2px; }
+    .achievement-score { font-size:11px; font-weight:900; color:#a80f24; text-align:right; white-space:nowrap; }
+    .achievement-empty { padding:10px; text-align:center; font-size:11px; color:#77535a; background:#fffafa; border-radius:10px; }
+    .my-level-callout { margin-top:10px; padding:11px; background:#fff7d6; color:#704c00; border:1px solid #e8c75c; border-radius:12px; font-size:12px; font-weight:850; }
+    .level-directory { display:flex; flex-direction:column; gap:7px; }
+    .level-card { display:flex; align-items:center; gap:11px; padding:10px; border:1px solid #f1d7db; border-radius:12px; background:#fff; }
+    .cuit-rank-badge{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 2px 2px rgba(20,25,45,.28));transform-origin:50% 50%}
+    .avatar-circle .cuit-rank-badge,.cuit-main-badge .cuit-rank-badge{width:100%;height:100%}
+    .rank-shimmer{opacity:0;pointer-events:none}
+    .rank-l9,.rank-l10{animation:rankBreath 3.8s ease-in-out infinite}
+    .rank-l9 .rank-shimmer,.rank-l10 .rank-shimmer{opacity:.9;animation:rankShine 4.8s ease-in-out infinite}
+    .rank-l10{filter:drop-shadow(0 0 4px rgba(255,205,67,.55)) drop-shadow(0 2px 3px rgba(20,25,45,.25))}
+    .rank-aura{animation:rankAura 3.6s ease-in-out infinite;transform-origin:50% 48%}
+    @keyframes rankBreath{0%,100%{transform:scale(1);filter:drop-shadow(0 1px 2px rgba(20,25,45,.25))}50%{transform:scale(1.035);filter:drop-shadow(0 0 6px rgba(255,210,80,.55))}}
+    @keyframes rankShine{0%,62%{transform:translateX(-28px) rotate(18deg);opacity:0}70%{opacity:.9}88%,100%{transform:translateX(95px) rotate(18deg);opacity:0}}
+    @keyframes rankAura{0%,100%{opacity:.72}50%{opacity:1}}
+    @media(prefers-reduced-motion:reduce){.rank-l9,.rank-l10,.rank-shimmer,.rank-aura{animation:none!important}}
+    .level-logo { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:23px; background:#fff5d6; border:1px solid #ebcf7a; flex-shrink:0; }
+    .level-card-name { font-size:12px; font-weight:900; color:#321016; }
+    .level-card-xp { font-size:10px; color:#77535a; margin-top:3px; }
+    /* Leaderboard lengkap ditampilkan melalui menu Raja Cuit, bukan beranda. */
+    #mainLeagueContainer { display:none !important; }
     .nav-icon { font-size: 16px; margin-bottom: 2px; }
 
     /* Modal Styling */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 16px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
- /* --- PERBAIKAN TAMPILAN RUANG LIVE TEKS --- */
-#liveChatBox {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-  width: 100% !important;
-  background: #ffffff !important;
-  padding: 12px !important;
-  border-radius: 16px !important;
-  border: 1px solid #d7ebff !important;
-}
-
-#liveLeaderboardContainer {
-  background: #fff8e1 !important;
-  border: 1px solid #ffe082 !important;
-  border-radius: 12px !important;
-  padding: 8px 10px !important;
-  width: 100% !important;
-}
-
-#liveMessagesList {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
-  max-height: 240px !important;
-  min-height: 150px !important;
-  overflow-y: auto !important;
-  padding: 6px !important;
-  background: #f4faff !important;
-  border-radius: 12px !important;
-  border: 1px solid #e1f0ff !important;
-}
-
-#quickChatContainer {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-  margin: 6px 0 !important;
-  width: 100% !important;
-}
-
-.quick-chip {
-  background: #edf7ff !important;
-  color: #082f6b !important;
-  border: 1px solid #d7ebff !important;
-  padding: 4px 8px !important;
-  border-radius: 20px !important;
-  font-size: 10.5px !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  white-space: nowrap !important;
-  width: auto !important;
-}
-
-.live-input-row {
-  display: flex !important;
-  gap: 6px !important;
-  align-items: center !important;
-  width: 100% !important;
-}
-
-.live-input-row input {
-  flex: 1 !important;
-  margin-bottom: 0 !important;
-}
-
-.live-action-buttons {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-  margin-top: 6px !important;
-}
-
-.live-action-buttons button {
-  width: auto !important;
-}
-/* --- FIX POP-UP & ANIMASI GIFT LIVE --- */
+ 
 #giftOverlayContainer {
   position: fixed !important;
   top: 0 !important;
@@ -352,20 +324,78 @@
     transform: scale(0.8) translateY(-30px);
   }
 }
-/* Sembunyikan semua banner & section di atas Live Room */
-body.in-live-room #topBarNav,
-body.in-live-room #panggungRajaContainer,
-body.in-live-room #poolHadiahContainer,
-body.in-live-room .panggung-raja-section,
-body.in-live-room .panggung-raja-container,
-body.in-live-room .pool-hadiah-container,
-body.in-live-room .top-banner-container,
-body.in-live-room .banner-slider,
-body.in-live-room main > div:nth-child(-n+3) {
-  display: none !important;
+
+    
+    .achievement-panel{background:#fff;border:1px solid #e6eaf2;border-radius:18px;padding:13px;margin:12px 0;box-shadow:0 5px 18px rgba(35,65,110,.06)}
+    .achievement-heading{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;color:#173b70;font-weight:900;font-size:14px}
+    .achievement-heading small{font-size:10px;font-weight:600;color:#7a8799}
+    .achievement-list{display:flex;flex-direction:column;gap:7px}
+    .achievement-row{display:flex;align-items:center;gap:9px;background:#f7f9fd;border:1px solid #edf0f6;border-radius:12px;padding:8px 9px;min-height:42px}
+    .achievement-rank{width:25px;height:25px;flex:0 0 25px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:#e7eefb;color:#234b84;font-size:11px;font-weight:900}
+    .achievement-avatar{width:31px;height:31px;flex:0 0 31px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#e4f4ed;font-size:16px}
+    .achievement-member{min-width:0;flex:1}.achievement-name{font-size:11px;font-weight:900;color:#24344d;overflow-wrap:anywhere}.achievement-meta{font-size:9px;color:#7d899b;margin-top:2px}
+    .achievement-score{font-size:10px;font-weight:900;color:#245a9c;text-align:right;white-space:nowrap}
+    .achievement-empty{font-size:11px;color:#7a8799;text-align:center;padding:14px 6px}
+    .my-level-callout{margin-top:10px;background:#fff5d8;border:1px solid #f3d47b;color:#76510b;border-radius:12px;padding:10px;font-size:11px;font-weight:900;text-align:center}
+    .level-directory{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .level-card{display:flex;align-items:center;gap:8px;padding:9px;border-radius:13px;border:1px solid #e8edf5;background:linear-gradient(135deg,#fff,#f6f9ff);min-width:0}
+    .level-logo{width:35px;height:35px;flex:0 0 35px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;background:#edf3ff}
+    .level-card-name{font-size:10px;font-weight:900;color:#233b60;line-height:1.3}.level-card-xp{font-size:9px;color:#718096;margin-top:3px}
+    @media(min-width:600px){.level-directory{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Beranda: filter feed berbentuk segmented control yang ringkas dan nyaman disentuh */
+.pills-group{
+  display:inline-flex; align-items:center; gap:3px; padding:3px;
+  border:1px solid #f0d8dc; border-radius:999px;
+  background:linear-gradient(135deg,#fff8f8,#fff);
+  box-shadow:0 2px 8px rgba(126,34,52,.07);
+}
+.pills-group .pill-btn{
+  appearance:none; border:0; border-radius:999px; background:transparent;
+  color:#826b70; padding:7px 12px; min-height:32px;
+  font-size:11px; font-weight:800; line-height:1; cursor:pointer;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease;
+  white-space:nowrap;
+}
+.pills-group .pill-btn.active{
+  color:#fff; background:linear-gradient(135deg,#d9364f,#a9142b);
+  box-shadow:0 2px 6px rgba(169,20,43,.22);
+}
+@media(max-width:380px){
+  .pills-group .pill-btn{padding:7px 9px;font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pills-group .pill-btn{transition:none}
+}
+/* Compact home viewport: keep the first member post visible sooner */
+#pageHome{padding-top:0!important}
+#promotedSection{margin-top:0!important;margin-bottom:3px!important}
+#promotedCarousel{gap:5px!important}
+#postsList .post-card:first-child{margin-top:2px!important}
+.home-feature-heading{
+  display:flex;align-items:center;gap:7px;margin:10px 0 7px;
+  color:#8e1830;font-size:12px;font-weight:900;letter-spacing:.25px;
+}
+.home-feature-heading .feature-mark{
+  width:25px;height:25px;display:grid;place-items:center;flex-shrink:0;
+  border-radius:9px;background:linear-gradient(135deg,#fff0d2,#ffe0a0);
+  box-shadow:inset 0 0 0 1px rgba(198,132,20,.18);
 }
 
-    </style>
+
+.special-windows-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;width:100%;border-top:1px solid #c8102e;position:relative}
+.special-window{display:flex;align-items:center;gap:8px;text-align:left;min-width:0;min-height:82px;padding:8px 9px;border:0;border-radius:0;background:#ffffff;color:#b5122b;cursor:pointer;box-sizing:border-box;position:relative}
+.special-window:nth-child(odd){border-right:1px solid #c8102e}
+.special-window:nth-child(n+3){border-top:1px solid #c8102e}
+.special-window:active{background:#fff5f5}
+.special-window:before{content:"✦";position:absolute;top:5px;right:7px;font-size:10px;color:#d8a33e;opacity:.9}
+.special-window:after{content:"";position:absolute;left:7px;right:7px;bottom:5px;border-bottom:1px dotted #edc1c8}
+.window-number{display:grid;place-items:center;flex-shrink:0;width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#e52342,#a50d27);color:#ffffff;font-size:11px;font-weight:900;box-shadow:0 2px 5px rgba(160,15,40,.22),inset 0 0 0 1px rgba(255,255,255,.45);border:1px solid #f1b9c2}
+.window-label{display:block;font-size:11px;font-weight:900;white-space:nowrap;color:#b5122b}
+.window-hint{display:block;font-size:9px;color:#666;margin-top:4px}
+@media(min-width:600px){.special-windows-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.special-window{min-height:88px}.special-window:nth-child(n){border-top:0;border-right:1px solid #c8102e}.special-window:last-child{border-right:0}}
+
+</style>
 
 </head>
 <body onclick="closeAllPostMenus(event)">
@@ -374,7 +404,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#0754b8; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔄 Refresh
     </button>
     <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
@@ -390,27 +420,8 @@ body.in-live-room main > div:nth-child(-n+3) {
     <img src="banner.png" alt="CUIT Banner - Curhat dapat Duit" class="cuit-banner-img" onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/yayan-hadiyanto/cuit-app/main/banner.png';">
   </div>
 
-  <!-- WIDGET POOL HADIAH MINGGU INI -->
-  <div style="margin: 10px 14px 0px 14px; background: linear-gradient(135deg, #0879d9, #0754b8); border-radius: 16px; padding: 10px 12px; color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); display: flex; justify-content: space-between; align-items: center; border: 1px solid #6ee7b7;">
-    <div>
-      <div style="font-size: 10px; font-weight: 800; color: #b9e2ff; text-transform: uppercase; letter-spacing: 0.5px;">
-        🎁 Total Pool Hadiah Mingguan
-      </div>
-      <div style="font-size: 18px; font-weight: 900; color: #ffffff; margin-top: 1px;" id="weeklyPoolCoinsDisplay">
-        0 🪙
-      </div>
-      <div style="font-size: 8.5px; color: #d1fae5; margin-top: 1px;">
-        Dibagi rata otomatis (1/10) ke 10 Juara setiap Minggu 23:59 WIB
-      </div>
-    </div>
-    <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 800; text-align: right; backdrop-filter: blur(4px);">
-      <span style="display: block; font-size: 8.5px; color: #b9e2ff;">Jatah per Juara:</span>
-      <span id="weeklyPoolPerWinnerDisplay" style="color: #fde047; font-weight: 900;">0 🪙</span>
-    </div>
-  </div>
-
   <!-- PANGGUNG 10 RAJA MINGGU INI -->
-  <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #082f6b, #312e81); border-radius: 16px; padding: 10px 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
+  <div id="mainLeagueContainer" style="margin: 10px 14px 4px 14px; background: linear-gradient(135deg, #321016, #312e81); border-radius: 16px; padding: 10px 10px; color: #fff; box-shadow: 0 4px 15px rgba(49, 46, 129, 0.3); transition: all 0.3s ease;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 2px;">
       <span style="font-size: 11px; font-weight: 900; color: #fde047; letter-spacing: 0.5px;">
         🏆 PANGGUNG 10 RAJA MINGGU INI
@@ -427,29 +438,29 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fde047; margin-bottom: 4px; white-space: nowrap;">👑 Raja Sawer</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width:26px;height:26px;border-radius:50%;background:#0754b8;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;border:1.5px solid #fde047;">🤍</div>
+          <div style="width:26px;height:26px;border-radius:50%;background:#c81e32;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;border:1.5px solid #fde047;">🤍</div>
           <div style="position:absolute;bottom:-2px;right:-2px;font-size:8px;">👑</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSawerName">Belum Ada</div>
         <div style="font-size: 7.5px; color: #fef08a; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champSawerScore">0 🪙</div>
       </div>
 
-      <!-- 2. RAJA LIVE -->
+      <!-- 2. RAJA GAME -->
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #ff7675; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
-        <div style="font-size: 8.5px; font-weight: 800; color: #ff7675; margin-bottom: 4px; white-space: nowrap;">🔴 Raja LIVE</div>
+        <div style="font-size: 8.5px; font-weight: 800; color: #ff7675; margin-bottom: 4px; white-space: nowrap;">🎯 Raja Game</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ff7675;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ff7675;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🎙️</div>
         </div>
-        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champLiveName">Belum Ada</div>
-        <div style="font-size: 7.5px; color: #ffbe76; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champLiveScore">0 🪙</div>
+        <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champGameName">Belum Ada</div>
+        <div style="font-size: 7.5px; color: #ffbe76; font-weight: 700; margin-top: 1px; white-space: nowrap;" id="champGameScore">0 🪙</div>
       </div>
 
       <!-- 3. RAJA CURHAT -->
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #38a6ff; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #93c5fd; margin-bottom: 4px; white-space: nowrap;">🌟 Raja Curhat</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #38a6ff;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #38a6ff;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🔥</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champCurhatName">Belum Ada</div>
@@ -460,7 +471,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #4ade80; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #86efac; margin-bottom: 4px; white-space: nowrap;">✍️ Raja Pujangga</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #4ade80;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #4ade80;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💙</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPujanggaName">Belum Ada</div>
@@ -471,7 +482,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #a855f7; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #c084fc; margin-bottom: 4px; white-space: nowrap;">💬 Raja Komentar</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #a855f7;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #a855f7;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">💬</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champKomentarName">Belum Ada</div>
@@ -482,7 +493,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #38bdf8; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #7dd3fc; margin-bottom: 4px; white-space: nowrap;">👥 Raja Jaringan</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #38bdf8;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #38bdf8;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">👥</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champFollowersName">Belum Ada</div>
@@ -493,7 +504,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div onclick="openCoinCollectorCalcModal()" style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f59e0b; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box; cursor: pointer;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbbf24; margin-bottom: 4px; white-space: nowrap;">🪙 Raja Koin</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f59e0b;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f59e0b;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🪙</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champPermataName">Belum Ada</div>
@@ -504,7 +515,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #f472b6; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fbcfe8; margin-bottom: 4px; white-space: nowrap;">🧲 Raja Sponsor</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f472b6;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #f472b6;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🤝</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champSponsorName">Belum Ada</div>
@@ -515,7 +526,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #06b6d4; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #67e8f9; margin-bottom: 4px; white-space: nowrap;">🎬 Raja Nonton</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #06b6d4;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #06b6d4;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">🎬</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champNontonName">Belum Ada</div>
@@ -526,7 +537,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #ec4899; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #f472b6; margin-bottom: 4px; white-space: nowrap;">❤️ Raja Like</div>
         <div style="position: relative; width: 26px; height: 26px; margin: 0 auto 4px auto;">
-          <div style="width: 26px; height: 26px; border-radius: 50%; background: #0754b8; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ec4899;">🤍</div>
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #c81e32; color:#fff; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ec4899;">🤍</div>
           <div style="position: absolute; bottom: -2px; right: -2px; font-size: 8px;">❤️</div>
         </div>
         <div style="font-size: 9px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="champLikeName">Belum Ada</div>
@@ -538,7 +549,15 @@ body.in-live-room main > div:nth-child(-n+3) {
 
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+<!-- CURHATAN TERBAIK: sorotan promosi dan live aktif -->
+    <div id="promotedSection" style="display: none; margin: 3px 0 5px; padding: 3px 6px; background:#ffffff; border:1px solid #ead5d9; border-radius:10px; box-shadow:0 1px 4px rgba(110,20,35,.05);">
+      <div class="home-feature-heading" style="margin:0 0 2px;font-size:9px;gap:4px;">
+        <span class="feature-mark" style="width:16px;height:16px;border-radius:5px;background:#fff0f0;box-shadow:none;font-size:10px;">✨</span> CURHATAN TERBAIK
+      </div>
+      <div id="promotedCarousel" style="display:flex; gap:6px; overflow-x:auto; padding:1px 0 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch; align-items:stretch;"></div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin:0 0 3px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <h2 class="section-title" style="margin-bottom:0;">Beranda</h2>
         <div class="pills-group">
@@ -546,15 +565,10 @@ body.in-live-room main > div:nth-child(-n+3) {
           <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
         </div>
       </div>
-      <button 
-        onclick="openReelsModal()" 
-        style="background: linear-gradient(135deg, #ffb300, #ff8f00); color: #3e2723; border: 1px solid #ffe082; padding: 5px 10px; border-radius: 16px; font-weight: 900; font-size: 10.5px; cursor: pointer; box-shadow: 0 2px 8px rgba(255, 143, 0, 0.4); display: flex; align-items: center; gap: 4px; white-space: nowrap;"
-      >
-        🎁 +10 Koin Gratis
-      </button>
+
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: #ffffff; padding: 6px 10px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+    <div style="display: flex; align-items: center; gap: 7px; margin:0 0 5px; background: #ffffff; padding: 4px 8px; border-radius: 13px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
         <div class="avatar-circle cuit-main-badge" id="homeQuickUserBadge" style="width: 48px; height: 48px;"></div>
       </div>
@@ -563,20 +577,42 @@ body.in-live-room main > div:nth-child(-n+3) {
         placeholder="Apa yang ingin kamu curhatkan?" 
         readonly 
         onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])"
-        style="margin-bottom: 0; background: #f3faff; border: 1px solid #eaf5ff; cursor: pointer; border-radius: 20px; padding: 7px 12px; font-size: 11.5px; color: var(--text-sub);"
+        style="margin-bottom: 0; background: #fff; border: 1px solid #e5e7eb; cursor: pointer; border-radius: 20px; padding: 6px 10px; font-size: 11px; color: var(--text-sub);"
       >
-      <button class="btn-primary" style="padding: 7px 12px; flex-shrink: 0; border-radius: 18px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
+      <button class="btn-primary" style="padding: 6px 10px; flex-shrink: 0; border-radius: 16px;" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">+ Curhat</button>
     </div>
 
-    <!-- BANNER LIVE TERSIAR / PROMOSI LIVE DI BERANDA -->
-    <div id="promotedSection" style="display: none; margin-top: 10px; margin-bottom: 4px;">
-      <div style="font-size: 11px; font-weight: 800; color: #e67e22; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-        🚀 SOROTAN HARI INI
+    <div class="home-shortcuts" aria-label="Menu cepat CUIT">
+      <button type="button" onclick="switchTab('pageGame',document.querySelectorAll('.nav-bar .nav-item')[1])"><span class="shortcut-icon game">🎯</span><span>Game</span></button>
+      <button type="button" onclick="openDailyCheckin()"><span class="shortcut-icon checkin">📅</span><span>Absen</span></button>
+      <button type="button" onclick="switchTab('pageSearch',document.querySelectorAll('.nav-bar .nav-item')[3])"><span class="shortcut-icon king">👑</span><span>Raja Cuit</span></button>
+      <button type="button" onclick="switchTab('pageProfile',document.querySelectorAll('.nav-bar .nav-item')[4])"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
+      <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
+    </div>
+
+    <!-- CURHATAN ISTIMEWA: empat jendela kurasi -->
+    <section id="specialPostsSection" style="width:100%;box-sizing:border-box;margin:3px 0 4px;padding:5px 0 0;background:#ffffff;border:1px solid #c8102e;border-radius:12px;box-shadow:0 0 0 2px #fff inset, 0 1px 5px rgba(130,15,35,.08);overflow:hidden;position:relative;">
+      <div class="home-feature-heading" style="margin:0 8px 4px;font-size:11px;">
+        <span class="feature-mark" style="background:linear-gradient(145deg,#fff 0%,#ffe6ea 100%);box-shadow:inset 0 0 0 1px #e7a2ad, 0 1px 3px #f4d6db;">💎</span>
+        CURHATAN ISTIMEWA
       </div>
-      <div id="promotedCarousel" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;"></div>
-    </div>
+      <div class="special-windows-grid">
+        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
+          <span class="window-number">01</span><span class="window-label">Jendela #1</span><span class="window-hint">Bagikan ceritamu</span>
+        </button>
+        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
+          <span class="window-number">02</span><span class="window-label">Jendela #2</span><span class="window-hint">Bagikan ceritamu</span>
+        </button>
+        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
+          <span class="window-number">03</span><span class="window-label">Jendela #3</span><span class="window-hint">Bagikan ceritamu</span>
+        </button>
+        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
+          <span class="window-number">04</span><span class="window-label">Jendela #4</span><span class="window-hint">Bagikan ceritamu</span>
+        </button>
+      </div>
+    </section>
 
-    <div class="feed-container" id="postsList" style="margin-top: 4px;">
+    <div class="feed-container" id="postsList" style="margin-top: 2px;">
       <div style="text-align: center; padding: 20px;">
         <span style="font-size:20px;">⚡</span>
         <p style="font-size: 11px; color: var(--text-sub); margin-top: 6px;">Memuat cerita kilat...</p>
@@ -641,14 +677,14 @@ body.in-live-room main > div:nth-child(-n+3) {
         <div style="background:#ecfdf5; padding:8px 10px; border-radius:10px; border:1px solid #b9e2ff; display:flex; justify-content:space-between; align-items:center;">
           <div>
             <div style="font-size:11px; font-weight:800; color:#065f46;">💎 50% Saldo Bersih Streamer</div>
-            <div style="font-size:9.5px; color:#0754b8;">Dikonversi otomatis ke Permata CUIT (Siap WD)</div>
+            <div style="font-size:9.5px; color:#c81e32;">Dikonversi otomatis ke Permata CUIT (Siap WD)</div>
           </div>
-          <div style="font-size:13px; font-weight:900; color:#0879d9;" id="calcNetGems">0 💎</div>
+          <div style="font-size:13px; font-weight:900; color:#e32636;" id="calcNetGems">0 💎</div>
         </div>
 
         <div style="background:#eff6ff; padding:8px 10px; border-radius:10px; border:1px solid #c5e7ff; display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <div style="font-size:11px; font-weight:800; color:#0754b8;">🤝 10% Bonus Referral Sponsor</div>
+            <div style="font-size:11px; font-weight:800; color:#c81e32;">🤝 10% Bonus Referral Sponsor</div>
             <div style="font-size:9.5px; color:#1d4ed8;">Masuk ke saldo dompet sponsor pengajak</div>
           </div>
           <div style="font-size:13px; font-weight:900; color:#2563eb;" id="calcSponsorCoins">0 🪙</div>
@@ -715,74 +751,36 @@ body.in-live-room main > div:nth-child(-n+3) {
     </div>
   </div>
 
-  <!-- 2. HALAMAN CARI -->
+  <!-- HALAMAN RAJA CUIT / PRESTASI MEMBER -->
   <div id="pageSearch" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
-    <h2 class="section-title">Jelajahi CUIT</h2>
-    
-    <div class="feelings-card">
-      <h3>Pilih dari Perasaanmu</h3>
-      <div class="tags-grid">
-        <button class="tag-item tag-Bahagia" onclick="filterByTag('Bahagia')">🌱 Bahagia</button>
-        <button class="tag-item tag-Bersyukur" onclick="filterByTag('Bersyukur')">🤲 Bersyukur</button>
-        <button class="tag-item tag-Semangat" onclick="filterByTag('Semangat')">🔥 Semangat</button>
-        <button class="tag-item tag-Cinta" onclick="filterByTag('Cinta')">🌸 Cinta</button>
-        <button class="tag-item tag-Lega" onclick="filterByTag('Lega')">😌 Lega</button>
-        <button class="tag-item tag-Humor" onclick="filterByTag('Humor')">😄 Humor</button>
-        <button class="tag-item tag-Sedih" onclick="filterByTag('Sedih')">🌧️ Sedih</button>
-        <button class="tag-item tag-Cemas" onclick="filterByTag('Cemas')">☁️ Cemas</button>
-        <button class="tag-item tag-Marah" onclick="filterByTag('Marah')">🌶️ Marah</button>
-        <button class="tag-item tag-Kecewa" onclick="filterByTag('Kecewa')">🌊 Kecewa</button>
-        <button class="tag-item tag-Kesepian" onclick="filterByTag('Kesepian')">🌙 Kesepian</button>
-        <button class="tag-item tag-PatahHati" onclick="filterByTag('Patah Hati')">🥀 Patah Hati</button>
-        <button class="tag-item tag-Bingung" onclick="filterByTag('Bingung')">🌀 Bingung</button>
-        <button class="tag-item tag-Rindu" onclick="filterByTag('Rindu')">💜 Rindu</button>
-        <button class="tag-item tag-Lelah" onclick="filterByTag('Lelah / Burnout')">🕯️ Lelah / Burnout</button>
-        <button class="tag-item tag-Ragu" onclick="filterByTag('Ragu')">❓ Ragu</button>
-      </div>
+    <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
+    <h2 class="section-title">👑 Raja Cuit & Prestasi Member</h2>
+    <div class="section-sub">Satu pemenang untuk setiap kategori. Periode hari ini dan minggu ini menggunakan WIB.</div>
+
+    <div class="achievement-panel">
+      <div class="achievement-heading"><span>👑 10 Raja Hari Ini</span><small>10 kategori penghargaan — bukan peringkat 10 anggota</small></div>
+      <div id="dailyKings" class="achievement-list"><div class="achievement-empty">Memuat kategori Raja Hari Ini…</div></div>
     </div>
-
-    <input type="text" id="searchInput" placeholder="Cari curhatan atau anggota..." onkeyup="searchPosts()" style="margin-top: 4px;">
-    
-    <label style="font-size: 11px; font-weight: 700; color: #333; margin-top: 4px; display: block;">Filter Kategori & Rangking</label>
-    <select id="mainSearchFilter" onchange="searchPosts()">
-      <optgroup label="Filter Perasaan">
-        <option value="all">Semua Perasaan</option>
-        <option value="Bahagia">🌱 Bahagia</option>
-        <option value="Bersyukur">🤲 Bersyukur</option>
-        <option value="Semangat">🔥 Semangat</option>
-        <option value="Cinta">🌸 Cinta</option>
-        <option value="Lega">😌 Lega</option>
-        <option value="Humor">😄 Humor</option>
-        <option value="Sedih">🌧️ Sedih</option>
-        <option value="Cemas">☁️ Cemas</option>
-        <option value="Marah">🌶️ Marah</option>
-        <option value="Kecewa">🌊 Kecewa</option>
-        <option value="Kesepian">🌙 Kesepian</option>
-        <option value="Patah Hati">🥀 Patah Hati</option>
-        <option value="Bingung">🌀 Bingung</option>
-        <option value="Rindu">💜 Rindu</option>
-        <option value="Lelah / Burnout">🕯️ Lelah / Burnout</option>
-        <option value="Ragu">❓ Ragu</option>
-      </optgroup>
-      <optgroup label="🏆 Liga Prestasi 7 Hari">
-        <option value="top_sawer">👑 Raja Sawer</option>
-        <option value="top_curhat">🌟 Bintang Curhat</option>
-        <option value="top_pujangga">✍️ Pujangga Utama</option>
-        <option value="top_sponsor">🧲 Magnet Sponsor</option>
-        <option value="top_level">🏆 Jam Terbang (Level)</option>
-        <option value="top_followers">👥 Pengikut Terbanyak</option>
-      </optgroup>
-    </select>
-
-    <div class="feed-container" id="searchResults">
-      <p style="text-align: center; color: var(--text-sub); margin-top: 10px;">Tulis kata kunci atau pilih filter di atas.</p>
+    <div class="achievement-panel">
+      <div class="achievement-heading"><span>🏆 10 Raja Minggu Ini</span><small>10 kategori penghargaan untuk periode minggu berjalan</small></div>
+      <div id="weeklyKings" class="achievement-list"><div class="achievement-empty">Memuat kategori Raja Minggu Ini…</div></div>
+    </div>
+    <div class="achievement-panel">
+      <div class="achievement-heading"><span>⭐ 10 Level Member Teratas</span><small>Diurutkan berdasarkan akumulasi koin berbayar terpakai yang tercatat</small></div>
+      <div id="topLevelMembers" class="achievement-list"><div class="achievement-empty">Memuat peringkat level…</div></div>
+      <div id="myLevelAchievement" class="my-level-callout">Ini levelmu: memuat…</div>
+    </div>
+    <div class="achievement-panel">
+      <div class="achievement-heading"><span>🎖️ Daftar Lengkap Level CUIT</span><small>Target kumulatif koin berbayar terpakai sesuai rancangan</small></div>
+      <div id="allCuitLevels" class="level-directory"></div>
     </div>
   </div>
 
   <!-- 3. HALAMAN BUAT CURHATAN -->
   <div id="pageCreate" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
     <h2 class="section-title">Buat curhatan</h2>
     <div class="section-sub">Tulis dengan nyaman. Tarif koin dinamis 1 koin per 1.200 karakter!</div>
 
@@ -790,7 +788,21 @@ body.in-live-room main > div:nth-child(-n+3) {
       <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
       <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin)</div>
 
-      <label style="font-size: 12px; font-weight: 800; color: #082f6b; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
+      <section id="postStyleEditor" class="post-style-editor" aria-label="Pengaturan tampilan curhatan">
+        <div class="post-style-title">🎨 Tampilan Curhatan</div>
+        <div id="styleLevelNotice" class="style-level-notice">Fasilitas mengikuti level tertinggi yang telah dicapai.</div>
+        <div class="style-control"><label for="postBorderStyle">Border sederhana <small>Level 3</small></label><select id="postBorderStyle" data-unlock="3" onchange="updatePostStylePreview()"><option value="solid">Garis halus</option><option value="dashed">Garis putus-putus</option><option value="double">Garis ganda</option><option value="none">Tanpa border</option></select></div>
+        <div class="style-control"><label for="postBackgroundStyle">Warna latar <small>Level 4</small></label><select id="postBackgroundStyle" data-unlock="4" onchange="updatePostStylePreview()"><option value="#ffffff">Putih</option><option value="#fff0f2">Merah muda pastel</option><option value="#fff7d6">Kuning pastel</option><option value="#eaf7ef">Hijau mint</option><option value="#edf4ff">Biru lembut</option><option value="#f4edff">Lavender</option></select></div>
+        <div class="style-control"><label>Format huruf <small>Level 5–6</small></label><div class="style-buttons"><button type="button" id="postBoldBtn" data-unlock="5" onclick="togglePostStyle('bold')"><b>B</b> Tebal</button><button type="button" id="postItalicBtn" data-unlock="6" onclick="togglePostStyle('italic')"><i>I</i> Miring</button></div></div>
+        <div class="style-control"><label for="postDecorBorder">Border dekoratif <small>Level 7</small></label><select id="postDecorBorder" data-unlock="7" onchange="updatePostStylePreview()"><option value="none">Tanpa dekorasi</option><option value="gold">Emas elegan</option><option value="floral">Bingkai bunga</option><option value="dashed-gold">Putus-putus emas</option></select></div>
+        <div class="style-control"><label for="postDecorBackground">Latar dekoratif <small>Level 8</small></label><select id="postDecorBackground" data-unlock="8" onchange="updatePostStylePreview()"><option value="none">Polos</option><option value="sunrise">Fajar hangat</option><option value="garden">Taman lembut</option><option value="night">Malam lavender</option></select></div>
+        <div class="style-control"><label for="postTextColor">Warna huruf <small>Level 9</small></label><select id="postTextColor" data-unlock="9" onchange="updatePostStylePreview()"><option value="#4a2028">Cokelat marun</option><option value="#b91c1c">Merah</option><option value="#1d4ed8">Biru</option><option value="#166534">Hijau</option><option value="#6b21a8">Ungu</option><option value="#111827">Hitam</option></select></div>
+        <div class="style-control"><label for="postFontFamily">Jenis huruf <small>Level 10</small></label><select id="postFontFamily" data-unlock="10" onchange="updatePostStylePreview()"><option value="system-ui, sans-serif">Standar</option><option value="Georgia, serif">Serif elegan</option><option value="'Trebuchet MS', sans-serif">Trebuchet</option><option value="'Courier New', monospace">Mesin ketik</option></select></div>
+        <div id="postStylePreview" class="post-style-preview">Pratinjau tampilan curhatanmu akan terlihat di sini.</div>
+        <div class="style-editor-note">Catatan: pilihan tampilan disimpan di perangkat ini pada versi uji coba. Agar tampil di semua perangkat, kolom metadata gaya perlu ditambahkan dan dihubungkan ke Supabase.</div>
+      </section>
+
+      <label style="font-size: 12px; font-weight: 800; color: #321016; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
       <select id="postFeeling">
         <option value="Bahagia">🌱 Bahagia</option>
         <option value="Bersyukur">🤲 Bersyukur</option>
@@ -810,7 +822,7 @@ body.in-live-room main > div:nth-child(-n+3) {
         <option value="Ragu">❓ Ragu</option>
       </select>
 
-      <label style="font-size: 12px; font-weight: 800; color: #082f6b; display: block; margin-top: 10px; margin-bottom: 4px;">
+      <label style="font-size: 12px; font-weight: 800; color: #321016; display: block; margin-top: 10px; margin-bottom: 4px;">
         🎁 Pasang Koin Beruntung untuk Komentator Tercepat (Opsional):
       </label>
       <input type="number" id="postRewardCoins" min="0" placeholder="Contoh: 5 (5 komentar pertama dapat 1 Koin Berbayar)" style="margin-bottom: 4px;">
@@ -821,67 +833,129 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="display: flex; gap: 6px; margin-top: 12px;">
         <button class="btn-primary" style="flex: 1;" onclick="submitNewPost()">Terbitkan</button>
         <button class="btn-secondary" style="flex: 1.2;" onclick="saveDraftLocally()">Simpan Draf</button>
-        <button class="btn-secondary" style="background: #f4faff;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
+        <button class="btn-secondary" style="background: #fffafa;" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- 4. HALAMAN LIVE TEKS FULL SCREEN -->
-  <div id="pageLive" class="page-section" style="padding-bottom: 80px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;" id="livePageHeader">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button class="back-btn" style="margin-bottom:0;" onclick="leaveLiveSession()">←</button>
-        <h2 class="section-title" style="font-size:16px;">Live Teks</h2>
+  <!-- HALAMAN GAME: TANTANGAN KATA BIJAK CUIT -->
+  <div id="pageGame" class="page-section cuit-kilat-page" style="padding-bottom:90px;">
+    <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0])">←</button>
+    <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
+    <style>
+      .cuit-kilat-page{color:#3b2020}
+      .cuit-kilat-page .kilat-shell{max-width:520px;margin:0 auto;background:linear-gradient(160deg,#fff8f8,#fff 48%,#fffaf0);border:1px solid #efdca8;border-radius:18px;padding:8px;box-shadow:0 8px 24px #8d202012}
+      .cuit-kilat-page .kilat-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+      .cuit-kilat-page .kilat-brand{display:flex;align-items:center;gap:9px}
+      .cuit-kilat-page .kilat-logo{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#e42c3f,#a70f25);color:#fff;font-size:23px;box-shadow:0 4px 12px #b91c1c30}
+      .cuit-kilat-page .kilat-eyebrow{font-size:10px;letter-spacing:1px;font-weight:900;color:#a87508}
+      .cuit-kilat-page .kilat-title{font-size:20px;line-height:1.15;margin:2px 0 0;color:#b91c1c}
+      .cuit-kilat-page .kilat-pill{border:1px solid #ecd28a;border-radius:999px;background:linear-gradient(135deg,#fffdf5,#fff0bf);padding:5px 8px;font-size:9px;font-weight:800;color:#805b08;white-space:nowrap}
+      .cuit-kilat-page .kilat-intro{font-size:10px;color:#806a6a;line-height:1.25;margin:0 0 5px}
+      .cuit-kilat-page .kilat-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 7px}
+      .cuit-kilat-page .kilat-stat{background:#fff;border:1px solid #f0dddd;border-radius:10px;padding:4px;text-align:center}
+      .cuit-kilat-page .kilat-stat-label{font-size:9px;letter-spacing:.5px;color:#957777;font-weight:850}
+      .cuit-kilat-page .kilat-stat-value{font-size:18px;font-weight:900;color:#b91c1c;margin-top:2px}
+      .cuit-kilat-page .kilat-progress{height:5px;background:#f7e1e1;border-radius:20px;overflow:hidden;margin-bottom:8px}
+      .cuit-kilat-page .kilat-progress span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#b91c1c,#e9b83d);transition:width .2s}
+      .cuit-kilat-page .kilat-panel{background:#fff;border:1px solid #ead6a0;border-radius:14px;padding:6px;box-shadow:0 5px 18px #8d20200b}
+      .cuit-kilat-page .kilat-targetrow{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px}
+      .cuit-kilat-page .kilat-small-label{font-size:9px;font-weight:900;letter-spacing:.5px;color:#9a7777}
+      .cuit-kilat-page .kilat-pairs{font-size:10px;font-weight:850;color:#875e08;background:#fff5d5;border:1px solid #f0d68b;padding:6px 8px;border-radius:999px}
+      .cuit-kilat-page .kilat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:min(100%,310px);margin:0 auto}
+      .cuit-kilat-page .kilat-tile{border:1px solid #9f1225;aspect-ratio:1/1;height:min(15vw,5.5dvh,50px);border-radius:13px;background:linear-gradient(145deg,#df263b,#a30d24);color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 0 #780b1a;cursor:pointer;position:relative;touch-action:manipulation}
+      .cuit-kilat-page .kilat-tile:active{transform:translateY(2px);box-shadow:0 2px 0 #780b1a}
+      .cuit-kilat-page .kilat-tile::after{content:"✦";font-size:20px;color:#ffe6a0}
+      .cuit-kilat-page .kilat-tile.open,.cuit-kilat-page .kilat-tile.matched{background:linear-gradient(145deg,#fff8dc,#ffecae);color:#8b171f;border:2px solid #d5a52f;box-shadow:0 3px 0 #d9b65b}
+      .cuit-kilat-page .kilat-tile.open::after,.cuit-kilat-page .kilat-tile.matched::after{content:none}
+      .cuit-kilat-page .kilat-tile:disabled{cursor:default}
+      .cuit-kilat-page .kilat-message{min-height:30px;display:flex;align-items:center;justify-content:center;text-align:center;color:#8b6e6e;font-size:10px;line-height:1.3;padding:6px 2px 0}
+      .cuit-kilat-page .kilat-actions{display:flex;gap:7px;margin-top:7px}
+      .cuit-kilat-page .kilat-btn{border:0;border-radius:12px;padding:10px 9px;font:inherit;font-size:11px;font-weight:900;cursor:pointer}
+      .cuit-kilat-page .kilat-btn-primary{background:linear-gradient(135deg,#d92339,#a70f25);color:#fff;flex:1;box-shadow:0 3px 0 #780b1a}
+      .cuit-kilat-page .kilat-btn-secondary{background:#fff7dc;color:#805b08;border:1px solid #e8cf83}
+      .cuit-kilat-page .kilat-result{display:none;margin-top:9px;background:#fff;border:1px solid #e5c66d;border-radius:17px;padding:12px;box-shadow:0 7px 20px #8d202010}
+      .cuit-kilat-page .kilat-result.show{display:flex;flex-direction:column;gap:8px}
+      .cuit-kilat-page .kilat-result h3{margin:0;font-size:16px;color:#b91c1c}
+      .cuit-kilat-page .kilat-result p{margin:0;color:#806a6a;font-size:11px;line-height:1.45}
+      .cuit-kilat-page .kilat-letters{display:flex;gap:7px;margin:1px 0}
+      .cuit-kilat-page .kilat-letter{flex:1;background:linear-gradient(145deg,#fff9e4,#ffedb4);border:1px solid #e5c66d;border-radius:11px;padding:7px 4px;text-align:center;font-size:25px;font-weight:950;color:#a51627}
+      .cuit-kilat-page .kilat-reward{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #f2e8d2;padding-top:7px}
+      .cuit-kilat-page .kilat-reward strong{font-size:17px;color:#a51627}
+      .cuit-kilat-page .kilat-wisdom{background:linear-gradient(135deg,#fff9e8,#fff1f1);border:1px solid #e9d18a;border-radius:12px;padding:11px;font-size:13px;line-height:1.5;color:#67202a;font-weight:650;overflow-wrap:anywhere}
+      .cuit-kilat-page .kilat-note{font-size:9px;color:#967c7c;line-height:1.35;margin:8px 2px 0}
+      .cuit-kilat-page #kilatCurhatBtn{width:100%;background:linear-gradient(110deg,#b91c1c,#e3b43b);color:white;border:1px solid #d4a32c;border-radius:12px;padding:12px;font-size:12px;font-weight:950;cursor:pointer;box-shadow:0 3px 0 #8b171f}
+      .cuit-kilat-page #kilatCurhatBtn:active{transform:translateY(1px)}
+      @media(max-height:650px){.cuit-kilat-page .kilat-shell{padding:9px}.cuit-kilat-page .kilat-tile{height:min(16vw,5.5dvh,50px)}.cuit-kilat-page .kilat-panel{padding:7px}}
+    
+    .home-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
+    .home-shortcuts button{min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:1px 0;color:#45343a;font-size:9px;font-weight:850;cursor:pointer}
+    .shortcut-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(30,35,60,.06)}
+    .shortcut-icon svg{width:24px;height:24px}.shortcut-icon.game{background:#fff0e2}.shortcut-icon.checkin{background:#e5f8ee}.shortcut-icon.king{background:#fff4c9}.shortcut-icon.progress{background:#f1e8ff}.shortcut-icon.nonton{background:#e7f2ff;border:1px solid #c7e0ff}
+    @media(min-width:600px){.home-shortcuts{max-width:560px;gap:12px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
+
+      .pool-shortcut{float:right;margin:-34px 0 8px 8px;border:1px solid #e5b8bd;border-radius:999px;padding:6px 10px;background:#fff;color:#b91c1c;font-size:11px;font-weight:850;box-shadow:0 2px 6px #b91c1c12}
+      .page-section{position:relative}.page-section>.pool-shortcut{position:absolute;right:12px;top:12px;float:none;margin:0;z-index:2}
+    </style>
+    <div class="kilat-shell">
+      <div class="kilat-head">
+        <div class="kilat-brand"><div class="kilat-logo" aria-hidden="true">✦</div><div><div class="kilat-eyebrow">PERMAINAN CUIT</div><h2 class="kilat-title">3 Huruf Kilat</h2></div></div>
+        
       </div>
-      <button class="btn-primary" id="btnStartLiveHeader" onclick="startLiveTeks()">+ Mulai Live Baru</button>
+      <p class="kilat-intro">Buka dua kotak, ingat hurufnya, lalu cari pasangannya. Temukan 3 pasangan untuk mendapatkan kombinasi tiga huruf!</p>
+      <section class="kilat-stats" aria-label="Status permainan">
+        <div class="kilat-stat"><div class="kilat-stat-label">WAKTU</div><div class="kilat-stat-value" id="kilatTime">30</div></div>
+        <div class="kilat-stat"><div class="kilat-stat-label">PASANGAN</div><div class="kilat-stat-value" id="kilatFound">0/3</div></div>
+        <div class="kilat-stat"><div class="kilat-stat-label">KOIN SIMULASI</div><div class="kilat-stat-value" id="kilatCoin">—</div></div>
+      </section>
+      <div class="kilat-progress" aria-hidden="true"><span id="kilatBar"></span></div>
+      <section class="kilat-panel">
+        <div class="kilat-targetrow"><div class="kilat-small-label">BUKA KOTAK UNTUK MENEMUKAN PASANGAN</div><div class="kilat-pairs" id="kilatRound">Siap bermain</div></div>
+        <div class="kilat-grid" id="kilatGrid" aria-label="16 kotak huruf tertutup"></div>
+        <div class="kilat-message" id="kilatMessage" aria-live="polite">Tekan “Mulai Permainan” untuk mengacak huruf dan menjalankan waktu.</div>
+        <div class="kilat-actions"><button class="kilat-btn kilat-btn-primary" id="kilatStart" type="button">▶ Mulai Permainan</button><button class="kilat-btn kilat-btn-secondary" id="kilatReset" type="button">Ulangi</button></div>
+      </section>
+      <section class="kilat-result" id="kilatResult" aria-live="polite">
+        <h3 id="kilatResultTitle">Kombinasi huruf didapat!</h3>
+        <p id="kilatResultDesc">Ini hasil simulasi; koin tidak masuk ke saldo CUIT.</p>
+        <div class="kilat-letters" id="kilatLetters"></div>
+        <div class="kilat-reward"><div><div class="kilat-small-label">BONUS SIMULASI</div><strong id="kilatReward">+0 koin</strong></div><div class="kilat-pairs" id="kilatSpeed">—</div></div>
+        <div class="kilat-wisdom" id="kilatWisdom">Kata bijak akan muncul di sini.</div>
+        <button id="kilatCurhatBtn" type="button">✍️ CURHATKAN</button>
+        <p id="kilatCurhatHint">Tekan tombol untuk membuka kolom curhat CUIT dengan kata bijak terisi otomatis. Anda tetap dapat mengedit sebelum menerbitkan.</p>
+        <div class="kilat-actions"><button class="kilat-btn kilat-btn-primary" id="kilatPlayAgain" type="button">Main Lagi</button></div>
+      </section>
+      <p class="kilat-note"><strong>Aturan simulasi:</strong> 16 kotak berisi 8 pasangan. Pasangan cocok tetap terbuka; pasangan tidak cocok tertutup lagi setelah jeda singkat. Selesaikan 3 pasangan dalam 30 detik. Jika waktu habis, hasil tiga huruf tetap dilengkapi. Bonus koin hanya angka simulasi dan tidak menambah saldo CUIT.</p>
     </div>
-
-    <div id="liveContainer" style="background: #fff; padding: 10px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <div id="activeLivesListContainer" style="margin-bottom: 10px;"></div>
-
-      <div id="liveStatusBox" style="text-align: center; color: var(--text-sub); font-size: 12px; padding: 6px 0;">
-        Belum ada sesi Live Teks aktif.
-      </div>
-
-            <div id="liveChatBox" style="display: none !important;">
-
-        <!-- 1. Top Supporter / Leaderboard -->
-        <div id="liveLeaderboardContainer">
-          <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleLeaderboard()">
-            <span style="font-weight: 800; font-size: 11px; color: #b7791f;">🏆 TOP SUPPORTER (Gift Terbanyak)</span>
-            <span id="lbToggleIcon" style="font-size: 10px; color: #b7791f;">▲ Sembunyikan</span>
-          </div>
-          <div id="liveLeaderboardList" style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; font-size: 11px;"></div>
-        </div>
-
-        <!-- 2. Kotak Pesan Chat -->
-        <div id="liveMessagesList"></div>
-
-        <!-- 3. Template Pesan Cepat -->
-        <div id="quickChatContainer"></div>
-
-        <!-- 4. Form Input & Kirim -->
-        <div class="live-input-row">
-          <input type="text" id="liveInputMessage" placeholder="Tulis pesan live..." onkeypress="if(event.key==='Enter') sendLiveMessage()">
-          <button class="btn-primary" onclick="sendLiveMessage()">Kirim</button>
-        </div>
-
-        <!-- 5. Baris Tombol Suka & Gift -->
-        <div class="live-action-buttons">
-          <button class="btn-secondary" id="btnLikeLive" onclick="toggleLikeLive()">♡ (<span id="liveLikesCount">0</span>)</button>
-          <button class="btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="openLiveGiftModal()">🎁 Gift</button>
-          <button class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="openSpecialGiftModal()">👑 Gift Spesial</button>
-          <button class="btn-secondary" onclick="promoteLiveSession()">🚀</button>
-        </div>
-
-      </div>
-
-    </div>
+    <script>
+    (() => {
+      const root = document.getElementById('pageGame');
+      if (!root || root.dataset.kilatReady === '1') return;
+      root.dataset.kilatReady = '1';
+      const letters = ["A","R","S","M","I","T","B","O"];
+      const el = id => root.querySelector('#' + id);
+      const grid=el('kilatGrid'), timeEl=el('kilatTime'), foundEl=el('kilatFound'), coinEl=el('kilatCoin'), bar=el('kilatBar'), message=el('kilatMessage'), startBtn=el('kilatStart'), resetBtn=el('kilatReset'), result=el('kilatResult'), lettersBox=el('kilatLetters'), rewardEl=el('kilatReward'), speedEl=el('kilatSpeed'), resultTitle=el('kilatResultTitle'), resultDesc=el('kilatResultDesc'), roundEl=el('kilatRound');
+      let deck=[], first=null, second=null, lock=false, matches=[], started=false, ended=false, remaining=30, timer=null, startedAt=0, mismatchTimer=null;
+      function shuffle(items){const arr=items.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+      function setMessage(text){message.textContent=text;}
+      function makeDeck(){deck=shuffle(letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]));}
+      function render(){grid.innerHTML='';deck.forEach((card,index)=>{const button=document.createElement('button');button.type='button';button.className='kilat-tile'+((card.revealed||card.matched)?' open':'')+(card.matched?' matched':'');button.textContent=(card.revealed||card.matched)?card.letter:'';button.setAttribute('aria-label',(card.revealed||card.matched)?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);button.disabled=!started||ended||lock||card.matched||card.revealed;button.addEventListener('click',()=>flip(index));grid.appendChild(button);});}
+      function updateStats(){timeEl.textContent=remaining;foundEl.textContent=`${matches.length}/3`;bar.style.width=`${Math.max(0,remaining/30*100)}%`;roundEl.textContent=matches.length>=3?'Selesai!':started?`Pasangan ${matches.length+1} dari 3`:'Siap bermain';}
+      function init(){document.body.classList.remove('kilat-result-mode');clearInterval(timer);clearTimeout(mismatchTimer);first=second=null;lock=false;matches=[];started=false;ended=false;remaining=30;startedAt=0;coinEl.textContent='—';result.classList.remove('show');makeDeck();deck.forEach(c=>{c.revealed=false;c.matched=false;});startBtn.disabled=false;startBtn.textContent='▶ Mulai Permainan';setMessage('Tekan “Mulai Permainan” untuk mengacak huruf dan menjalankan waktu.');updateStats();render();}
+      function startGame(){if(started&&!ended)return;init();started=true;startedAt=Date.now();startBtn.disabled=true;startBtn.textContent='Permainan Berjalan';setMessage('Ingat posisi huruf! Temukan tiga pasangan.');updateStats();render();timer=setInterval(()=>{remaining=Math.max(0,30-Math.floor((Date.now()-startedAt)/1000));updateStats();if(remaining<=0)finish(true);},150);}
+      function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},700);}}
+      function makeWisdom(foundLetters){const themes={A:["Awali langkah dengan harapan; kemajuan kecil tetap berarti.","Arah yang baik dimulai dari niat baik dan langkah yang konsisten."],R:["Rintangan bukan alasan berhenti; jadikan setiap hari kesempatan untuk tumbuh.","Rawat harapan, lakukan yang terbaik, dan hargai setiap proses."],S:["Sabar bukan diam; sabar adalah tetap berusaha tanpa kehilangan kebaikan.","Sedikit demi sedikit, langkah yang tekun akan membawa perubahan."],M:["Mulailah dari hal sederhana, lalu teruskan dengan hati yang teguh.","Makna keberhasilan ada pada usaha baik yang terus dijaga."],I:["Ikhtiar hari ini adalah bekal untuk hari esok yang lebih baik.","Ingat, kebaikan kecil yang dilakukan terus-menerus punya arti besar."],T:["Tetap melangkah dengan tenang; proses baik tak harus serba cepat.","Tumbuhlah tanpa membandingkan perjalananmu dengan orang lain."],B:["Berbuat baiklah meski sederhana; dampaknya bisa lebih luas dari dugaan.","Bersyukur menjaga hati, berusaha membuka jalan."],O:["Optimisme bukan menunggu mudah, tetapi percaya sambil terus berusaha.","Orang yang tekun memberi kesempatan pada harapan untuk tumbuh."]};const key=foundLetters.slice().sort().join('');const sum=foundLetters.reduce((n,ch)=>n+ch.charCodeAt(0),0);const options=themes[foundLetters[sum%foundLetters.length]]||themes.A;return options[(sum+key.length)%options.length];}
+      function finish(timeout){if(ended)return;ended=true;started=false;clearInterval(timer);clearTimeout(mismatchTimer);lock=true;if(timeout){const used=new Set(matches);const candidates=shuffle(letters.filter(l=>!used.has(l)));while(matches.length<3&&candidates.length)matches.push(candidates.shift());}matches=matches.slice(0,3);const elapsed=Math.min(30,Math.floor((Date.now()-startedAt)/1000));let coins=1;if(!timeout){if(elapsed<=5)coins=5;else if(elapsed<=10)coins=4;else if(elapsed<=15)coins=3;else coins=2;}coinEl.textContent=`+${coins}`;rewardEl.textContent=`+${coins} koin`;speedEl.textContent=timeout?'Waktu habis':`${elapsed} detik`;resultTitle.textContent=timeout?'Waktu habis, tetap dapat huruf!':'Tiga pasangan ditemukan!';resultDesc.textContent=timeout?'Huruf yang belum didapat dilengkapi otomatis. Ini simulasi, bukan saldo CUIT.':'Berhasil mengingat dan menemukan tiga pasangan. Ini simulasi, bukan saldo CUIT.';el('kilatWisdom').textContent='“'+makeWisdom(matches)+'”';lettersBox.innerHTML='';matches.forEach(letter=>{const item=document.createElement('div');item.className='kilat-letter';item.textContent=letter;lettersBox.appendChild(item);});startBtn.disabled=false;startBtn.textContent='▶ Mulai Lagi';roundEl.textContent='Selesai!';updateStats();render();result.classList.add('show');setMessage(timeout?'Permainan selesai. Hasil tiga huruf tetap tersedia.':'Permainan selesai! Kata bijak siap digunakan.');}
+      function openCurhat(){const quote=el('kilatWisdom').textContent.replace(/^“|”$/g,'').trim();const textarea=document.getElementById('postContent');if(textarea){textarea.value=quote;if(typeof updateCharCount==='function')updateCharCount(textarea);}const navItems=document.querySelectorAll('.nav-bar .nav-item');if(typeof switchTab==='function')switchTab('pageCreate',navItems[2]||null);if(textarea){setTimeout(()=>{textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});},120);} }
+      startBtn.addEventListener('click',startGame);resetBtn.addEventListener('click',init);el('kilatPlayAgain').addEventListener('click',()=>{init();startGame();});el('kilatCurhatBtn').addEventListener('click',openCurhat);init();
+    })();
+    </script>
   </div>
 
   <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
+    <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
     <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
 
     <div class="profile-card">
@@ -892,7 +966,7 @@ body.in-live-room main > div:nth-child(-n+3) {
           </div>
           <div>
             <div style="font-size: 16px; font-weight: 900;" id="profName">Penilik Bageur</div>
-            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #d7ebff; color: #333;">🌱 Cuiter Baru</span>
+            <span class="btn-sm-badge" id="profLevelTitle" style="margin-top: 4px; background: #fff0f1; color: #333;">🌱 Tunas CUIT</span>
           </div>
         </div>
         <button class="btn-secondary" style="padding: 5px 12px;" onclick="openEditProfileModal()">Edit</button>
@@ -900,7 +974,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
       <div class="profile-stats-grid" id="mainProfileStatsGrid">
         <div class="stat-card-item">
-          <div class="val" id="profExp">0 EXP</div>
+          <div class="val" id="profExp">0 koin berbayar terpakai</div>
           <div class="lbl">Jam Terbang</div>
         </div>
         <div class="stat-card-item">
@@ -920,24 +994,34 @@ body.in-live-room main > div:nth-child(-n+3) {
           <div class="lbl">Postingan</div>
         </div>
         <div class="stat-card-item" id="adminTotalMemberCard" style="display: none; background: #eaf6ff; border: 1px solid #bfdefb;">
-          <div class="val" id="profTotalMembers" style="color: #0754b8;">0</div>
-          <div class="lbl" style="color: #0754b8; font-weight: 800;">Total Member</div>
+          <div class="val" id="profTotalMembers" style="color: #c81e32;">0</div>
+          <div class="lbl" style="color: #c81e32; font-weight: 800;">Total Member</div>
         </div>
       </div>
 
       <div class="level-progress-container">
-        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #082f6b;">
+        <div style="display: flex; justify-content: space-between; font-size: 10.5px; font-weight: 800; color: #321016;">
           <span>Kemajuan Level Cuiter</span>
-          <span id="levelNextInfo">1.000 EXP lagi menuju 💙 Cuiter Setia</span>
+          <span id="levelNextInfo">1.000 koin berbayar terpakai lagi menuju ⭐ Bintang CUIT</span>
         </div>
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" id="levelProgressBar"></div>
         </div>
       </div>
 
-      <div style="background: #f3faff; padding: 12px; border-radius: 14px; border: 1px solid #d7ebff; margin-top: 10px;">
-        <div style="font-size: 11px; font-weight: 800; color: #082f6b; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
-        <div style="font-size: 10px; color: #42658a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
+      <div id="memberActivityStatusCard" style="margin-top:10px;padding:10px 12px;border:1px solid #d9e6dc;border-radius:12px;background:#fff">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong style="font-size:12px">Status Keaktifan</strong><span id="memberActivityStatus" style="font-size:11px;font-weight:900;color:#16803c">● Aktif</span></div>
+        <div id="memberActivityHint" style="font-size:10px;color:#665b5d;margin-top:4px">Aktivitas terakhir tercatat hari ini.</div>
+      </div>
+      <div id="memberLevelFacilities" style="margin-top:10px;padding:11px;border:1px solid #ead5d8;border-radius:13px;background:#fff">
+        <div style="font-size:12px;font-weight:900;color:#a9142b;margin-bottom:7px">🎖️ Fasilitas Level Member</div>
+        <div id="memberLevelFacilitiesList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px"></div>
+        <div style="font-size:9px;color:#77666a;margin-top:7px">Hak fasilitas mengikuti level tertinggi yang dicapai. Promosi tetap menggunakan koin berbayar sesuai tarif.</div>
+      </div>
+
+      <div style="background: #f3faff; padding: 12px; border-radius: 14px; border: 1px solid #fff0f1; margin-top: 10px;">
+        <div style="font-size: 11px; font-weight: 800; color: #321016; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
+        <div style="font-size: 10px; color: #77535a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
         
         <div style="display: flex; gap: 6px;">
           <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
@@ -946,8 +1030,19 @@ body.in-live-room main > div:nth-child(-n+3) {
       </div>
     </div>
 
+    <div id="memberGemBalanceCard" style="margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #e8c4c8;border-left:4px solid #c81e32;border-radius:14px;box-shadow:0 3px 10px #5b1b2208">
+      <div style="font-size:13px;font-weight:900;color:#b91c1c">💎 Permata Saya</div>
+      <div style="font-size:22px;font-weight:950;color:#292929;margin:4px 0"><span id="memberGemBalance">0</span> permata</div>
+      <div id="memberGemWithdrawalHint" style="font-size:11px;color:#555">Kurang 20.000 permata lagi untuk bisa melakukan penarikan.</div>
+    </div>
+    <div id="adminPlatformGemCard" style="display:none;margin:0 0 12px;padding:12px;background:#fff;border:1px solid #d7b46a;border-left:4px solid #b91c1c;border-radius:14px">
+      <div style="font-size:13px;font-weight:900;color:#b91c1c">💎 Permata Platform (ADMINCUIT)</div>
+      <div style="font-size:22px;font-weight:950;color:#292929;margin:4px 0"><span id="platformGemBalance">0</span> permata</div>
+      <div style="font-size:10px;color:#666">Akumulasi bagian platform 40% dari transaksi yang tercatat. Nilai akan tampil setelah sumber data Supabase disiapkan.</div>
+    </div>
+
     <div id="adminPanelSection" style="display: none; margin-bottom: 12px; padding: 14px; background: #eaf6ff; border-radius: 14px; border: 1px solid #bfdefb;">
-      <h4 style="margin: 0 0 6px 0; color: #0754b8; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
+      <h4 style="margin: 0 0 6px 0; color: #c81e32; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
       <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
       <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
     </div>
@@ -991,24 +1086,19 @@ body.in-live-room main > div:nth-child(-n+3) {
   <!-- Bottom Navigation Bar -->
   <div class="nav-bar">
     <div class="nav-item active" onclick="switchTab('pageHome', this)">
-      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div>
-      <span>Beranda</span>
+      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div><span>Beranda</span>
     </div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)">
-      <span class="nav-icon">🔍</span>
-      <span>Cari</span>
+    <div class="nav-item" onclick="switchTab('pageGame', this)">
+      <span class="nav-icon">🎯</span><span>Game</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageCreate', this)">
-      <span class="nav-icon">➕</span>
-      <span>Buat</span>
+      <div class="nav-add-button">+</div><span>Buat</span>
     </div>
-    <div class="nav-item" onclick="switchTab('pageLive', this)">
-      <span class="nav-icon">📄</span>
-      <span>Live</span>
+    <div class="nav-item" onclick="switchTab('pageSearch', this)">
+      <span class="nav-icon">👑</span><span>Raja</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon"><div class="nav-profile-avatar">🤍</div></span>
-      <span>Profil</span>
+      <span class="nav-icon"><div class="nav-profile-avatar">🌱</div></span><span>Profil</span>
     </div>
   </div>
 
@@ -1023,7 +1113,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <div style="text-align: center; margin-bottom: 12px;">
         <div class="cuit-main-badge" id="mMainBadge" style="width:64px;height:64px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;"></div>
         <div style="font-size: 16px; font-weight: 900;" id="mName">Nama Pengguna</div>
-        <span class="btn-sm-badge" id="mBadge" style="margin-top: 4px; background:#d7ebff; color:#333;">🌱 Cuiter Baru</span>
+        <span class="btn-sm-badge" id="mBadge" style="margin-top: 4px; background:#fff0f1; color:#333;">🌱 Tunas CUIT</span>
       </div>
 
       <!-- GRID STATISTIK UTAMA -->
@@ -1057,8 +1147,8 @@ body.in-live-room main > div:nth-child(-n+3) {
       <!-- GRID DOMPET / KOIN & PERMATA -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; text-align: center;">
         <div style="background:#ecfdf5; border:1px solid #b9e2ff; padding:8px 4px; border-radius:10px;">
-          <div style="font-size:12px; font-weight:900; color:#0879d9;" id="mPaidCoins">0 🪙</div>
-          <div style="font-size:9px; color:#0754b8;">Koin Berbayar</div>
+          <div style="font-size:12px; font-weight:900; color:#e32636;" id="mPaidCoins">0 🪙</div>
+          <div style="font-size:9px; color:#c81e32;">Koin Berbayar</div>
         </div>
         <div style="background:#eff6ff; border:1px solid #c5e7ff; padding:8px 4px; border-radius:10px;">
           <div style="font-size:12px; font-weight:900; color:#2563eb;" id="mGems">0 💎</div>
@@ -1088,9 +1178,9 @@ body.in-live-room main > div:nth-child(-n+3) {
       </div>
 
       <div style="font-size: 11.5px; color: #333; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
-        <div style="background: #e8f5ff; padding: 10px; border-radius: 12px; border: 1px solid #c8e8ff;">
+        <div style="background: #fff0f1; padding: 10px; border-radius: 12px; border: 1px solid #c8e8ff;">
           <b style="color: var(--primary); font-size: 12px;">👨‍💻 Pengembang & Kreator Aplikasi:</b><br>
-          <div style="font-size: 13px; font-weight: 900; color: #082f6b; margin-top: 2px;">Yan Kasmaran</div>
+          <div style="font-size: 13px; font-weight: 900; color: #321016; margin-top: 2px;">Yan Kasmaran</div>
           <div style="font-size: 11px; font-weight: 700; color: #31577e;">(Yayan Hadiyanto, S.Pd.-MT.)</div>
           <div style="margin-top: 6px; font-size: 10.5px; color: #555; border-top: 1px dashed #c0b6ff; padding-top: 4px;">
             <b>Naungan Ekosistem:</b><br>
@@ -1158,7 +1248,7 @@ body.in-live-room main > div:nth-child(-n+3) {
         Kamu yakin ingin mengirimkan gift ini?
       </div>
       <div style="display: flex; gap: 8px;">
-        <button class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #319af0, #0879d9);" onclick="executeSendGift()">SAWER</button>
+        <button class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #319af0, #e32636);" onclick="executeSendGift()">SAWER</button>
         <button class="btn-secondary" style="flex: 1; background: #eee;" onclick="document.getElementById('confirmGiftModal').style.display='none'">BATAL</button>
       </div>
     </div>
@@ -1174,6 +1264,45 @@ body.in-live-room main > div:nth-child(-n+3) {
         <button class="btn-primary" style="flex:1;" onclick="saveProfileChanges()">Simpan</button>
         <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('editProfileModal').style.display='none'">Batal</button>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL PILIHAN PROMOSI POST -->
+  <div id="promotionChoiceModal" class="modal" style="z-index:100100;">
+    <div class="modal-content" style="width:min(440px,94vw);padding:18px;border-radius:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
+        <h3 style="margin:0;font-size:17px;color:#b91c32;">🚀 Promosikan Curhatan</h3>
+        <button type="button" aria-label="Tutup" onclick="closePromotionModal()" style="border:0;background:#f3f4f6;border-radius:50%;width:32px;height:32px;font-size:18px;">×</button>
+      </div>
+      <p style="font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px;">Pilih jenis promosi dan tentukan durasinya. Biaya dihitung per jam menggunakan Koin Berbayar.</p>
+      <div id="promotionOptionBiasa" class="promotion-option" style="border:1.5px solid #f2b8c0;border-radius:14px;padding:12px;margin-bottom:10px;background:#fffafb;">
+        <div style="font-weight:850;font-size:14px;color:#9f1239;margin-bottom:4px;">⭐ Promosi Biasa</div>
+        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Terbaik</b> selama masa promosi aktif.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="promotionBiasaButton" type="button" onclick="selectPromotionType('biasa')" style="flex:1;min-height:42px;border:0;border-radius:10px;background:#c81e32;color:#fff;font-weight:850;padding:8px;">1 Koin / jam</button>
+          <label for="promotionBiasaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
+          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionBiasaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
+        </div>
+      </div>
+      <div id="promotionOptionIstimewa" class="promotion-option" style="border:1.5px solid #e8d5a0;border-radius:14px;padding:12px;margin-bottom:12px;background:#fffdf5;">
+        <div style="font-weight:850;font-size:14px;color:#946200;margin-bottom:4px;">✨ Promosi Istimewa</div>
+        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Istimewa</b> selama masa promosi aktif.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="promotionIstimewaButton" type="button" onclick="selectPromotionType('istimewa')" style="flex:1;min-height:42px;border:1px solid #d7b65e;border-radius:10px;background:#fff;color:#946200;font-weight:850;padding:8px;">5 Koin / jam</button>
+          <label for="promotionIstimewaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
+          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionIstimewaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f8f8fa;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+        <span style="font-size:12px;color:#555;">Total biaya <span id="promotionCostExplain">(1 jam × 1 koin)</span></span>
+        <b id="promotionTotalCost" style="font-size:16px;color:#b91c32;">1 Koin</b>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:12px;">Saldo Koin Berbayar: <b id="promotionBalance">0</b> koin</div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="closePromotionModal()" style="flex:1;border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:750;">Batal</button>
+        <button id="confirmPromotionButton" type="button" onclick="confirmPostPromotion()" style="flex:1;border:0;background:#c81e32;color:#fff;border-radius:10px;padding:11px;font-weight:850;">Oke, Promosikan</button>
+      </div>
+      <div id="promotionFeedback" role="status" style="font-size:11px;color:#b91c32;margin-top:8px;"></div>
     </div>
   </div>
 
@@ -1204,7 +1333,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <input type="password" id="password" placeholder="Kata Sandi">
       
       <label style="font-size: 10.5px; font-weight: 800; color: var(--primary); display: block; margin-top: 2px;">Kode Sponsor Referral (Otomatis):</label>
-      <input type="text" id="referralCodeInput" readonly style="background: #edf7ff; font-weight: 800; color: #333;">
+      <input type="text" id="referralCodeInput" readonly style="background: #f5dfe2; font-weight: 800; color: #333;">
 
       <div style="display: flex; gap: 6px; margin-top: 8px;">
         <button class="btn-primary" style="flex:1;" onclick="submitLogin()">Masuk</button>
@@ -1220,7 +1349,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
       <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Koin Berbayar: 50% untuk Kreator, 10% untuk Sponsor; 40% tidak dibagikan</div>
       
-      <div style="background: #e8f5ff; border: 1.5px dashed #0754b8; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
+      <div style="background: #fff0f1; border: 1.5px dashed #c81e32; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
         <span style="font-weight: 900; font-size: 12px; color: var(--primary); display: block;">📌 Kirim Gift Absen (1 🪙)</span>
         <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
@@ -1250,13 +1379,13 @@ body.in-live-room main > div:nth-child(-n+3) {
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Burger (20 🪙)</div>
         <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon (20 🪙)</div>
 
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja (50 🪙)</div>
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser (50 🪙)</div>
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala (50 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja (50 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser (50 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala (50 🪙)</div>
 
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super (100 🪙)</div>
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil (100 🪙)</div>
-        <div class="gift-card-item" style="background:#e8f5ff; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal (100 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super (100 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil (100 🪙)</div>
+        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal (100 🪙)</div>
 
         <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2; font-weight:900;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai (200 🪙)</div>
         <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung (300 🪙)</div>
@@ -1316,18 +1445,18 @@ body.in-live-room main > div:nth-child(-n+3) {
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
-      <div style="background: #edf7ff; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
+      <div style="background: #f5dfe2; padding: 10px; border-radius: 12px; margin: 8px 0; font-size: 12px;">
         <div><b>Saldo Koin Berbayar:</b> <span id="wPaidCoin">0</span> Koin</div>
         <div><b>Nilai Setara:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
 
-      <div style="font-size: 11px; font-weight: 800; color: #082f6b; margin: 10px 0 6px 0;">Pilih Paket Top-Up (QRIS DOKU Otomatis):</div>
+      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 10px 0 6px 0;">Pilih Paket Top-Up (QRIS DOKU Otomatis):</div>
       <div id="packageListContainer" style="display: flex; flex-direction: column; gap: 6px;">
         <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
 
-      <div style="font-size: 11px; font-weight: 800; color: #082f6b; margin: 14px 0 6px 0;">📜 Riwayat Penerimaan Permata (Buku Kas Permanen):</div>
-      <div id="giftHistoryListContainer" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #f3faff; padding: 8px; border-radius: 12px; border: 1px solid #d7ebff;">
+      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 14px 0 6px 0;">📜 Riwayat Penerimaan Permata (Buku Kas Permanen):</div>
+      <div id="giftHistoryListContainer" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #f3faff; padding: 8px; border-radius: 12px; border: 1px solid #fff0f1;">
         <p style="text-align: center; font-size: 10.5px; color: var(--text-sub);">Memuat riwayat transaksi...</p>
       </div>
 
@@ -1382,7 +1511,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
       <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
 
-      <div style="background: #edf7ff; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
+      <div style="background: #f5dfe2; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
         <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
         <div>Total Biaya Admin: Rp <span id="coFee">5.000</span></div>
         <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
@@ -1402,6 +1531,24 @@ body.in-live-room main > div:nth-child(-n+3) {
     </div>
   </div>
   <script>
+    async function openDailyCheckin() {
+      if (!currentUser) { alert('Silakan masuk terlebih dahulu untuk melakukan absen.'); return; }
+      const day = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+      const ok = confirm(`Absen harian CUIT\nTanggal: ${day} WIB\n\nAbsen akan dicatat ke Supabase jika tabel cuit_checkins tersedia. Lanjutkan?`);
+      if (!ok) return;
+      try {
+        const { data: existing, error: readError } = await supabaseClient.from('cuit_checkins').select('id').eq('user_id', currentUser.id).eq('checkin_date', day).maybeSingle();
+        if (readError) throw readError;
+        if (existing) { alert('Kamu sudah absen hari ini.'); return; }
+        const { error } = await supabaseClient.from('cuit_checkins').insert({user_id:currentUser.id, checkin_date:day});
+        if (error) throw error;
+        alert('Absen hari ini berhasil dicatat.');
+      } catch (error) {
+        console.error('Absen CUIT:', error);
+        alert('Fitur absen membutuhkan tabel cuit_checkins dan kebijakan RLS di Supabase. Belum ada bonus koin yang diberikan.');
+      }
+    }
+
     const CONFIG = {
       FREE_COINS_DAILY: 20,
       MAX_CHAR_FREE_CURHAT: 1200,
@@ -1412,6 +1559,7 @@ body.in-live-room main > div:nth-child(-n+3) {
     };
 
     const SUPABASE_URL = 'https://ozakuxlktqweembeqgyh.supabase.co';
+    // Public publishable/anon key only. Never place service_role keys in browser code.
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1628,7 +1776,7 @@ body.in-live-room main > div:nth-child(-n+3) {
     }
 
     function spawnConfetti(count, duration) {
-      const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#0879d9', '#2ecc71', '#ffd700'];
+      const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#e32636', '#2ecc71', '#ffd700'];
       for (let i = 0; i < count; i++) {
         setTimeout(() => {
           const confetti = document.createElement('div');
@@ -1678,19 +1826,20 @@ body.in-live-room main > div:nth-child(-n+3) {
       }
     }
 
+    function openCurhatanFeed(navElement) {
+      switchTab('pageHome', navElement);
+      const feed = document.getElementById('postsList');
+      if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function switchTab(pageId, navElement) {
+      if (pageId === 'pageSearch' && typeof loadAchievements === 'function') { loadAchievements(); }
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
         nav.classList.remove('active');
         const iconBg = nav.querySelector('.nav-icon-bg');
         if (iconBg) nav.innerHTML = nav.innerHTML.replace('<div class="nav-icon-bg">', '').replace('</div>', '');
       });
-
-      if (pageId === 'pageLive' && currentActiveLive && !userHasLeftLive) {
-        document.body.classList.add('is-in-live');
-      } else {
-        document.body.classList.remove('is-in-live');
-      }
 
       document.getElementById(pageId).classList.add('active');
       if (navElement) {
@@ -1703,7 +1852,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
       if (pageId === 'pageProfile') renderProfileData();
       if (pageId === 'pageCreate') loadDraftLocally();
-      if (pageId === 'pageLive') loadActiveLiveSession();
+
     }
 
     function checkDailyCoinReset() {
@@ -1764,11 +1913,6 @@ body.in-live-room main > div:nth-child(-n+3) {
       ]);
       
       initGlobalRealtime();
-
-      const savedLiveId = localStorage.getItem('cuit_active_live_id');
-      if (savedLiveId) {
-        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
-      }
     }
 
     async function loadUserLikes() {
@@ -1885,101 +2029,224 @@ body.in-live-room main > div:nth-child(-n+3) {
     }
 
     function cuitBadgeSvg(level) {
-      const title = typeof level === 'string' ? level : (level?.title || '');
-      const idx = title.includes('Maestro') ? 4
-        : title.includes('Sultan') ? 3
-        : title.includes('Aktif') ? 2
-        : title.includes('Setia') ? 1 : 0;
-
-      const colors = [
-        ['#ffdda0', '#a94e23', '#ff9b49'],
-        ['#e8f6ff', '#467bb9', '#75d7ff'],
-        ['#fff0a1', '#b66b13', '#ffd54d'],
-        ['#fff4bc', '#a96a0c', '#ffbb35'],
-        ['#ffd5ff', '#7137c5', '#b46aff']
+      const raw = typeof level === 'string' ? level : (typeof level === 'number' ? String(level) : (level?.title || ''));
+      const found = raw.match(/(?:Level\s*)?(10|[1-9])|Dewa|Kaisar|Adipati|Panglima|Bangsawan|Ksatria|Elit|Penggerak|Bintang|Tunas/i);
+      const byName = /Dewa/i.test(raw)?10:/Kaisar/i.test(raw)?9:/Adipati/i.test(raw)?8:/Panglima/i.test(raw)?7:/Bangsawan/i.test(raw)?6:/Ksatria/i.test(raw)?5:/Elit/i.test(raw)?4:/Penggerak/i.test(raw)?3:/Bintang/i.test(raw)?2:1;
+      const n = Math.max(1, Math.min(10, found && /^\d+$/.test(found[0]) ? Number(found[0]) : byName));
+      const palettes = [
+        ['#d8f7b8','#176b3a','#83d65b','#f7ffe5'], ['#fff1a8','#8f4c0b','#ffcf38','#fffbe4'],
+        ['#ffd0a1','#9a4216','#ff8b37','#fff0d9'], ['#e9c7ff','#54258a','#b875ff','#fff0ff'],
+        ['#b9e9ff','#164c85','#4bb8f4','#effbff'], ['#ffe2a1','#81500b','#e8a62c','#fff8dc'],
+        ['#b8ffe9','#075d4b','#20c6a0','#eafff8'], ['#f2d0ff','#552079','#c05cff','#fff0ff'],
+        ['#fff0a6','#713500','#ffbd25','#fffde8'], ['#ffffff','#5c3a00','#ffe05c','#ffffff']
       ];
-
-      const [light, deep, glow] = colors[idx];
-      const starsCount = idx + 1;
-      const uid = 'cuitBadge' + (++cuitBadgeSerial);
-      const start = 50 - (starsCount - 1) * 15 / 2;
-
-      const stars = Array.from({ length: starsCount }, (_, i) =>
-        `<polygon class="spark"
-          style="animation-delay:${i * 0.17}s"
-          points="${cuitStarPoints(start + i * 15, 76)}"
-          fill="url(#${uid}gold)" stroke="#fff5c4" stroke-width=".7"/>`
-      ).join('');
-
-      return `<svg class="cuit-rank-badge" viewBox="0 0 100 100"
-        role="img" aria-label="${title}, ${starsCount} bintang"
-        xmlns="http://www.w3.org/2000/svg">
+      const [light, deep, glow, shine] = palettes[n-1];
+      const uid = 'cuitRank' + (++cuitBadgeSerial);
+      const title = ['','Tunas Cuiter','Bintang Cuiter','Penggerak Cuiter','Elit Cuiter','Ksatria Cuiter','Bangsawan Cuiter','Panglima Cuiter','Adipati Cuiter','Kaisar Cuiter','Dewa Cuiter'][n];
+      const stars = Array.from({length:Math.min(n,5)},(_,i)=>{
+        const x = 50 + (i-(Math.min(n,5)-1)/2)*12;
+        return `<path d="M${x} 76 l2.3 4.6 5 .7 -3.7 3.5 .9 5 -4.5 -2.4 -4.5 2.4 .9 -5 -3.7 -3.5 5 -.7Z" fill="url(#${uid}gold)" stroke="#fff6c6" stroke-width=".6"/>`;
+      }).join('');
+      const sideOrnament = n >= 5 ? `<path d="M23 43 Q9 31 17 19 Q31 24 34 39 L30 53 Q22 50 23 43Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1"/><path d="M77 43 Q91 31 83 19 Q69 24 66 39 L70 53 Q78 50 77 43Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1"/>` : `<path d="M25 35 Q13 27 18 17 Q29 22 34 34 M75 35 Q87 27 82 17 Q71 22 66 34" fill="none" stroke="url(#${uid}metal)" stroke-width="3" stroke-linecap="round"/>`;
+      const crest = n===1 ? `<path d="M50 28 C43 20 33 27 37 37 C40 43 47 47 50 49 C53 47 60 43 63 37 C67 27 57 20 50 28Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.3"/><path d="M50 31 L50 45 M43 34 L50 40 L57 34" stroke="#fff" stroke-width="1.5" fill="none"/>`
+        : n===2 ? `<path d="M50 25 L55 39 L70 40 L59 49 L63 63 L50 55 L37 63 L41 49 L30 40 L45 39Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.4"/>`
+        : n===3 ? `<circle cx="50" cy="44" r="17" fill="none" stroke="url(#${uid}metal)" stroke-width="5"/><circle cx="50" cy="44" r="9" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.2"/><path d="M50 28 V60 M34 44 H66 M39 33 L61 55 M61 33 L39 55" stroke="${shine}" stroke-width="1.1"/>`
+        : n===4 ? `<path d="M50 26 L68 36 L64 55 L50 66 L36 55 L32 36Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.5"/><path d="M50 30 L57 43 L50 59 L43 43Z" fill="${shine}" opacity=".8"/>`
+        : n===5 ? `<path d="M50 25 L66 32 L64 50 Q60 61 50 67 Q40 61 36 50 L34 32Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.5"/><path d="M50 32 L58 43 L50 57 L42 43Z" fill="url(#${uid}metal)"/>`
+        : n===6 ? `<path d="M32 31 L37 23 L45 30 L50 19 L55 30 L63 23 L68 31 L65 39 Q50 45 35 39Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.2"/><path d="M50 39 L61 48 L50 62 L39 48Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.2"/>`
+        : n===7 ? `<path d="M28 33 L15 24 L23 43 L18 51 L35 53 L50 66 L65 53 L82 51 L77 43 L85 24 L72 33 L64 27 L58 39 L50 32 L42 39 L36 27Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.2"/><path d="M50 38 L58 47 L50 59 L42 47Z" fill="url(#${uid}gem)"/>`
+        : n===8 ? `<path d="M30 33 L29 21 L42 29 L50 17 L58 29 L71 21 L70 33 L64 40 L36 40Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.3"/><path d="M50 37 L65 48 L50 64 L35 48Z" fill="url(#${uid}gem)" stroke="${shine}" stroke-width="1.2"/><circle cx="50" cy="48" r="4" fill="${shine}"/>`
+        : n===9 ? `<path d="M26 42 Q12 31 18 18 Q31 23 37 39 L34 53Z M74 42 Q88 31 82 18 Q69 23 63 39 L66 53Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.2"/><path d="M30 34 L28 20 L41 29 L50 12 L59 29 L72 20 L70 34 L64 40 L36 40Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.3"/><path d="M50 34 L66 48 L50 66 L34 48Z" fill="url(#${uid}gem)" stroke="#fff8c2" stroke-width="1.5"/><path d="M50 37 L50 61 M39 48 H61" stroke="#fff" stroke-width="1.4"/>`
+        : `<path d="M24 43 Q5 26 17 13 Q33 18 39 37 L34 55Z M76 43 Q95 26 83 13 Q67 18 61 37 L66 55Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width="1.4"/><path d="M25 34 L23 16 L39 27 L50 7 L61 27 L77 16 L75 34 L67 42 L33 42Z" fill="url(#${uid}metal)" stroke="#fffbd8" stroke-width="1.5"/><path d="M50 31 L69 48 L50 69 L31 48Z" fill="url(#${uid}gem)" stroke="#fff" stroke-width="1.7"/><path d="M50 33 L50 65 M35 48 H65 M40 38 L60 58 M60 38 L40 58" stroke="#fff" stroke-width="1.2" opacity=".9"/><circle cx="50" cy="48" r="5" fill="#fff" stroke="${deep}" stroke-width="1.2"/>`;
+      return `<svg class="cuit-rank-badge rank-l${n}" viewBox="0 0 100 100" role="img" aria-label="Level ${n} ${title}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="${uid}rim" x1="0" y1="0" x2="1" y2="1">
-            <stop stop-color="#fffde0"/>
-            <stop offset=".22" stop-color="${light}"/>
-            <stop offset=".48" stop-color="${deep}"/>
-            <stop offset=".72" stop-color="${light}"/>
-            <stop offset="1" stop-color="${deep}"/>
-          </linearGradient>
-          <linearGradient id="${uid}inside" x1=".1" y1="0" x2=".9" y2="1">
-            <stop stop-color="#284a77"/>
-            <stop offset=".45" stop-color="#101b36"/>
-            <stop offset="1" stop-color="#050c1d"/>
-          </linearGradient>
-          <linearGradient id="${uid}crystal" x1="0" y1="0" x2="1" y2="1">
-            <stop stop-color="#fff"/>
-            <stop offset=".3" stop-color="#a6f4ff"/>
-            <stop offset=".62" stop-color="#32a7ff"/>
-            <stop offset="1" stop-color="#5040d7"/>
-          </linearGradient>
-          <linearGradient id="${uid}gold" x1="0" y1="0" x2="0" y2="1">
-            <stop stop-color="#fffbd5"/>
-            <stop offset=".48" stop-color="#ffdc61"/>
-            <stop offset="1" stop-color="#ed8618"/>
-          </linearGradient>
-          <radialGradient id="${uid}halo">
-            <stop stop-color="${glow}" stop-opacity=".6"/>
-            <stop offset="1" stop-color="${glow}" stop-opacity="0"/>
-          </radialGradient>
+          <linearGradient id="${uid}metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".16" stop-color="${shine}"/><stop offset=".32" stop-color="${light}"/><stop offset=".53" stop-color="${deep}"/><stop offset=".72" stop-color="${glow}"/><stop offset=".88" stop-color="#fff4bd"/><stop offset="1" stop-color="${deep}"/></linearGradient>
+          <linearGradient id="${uid}gold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffde4"/><stop offset=".35" stop-color="#ffe56b"/><stop offset=".68" stop-color="#d99018"/><stop offset="1" stop-color="#fff3ad"/></linearGradient>
+          <linearGradient id="${uid}gem" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".18" stop-color="${shine}"/><stop offset=".4" stop-color="${glow}"/><stop offset=".72" stop-color="${deep}"/><stop offset="1" stop-color="#07152e"/></linearGradient>
+          <radialGradient id="${uid}halo"><stop stop-color="${glow}" stop-opacity=".8"/><stop offset=".55" stop-color="${glow}" stop-opacity=".22"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
+          <linearGradient id="${uid}shine"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset=".56" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
         </defs>
-        <circle class="aura" cx="50" cy="49" r="45" fill="url(#${uid}halo)"/>
-        <path d="M50 5 C57 13 69 14 79 19 L88 36 Q93 50 85 66 Q73 83 50 94 Q27 83 15 66 Q7 50 12 36 L21 19 C31 14 43 13 50 5Z"
-          fill="url(#${uid}rim)" stroke="${light}" stroke-width="1.3"/>
-        <path d="M50 10 C58 17 69 18 76 23 L83 38 Q87 50 80 63 Q69 78 50 88 Q31 78 20 63 Q13 50 17 38 L24 23 C31 18 42 17 50 10Z"
-          fill="#0b1530" stroke="${deep}" stroke-width="2"/>
-        <path d="M50 16 C59 23 67 23 72 27 L78 40 Q81 50 75 61 Q65 73 50 81 Q35 73 25 61 Q19 50 22 40 L28 27 C33 23 41 23 50 16Z"
-          fill="url(#${uid}inside)" stroke="${light}" stroke-opacity=".7" stroke-width=".8"/>
-        <path d="M32 29 L28 18 L40 24 L50 12 L60 24 L72 18 L68 29 Q50 35 32 29Z"
-          fill="url(#${uid}rim)" stroke="#fff0b3" stroke-width=".9"/>
-        <path d="M46 22 L50 15 L54 22 L50 27Z"
-          fill="url(#${uid}crystal)" stroke="#fff" stroke-width=".5"/>
-        <path d="M24 47 Q13 38 16 30 Q24 35 30 43 L32 60 Q26 57 24 47Z"
-          fill="url(#${uid}rim)" stroke="${light}" stroke-width=".7"/>
-        <path d="M76 47 Q87 38 84 30 Q76 35 70 43 L68 60 Q74 57 76 47Z"
-          fill="url(#${uid}rim)" stroke="${light}" stroke-width=".7"/>
-        <g class="floatgem">
-          <path d="M50 32 L62 48 L50 66 L38 48Z"
-            fill="url(#${uid}crystal)" stroke="#d6fbff" stroke-width="1.1"/>
-          <path d="M50 32 L50 66 L38 48Z" fill="#fff" opacity=".4"/>
-          <path d="M50 32 L62 48 L50 46Z" fill="#fff" opacity=".7"/>
-          <path d="M50 46 L62 48 L50 66Z" fill="#2535a8" opacity=".55"/>
-        </g>
-        <path d="M26 68 Q50 61 74 68 L70 78 Q50 87 30 78Z"
-          fill="#071126" stroke="${light}" stroke-opacity=".65" stroke-width=".8"/>
+        <circle class="rank-aura" cx="50" cy="48" r="47" fill="url(#${uid}halo)"/>
+        <path d="M50 3 L59 10 L73 10 L80 20 L90 27 L89 41 L95 50 L88 61 L87 74 L74 80 L66 91 L52 91 L50 97 L43 91 L29 91 L21 80 L9 74 L10 61 L4 50 L11 41 L10 27 L20 20 L27 10 L41 10Z" fill="url(#${uid}metal)" stroke="#fff5c6" stroke-width="1.4"/>
+        <path d="M50 9 L61 15 L73 15 L78 25 L86 31 L84 43 L90 50 L82 61 L81 71 L70 77 L63 86 L51 85 L50 91 L44 85 L32 86 L25 77 L14 71 L15 61 L10 50 L16 43 L14 31 L22 25 L27 15 L39 15Z" fill="#111b34" stroke="${deep}" stroke-width="2"/>
+        <path d="M50 14 L60 20 L71 20 L76 29 L82 34 L80 44 L85 50 L78 60 L77 69 L67 74 L61 81 L51 80 L50 85 L44 80 L34 81 L28 74 L18 69 L19 60 L14 50 L20 44 L18 34 L24 29 L29 20 L40 20Z" fill="url(#${uid}metal)" stroke="${shine}" stroke-width=".8"/>
+        <circle cx="50" cy="48" r="25" fill="#07152c" stroke="url(#${uid}gold)" stroke-width="2.3"/>
+        <circle cx="50" cy="48" r="21.5" fill="none" stroke="${light}" stroke-width=".8" stroke-dasharray="1.6 2.4"/>
+        ${sideOrnament}${crest}
+        <text x="50" y="72" text-anchor="middle" font-family="Georgia,serif" font-size="${n===10?10:12}" font-weight="900" fill="url(#${uid}gold)" stroke="#4b2d00" stroke-width=".35">${String(n).padStart(2,'0')}</text>
         ${stars}
-        <path d="M29 81 Q50 91 71 81" fill="none"
-          stroke="${light}" stroke-width="1.2" opacity=".85"/>
+        <path d="M50 4 L51.5 10 L58 11.5 L51.5 13 L50 19 L48.5 13 L42 11.5 L48.5 10Z" fill="#fff" opacity=".95"/>
+        <rect class="rank-shimmer" x="-45" y="0" width="35" height="100" fill="url(#${uid}shine)" transform="rotate(18 50 50)"/>
       </svg>`;
     }
 
+    // Ambang ini mengikuti rancangan pengguna. Nilai pada UI masih bersumber dari
+    // profiles.used_paid_coins; otorisasi XP final tetap memerlukan validasi backend.
+    const CUIT_LEVELS = [
+      { level: 1, title: 'Tunas Cuiter', icon: '🌱', xp: 0, color: '#2f9e44', emblem: 'tunas' },
+      { level: 2, title: 'Bintang Cuiter', icon: '⭐', xp: 1000, color: '#d62839', emblem: 'bintang-merah-emas' },
+      { level: 3, title: 'Penggerak Cuiter', icon: '⚙️', xp: 5000, color: '#e67e22', emblem: 'penggerak' },
+      { level: 4, title: 'Elit Cuiter', icon: '🔶', xp: 20000, color: '#8e44ad', emblem: 'elit' },
+      { level: 5, title: 'Ksatria Cuiter', icon: '🛡️', xp: 75000, color: '#2471a3', emblem: 'ksatria' },
+      { level: 6, title: 'Bangsawan Cuiter', icon: '🏵️', xp: 200000, color: '#b9770e', emblem: 'bangsawan' },
+      { level: 7, title: 'Panglima Cuiter', icon: '⚔️', xp: 500000, color: '#117864', emblem: 'panglima' },
+      { level: 8, title: 'Adipati Cuiter', icon: '👑', xp: 1500000, color: '#7d3c98', emblem: 'adipati' },
+      { level: 9, title: 'Kaisar Cuiter', icon: '👑', xp: 4000000, color: '#c58b00', emblem: 'kaisar' },
+      { level: 10, title: 'Dewa Cuiter', icon: '🌟', xp: 10000000, color: '#b8860b', emblem: 'dewa' }
+    ];
+
     function getUserLevel(expPoints = null) {
-      const pts = (expPoints !== null) ? parseInt(expPoints) : usedPaidCoins;
-      if (pts >= 100000) return { title: '💎 Cuiter Maestro', icon: '💎', next: null, target: 100000, color: '#5856d6' };
-      if (pts >= 25000) return { title: '👑 Cuiter Sultan', icon: '👑', next: '💎 Cuiter Maestro', target: 100000, prev: 25000, color: '#ffcc00' };
-      if (pts >= 5000) return { title: '🔥 Cuiter Aktif', icon: '🔥', next: '👑 Cuiter Sultan', target: 25000, prev: 5000, color: '#ff9500' };
-      if (pts >= 1000) return { title: '💙 Cuiter Setia', icon: '💙', next: '🔥 Cuiter Aktif', target: 5000, prev: 1000, color: '#007aff' };
-      return { title: '🌱 Cuiter Baru', icon: '🌱', next: '💙 Cuiter Setia', target: 1000, prev: 0, color: '#8e8e93' };
+      const pts = Math.max(0, Number.parseInt(expPoints !== null ? expPoints : usedPaidCoins, 10) || 0);
+      let current = CUIT_LEVELS[0];
+      for (const item of CUIT_LEVELS) { if (pts >= item.xp) current = item; else break; }
+      const next = CUIT_LEVELS.find(item => item.level === current.level + 1) || null;
+      return {
+        title: `${current.icon} ${current.title}`, icon: current.icon, level: current.level,
+        next: next ? `${next.icon} ${next.title}` : null,
+        target: next ? next.xp : current.xp,
+        prev: current.xp, color: current.color, xp: pts
+      };
+    }
+
+    function escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch])); }
+
+    const RAJA_CATEGORIES = [
+      { key:'sawer', name:'Raja Sawer', icon:'🎁', desc:'Koin gift yang dikirim', table:'gift_transactions' },
+      { key:'game', name:'Raja Game', icon:'🎯', desc:'Aktivitas permainan', table:null },
+      { key:'curhat', name:'Raja Curhat', icon:'💭', desc:'Curhatan dengan interaksi tertinggi', table:'curhat' },
+      { key:'pujangga', name:'Raja Pujangga', icon:'✍️', desc:'Jumlah curhatan dibuat', table:'curhat' },
+      { key:'komentar', name:'Raja Komentar', icon:'💬', desc:'Komentar yang ditulis', table:'comments' },
+      { key:'jaringan', name:'Raja Jaringan', icon:'👥', desc:'Pengikut yang diperoleh', table:'follows' },
+      { key:'koin', name:'Raja Koin', icon:'🪙', desc:'Koin gift yang diterima', table:'gift_transactions' },
+      { key:'sponsor', name:'Raja Sponsor', icon:'🤝', desc:'Member yang direferensikan', table:'profiles' },
+      { key:'nonton', name:'Raja Nonton', icon:'▶️', desc:'Klaim misi nonton yang tercatat', table:'reels_claims' },
+      { key:'like', name:'Raja Like', icon:'❤️', desc:'Like yang diberikan', table:'post_likes' }
+    ];
+
+    function renderAchievementRows(containerId, rows, scoreLabel) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      if (!rows.length) { el.innerHTML = '<div class="achievement-empty">Belum ada data anggota untuk ditampilkan.</div>'; return; }
+      el.innerHTML = rows.slice(0, 10).map((row, index) => {
+        const isMe = !!(currentUser && row.id === currentUser.id);
+        const badge = row.levelInfo || getUserLevel(row.xp || 0);
+        return `<div class="achievement-row">
+          <div class="achievement-rank">${index + 1}</div>
+          <div class="achievement-avatar" style="border-color:${badge.color || '#d4a72c'};color:${badge.color || '#d4a72c'}">${badge.icon || '🌱'}</div>
+          <div class="achievement-member"><div class="achievement-name">${escapeHtml(row.name || 'Member CUIT')}${isMe ? ' <span style="color:#9a6a00">• Ini levelmu</span>' : ''}</div><div class="achievement-meta">${escapeHtml(badge.title || '')}</div></div>
+          <div class="achievement-score">${Number(row.score || 0).toLocaleString('id-ID')}<br><span style="font-weight:600;color:#77535a">${scoreLabel}</span></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderLevelDirectory() {
+      const el = document.getElementById('allCuitLevels');
+      if (!el) return;
+      const myLevel = getUserLevel();
+      el.innerHTML = CUIT_LEVELS.map(item => `<div class="level-card" style="${item.level === myLevel.level ? 'border-color:#d4a72c;background:#fffaf0;' : ''}">
+        <div class="level-logo" style="width:44px;height:44px;padding:0;background:transparent;border:0;border-radius:0;flex:0 0 44px">${cuitBadgeSvg(item.level)}</div>
+        <div><div class="level-card-name">Level ${item.level} · ${item.title}${item.level === myLevel.level ? ' <span style="color:#9a6a00">(Ini levelmu)</span>' : ''}</div><div class="level-card-xp">Target: ${item.xp.toLocaleString('id-ID')} koin berbayar terpakai</div></div>
+      </div>`).join('');
+    }
+
+    function localStartOfDayWIB(date = new Date()) {
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Jakarta', year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(date);
+      const v = Object.fromEntries(parts.map(p => [p.type,p.value]));
+      return new Date(`${v.year}-${v.month}-${v.day}T00:00:00+07:00`);
+    }
+    function localStartOfWeekWIB(date = new Date()) {
+      const d = localStartOfDayWIB(date);
+      const weekday = new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jakarta',weekday:'short'}).format(date);
+      const offset = ({Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6})[weekday] ?? 0;
+      d.setTime(d.getTime() - offset*86400000);
+      return d;
+    }
+    function safeNameFromRow(row) {
+      return row?.username || row?.sender_name || row?.name || (row?.email ? String(row.email).split('@')[0] : '') || (row?.user_email ? String(row.user_email).split('@')[0] : '') || 'Member CUIT';
+    }
+    function winnerFromCounts(counts) {
+      const sorted = Object.entries(counts || {}).filter(([,score]) => Number(score)>0).sort((a,b)=>Number(b[1])-Number(a[1]));
+      return sorted.length ? { key:sorted[0][0], score:Number(sorted[0][1]) } : null;
+    }
+    function countBy(rows, keyFn, scoreFn = () => 1) {
+      const counts = {};
+      (rows || []).forEach(row => { const key = keyFn(row); if (key) counts[key] = (counts[key] || 0) + Number(scoreFn(row) || 0); });
+      return counts;
+    }
+    function renderKingCategories(containerId, categoryResults) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = RAJA_CATEGORIES.map((cat,index) => {
+        const result = categoryResults[cat.key];
+        const name = result?.name || 'Belum ada pemenang';
+        const score = result?.scoreLabel || (cat.key === 'game' ? 'Data game belum terhubung' : 'Belum ada data');
+        const note = result?.note || cat.desc;
+        return `<div class="achievement-row">
+          <div class="achievement-rank">${index+1}</div><div class="achievement-avatar" style="color:${cat.key==='game'?'#c81e32':'#b8860b'}">${cat.icon}</div>
+          <div class="achievement-member"><div class="achievement-name">${escapeHtml(cat.name)}</div><div class="achievement-meta">${escapeHtml(name)} · ${escapeHtml(note)}</div></div>
+          <div class="achievement-score" style="max-width:100px;white-space:normal">${escapeHtml(score)}</div>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadAchievements() {
+      renderLevelDirectory();
+      const myCallout = document.getElementById('myLevelAchievement');
+      try {
+        const { data: profiles, error: profileError } = await supabaseClient.from('profiles').select('id,email,username,used_paid_coins,sponsor,created_at,followers_count');
+        if (profileError) throw profileError;
+        const members = (profiles || []).map(p => ({ id:p.id, email:p.email, name:p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'), xp:Number(p.used_paid_coins || 0), levelInfo:getUserLevel(Number(p.used_paid_coins || 0)) }));
+        const mine = currentUser ? members.find(m => m.id === currentUser.id) : null;
+        const myXP = mine ? mine.xp : Number(usedPaidCoins || 0);
+        const myLevel = getUserLevel(myXP);
+        if (myCallout) myCallout.innerHTML = `✨ Ini levelmu: Level ${myLevel.level} — ${myLevel.title} · ${myXP.toLocaleString('id-ID')} / ${myLevel.next ? myLevel.target.toLocaleString('id-ID') : 'maksimal'} koin berbayar terpakai${currentUser && members.length && [...members].sort((a,b)=>b.xp-a.xp).slice(0,10).some(m=>m.id===currentUser.id) ? ' · Kamu juga masuk 10 besar!' : ''}`;
+        const levelRows = [...members].sort((a,b) => b.xp-a.xp).slice(0,10).map(m => ({...m,score:m.xp}));
+        renderAchievementRows('topLevelMembers', levelRows, 'koin terpakai');
+
+        const dayStart = localStartOfDayWIB();
+        const weekStart = localStartOfWeekWIB();
+        const [allPostsRes, allGiftsRes, allCommentsRes, allFollowsRes, allLikesRes, allReelsRes, allProfilesRes] = await Promise.all([
+          supabaseClient.from('curhat').select('*').gte('created_at', weekStart.toISOString()).order('created_at',{ascending:false}),
+          supabaseClient.from('gift_transactions').select('*').gte('created_at', weekStart.toISOString()),
+          supabaseClient.from('comments').select('*').gte('created_at', weekStart.toISOString()),
+          supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
+          supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
+          supabaseClient.from('reels_claims').select('*').gte('created_at', weekStart.toISOString()),
+          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at').gte('created_at', weekStart.toISOString())
+        ]);
+        const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allProfilesRes].filter(r=>r.error);
+        if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));
+        const byPeriod = (rows,start) => (rows||[]).filter(r => r.created_at && new Date(r.created_at) >= start);
+        function makeResults(start) {
+          const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
+          const results = {};
+          let w;
+          w=winnerFromCounts(countBy(gifts,g=>g.sender_id||g.sender_email||g.sender_name,g=>g.coins_amount||g.amount||0));
+          if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
+          // Raja Game tidak memakai data LIVE lama. Nama tabel game belum ditemukan dalam file audit ini.
+          results.game={name:'Belum tersedia',scoreLabel:'Data game belum terhubung',note:'menunggu audit sumber transaksi game'};
+          const postEngagement = {};
+          posts.forEach(p=>{const key=p.user_id||p.user_email||p.email||p.username;if(!key)return;const value=Number(p.likes_count||0)+Number(p.comments_count||0);postEngagement[key]=(postEngagement[key]||0)+value;});
+          w=winnerFromCounts(postEngagement); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.curhat={name:safeNameFromRow(p),scoreLabel:`${w.score.toLocaleString('id-ID')} interaksi`,note:'interaksi pada curhatan'};}
+          w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
+          w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
+          w=winnerFromCounts(countBy(follows,f=>f.following_email||f.following_id)); if(w){const p=(profiles||[]).find(p=>p.email===w.key||p.id===w.key);results.jaringan={name:p?.username||(p?.email? p.email.split('@')[0]:String(w.key).split('@')[0]),scoreLabel:`${w.score} pengikut`,note:'pengikut baru tercatat'};}
+          w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0)); if(w){const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);results.koin={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'koin gift diterima'};}
+          w=winnerFromCounts(countBy(newProfiles,p=>p.sponsor)); if(w){const p=(profiles||[]).find(p=>p.username===w.key||p.email===w.key);results.sponsor={name:p?.username||(p?.email?p.email.split('@')[0]:String(w.key)),scoreLabel:`${w.score} member`,note:'member terdaftar melalui sponsor'};}
+          w=winnerFromCounts(countBy(reels,r=>r.user_id||r.user_email)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.nonton={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} klaim`,note:'klaim misi nonton'};}
+          w=winnerFromCounts(countBy(likes,l=>l.user_id||l.user_email||l.guest_token)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.like={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} like`,note:'like diberikan'};}
+          return results;
+        }
+        const dailyResults = makeResults(dayStart);
+        const weeklyResults = makeResults(weekStart);
+        // Kategori tanpa hasil tetap ditampilkan; jangan menyamarkan data kosong sebagai pemenang.
+        renderKingCategories('dailyKings',dailyResults);
+        renderKingCategories('weeklyKings',weeklyResults);
+      } catch (err) {
+        console.warn('Prestasi member belum dapat dimuat:', err);
+        ['dailyKings','weeklyKings','topLevelMembers'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML='<div class="achievement-empty">Data belum dapat dimuat. Periksa koneksi, izin RLS, dan konfigurasi database.</div>'; });
+        if (myCallout) myCallout.textContent = `Ini levelmu: Level ${getUserLevel().level} — ${getUserLevel().title}`;
+      }
     }
 
     async function loadPosts() {
@@ -2079,54 +2346,13 @@ body.in-live-room main > div:nth-child(-n+3) {
           document.getElementById('champSawerScore').innerText = '0 🪙';
         }
 
-        // --- 2. RAJA LIVE ---
-        let liveCoinMap = {};
-        if (weeklyLives && weeklyLives.length > 0) {
-          weeklyLives.forEach(l => {
-            if (l.host_name) {
-              liveCoinMap[l.host_name] = (liveCoinMap[l.host_name] || 0) + (l.total_coins_received || 0);
-            }
-          });
-        }
-        if (weeklyLiveMsgs && weeklyLiveMsgs.length > 0) {
-          weeklyLiveMsgs.forEach(m => {
-            if (m.content && m.content.includes('🎁 Mengirimkan Gift')) {
-              const matchCoins = m.content.match(/\((\d+)\s*🪙\)/);
-              if (matchCoins) {
-                const coins = parseInt(matchCoins[1]) || 0;
-                const matchTarget = m.content.match(/untuk\s+@(.+)/);
-                const targetHost = matchTarget ? matchTarget[1].trim() : 'Host';
-                liveCoinMap[targetHost] = (liveCoinMap[targetHost] || 0) + coins;
-              }
-            }
-          });
-        }
-
-        const sortedHosts = Object.keys(liveCoinMap).sort((a, b) => liveCoinMap[b] - liveCoinMap[a]);
-        let validHostName = null;
-        let validHostScore = 0;
-
-        for (const hName of sortedHosts) {
-          const { data: prof } = await supabaseClient
-            .from('profiles')
-            .select('username, email')
-            .or(`username.ilike.${hName},email.ilike.${hName}`)
-            .maybeSingle();
-
-          if (prof && liveCoinMap[hName] > 0) {
-            validHostName = prof.username || prof.email.split('@')[0];
-            validHostScore = liveCoinMap[hName];
-            break;
-          }
-        }
-
-        if (validHostName) {
-          document.getElementById('champLiveName').innerText = validHostName;
-          document.getElementById('champLiveScore').innerText = `${validHostScore.toLocaleString('id-ID')} 🪙`;
-        } else {
-          document.getElementById('champLiveName').innerText = 'Belum Ada';
-          document.getElementById('champLiveScore').innerText = '0 🪙';
-        }
+        // --- 2. RAJA GAME ---
+        // Belum ada tabel transaksi game yang terverifikasi pada file ini.
+        // Jangan memakai data LIVE lama sebagai pengganti pemenang game.
+        const gameNameEl = document.getElementById('champGameName');
+        const gameScoreEl = document.getElementById('champGameScore');
+        if (gameNameEl) gameNameEl.innerText = 'Data game belum terhubung';
+        if (gameScoreEl) gameScoreEl.innerText = 'Menunggu audit tabel game';
 
         // --- 3. RAJA CURHAT ---
         if (data && data.length > 0) {
@@ -2433,18 +2659,18 @@ body.in-live-room main > div:nth-child(-n+3) {
           let cardsHTML = '';
           sorotanItems.forEach(item => {
             let rawName = item.username || 'Pengguna';
-            let snippet = item.title.length > 45 ? item.title.substring(0, 45) + '...' : item.title;
+            let snippet = item.title.length > 70 ? item.title.substring(0, 70) + '...' : item.title;
             const isLive = (item.type === 'live');
 
             cardsHTML += `
               <div onclick="${isLive ? `joinLiveRoomDirect('${item.id}')` : `openPromotedDetail('${item.id}')`}" 
-                   style="min-width: 100px; width: 100px; height: 145px; background: ${isLive ? 'linear-gradient(180deg, #ff4757 0%, #2f3542 100%)' : 'linear-gradient(180deg, #0754b8 0%, #341f97 100%)'}; border-radius: 14px; padding: 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 3px 8px rgba(0,0,0,0.15); border: 2px solid #ffd700; overflow: hidden;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <div style="width: 24px; height: 24px; border-radius: 50%; background: #fff; color:#333; display: flex; align-items: center; justify-content: center; font-size: 11px; border: 1.5px solid #ffd700;">🤍</div>
-                  ${isLive ? `<span style="font-size:8px; background:#ff4757; color:#fff; padding:1px 4px; border-radius:6px; font-weight:800;">🔴 LIVE</span>` : ''}
+                   style="min-width: 174px; width: 174px; height: 70px; background: ${isLive ? 'linear-gradient(135deg, #fff5f5 0%, #c8102e 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fff1f3 100%)'}; border-radius: 10px; padding: 6px 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 0 1px rgba(200,16,46,.10), 0 2px 5px rgba(120,20,40,.08); border: 1px solid #c8102e; overflow: hidden; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
+                  <div style="font-size: 9px; color:#a30f27; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${rawName}</div>
+                  ${isLive ? `<span style="font-size:8px; background:#c8102e; color:#fff; padding:2px 5px; border-radius:6px; font-weight:800; flex-shrink:0;">● LIVE</span>` : ''}
                 </div>
-                <div style="font-size: 9.5px; color: #ffffff; line-height: 1.25; font-weight: 600; overflow: hidden; margin: 4px 0;">${snippet}</div>
-                <div style="font-size: 9px; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${rawName}</div>
+                <div style="font-size: 10px; color: #34252a; line-height: 1.25; font-weight: 650; overflow: hidden; margin: 3px 0;">${snippet}</div>
+                <div style="font-size: 8px; font-weight: 800; color: #c8102e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✦ CURHATAN TERPILIH</div>
               </div>
             `;
           });
@@ -2495,35 +2721,112 @@ body.in-live-room main > div:nth-child(-n+3) {
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
 
-    async function promotePost(postId) {
+    let pendingPromotionPostId = null;
+    let selectedPromotionType = 'biasa';
+    let promotionSubmitting = false;
+
+    function promotePost(postId) {
       closeAllPostMenus();
-      
-      const inputVal = await prompt("Berapa jam ingin mempromosikan postingan ini? (1 Koin Berbayar = 1 Jam):", "1");
-      const hours = parseInt(inputVal) || 0;
-      
-      if (hours <= 0) return;
+      if (!currentUser) return alert('Silakan masuk terlebih dahulu untuk mempromosikan curhatan.');
+      pendingPromotionPostId = postId;
+      promotionSubmitting = false;
+      const modal = document.getElementById('promotionChoiceModal');
+      document.getElementById('promotionBiasaHours').value = '1';
+      document.getElementById('promotionIstimewaHours').value = '1';
+      document.getElementById('promotionBalance').textContent = Number(paidCoins || 0).toLocaleString('id-ID');
+      document.getElementById('promotionFeedback').textContent = '';
+      document.getElementById('confirmPromotionButton').disabled = false;
+      document.getElementById('confirmPromotionButton').textContent = 'Oke, Promosikan';
+      selectPromotionType('biasa');
+      modal.style.display = 'flex';
+    }
 
-      if (paidCoins < hours) {
-        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${hours} jam membutuhkan ${hours} Koin Berbayar.`);
+    function closePromotionModal() {
+      if (promotionSubmitting) return;
+      document.getElementById('promotionChoiceModal').style.display = 'none';
+      pendingPromotionPostId = null;
+    }
+
+    function selectPromotionType(type) {
+      selectedPromotionType = type === 'istimewa' ? 'istimewa' : 'biasa';
+      const biasa = document.getElementById('promotionBiasaButton');
+      const istimewa = document.getElementById('promotionIstimewaButton');
+      biasa.style.background = selectedPromotionType === 'biasa' ? '#c81e32' : '#fff';
+      biasa.style.color = selectedPromotionType === 'biasa' ? '#fff' : '#9f1239';
+      biasa.style.border = selectedPromotionType === 'biasa' ? '1px solid #c81e32' : '1px solid #f2b8c0';
+      istimewa.style.background = selectedPromotionType === 'istimewa' ? '#b8860b' : '#fff';
+      istimewa.style.color = selectedPromotionType === 'istimewa' ? '#fff' : '#946200';
+      istimewa.style.border = selectedPromotionType === 'istimewa' ? '1px solid #b8860b' : '1px solid #d7b65e';
+      updatePromotionCost();
+    }
+
+    function updatePromotionCost() {
+      const inputId = selectedPromotionType === 'istimewa' ? 'promotionIstimewaHours' : 'promotionBiasaHours';
+      const raw = document.getElementById(inputId).value;
+      const hours = Math.floor(Number(raw));
+      const rate = selectedPromotionType === 'istimewa' ? 5 : 1;
+      const valid = raw !== '' && Number.isFinite(hours) && hours >= 1 && String(hours) === String(Number(raw));
+      const cost = valid ? hours * rate : 0;
+      document.getElementById('promotionTotalCost').textContent = `${cost.toLocaleString('id-ID')} Koin`;
+      document.getElementById('promotionCostExplain').textContent = valid ? `(${hours} jam × ${rate} koin)` : '(masukkan durasi minimal 1 jam)';
+      document.getElementById('promotionFeedback').textContent = valid && cost > Number(paidCoins || 0) ? 'Saldo Koin Berbayar tidak mencukupi untuk pilihan ini.' : '';
+      document.getElementById('confirmPromotionButton').disabled = !valid || cost > Number(paidCoins || 0) || promotionSubmitting;
+    }
+
+    async function confirmPostPromotion() {
+      if (promotionSubmitting) return;
+      const inputId = selectedPromotionType === 'istimewa' ? 'promotionIstimewaHours' : 'promotionBiasaHours';
+      const raw = document.getElementById(inputId).value;
+      const hours = Number(raw);
+      const rate = selectedPromotionType === 'istimewa' ? 5 : 1;
+      const cost = hours * rate;
+      if (!pendingPromotionPostId) return;
+      if (!Number.isInteger(hours) || hours < 1) {
+        document.getElementById('promotionFeedback').textContent = 'Durasi harus berupa bilangan bulat minimal 1 jam.';
+        return;
       }
-
-      const nowMs = Date.now();
-      const expiryMs = nowMs + (hours * 3600 * 1000);
-      const expiryISO = new Date(expiryMs).toISOString();
-
-      const { error } = await supabaseClient
-        .from('curhat')
-        .update({ is_promoted: true, promoted_until: expiryISO, updated_at: new Date().toISOString() })
-        .eq('id', postId);
-
-      if (error) return alert('Gagal mempromosikan postingan: ' + error.message);
-
-      paidCoins -= hours;
-      usedPaidCoins += hours;
-      updateCoinUI(true);
-
-      alert(`Postingan berhasil dipromosikan ke barisan Sorotan Paling Kiri! (+${hours} EXP Jam Terbang)`);
-      loadPosts();
+      if (Number(paidCoins || 0) < cost) {
+        document.getElementById('promotionFeedback').textContent = `Saldo tidak cukup. Dibutuhkan ${cost} Koin Berbayar.`;
+        return;
+      }
+      const post = allPostsCache.find(p => String(p.id) === String(pendingPromotionPostId));
+      if (!post) {
+        document.getElementById('promotionFeedback').textContent = 'Curhatan tidak ditemukan. Tutup lalu muat ulang beranda.';
+        return;
+      }
+      promotionSubmitting = true;
+      const confirmBtn = document.getElementById('confirmPromotionButton');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Memproses…';
+      document.getElementById('promotionFeedback').textContent = 'Menyimpan promosi…';
+      const expiryISO = new Date(Date.now() + hours * 3600 * 1000).toISOString();
+      try {
+        const { error } = await supabaseClient.from('curhat').update({
+          is_promoted: true,
+          promoted_until: expiryISO,
+          promotion_type: selectedPromotionType,
+          updated_at: new Date().toISOString()
+        }).eq('id', pendingPromotionPostId);
+        if (error) {
+          document.getElementById('promotionFeedback').textContent = 'Promosi belum tersimpan. Saldo tidak dipotong. Pastikan kolom promosi tersedia di Supabase. ' + error.message;
+          promotionSubmitting = false;
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Coba Lagi';
+          return;
+        }
+        // Current client-side wallet is a local state only. Do not claim an atomic charge/ledger transaction here.
+        document.getElementById('promotionFeedback').textContent = 'Promosi tersimpan pada data curhatan. Pemotongan saldo yang aman memerlukan transaksi/RPC di server; saldo tidak diubah oleh prototipe ini.';
+        alert(`Data promosi ${selectedPromotionType === 'istimewa' ? 'Istimewa' : 'Biasa'} (${hours} jam) tersimpan. Catatan: saldo belum dipotong karena transaksi saldo aman belum tersedia.`);
+        document.getElementById('promotionChoiceModal').style.display = 'none';
+        pendingPromotionPostId = null;
+        promotionSubmitting = false;
+        loadPosts();
+      } catch (err) {
+        document.getElementById('promotionFeedback').textContent = 'Terjadi kendala. Tidak ada pemotongan saldo yang dilakukan: ' + (err?.message || err);
+        promotionSubmitting = false;
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Coba Lagi';
+      }
     }
 
     async function promoteLiveSession() {
@@ -2649,7 +2952,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       </div>
 
       <!-- ISI CURHATAN -->
-      <div class="post-body">${p.content}</div>
+      <div class="post-body"${cuitStyleInlineForPost(p.id)}>${escapeHtml(p.content || '')}</div>
       
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
         <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 800; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);">
@@ -2663,7 +2966,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
       <!-- AKSI FOOTER -->
       <div class="post-footer-actions">
-        <div class="action-chip" style="${isLiked ? 'background:#e8f5ff; color:#0754b8; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+        <div class="action-chip" style="${isLiked ? 'background:#fff0f1; color:#c81e32; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
         <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
         <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
       </div>
@@ -2835,7 +3138,7 @@ body.in-live-room main > div:nth-child(-n+3) {
             <span style="font-weight: 800; font-size: 11px; color: var(--text-main);">${c.username || 'Pengguna'}</span>
             <span style="font-size: 9px; color: var(--text-sub);">${new Date(c.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
           </div>
-          <div style="font-size: 12px; color: #153d70; word-break: break-word;">${c.content}</div>
+          <div style="font-size: 12px; color: #4a2028; word-break: break-word;">${c.content}</div>
         </div>
       `).join('');
     }
@@ -3259,10 +3562,10 @@ body.in-live-room main > div:nth-child(-n+3) {
         }
 
         return `
-          <div style="background:#edf7ff; padding:10px; border-radius:12px; font-size:11px; display:flex; flex-direction:column; gap:6px; margin-bottom:4px;">
+          <div style="background:#f5dfe2; padding:10px; border-radius:12px; font-size:11px; display:flex; flex-direction:column; gap:6px; margin-bottom:4px;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div>
-                <div style="font-size:11.5px; color:#082f6b; line-height:1.4;">${n.message}</div>
+                <div style="font-size:11.5px; color:#321016; line-height:1.4;">${n.message}</div>
                 <div style="font-size:9px; color:var(--text-sub); margin-top:2px;">${new Date(n.created_at).toLocaleString('id-ID')}</div>
               </div>
               <button style="border:none; background:none; color:#e74c3c; cursor:pointer; font-size:14px; padding:0 4px;" onclick="deleteSingleNotif('${n.id}')">✕</button>
@@ -3270,7 +3573,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
             ${isGiftNotif ? `
               <button class="btn-primary" 
-                      style="padding:5px 10px; font-size:10px; border-radius:8px; background:linear-gradient(135deg, #319af0, #0879d9); align-self:flex-start;" 
+                      style="padding:5px 10px; font-size:10px; border-radius:8px; background:linear-gradient(135deg, #319af0, #e32636); align-self:flex-start;" 
                       onclick="openThankYouDraft('${senderName.replace(/'/g, "\\'")}', '${giftDetailText.replace(/'/g, "\\'")}')">
                 💬 Balas Ucapan Terima Kasih
               </button>
@@ -3439,7 +3742,7 @@ body.in-live-room main > div:nth-child(-n+3) {
         chatBox.style.display = 'none';
         livesListContainer.style.display = 'block';
 
-        statusBox.innerHTML = `<div style="font-weight:800; font-size:12px; color:#153d70;">🌐 ${activeLives.length} Sesi Live Teks Sedang Berlangsung:</div>`;
+        statusBox.innerHTML = `<div style="font-weight:800; font-size:12px; color:#4a2028;">🌐 ${activeLives.length} Sesi Live Teks Sedang Berlangsung:</div>`;
 
         let listHTML = '';
         activeLives.forEach(live => {
@@ -3449,7 +3752,7 @@ body.in-live-room main > div:nth-child(-n+3) {
           const remMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
 
           listHTML += `
-            <div style="background:#f3faff; border:1px solid #d7ebff; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#f3faff; border:1px solid #fff0f1; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <div style="font-weight:800; font-size:12px; color:var(--primary);">🔴 ${live.title}</div>
                 <div style="font-size:10.5px; color:#444; margin-top:2px;">Host: <b>${live.host_name}</b> • <span style="color:#e67e22;">⏳ ${remMinutes}m tersisa</span></div>
@@ -3498,7 +3801,7 @@ body.in-live-room main > div:nth-child(-n+3) {
           document.getElementById('liveLikesCount').innerText = likesCount;
         }
 
-        switchTab('pageLive', document.querySelectorAll('.nav-bar .nav-item')[3]);
+        switchTab('pageGame', document.querySelectorAll('.nav-bar .nav-item')[2]);
         loadLiveMessages(live.id);
         subscribeToLiveRealtime(live.id);
       }
@@ -3544,7 +3847,7 @@ body.in-live-room main > div:nth-child(-n+3) {
 
     async function startLiveTeks() {
       const userLvl = getUserLevel();
-      if (userLvl.title === '🌱 Cuiter Baru') return alert('Syarat membuat Live Teks minimal level 💙 Cuiter Setia!');
+      if (userLvl.level < 2) return alert('Fitur ini mensyaratkan minimal Level 2 — Bintang CUIT.');
       if (paidCoins < 10) return alert('Minimal saldo 10 Koin Berbayar untuk siaran Live Teks!');
 
       const title = await prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
@@ -3630,7 +3933,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       messagesList.innerHTML = messages.map(m => {
         const isGiftMsg = m.content.includes('🎁 Mengirimkan Gift');
         return `
-          <div style="background: ${isGiftMsg ? '#fff8e1' : '#ffffff'}; padding: 6px 10px; border-radius: 10px; border: 1px solid ${isGiftMsg ? '#ffe082' : '#d7ebff'}; font-size: 11px;">
+          <div style="background: ${isGiftMsg ? '#fff8e1' : '#ffffff'}; padding: 6px 10px; border-radius: 10px; border: 1px solid ${isGiftMsg ? '#ffe082' : '#fff0f1'}; font-size: 11px;">
             <b style="color: var(--primary);">${m.username}:</b> <span style="${isGiftMsg ? 'font-weight: 800; color: #d35400;' : ''}">${m.content}</span>
           </div>
         `;
@@ -3827,8 +4130,8 @@ body.in-live-room main > div:nth-child(-n+3) {
         const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr_content)}`;
 
         qrisContainer.innerHTML = `
-          <div style="font-size: 12px; font-weight: 800; color: #082f6b; margin-bottom: 8px;">Total Tagihan: Rp ${priceIdr.toLocaleString('id-ID')}</div>
-          <img src="${qrImageUrl}" alt="DOKU QRIS Code" style="width: 180px; height: 180px; border-radius: 8px; border: 2px solid #0754b8;" />
+          <div style="font-size: 12px; font-weight: 800; color: #321016; margin-bottom: 8px;">Total Tagihan: Rp ${priceIdr.toLocaleString('id-ID')}</div>
+          <img src="${qrImageUrl}" alt="DOKU QRIS Code" style="width: 180px; height: 180px; border-radius: 8px; border: 2px solid #c81e32;" />
         `;
 
       } catch (err) {
@@ -3912,6 +4215,100 @@ body.in-live-room main > div:nth-child(-n+3) {
       document.getElementById('configModal').style.display = 'flex';
     }
 
+    function openPoolInfo(){ alert('Pool Mingguan CUIT: tampilan pool belum terhubung pada versi file ini. Data dan pembagian pool perlu disambungkan ke tabel Supabase sebelum angka ditampilkan.'); }
+
+    const CUIT_LEVEL_FACILITIES = [
+      'Promosi Biasa — 1 koin/jam',
+      'Promosi Istimewa — 5 koin/jam',
+      'Memilih border sederhana curhatan',
+      'Memilih warna latar curhatan',
+      'Format huruf bold',
+      'Format huruf italic',
+      'Memilih dekorasi border curhatan',
+      'Memilih desain latar curhatan',
+      'Menentukan warna huruf',
+      'Memilih jenis huruf (font)'
+    ];
+    function cuitGetCurrentLevelNumber(userLvl) {
+      const title = String(userLvl?.title || '').toLowerCase();
+      const names = ['tunas','bintang','penggerak','elit','ksatria','bangsawan','panglima','adipati','kaisar','dewa'];
+      const found = names.findIndex(n => title.includes(n));
+      return found >= 0 ? found + 1 : 1;
+    }
+    function renderMemberLevelFacilities(level) {
+      const host = document.getElementById('memberLevelFacilitiesList');
+      if (!host) return;
+      host.innerHTML = '';
+      CUIT_LEVEL_FACILITIES.slice(0, Math.max(1, Math.min(10, level))).forEach((name, i) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:7px;border:1px solid #f1e2e4;border-radius:9px;background:#fffafa;font-size:10px;line-height:1.35;color:#49343a';
+        item.textContent = `${i + 1}. ${name}`;
+        host.appendChild(item);
+      });
+    }
+    const CUIT_POST_STYLE_DEFAULT = {border:'solid',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif'};
+    function cuitCurrentStyleLevel(){ return cuitGetCurrentLevelNumber(getUserLevel()); }
+    function cuitPostStyleRead(){
+      const style={...CUIT_POST_STYLE_DEFAULT};
+      const fields={border:'postBorderStyle',background:'postBackgroundStyle',decorBorder:'postDecorBorder',decorBackground:'postDecorBackground',textColor:'postTextColor',fontFamily:'postFontFamily'};
+      Object.entries(fields).forEach(([key,id])=>{const el=document.getElementById(id);if(el)style[key]=el.value;});
+      style.bold=document.getElementById('postBoldBtn')?.classList.contains('selected')||false;
+      style.italic=document.getElementById('postItalicBtn')?.classList.contains('selected')||false;
+      return style;
+    }
+    function cuitPostStyleCss(style){
+      const s={...CUIT_POST_STYLE_DEFAULT,...(style||{})};
+      const border=['solid','dashed','double','none'].includes(s.border)?s.border:'solid';
+      const color=/^#[0-9a-f]{6}$/i.test(s.background)?s.background:'#ffffff';
+      const text=/^#[0-9a-f]{6}$/i.test(s.textColor)?s.textColor:'#4a2028';
+      const font=['system-ui, sans-serif','Georgia, serif',"'Trebuchet MS', sans-serif","'Courier New', monospace"].includes(s.fontFamily)?s.fontFamily:'system-ui, sans-serif';
+      let extra=''; if(s.decorBorder==='gold')extra='border:3px double #d4a72c;';else if(s.decorBorder==='floral')extra='border:2px solid #d98ba4;outline:2px dotted #e8bac9;outline-offset:-6px;';else if(s.decorBorder==='dashed-gold')extra='border:2px dashed #c39a24;';
+      let bg=color;if(s.decorBackground==='sunrise')bg='linear-gradient(135deg,#fff3dc,#ffe5e8)';else if(s.decorBackground==='garden')bg='linear-gradient(135deg,#effbea,#e1f5e9)';else if(s.decorBackground==='night')bg='linear-gradient(135deg,#f0eaff,#e8edff)';
+      return `border-style:${border};background:${bg};color:${text};font-family:${font};font-weight:${s.bold?'800':'500'};font-style:${s.italic?'italic':'normal'};${extra}`;
+    }
+    function updatePostStylePreview(){
+      const level=cuitCurrentStyleLevel();
+      document.querySelectorAll('#postStyleEditor [data-unlock]').forEach(el=>{const need=Number(el.dataset.unlock);el.disabled=level<need;el.title=level<need?`Terbuka mulai Level ${need}`:'';});
+      const notice=document.getElementById('styleLevelNotice');if(notice)notice.textContent=`Levelmu saat ini ${level}/10. Fasilitas yang belum terbuka akan aktif saat levelnya tercapai.`;
+      const preview=document.getElementById('postStylePreview');if(preview){const st=cuitPostStyleRead();preview.style.cssText=cuitPostStyleCss(st)+';padding:12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;margin-top:10px;';preview.textContent=document.getElementById('postContent')?.value.trim()||'Pratinjau tampilan curhatanmu akan terlihat di sini.';}
+    }
+    function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?5:6;if(level<need)return alert(`Fasilitas ini terbuka mulai Level ${need}.`);const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
+    function cuitSavePostStyle(postId,style){try{const key='cuit_post_styles_v1';const all=JSON.parse(localStorage.getItem(key)||'{}');all[String(postId)]=style;localStorage.setItem(key,JSON.stringify(all));}catch(e){console.warn('Gaya curhatan tidak dapat disimpan lokal',e);}}
+    function cuitGetPostStyle(postId){try{return JSON.parse(localStorage.getItem('cuit_post_styles_v1')||'{}')[String(postId)]||null;}catch(e){return null;}}
+    function cuitStyleInlineForPost(postId){const style=cuitGetPostStyle(postId);return style?` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`:'';}
+    function cuitResetPostStyle(){Object.entries({postBorderStyle:'solid',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
+    document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();});
+
+    function cuitActivityKey() {
+      const id = currentUser?.id || localStorage.getItem('cuit_guest_identifier') || 'guest';
+      return 'cuit_last_meaningful_activity_' + id;
+    }
+    function renderMemberActivityStatus() {
+      const statusEl = document.getElementById('memberActivityStatus');
+      const hintEl = document.getElementById('memberActivityHint');
+      if (!statusEl || !hintEl) return;
+      const key = cuitActivityKey();
+      let last = Number(localStorage.getItem(key) || 0);
+      if (!last) { last = Date.now(); localStorage.setItem(key, String(last)); }
+      const days = Math.max(0, Math.floor((Date.now() - last) / 86400000));
+      let status, color, hint;
+      if (days <= 3) { status = '● Aktif'; color = '#16803c'; hint = days === 0 ? 'Aktivitas terakhir tercatat hari ini.' : `Aktivitas terakhir ${days} hari lalu.`; }
+      else if (days <= 7) { status = '● Kurang Aktif'; color = '#a16207'; hint = `Sudah ${days} hari tidak ada aktivitas. Silakan kembali berinteraksi.`; }
+      else { status = '● Tidak Aktif'; color = '#b91c1c'; hint = `Sudah ${days} hari tidak ada aktivitas. Level dan fasilitas tetap aman.`; }
+      statusEl.textContent = status; statusEl.style.color = color; hintEl.textContent = hint;
+    }
+    function cuitRecordMeaningfulActivity() {
+      if (!currentUser) return;
+      localStorage.setItem(cuitActivityKey(), String(Date.now()));
+      renderMemberActivityStatus();
+    }
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('button, .nav-item, .action-chip, .menu-btn-item')) cuitRecordMeaningfulActivity();
+    }, true);
+    document.addEventListener('change', function(e) {
+      if (e.target.matches('textarea, input, select')) cuitRecordMeaningfulActivity();
+    }, true);
+
     async function renderProfileData() {
       const userLvl = getUserLevel();
       const displayName = customDisplayName || 'Penilik Bageur';
@@ -3923,7 +4320,9 @@ body.in-live-room main > div:nth-child(-n+3) {
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profLevelTitle').style.background = userLvl.color;
       document.getElementById('profLevelTitle').style.color = '#fff';
-      document.getElementById('profExp').innerText = `${usedPaidCoins} EXP`;
+      document.getElementById('profExp').innerText = `${usedPaidCoins} koin berbayar terpakai`;
+      renderMemberLevelFacilities(cuitGetCurrentLevelNumber(userLvl));
+      renderMemberActivityStatus();
 
       const isAdmin = (myEmail === 'mantanperamal@gmail.com');
       const sponsorCodeToUse = isAdmin ? 'ADMINCUIT' : (displayName.replace(/\s+/g, '').toUpperCase());
@@ -3932,6 +4331,15 @@ body.in-live-room main > div:nth-child(-n+3) {
       document.getElementById('displaySponsorLink').innerText = fullSponsorLink;
 
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
+      const platformCard = document.getElementById('adminPlatformGemCard');
+      if (platformCard) platformCard.style.display = isAdmin ? 'block' : 'none';
+      // Balance widgets are intentionally not fabricated: read values from a future dedicated Supabase ledger/table.
+      const memberGemEl = document.getElementById('memberGemBalance');
+      const platformGemEl = document.getElementById('platformGemBalance');
+      if (memberGemEl && !memberGemEl.dataset.loaded) memberGemEl.textContent = '0';
+      if (platformGemEl && !platformGemEl.dataset.loaded) platformGemEl.textContent = '0';
+      const withdrawalHint = document.getElementById('memberGemWithdrawalHint');
+      if (withdrawalHint) withdrawalHint.textContent = 'Saldo belum tersambung ke buku besar permata. Minimal penarikan 20.000 permata.';
 
       let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
       if (currentUser) {
@@ -3979,7 +4387,7 @@ body.in-live-room main > div:nth-child(-n+3) {
         const needed = userLvl.target - usedPaidCoins;
 
         progressBar.style.width = `${percentage}%`;
-        nextInfo.innerText = `${needed.toLocaleString('id-ID')} EXP lagi menuju ${userLvl.next}`;
+        nextInfo.innerText = `${needed.toLocaleString('id-ID')} koin berbayar terpakai lagi menuju ${userLvl.next}`;
       }
 
       if (currentUser) {
@@ -4318,6 +4726,9 @@ body.in-live-room main > div:nth-child(-n+3) {
       const content = document.getElementById('postContent').value.trim();
       const feeling = document.getElementById('postFeeling').value;
       const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
+      const postStyle = cuitPostStyleRead();
+      const styleLevel = cuitCurrentStyleLevel();
+      if ((postStyle.border !== 'solid' && styleLevel < 3) || (postStyle.background !== '#ffffff' && styleLevel < 4) || (postStyle.bold && styleLevel < 5) || (postStyle.italic && styleLevel < 6) || (postStyle.decorBorder !== 'none' && styleLevel < 7) || (postStyle.decorBackground !== 'none' && styleLevel < 8) || (postStyle.textColor !== '#4a2028' && styleLevel < 9) || (postStyle.fontFamily !== 'system-ui, sans-serif' && styleLevel < 10)) return alert('Ada fasilitas tampilan yang belum terbuka pada levelmu. Pilih kembali fasilitas yang tersedia.');
 
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
 
@@ -4341,7 +4752,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       const myEmail = currentUser ? currentUser.email : guestId;
       const myName = customDisplayName || 'Penilik Bageur';
 
-      const { error } = await supabaseClient.from('curhat').insert([
+      const { data: insertedPosts, error } = await supabaseClient.from('curhat').insert([
         {
           content: content,
           feeling: feeling,
@@ -4351,11 +4762,13 @@ body.in-live-room main > div:nth-child(-n+3) {
           reward_coins: rewardCoins,
           remaining_reward_coins: rewardCoins
         }
-      ]);
+      ]).select('id');
 
       if (!error) {
+        if (insertedPosts && insertedPosts[0] && insertedPosts[0].id) cuitSavePostStyle(insertedPosts[0].id, postStyle);
         document.getElementById('postContent').value = '';
         document.getElementById('postRewardCoins').value = '';
+        cuitResetPostStyle();
         alert(rewardCoins > 0 
           ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` 
           : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin)`);
@@ -4557,28 +4970,7 @@ body.in-live-room main > div:nth-child(-n+3) {
       loadPosts();
     }
 
-    async function updateWeeklyRewardPoolUI() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('platform_reward_pool')
-          .select('amount')
-          .eq('id', 1)
-          .maybeSingle();
-
-        const totalPool = (data && data.amount) ? data.amount : 0;
-        const sharePerWinner = Math.floor(totalPool / 10);
-
-        const poolElem = document.getElementById('weeklyPoolCoinsDisplay');
-        const shareElem = document.getElementById('weeklyPoolPerWinnerDisplay');
-
-        if (poolElem) poolElem.innerText = `${totalPool.toLocaleString('id-ID')} 🪙`;
-        if (shareElem) shareElem.innerText = `${sharePerWinner.toLocaleString('id-ID')} 🪙`;
-      } catch (err) {
-        console.error('Gagal memuat reward pool:', err);
-      }
-    }
-
-    updateWeeklyRewardPoolUI();
+  // Widget pool mingguan dihapus dari beranda sesuai keputusan desain.
     checkUser();
   </script>
 
@@ -4696,4 +5088,4 @@ body.in-live-room main > div:nth-child(-n+3) {
     });
   </script>
 </body>
-</html>
+  </html>
