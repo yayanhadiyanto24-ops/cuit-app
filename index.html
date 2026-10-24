@@ -219,7 +219,84 @@
     /* Modal Styling */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 16px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
-  </style>
+ /* --- PERBAIKAN TAMPILAN RUANG LIVE TEKS --- */
+#liveChatBox {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+  background: #ffffff !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  border: 1px solid #d7ebff !important;
+}
+
+#liveLeaderboardContainer {
+  background: #fff8e1 !important;
+  border: 1px solid #ffe082 !important;
+  border-radius: 12px !important;
+  padding: 8px 10px !important;
+  width: 100% !important;
+}
+
+#liveMessagesList {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  max-height: 240px !important;
+  min-height: 150px !important;
+  overflow-y: auto !important;
+  padding: 6px !important;
+  background: #f4faff !important;
+  border-radius: 12px !important;
+  border: 1px solid #e1f0ff !important;
+}
+
+#quickChatContainer {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin: 6px 0 !important;
+  width: 100% !important;
+}
+
+.quick-chip {
+  background: #edf7ff !important;
+  color: #082f6b !important;
+  border: 1px solid #d7ebff !important;
+  padding: 4px 8px !important;
+  border-radius: 20px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  width: auto !important;
+}
+
+.live-input-row {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.live-input-row input {
+  flex: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+.live-action-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin-top: 6px !important;
+}
+
+.live-action-buttons button {
+  width: auto !important;
+}
+
+    </style>
 
 </head>
 <body onclick="closeAllPostMenus(event)">
