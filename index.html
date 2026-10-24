@@ -3461,6 +3461,7 @@ body.in-live-room #poolHadiahContainer {
     }
 
     async function joinLiveRoomDirect(liveId) {
+      document.body.classList.add('in-live-room');
       const { data: live } = await supabaseClient
         .from('lives')
         .select('*')
