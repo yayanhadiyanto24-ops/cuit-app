@@ -2410,42 +2410,41 @@
     }
 
     function renderCardHTML(p) {
-      let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
-      let feelingTag = p.feeling || 'Bahagia';
-      const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
-      
-      const likesCount = p.likes_count ?? 0;
-      const commentsCount = p.comments_count ?? 0;
-      const giftsCoinsCount = p.gifts_count ?? 0;
-      const isLiked = userLikedPostsSet.has(String(p.id));
-      
-      let authorPoin = 0;
-      if (p.user_id && profilesMap[p.user_id] !== undefined) {
-        authorPoin = profilesMap[p.user_id];
-      } else if (p.user_email && profilesMap[p.user_email] !== undefined) {
-        authorPoin = profilesMap[p.user_email];
-      } else if (currentUser && (currentUser.id === p.user_id || currentUser.email === p.user_email)) {
-        authorPoin = usedPaidCoins;
-      }
+  let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
+  let feelingTag = p.feeling || 'Bahagia';
+  const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
+  
+  const likesCount = p.likes_count ?? 0;
+  const commentsCount = p.comments_count ?? 0;
+  const giftsCoinsCount = p.gifts_count ?? 0;
+  const isLiked = userLikedPostsSet.has(String(p.id));
+  
+  let authorPoin = 0;
+  if (p.user_id && profilesMap[p.user_id] !== undefined) {
+    authorPoin = profilesMap[p.user_id];
+  } else if (p.user_email && profilesMap[p.user_email] !== undefined) {
+    authorPoin = profilesMap[p.user_email];
+  } else if (currentUser && (currentUser.id === p.user_id || currentUser.email === p.user_email)) {
+    authorPoin = usedPaidCoins;
+  }
 
-      const userLvl = getUserLevel(authorPoin);
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const isSelf = (p.user_email === myEmail);
-      const isFollowing = followingSet.has(p.user_email);
-      const isAdmin = (myEmail === 'mantanperamal@gmail.com');
+  const userLvl = getUserLevel(authorPoin);
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const myEmail = currentUser ? currentUser.email : guestId;
+  const isSelf = (p.user_email === myEmail);
+  const isFollowing = followingSet.has(p.user_email);
+  const isAdmin = (myEmail === 'mantanperamal@gmail.com');
 
-      const safeContent = (p.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
-
-      return `
-        function renderCardHTML(p) {
-  // ... (kode variabel di atas tetap sama)
+  // Bersihkan teks agar tidak merusak fungsi JavaScript saat diklik
+  const safeContent = (p.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+  const safeName = rawName.replace(/'/g, "\\'");
+  const safeEmail = (p.user_email || '').replace(/'/g, "\\'");
 
   return `
     <div class="post-card" id="post-${p.id}">
       <div class="post-header">
-        <!-- SISI KIRI: Foto & Info User -->
-        <div class="user-info" onclick="openUserProfileModal('${p.user_email}', '${rawName}', ${authorPoin})">
+        <!-- KIRI: Foto & Info User -->
+        <div class="user-info" onclick="openUserProfileModal('${safeEmail}', '${safeName}', ${authorPoin})">
           <div class="avatar-container cuit-post-main-wrap">
             <div class="avatar-circle cuit-main-badge">
               ${cuitBadgeSvg(userLvl.title)}
@@ -2455,7 +2454,7 @@
           <div class="user-details">
             <div class="user-name-row">
               <span class="user-name">${rawName}</span>
-              ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_email}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+              ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${safeEmail}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
             </div>
             <div class="badge-row">
               <span class="btn-sm-badge" style="background:${userLvl.color}; color:#fff;">${userLvl.title}</span>
@@ -2464,7 +2463,7 @@
           </div>
         </div>
         
-        <!-- SISI KANAN: Jam + Tombol Titik 3 + Dropdown Menu -->
+        <!-- KANAN: Jam + Titik 3 + Menu Dropdown -->
         <div class="post-header-right">
           <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
           <button class="btn-more-options" onclick="togglePostMenu('${p.id}', event)">⋮</button>
@@ -2496,9 +2495,26 @@
         </div>
       </div>
 
+      <!-- ISI CURHATAN -->
       <div class="post-body">${p.content}</div>
+      
+      ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
+        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 800; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);">
+          🎁 Sisa ${p.remaining_reward_coins} Koin Berbayar untuk Komentator Tercepat!
+        </div>
+      ` : ''}
 
-      <!-- Sisa kode footer postingan di bawahnya tetap sama -->
+      <div>
+        <span class="btn-sm-badge badge-publik">🌐 Publik</span>
+      </div>
+
+      <!-- AKSI FOOTER -->
+      <div class="post-footer-actions">
+        <div class="action-chip" style="${isLiked ? 'background:#e8f5ff; color:#0754b8; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+        <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
+        <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
+      </div>
+    </div>
   `;
 }
 
