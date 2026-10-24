@@ -352,14 +352,16 @@
     transform: scale(0.8) translateY(-30px);
   }
 }
-/* Sembunyikan Total Pool Hadiah & Panggung Raja saat masuk ruang live */
+/* Sembunyikan semua banner & section di atas Live Room */
 body.in-live-room #topBarNav,
-body.in-live-room div:has(> #panggungRajaList),
-body.in-live-room div:has(> .panggung-raja-card),
-body.in-live-room div[style*="PANGGUNG 10 RAJA"],
-body.in-live-room div[style*="TOTAL POOL HADIAH"],
+body.in-live-room #panggungRajaContainer,
+body.in-live-room #poolHadiahContainer,
+body.in-live-room .panggung-raja-section,
 body.in-live-room .panggung-raja-container,
-body.in-live-room .pool-hadiah-container {
+body.in-live-room .pool-hadiah-container,
+body.in-live-room .top-banner-container,
+body.in-live-room .banner-slider,
+body.in-live-room main > div:nth-child(-n+3) {
   display: none !important;
 }
 
