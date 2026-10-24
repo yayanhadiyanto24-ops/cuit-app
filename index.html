@@ -3434,12 +3434,7 @@ body.in-live-room main > div:nth-child(-n+3) {
           const quickContainer = document.getElementById('quickChatContainer');
           if (quickContainer) quickContainer.innerHTML = '';
         }
-
       }
-
-        document.getElementById('liveLikesCount').innerText = currentActiveLive.likes_count || 0;
-        
-        renderQuickChatGrid(isHost);
 
       } else if (activeLives && activeLives.length > 0) {
         document.body.classList.remove('is-in-live');
