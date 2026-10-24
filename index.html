@@ -352,6 +352,12 @@
     transform: scale(0.8) translateY(-30px);
   }
 }
+/* Sembunyikan banner atas hanya saat berada di dalam ruang Live Teks */
+body.in-live-room .top-banner-container,
+body.in-live-room #panggungRajaContainer,
+body.in-live-room #poolHadiahContainer {
+  display: none !important;
+}
 
     </style>
 
