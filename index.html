@@ -1119,10 +1119,10 @@
   async function startGame() {
     if (started || gameStartPending || gameFinishPending) return;
 
-    if (!window.supabaseClient) {
-      setMessage('Koneksi Supabase belum tersedia.');
-      return;
-    }
+    if (typeof supabaseClient === 'undefined') {
+  setMessage('Klien Supabase belum dibuat. Periksa script utama CUIT.');
+  return;
+}
 
     gameStartPending = true;
     startBtn.disabled = true;
