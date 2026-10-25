@@ -550,7 +550,7 @@
 
   <!-- 1. HALAMAN BERANDA -->
   <div id="pageHome" class="page-section active">
-<!-- CURHATAN TERBAIK: sorotan promosi dan live aktif -->
+<!-- CURHATAN TERBAIK: sorotan promosi -->
     <div id="promotedSection" style="display: none; margin: 3px 0 5px; padding: 3px 6px; background:#ffffff; border:1px solid #ead5d9; border-radius:10px; box-shadow:0 1px 4px rgba(110,20,35,.05);">
       <div class="home-feature-heading" style="margin:0 0 2px;font-size:9px;gap:4px;">
         <span class="feature-mark" style="width:16px;height:16px;border-radius:5px;background:#fff0f0;box-shadow:none;font-size:10px;">✨</span> CURHATAN TERBAIK
@@ -586,7 +586,7 @@
     <div class="home-shortcuts" aria-label="Menu cepat CUIT">
       <button type="button" onclick="switchTab('pageGame',document.querySelectorAll('.nav-bar .nav-item')[1])"><span class="shortcut-icon game">🎯</span><span>Game</span></button>
       <button type="button" onclick="openDailyCheckin()"><span class="shortcut-icon checkin">📅</span><span>Absen</span></button>
-      <button type="button" onclick="switchTab('pageSearch',document.querySelectorAll('.nav-bar .nav-item')[3])"><span class="shortcut-icon king">👑</span><span>Raja Cuit</span></button>
+      <button type="button" onclick="switchTab('pageKings',document.querySelectorAll('.nav-bar .nav-item')[3])"><span class="shortcut-icon king">👑</span><span>Raja Cuit</span></button>
       <button type="button" id="openTodayProgressButton" aria-label="Buka Progres Hari Ini"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
       <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
     </div>
@@ -793,7 +793,7 @@
   </div>
 
   <!-- HALAMAN RAJA CUIT / PRESTASI MEMBER -->
-  <div id="pageSearch" class="page-section">
+  <div id="pageKings" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
     <h2 class="section-title">👑 Raja Cuit & Prestasi Member</h2>
@@ -1135,7 +1135,7 @@
     <div class="nav-item" onclick="switchTab('pageCreate', this)">
       <div class="nav-add-button">+</div><span>Buat</span>
     </div>
-    <div class="nav-item" onclick="switchTab('pageSearch', this)">
+    <div class="nav-item" onclick="switchTab('pageKings', this)">
       <span class="nav-icon">👑</span><span>Raja</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
@@ -1271,15 +1271,8 @@
     </div>
   </div>
 
-  <!-- MODAL PILIH PENERIMA GIFT LIVE -->
-  <div id="selectLiveRecipientModal" class="modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom: 6px;">Pilih Penerima Gift 🎁</h3>
-      <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 10px;">Pilih Host atau Penonton lain di Live Chat yang ingin kamu beri gift:</div>
-      <div id="liveRecipientsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 12px;"></div>
-      <button class="btn-secondary" style="width: 100%; background: #eee;" onclick="document.getElementById('selectLiveRecipientModal').style.display='none'">Batal</button>
-    </div>
-  </div>
+  
+  
 
   <!-- MODAL KONFIRMASI SAWER GIFT -->
   <div id="confirmGiftModal" class="modal">
@@ -1353,7 +1346,6 @@
       
       <div style="background: #fff0f1; border: 1.5px dashed #c81e32; padding: 8px; border-radius: 12px; margin-bottom: 8px; text-align: center;" onclick="sendGiftAction(1, 'Absen')">
         <span style="font-weight: 900; font-size: 12px; color: var(--primary); display: block;">📌 Kirim Gift Absen (1 🪙)</span>
-        <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
 
       <div class="gift-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
@@ -1377,30 +1369,8 @@
     </div>
   </div>
 
-  <!-- MODAL GIFT KHUSUS LIVE: gunakan katalog Gift CUIT yang sama -->
-  <div id="specialGiftModal" class="modal">
-    <div class="modal-content" style="max-width:460px;max-height:86vh;overflow:auto;">
-      <h3 style="margin-bottom:8px;color:#9b6a00;">🎁 Gift CUIT untuk Live</h3>
-      <p style="font-size:11px;color:#666;margin-bottom:10px;">Pilih salah satu dari 14 Gift. Harga menggunakan Koin Berbayar.</p>
-      <div class="gift-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Bunga Hati')">🌹 <b>Bunga Hati</b><br><small>5 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Ceria')">⭐ <b>Bintang Ceria</b><br><small>10 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pelukan Manis')">🧸 <b>Pelukan Manis</b><br><small>20 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(50, 'Kejutan Spesial')">🎁 <b>Kejutan Spesial</b><br><small>50 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(100, 'Surat Cinta')">💌 <b>Surat Cinta</b><br><small>100 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(200, 'Kotak Hoki')">🪙 <b>Kotak Hoki</b><br><small>200 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(500, 'Hati Bersinar')">💖 <b>Hati Bersinar</b><br><small>500 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(1000, 'Parfum Aura')">🧴 <b>Parfum Aura</b><br><small>1.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(2000, 'Mahkota Kehormatan')">👑 <b>Mahkota Kehormatan</b><br><small>2.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(5000, 'Phoenix Api')">🔥 <b>Phoenix Api</b><br><small>5.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(10000, 'Kapal Kejayaan')">🚢 <b>Kapal Kejayaan</b><br><small>10.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(20000, 'Kuda Pegasus')">🐎 <b>Kuda Pegasus</b><br><small>20.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(50000, 'Istana Cinta')">🏰 <b>Istana Cinta</b><br><small>50.000 Koin</small></div>
-        <div class="gift-card-item" onclick="sendGiftAction(100000, 'Legenda Sempurna')">👑 <b>Legenda Sempurna</b><br><small>100.000 Koin</small></div>
-      </div>
-      <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="document.getElementById('specialGiftModal').style.display='none'">Tutup</button>
-    </div>
-  </div>
+  
+  
 
   <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
   <div id="walletModal" class="modal">
@@ -1605,17 +1575,10 @@
     let userLikedPostsSet = new Set();
     let activeTargetPostId = null;
     let activeCommentPostId = null;
-    let isLiveGiftContext = false;
-    let selectedLiveRecipient = null;
     let pendingGiftData = null;
     let followingSet = new Set();
     let currentFeedFilter = 'semua';
-    let currentActiveLive = null;
-    let liveRealtimeChannel = null;
     let isLeaderboardOpen = true;
-    let userHasLeftLive = false;
-    let userHasCheckedInLive = {}; 
-
     let freeCoins = 0;
     let paidCoins = 0;
     let gems = 0;
@@ -1866,7 +1829,7 @@
     }
 
     function switchTab(pageId, navElement) {
-      if (pageId === 'pageSearch' && typeof loadAchievements === 'function') { loadAchievements(); }
+      if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
         nav.classList.remove('active');
@@ -2234,7 +2197,7 @@
           let w;
           w=winnerFromCounts(countBy(gifts,g=>g.sender_id||g.sender_email||g.sender_name,g=>g.coins_amount||g.amount||0));
           if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
-          // Raja Game tidak memakai data LIVE lama. Nama tabel game belum ditemukan dalam file audit ini.
+          // Data Raja Game dihitung dari sumber data yang tersedia; tidak menggunakan fitur siaran.
           results.game={name:'Belum tersedia',scoreLabel:'Data game belum terhubung',note:'menunggu audit sumber transaksi game'};
           const postEngagement = {};
           posts.forEach(p=>{const key=p.user_id||p.user_email||p.email||p.username;if(!key)return;const value=Number(p.likes_count||0)+Number(p.comments_count||0);postEngagement[key]=(postEngagement[key]||0)+value;});
@@ -2280,16 +2243,12 @@
 
         if (error) throw error;
 
-        let profilesData, activeLivePromos, weeklyGifts, weeklyLives, weeklyLiveMsgs, 
-            weeklyComments, weeklyFollows, weeklyNewMembers, weeklyLikes, weeklyReelsClaims;
+        let profilesData, weeklyGifts, weeklyComments, weeklyFollows, weeklyNewMembers, weeklyLikes, weeklyReelsClaims;
 
         try {
           const results = await Promise.all([
             supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-            supabaseClient.from('lives').select('*').eq('is_active', true).gt('promoted_until', new Date().toISOString()),
             supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
-            supabaseClient.from('lives').select('*').gte('created_at', startOfWeekISO),
-            supabaseClient.from('live_messages').select('*').gte('created_at', startOfWeekISO),
             supabaseClient.from('comments').select('username, user_email, created_at').gte('created_at', startOfWeekISO),
             supabaseClient.from('follows').select('following_email, created_at').gte('created_at', startOfWeekISO),
             supabaseClient.from('profiles').select('sponsor, username, email, created_at').gte('created_at', startOfWeekISO),
@@ -2298,15 +2257,12 @@
           ]);
 
           profilesData = results[0].data;
-          activeLivePromos = results[1].data;
-          weeklyGifts = results[2].data;
-          weeklyLives = results[3].data;
-          weeklyLiveMsgs = results[4].data;
-          weeklyComments = results[5].data;
-          weeklyFollows = results[6].data;
-          weeklyNewMembers = results[7].data;
-          weeklyLikes = results[8].data;
-          weeklyReelsClaims = results[9].data;
+          weeklyGifts = results[1].data;
+          weeklyComments = results[2].data;
+          weeklyFollows = results[3].data;
+          weeklyNewMembers = results[4].data;
+          weeklyLikes = results[5].data;
+          weeklyReelsClaims = results[6].data;
         } catch (err) {
           console.warn("Peringatan saat mengambil data panggung raja:", err);
         }
@@ -2359,7 +2315,7 @@
 
         // --- 2. RAJA GAME ---
         // Belum ada tabel transaksi game yang terverifikasi pada file ini.
-        // Jangan memakai data LIVE lama sebagai pengganti pemenang game.
+        // Jangan memakai data dari fitur yang sudah dihapus sebagai pengganti pemenang game.
         const gameNameEl = document.getElementById('champGameName');
         const gameScoreEl = document.getElementById('champGameScore');
         if (gameNameEl) gameNameEl.innerText = 'Data game belum terhubung';
@@ -2875,41 +2831,6 @@
       }
     }
 
-    async function promoteLiveSession() {
-      if (!currentActiveLive || !currentActiveLive.id) {
-        return alert('Tidak ada Live aktif yang dapat dipromosikan!');
-      }
-
-      const inputVal = await prompt("Berapa menit ingin mempromosikan Sesi Live ini ke Feed Beranda? (1 Koin Berbayar = 1 Menit Promosi):", "10");
-      const minutes = parseInt(inputVal) || 0;
-      
-      if (minutes <= 0) return;
-
-      if (paidCoins < minutes) {
-        return alert(`Saldo Bank Koin kamu tidak cukup! Mempromosikan selama ${minutes} menit membutuhkan ${minutes} Koin Berbayar.`);
-      }
-
-      const nowMs = Date.now();
-      const expiryMs = nowMs + (minutes * 60 * 1000);
-      const expiryISO = new Date(expiryMs).toISOString();
-
-      const { error } = await supabaseClient
-        .from('lives')
-        .update({ 
-          promoted_until: expiryISO, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', currentActiveLive.id);
-
-      if (error) return alert('Gagal mempromosikan Sesi Live: ' + error.message);
-
-      paidCoins -= minutes;
-      usedPaidCoins += minutes;
-      updateCoinUI(true);
-
-      alert(`🎉 Sesi Live "${currentActiveLive.title}" berhasil dipromosikan ke Sorotan Paling Kiri selama ${minutes} menit!`);
-      loadPosts();
-    }
 
     function renderCardHTML(p) {
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
@@ -3138,28 +3059,6 @@
       }
     }
 
-    async function toggleLikeLive() {
-      if (!currentActiveLive) return;
-
-      const success = await deductCoin(1);
-      if (!success) {
-        return alert('Saldo Koin kamu habis untuk memberikan Like di Live Chat!');
-      }
-
-      currentActiveLive.likes_count = (currentActiveLive.likes_count || 0) + 1;
-      const newCount = currentActiveLive.likes_count;
-
-      const likesCountElem = document.getElementById('liveLikesCount');
-      if (likesCountElem) likesCountElem.innerText = newCount;
-
-      const btn = document.getElementById('btnLikeLive');
-      if (btn) {
-        btn.style.transform = 'scale(1.15)';
-        setTimeout(() => { btn.style.transform = 'scale(1)'; }, 100);
-      }
-
-      await supabaseClient.from('lives').update({ likes_count: newCount }).eq('id', currentActiveLive.id);
-    }
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
@@ -3284,70 +3183,11 @@
 
     function openGiftModal(postId) {
       activeTargetPostId = postId;
-      isLiveGiftContext = false;
       document.getElementById('giftModal').style.display = 'flex';
     }
 
-    function openSpecialGiftModal() {
-      if (isLiveGiftContext && currentActiveLive) {
-        document.getElementById('specialGiftModal').style.display = 'flex';
-      } else {
-        openLiveGiftModal();
-      }
-    }
 
-    async function openLiveGiftModal() {
-      if (!currentActiveLive) return alert('Tidak ada Live aktif!');
-      
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
 
-      const { data: messages } = await supabaseClient
-        .from('live_messages')
-        .select('username')
-        .eq('live_id', currentActiveLive.id);
-
-      const container = document.getElementById('liveRecipientsList');
-      let recipientsMap = new Map();
-
-      if (currentActiveLive.host_name !== myName && currentActiveLive.host_email !== myEmail) {
-        recipientsMap.set(currentActiveLive.host_name, currentActiveLive.host_email);
-      }
-
-      if (messages) {
-        messages.forEach(m => {
-          if (m.username !== myName && !recipientsMap.has(m.username)) {
-            recipientsMap.set(m.username, m.username);
-          }
-        });
-      }
-
-      if (recipientsMap.size === 0) {
-        return alert('Belum ada penonton atau host lain di room ini untuk diberi gift!');
-      }
-
-      let html = '';
-      recipientsMap.forEach((emailOrName, name) => {
-        const isHost = (name === currentActiveLive.host_name);
-        html += `
-          <button class="btn-secondary" style="width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; padding:8px 12px;" onclick="chooseLiveRecipient('${name}', '${emailOrName}')">
-            <span><b>${name}</b> ${isHost ? '👑 (Host)' : '👤 (Penonton)'}</span>
-            <span style="font-size:10px; color:var(--primary);">Pilih →</span>
-          </button>
-        `;
-      });
-
-      container.innerHTML = html;
-      document.getElementById('selectLiveRecipientModal').style.display = 'flex';
-    }
-
-    function chooseLiveRecipient(name, emailOrName) {
-      selectedLiveRecipient = { name, emailOrName };
-      document.getElementById('selectLiveRecipientModal').style.display = 'none';
-      isLiveGiftContext = true;
-      document.getElementById('giftModal').style.display = 'flex';
-    }
 
     function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Bank Koin Berbayar tidak mencukupi!');
@@ -3359,7 +3199,6 @@
       `;
 
       document.getElementById('giftModal').style.display = 'none';
-      document.getElementById('specialGiftModal').style.display = 'none';
       document.getElementById('confirmGiftModal').style.display = 'flex';
     }
 
@@ -3386,7 +3225,7 @@
         return alert('Saldo Koin Berbayar tidak mencukupi.');
       }
 
-      if (!isLiveGiftContext && activeTargetPostId) {
+      if (activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
         if (currentPost && (String(currentPost.user_id) === String(currentUser.id) || String(currentPost.user_email || '').toLowerCase() === String(myEmail || '').toLowerCase())) {
           document.getElementById('confirmGiftModal').style.display = 'none';
@@ -3397,38 +3236,7 @@
 
       document.getElementById('confirmGiftModal').style.display = 'none';
       try {
-        if (isLiveGiftContext && currentActiveLive) {
-          const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
-          const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
-          const { error: txError } = await supabaseClient.rpc('send_live_gift', {
-            p_sender_id: currentUser.id,
-            p_receiver_id: String(targetIdentifier),
-            p_amount: amount
-          });
-          if (txError) throw txError;
-
-          // Hanya setelah transaksi database sukses, buat catatan pendukung.
-          const { error: messageError } = await supabaseClient.from('live_messages').insert([{
-            live_id: currentActiveLive.id, username: myName,
-            content: `🎁 Mengirimkan Gift ${giftName} (${amount} 🪙) untuk @${targetName}`
-          }]);
-          if (messageError) console.error('Gift sukses, tetapi pesan Live gagal disimpan:', messageError);
-          const { error: giftLogError } = await supabaseClient.from('gift_transactions').insert([{
-            recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: amount
-          }]);
-          if (giftLogError) console.error('Gift sukses, tetapi riwayat Gift gagal disimpan:', giftLogError);
-          const { error: notifError } = await supabaseClient.from('user_notifications').insert([{
-            recipient_email: String(targetIdentifier), sender_name: myName,
-            message: `🎁 ${myName} memberikan Gift ${giftName} (${amount} 🪙) di Live Chat!`
-          }]);
-          if (notifError) console.error('Gift sukses, tetapi notifikasi gagal disimpan:', notifError);
-          userHasCheckedInLive[currentActiveLive.id] = true;
-          const { data: freshLive, error: liveReadError } = await supabaseClient.from('lives').select('total_coins_received').eq('id', currentActiveLive.id).maybeSingle();
-          if (!liveReadError && freshLive) currentActiveLive.total_coins_received = freshLive.total_coins_received || 0;
-          await updateCoinUI(false);
-          triggerGiftAnimation(myName, giftName, amount, targetName);
-          loadPosts();
-        } else if (activeTargetPostId) {
+        if (activeTargetPostId) {
           const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
           if (!currentPost) throw new Error('Postingan tujuan tidak ditemukan. Muat ulang beranda lalu coba lagi.');
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
@@ -3459,7 +3267,7 @@
           triggerGiftAnimation(myName, giftName, amount, targetName);
           loadPosts();
         } else {
-          throw new Error('Pilih postingan atau penerima Live terlebih dahulu.');
+          throw new Error('Pilih postingan terlebih dahulu.');
         }
       } catch (error) {
         console.error('Transaksi Gift gagal:', error);
@@ -3467,7 +3275,6 @@
         alert('Gift gagal diproses. Saldo tidak boleh dianggap terpotong jika transaksi database gagal. Pesan: ' + (error?.message || 'Kesalahan tidak diketahui'));
       } finally {
         pendingGiftData = null;
-        selectedLiveRecipient = null;
       }
     }
 
@@ -3668,338 +3475,23 @@
       `).join('');
     }
 
-    function toggleLeaderboard() {
-      isLeaderboardOpen = !isLeaderboardOpen;
-      const lbList = document.getElementById('liveLeaderboardList');
-      const iconSpan = document.getElementById('lbToggleIcon');
 
-      if (isLeaderboardOpen) {
-        lbList.style.display = 'flex';
-        iconSpan.innerText = '▲ Sembunyikan';
-      } else {
-        lbList.style.display = 'none';
-        iconSpan.innerText = '▼ Tampilkan';
-      }
-    }
 
-    function leaveLiveSession() {
-      document.body.classList.remove('in-live-room'); //
-      userHasLeftLive = true;
-      cleanupLiveSesssion();
-      
-      document.getElementById('liveChatBox').style.display = 'none';
-      document.getElementById('btnStartLiveHeader').style.display = 'block';
-      
-      switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
-    }
 
-    async function loadActiveLiveSession() {
-      const { data: activeLives } = await supabaseClient
-        .from('lives')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
 
-      const statusBox = document.getElementById('liveStatusBox');
-      const chatBox = document.getElementById('liveChatBox');
-      const btnHeader = document.getElementById('btnStartLiveHeader');
-      const livesListContainer = document.getElementById('activeLivesListContainer');
 
-      btnHeader.style.display = 'block';
-
-            if (currentActiveLive) {
-        const nowMs = Date.now();
-        const createdMs = new Date(currentActiveLive.created_at).getTime();
-        const expiryMs = currentActiveLive.ended_at ? new Date(currentActiveLive.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
-
-        if (nowMs >= expiryMs) {
-          await supabaseClient.from('lives').update({ is_active: false }).eq('id', currentActiveLive.id);
-          cleanupLiveSesssion();
-          statusBox.innerHTML = `Sesi Live Teks telah berakhir otomatis (Batas waktu 60 menit tercapai).`;
-          chatBox.style.display = 'none';
-          document.body.classList.remove('in-live-room');
-          return;
-        }
-
-        const remainingMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
-        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-        const myEmail = currentUser ? currentUser.email : guestId;
-        const isHost = currentActiveLive.host_email === myEmail;
-
-        const isInLiveRoom = document.body.classList.contains('in-live-room');
-
-        if (isInLiveRoom) {
-          livesListContainer.style.display = 'none';
-          chatBox.style.display = 'flex';
-
-          statusBox.innerHTML = `
-            <div style="font-weight: 800; font-size: 11px;">
-            <div style="font-size: 11px; color: #444;">LIVE TEKS BERJALAN (${remainingMinutes} mnt tersisa)</div>
-            <div style="font-size: 11px; color: #666;">Host: <b>${currentActiveLive.host_name}</b> (${currentActiveLive.title})</div>
-            <div style="display: flex; gap: 6px; margin-top:6px;">
-              ${isHost ? `<button class="btn-primary" onclick="endLiveSession('${currentActiveLive.id}')">Akhiri Live</button>` : ''}
-              <button class="btn-secondary" onclick="leaveLiveSession()">🚪 Keluar Live</button>
-            </div>
-          `;
-
-          const likesElem = document.getElementById('liveLikesCount');
-          if (likesElem) likesElem.innerText = currentActiveLive.likes_count || 0;
-          
-          renderQuickChatGrid(isHost);
-
-        } else {
-          livesListContainer.style.display = 'block';
-          chatBox.style.display = 'none';
-
-          const quickContainer = document.getElementById('quickChatContainer');
-          if (quickContainer) quickContainer.innerHTML = '';
-        }
-      } else if (activeLives && activeLives.length > 0) {
-        document.body.classList.remove('is-in-live');
-        chatBox.style.display = 'none';
-        livesListContainer.style.display = 'block';
-
-        statusBox.innerHTML = `<div style="font-weight:800; font-size:12px; color:#4a2028;">🌐 ${activeLives.length} Sesi Live Teks Sedang Berlangsung:</div>`;
-
-        let listHTML = '';
-        activeLives.forEach(live => {
-          const nowMs = Date.now();
-          const createdMs = new Date(live.created_at).getTime();
-          const expiryMs = live.ended_at ? new Date(live.ended_at).getTime() : (createdMs + (60 * 60 * 1000));
-          const remMinutes = Math.max(0, Math.ceil((expiryMs - nowMs) / 60000));
-
-          listHTML += `
-            <div style="background:#f3faff; border:1px solid #fff0f1; padding:10px; border-radius:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <div style="font-weight:800; font-size:12px; color:var(--primary);">🔴 ${live.title}</div>
-                <div style="font-size:10.5px; color:#444; margin-top:2px;">Host: <b>${live.host_name}</b> • <span style="color:#e67e22;">⏳ ${remMinutes}m tersisa</span></div>
-              </div>
-              <button class="btn-primary" style="padding:6px 12px; font-size:11px;" onclick="joinLiveRoomDirect('${live.id}')">Masuk Live</button>
-            </div>
-          `;
-        });
-
-        livesListContainer.innerHTML = listHTML;
-
-      } else {
-        document.body.classList.remove('is-in-live');
-        cleanupLiveSesssion();
-        livesListContainer.style.display = 'none';
-        statusBox.innerHTML = `Belum ada Live aktif. Kamu bisa mencoba memulai sesi Live baru jika level dan saldo memenuhi syarat.`;
-        chatBox.style.display = 'none';
-      }
-    }
-
-    function renderQuickChatGrid(isHost) {
-      const container = document.getElementById('quickChatContainer');
-      const templates = isHost ? QUICK_TEMPLATES_HOST : QUICK_TEMPLATES_PENONTON;
-
-      container.innerHTML = templates.map(txt => `
-        <div class="quick-chip" onclick="applyQuickChat('${txt.replace(/'/g, "\\'")}')">${txt}</div>
-      `).join('');
-    }
-
-    async function joinLiveRoomDirect(liveId) {
-      document.body.classList.add('in-live-room');
-      const { data: live } = await supabaseClient
-        .from('lives')
-        .select('*')
-        .eq('id', liveId)
-        .maybeSingle();
-
-      if (live) {
-        currentActiveLive = live;
-        userHasLeftLive = false;
-        localStorage.setItem('cuit_active_live_id', live.id);
-        
-        const likesCount = live.likes_count || 0;
-        const btnLike = document.getElementById('btnLikeLive');
-        if (btnLike) {
-          document.getElementById('liveLikesCount').innerText = likesCount;
-        }
-
-        switchTab('pageGame', document.querySelectorAll('.nav-bar .nav-item')[2]);
-        loadLiveMessages(live.id);
-        subscribeToLiveRealtime(live.id);
-      }
-    }
-
-    function cleanupLiveSesssion() {
-      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
-      currentActiveLive = null;
-      localStorage.removeItem('cuit_active_live_id');
-      document.body.classList.remove('is-in-live');
-    }
 
     let processedMsgIds = new Set();
 
-    function subscribeToLiveRealtime(liveId) {
-      if (liveRealtimeChannel) supabaseClient.removeChannel(liveRealtimeChannel);
 
-      liveRealtimeChannel = supabaseClient
-        .channel(`live_room_${liveId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_messages', filter: `live_id=eq.${liveId}` }, payload => {
-          const newMsg = payload.new;
-          
-          if (!processedMsgIds.has(newMsg.id)) {
-            processedMsgIds.add(newMsg.id);
 
-            if (newMsg.content.includes('🎁 Mengirimkan Gift')) {
-              const matchCoins = newMsg.content.match(/\((\d+)\s*🪙\)/);
-              const matchGiftName = newMsg.content.match(/Gift\s+([^(]+)/);
-              const matchTarget = newMsg.content.match(/untuk\s+@(.+)/);
 
-              const coins = matchCoins ? parseInt(matchCoins[1]) : 1;
-              const giftName = matchGiftName ? matchGiftName[1].trim() : 'Gift';
-              const targetName = matchTarget ? matchTarget[1].trim() : 'Host';
 
-              triggerGiftAnimation(newMsg.username, giftName, coins, targetName);
-            }
-          }
 
-          loadLiveMessages(liveId);
-        })
-        .subscribe();
-    }
-
-    async function startLiveTeks() {
-      const userLvl = getUserLevel();
-      if (userLvl.level < 2) return alert('Fitur ini mensyaratkan minimal Level 2 — Bintang CUIT.');
-      if (paidCoins < 10) return alert('Minimal saldo 10 Koin Berbayar untuk siaran Live Teks!');
-
-      const title = await prompt("Masukkan Topik / Judul Live Teks kamu:", "Ngobrol Santai Latihan Tari");
-      if (!title) return;
-
-      paidCoins -= 10;
-      usedPaidCoins += 10;
-      updateCoinUI(true);
-
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      const nowMs = Date.now();
-      const maxLiveMs = nowMs + (60 * 60 * 1000);
-      const endedAtISO = new Date(maxLiveMs).toISOString();
-
-      const { data, error } = await supabaseClient.from('lives').insert([
-        { title, host_name: myName, host_email: myEmail, is_active: true, ended_at: endedAtISO, total_coins_received: 0, likes_count: 0 }
-      ]).select().single();
-
-      if (!error) {
-        userHasLeftLive = false;
-        alert('Live Teks berhasil dimulai! Durasi maksimal adalah 60 menit.');
-        joinLiveRoomDirect(data.id);
-      } else {
-        alert('Gagal memulai Live: ' + error.message);
-      }
-    }
-
-    async function stopLiveSession(liveId) {
-      if (!confirm('Yakin ingin mengakhiri sesi Live ini?')) return;
-
-      await supabaseClient.from('lives').update({ is_active: false }).eq('id', liveId);
-      alert('Sesi Live telah diakhiri.');
-      cleanupLiveSesssion();
-      loadActiveLiveSession();
-    }
-
-    async function loadLiveMessages(liveId) {
-      const messagesList = document.getElementById('liveMessagesList');
-      const leaderboardList = document.getElementById('liveLeaderboardList');
-
-      const { data: messages } = await supabaseClient
-        .from('live_messages')
-        .select('*')
-        .eq('live_id', liveId)
-        .order('created_at', { ascending: true });
-
-      if (!messages || messages.length === 0) {
-        messagesList.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Belum ada pesan di ruang Live.</p>';
-        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
-        return;
-      }
-
-      let supporterMap = {};
-      messages.forEach(m => {
-        if (m.content.includes('🎁 Mengirimkan Gift')) {
-          const match = m.content.match(/\((\d+)\s*🪙\)/);
-          if (match) {
-            const coins = parseInt(match[1]) || 0;
-            supporterMap[m.username] = (supporterMap[m.username] || 0) + coins;
-          }
-        }
-      });
-
-      let sortedSupporters = Object.keys(supporterMap)
-        .map(user => ({ user, coins: supporterMap[user] }))
-        .sort((a, b) => b.coins - a.coins);
-
-      if (sortedSupporters.length > 0) {
-        const medals = ['🥇', '🥈', '🥉'];
-        leaderboardList.innerHTML = sortedSupporters.map((s, idx) => `
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ffe082; padding-bottom: 2px;">
-            <span><b>${medals[idx] || '🏅'} ${s.user}</b></span>
-            <span style="font-weight: 800; color: #d35400;">${s.coins.toLocaleString('id-ID')} 🪙</span>
-          </div>
-        `).join('');
-      } else {
-        leaderboardList.innerHTML = '<i style="color: var(--text-sub);">Belum ada penonton yang memberikan gift.</i>';
-      }
-
-      messagesList.innerHTML = messages.map(m => {
-        const isGiftMsg = m.content.includes('🎁 Mengirimkan Gift');
-        return `
-          <div style="background: ${isGiftMsg ? '#fff8e1' : '#ffffff'}; padding: 6px 10px; border-radius: 10px; border: 1px solid ${isGiftMsg ? '#ffe082' : '#fff0f1'}; font-size: 11px;">
-            <b style="color: var(--primary);">${m.username}:</b> <span style="${isGiftMsg ? 'font-weight: 800; color: #d35400;' : ''}">${m.content}</span>
-          </div>
-        `;
-      }).join('');
-
-      messagesList.scrollTop = messagesList.scrollHeight;
-    }
-
-    function applyQuickChat(text) {
-      const input = document.getElementById('liveInputMessage');
-      input.value = text;
-      sendLiveMessage();
-    }
-
-    async function sendLiveMessage() {
-      const input = document.getElementById('liveInputMessage');
-      const msg = input.value.trim();
-      if (!msg || !currentActiveLive) return;
-
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      const isHost = (currentActiveLive.host_email === myEmail || currentActiveLive.host_name === myName);
-
-      if (!isHost && !userHasCheckedInLive[currentActiveLive.id]) {
-        alert("📌 Penonton wajib mengirimkan Gift Absen (1 Koin) lebih dulu untuk membuka akses komentar di ruang live ini!");
-        
-        selectedLiveRecipient = { name: currentActiveLive.host_name, emailOrName: currentActiveLive.host_email };
-        isLiveGiftContext = true;
-        sendGiftAction(1, 'Absen');
-        return;
-      }
-
-      const success = await deductCoin(1);
-      if (!success) {
-        return alert('Koin kamu habis! Tonton video Misi Reels untuk mendapatkan koin tambahan.');
-      }
-
-      await supabaseClient.from('live_messages').insert([
-        { live_id: currentActiveLive.id, username: myName, content: msg }
-      ]);
-
-      input.value = '';
-    }
 
     function filterByTag(tagName) {
       document.getElementById('searchInput').value = tagName;
-      switchTab('pageSearch', document.querySelectorAll('.nav-item')[1]);
+      switchTab('pageKings', document.querySelectorAll('.nav-item')[1]);
       document.getElementById('mainSearchFilter').value = tagName;
       searchPosts();
     }
