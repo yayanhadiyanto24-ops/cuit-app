@@ -1178,14 +1178,10 @@
         ? 'Gratis'
         : `${fee} koin`;
 
-      // Perbarui tampilan saldo jika RPC mengembalikan saldo baru.
-      const balance =
-        session.remaining_paid_coins ??
-        session.paid_coins_balance;
-
-      if (balance !== undefined && typeof currentUser === 'object' && currentUser) {
-        currentUser.paidCoins = Number(balance);
-      }
+      // Beri tahu CUIT bahwa saldo di database telah berubah.
+window.dispatchEvent(
+  new CustomEvent('cuit:coins-updated')
+);
 
       makeDeck();
       first = null;
