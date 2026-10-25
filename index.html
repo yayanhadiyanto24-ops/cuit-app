@@ -2465,6 +2465,10 @@ window.dispatchEvent(
       }
     }
 
+window.addEventListener('cuit:coins-updated', async () => {
+  await updateCoinUI();
+});
+
     let cuitBadgeSerial = 0;
 
     function cuitStarPoints(cx, cy, ro = 6.4, ri = 2.8) {
