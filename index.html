@@ -1416,7 +1416,7 @@
         <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
 
-      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 14px 0 6px 0;">📜 Riwayat Penerimaan Permata (Buku Kas Permanen):</div>
+      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 14px 0 6px 0;">📜 Riwayat Gift Masuk (tersimpan di Dompet):</div>
       <div id="giftHistoryListContainer" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; background: #f3faff; padding: 8px; border-radius: 12px; border: 1px solid #fff0f1;">
         <p style="text-align: center; font-size: 10.5px; color: var(--text-sub);">Memuat riwayat transaksi...</p>
       </div>
@@ -1966,40 +1966,25 @@
     }
 
     async function syncCoinsToSupabase() {
+      // Sinkronkan metadata profil saja. Saldo koin hanya boleh diubah oleh
+      // transaksi database yang tervalidasi agar saldo lokal lama tidak menimpa saldo server.
       if (!currentUser) return;
-      
       try {
         const myEmail = currentUser.email;
         const myOwnReferralCode = (customDisplayName || 'PENILIKBAGEUR').replace(/\s+/g, '').toUpperCase();
-        const isPrimaryAdmin =
-          String(myEmail || '').trim().toLowerCase() === 'mantanperamal@gmail.com' ||
-          myOwnReferralCode === 'ADMINCUIT';
-
-        let activeSponsorRef =
-          localStorage.getItem('cuit_active_sponsor_ref') ||
-          CONFIG.DEFAULT_SPONSOR;
-
-        if (isPrimaryAdmin) {
-          mySponsorCode = null;
-        } else if (!mySponsorCode || mySponsorCode === myOwnReferralCode) {
-          mySponsorCode = activeSponsorRef;
-        }
-
-        const profilePayload = {
-          id: currentUser.id,
+        const isPrimaryAdmin = String(myEmail || '').trim().toLowerCase() === 'mantanperamal@gmail.com' || myOwnReferralCode === 'ADMINCUIT';
+        let activeSponsorRef = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+        if (isPrimaryAdmin) mySponsorCode = null;
+        else if (!mySponsorCode || mySponsorCode === myOwnReferralCode) mySponsorCode = activeSponsorRef;
+        const { error } = await supabaseClient.from('profiles').update({
           email: myEmail,
           username: customDisplayName || 'Penilik Bageur',
           referral_code: myOwnReferralCode,
-          sponsor: mySponsorCode,
-          free_coins: freeCoins,
-          paid_coins: paidCoins,
-          gems: gems,
-          used_paid_coins: usedPaidCoins
-        };
-
-        await supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'id' });
+          sponsor: mySponsorCode
+        }).eq('id', currentUser.id);
+        if (error) console.error('Gagal sinkron metadata profil:', error);
       } catch (err) {
-        console.error("Gagal sync ke Supabase:", err);
+        console.error('Gagal sinkron metadata profil:', err);
       }
     }
 
@@ -3380,220 +3365,173 @@
 
     async function executeSendGift() {
       if (!pendingGiftData) return;
+      if (!currentUser || !currentUser.id) {
+        document.getElementById('confirmGiftModal').style.display = 'none';
+        pendingGiftData = null;
+        return alert('Silakan masuk ke akun CUIT terlebih dahulu untuk mengirim Gift dengan Koin Berbayar.');
+      }
 
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
+      const myEmail = currentUser.email;
+      const myName = customDisplayName || (currentUser.email || '').split('@')[0] || 'Anggota CUIT';
+      const { cost, giftName } = pendingGiftData;
+      const amount = Number(cost);
+      if (!Number.isSafeInteger(amount) || amount <= 0) {
+        document.getElementById('confirmGiftModal').style.display = 'none';
+        pendingGiftData = null;
+        return alert('Jumlah koin Gift tidak valid.');
+      }
+      if (paidCoins < amount) {
+        document.getElementById('confirmGiftModal').style.display = 'none';
+        pendingGiftData = null;
+        return alert('Saldo Koin Berbayar tidak mencukupi.');
+      }
 
       if (!isLiveGiftContext && activeTargetPostId) {
         const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-        if (currentPost && (currentPost.user_email === myEmail || currentPost.username === myName)) {
+        if (currentPost && (String(currentPost.user_id) === String(currentUser.id) || String(currentPost.user_email || '').toLowerCase() === String(myEmail || '').toLowerCase())) {
           document.getElementById('confirmGiftModal').style.display = 'none';
           pendingGiftData = null;
           return alert('⚠️ Kamu tidak dapat mengirimkan Gift ke postingan milik sendiri!');
         }
       }
 
-      const { cost, giftName } = pendingGiftData;
-
-      if (!Number.isFinite(Number(cost)) || Number(cost) <= 0) {
-        document.getElementById('confirmGiftModal').style.display = 'none';
-        pendingGiftData = null;
-        return alert('Jumlah koin Gift tidak valid.');
-      }
-
-      if (paidCoins < Number(cost)) {
-        document.getElementById('confirmGiftModal').style.display = 'none';
-        pendingGiftData = null;
-        return alert('Saldo Koin Berbayar tidak mencukupi.');
-      }
-
       document.getElementById('confirmGiftModal').style.display = 'none';
+      try {
+        if (isLiveGiftContext && currentActiveLive) {
+          const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
+          const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
+          const { error: txError } = await supabaseClient.rpc('send_live_gift', {
+            p_sender_id: currentUser.id,
+            p_receiver_id: String(targetIdentifier),
+            p_amount: amount
+          });
+          if (txError) throw txError;
 
-      if (isLiveGiftContext && currentActiveLive) {
-        const targetName = selectedLiveRecipient ? selectedLiveRecipient.name : currentActiveLive.host_name;
-        const targetIdentifier = selectedLiveRecipient ? selectedLiveRecipient.emailOrName : currentActiveLive.host_email;
-
-        userHasCheckedInLive[currentActiveLive.id] = true;
-
-        const newLiveCoins = (currentActiveLive.total_coins_received || 0) + parseInt(cost);
-        currentActiveLive.total_coins_received = newLiveCoins;
-
-        await supabaseClient.from('live_messages').insert([
-          { live_id: currentActiveLive.id, username: myName, content: `🎁 Mengirimkan Gift ${giftName} (${cost} 🪙) untuk @${targetName}` }
-        ]);
-
-        await Promise.all([
-          supabaseClient.from('lives').update({ total_coins_received: newLiveCoins }).eq('id', currentActiveLive.id),
-          supabaseClient.rpc('send_live_gift', {
-            p_sender_id: currentUser ? currentUser.id : null,
-            p_receiver_id: targetIdentifier,
-            p_amount: parseInt(cost)
-          }),
-          supabaseClient.from('user_notifications').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) di Live Chat!` }]),
-          supabaseClient.from('gift_transactions').insert([{ recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: cost }])
-        ]);
-
-        triggerGiftAnimation(myName, giftName, cost, targetName);
-        loadPosts();
-
-      } else if (activeTargetPostId) {
-        const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
-
-        if (currentPost) {
-          const newGiftCoinsCount = (currentPost.gifts_count || 0) + cost;
-          currentPost.gifts_count = newGiftCoinsCount;
-
+          // Hanya setelah transaksi database sukses, buat catatan pendukung.
+          const { error: messageError } = await supabaseClient.from('live_messages').insert([{
+            live_id: currentActiveLive.id, username: myName,
+            content: `🎁 Mengirimkan Gift ${giftName} (${amount} 🪙) untuk @${targetName}`
+          }]);
+          if (messageError) console.error('Gift sukses, tetapi pesan Live gagal disimpan:', messageError);
+          const { error: giftLogError } = await supabaseClient.from('gift_transactions').insert([{
+            recipient_email: String(targetIdentifier), sender_name: myName, gift_name: giftName, coins_amount: amount
+          }]);
+          if (giftLogError) console.error('Gift sukses, tetapi riwayat Gift gagal disimpan:', giftLogError);
+          const { error: notifError } = await supabaseClient.from('user_notifications').insert([{
+            recipient_email: String(targetIdentifier), sender_name: myName,
+            message: `🎁 ${myName} memberikan Gift ${giftName} (${amount} 🪙) di Live Chat!`
+          }]);
+          if (notifError) console.error('Gift sukses, tetapi notifikasi gagal disimpan:', notifError);
+          userHasCheckedInLive[currentActiveLive.id] = true;
+          const { data: freshLive, error: liveReadError } = await supabaseClient.from('lives').select('total_coins_received').eq('id', currentActiveLive.id).maybeSingle();
+          if (!liveReadError && freshLive) currentActiveLive.total_coins_received = freshLive.total_coins_received || 0;
+          await updateCoinUI(false);
+          triggerGiftAnimation(myName, giftName, amount, targetName);
+          loadPosts();
+        } else if (activeTargetPostId) {
+          const currentPost = allPostsCache.find(p => String(p.id) === String(activeTargetPostId));
+          if (!currentPost) throw new Error('Postingan tujuan tidak ditemukan. Muat ulang beranda lalu coba lagi.');
           const targetIdentifier = currentPost.user_id || currentPost.user_email;
-          const targetName = currentPost.username || "Pembuat Curhat";
+          const targetName = currentPost.username || 'Pembuat Curhat';
+          const { error: txError } = await supabaseClient.rpc('process_gift_rewards', {
+            p_sender_id: currentUser.id,
+            p_creator_identifier: String(targetIdentifier),
+            p_cost: amount
+          });
+          if (txError) throw txError;
 
-          try {
-            const { data: rewardData, error: rewardError } =
-              await supabaseClient.rpc('process_gift_rewards', {
-                p_creator_identifier: String(targetIdentifier),
-                p_cost: parseInt(cost, 10)
-              });
-
-            if (rewardError) throw rewardError;
-
-            await supabaseClient
-              .from('gift_transactions')
-              .insert([{
-                recipient_email: String(currentPost.user_email),
-                sender_name: myName,
-                gift_name: giftName,
-                coins_amount: parseInt(cost, 10),
-                post_id: String(activeTargetPostId)
-              }]);
-
-            await supabaseClient
-              .from('user_notifications')
-              .insert([{
-                recipient_email: String(currentPost.user_email),
-                sender_name: myName,
-                message: `🎁 ${myName} memberikan Gift ${giftName} (${cost} 🪙) pada postingan kamu!`
-              }]);
-
-            await supabaseClient
-              .from('curhat')
-              .update({
-                gifts_count: (currentPost.gifts_count || 0) + parseInt(cost, 10)
-              })
-              .eq('id', activeTargetPostId);
-
-            currentPost.gifts_count = (currentPost.gifts_count || 0) + parseInt(cost, 10);
-
-            await updateCoinUI(true);
-            triggerGiftAnimation(myName, giftName, cost, targetName);
-            loadPosts();
-
-          } catch (error) {
-            console.error('Gagal memproses pembagian permata Gift:', error);
-            await updateCoinUI(true);
-            alert('Gift belum dapat diproses. Silakan periksa saldo dan coba lagi.');
-          }
+          const { error: giftLogError } = await supabaseClient.from('gift_transactions').insert([{
+            recipient_email: String(currentPost.user_email), sender_name: myName,
+            gift_name: giftName, coins_amount: amount, post_id: String(activeTargetPostId)
+          }]);
+          if (giftLogError) console.error('Gift sukses, tetapi riwayat Gift gagal disimpan:', giftLogError);
+          const { error: notifError } = await supabaseClient.from('user_notifications').insert([{
+            recipient_email: String(currentPost.user_email), sender_name: myName,
+            message: `🎁 ${myName} memberikan Gift ${giftName} (${amount} 🪙) pada postingan kamu!`
+          }]);
+          if (notifError) console.error('Gift sukses, tetapi notifikasi gagal disimpan:', notifError);
+          const { error: postError } = await supabaseClient.from('curhat').update({
+            gifts_count: Number(currentPost.gifts_count || 0) + amount
+          }).eq('id', activeTargetPostId);
+          if (postError) console.error('Gift sukses, tetapi jumlah Gift pada postingan gagal diperbarui:', postError);
+          else currentPost.gifts_count = Number(currentPost.gifts_count || 0) + amount;
+          await updateCoinUI(false);
+          triggerGiftAnimation(myName, giftName, amount, targetName);
+          loadPosts();
+        } else {
+          throw new Error('Pilih postingan atau penerima Live terlebih dahulu.');
         }
+      } catch (error) {
+        console.error('Transaksi Gift gagal:', error);
+        await updateCoinUI(false);
+        alert('Gift gagal diproses. Saldo tidak boleh dianggap terpotong jika transaksi database gagal. Pesan: ' + (error?.message || 'Kesalahan tidak diketahui'));
+      } finally {
+        pendingGiftData = null;
+        selectedLiveRecipient = null;
       }
-      pendingGiftData = null;
-      selectedLiveRecipient = null;
     }
 
     function triggerGiftAnimation(senderName, giftName, coins, targetName) {
       const container = document.getElementById('giftOverlayContainer');
-      const banner = document.createElement('div');
-      
-      let sizeClass = 'small';
-      let icon = '🎁';
+      if (!container) return;
 
+      // Ikon disesuaikan dengan katalog Gift; efek sengaja tanpa teks.
       const iconsMap = {
-        'Badai Petir': '⚡',
-        'Gunung Meletus': '🌋',
-        'Komet Raksasa': '☄️',
-        'Supernova': '🌌',
-        'Naga Meteorit': '🐉',
-        'Kapal Selam Atlantis': '🌊',
-        'Wijayakusuma Emas': '🪷',
-        'Istana Sultan Agung': '🏰'
+        'Bunga Hati':'🌹', 'Bintang Ceria':'⭐', 'Pelukan Manis':'🧸',
+        'Kejutan Spesial':'🎁', 'Surat Cinta':'💌', 'Kotak Hoki':'🪙',
+        'Hati Bersinar':'💖', 'Parfum Aura':'🧴', 'Mahkota Kehormatan':'👑',
+        'Phoenix Api':'🔥', 'Kapal Kejayaan':'🚢', 'Kuda Pegasus':'🐎',
+        'Istana Cinta':'🏰', 'Legenda Sempurna':'👑',
+        'Badai Petir':'⚡', 'Gunung Meletus':'🌋', 'Komet Raksasa':'☄️',
+        'Supernova':'🌌', 'Naga Meteorit':'🐉', 'Kapal Selam Atlantis':'🌊',
+        'Wijayakusuma Emas':'🪷', 'Istana Sultan Agung':'🏰'
       };
-
-      let stayDuration = 3000;
-
-      if (coins >= 10000) {
-        sizeClass = 'ultimate';
-        icon = '🏰';
-        stayDuration = 20000;
-        spawnConfetti(200, stayDuration);
-      } else if (coins >= 5000) {
-        sizeClass = 'ultimate';
-        icon = '🪷';
-        stayDuration = 15000;
-        spawnConfetti(150, stayDuration);
-      } else if (coins >= 2000) {
-        sizeClass = 'ultimate';
-        icon = '🌊';
-        stayDuration = 12000;
-        spawnConfetti(100, stayDuration);
-      } else if (coins >= 1000) {
-        sizeClass = 'ultimate';
-        icon = '🐉';
-        stayDuration = 10000;
-        spawnConfetti(80, stayDuration);
-      } else if (coins >= 500) {
-        sizeClass = 'ultimate';
-        icon = iconsMap[giftName] || '🌌';
-        stayDuration = 8000;
-        spawnConfetti(60, stayDuration);
-      } else if (coins >= 400) {
-        sizeClass = 'ultimate';
-        icon = iconsMap[giftName] || '☄️';
-        stayDuration = 7000;
-        spawnConfetti(50, stayDuration);
-      } else if (coins >= 300) {
-        sizeClass = 'ultimate';
-        icon = iconsMap[giftName] || '🌋';
-        stayDuration = 6000;
-        spawnConfetti(40, stayDuration);
-      } else if (coins >= 200) {
-        sizeClass = 'ultimate';
-        icon = iconsMap[giftName] || '⚡';
-        stayDuration = 5000;
-        spawnConfetti(30, stayDuration);
-      } else if (coins >= 50) {
-        sizeClass = 'large';
-        icon = '👑';
-        stayDuration = 4500;
-        spawnConfetti(20, stayDuration);
-      } else if (coins >= 5) {
-        sizeClass = 'medium';
-        icon = '🌟';
-        stayDuration = 3500;
-      }
-
-      banner.className = `gift-banner ${sizeClass}`;
-      
-      if (sizeClass === 'ultimate') {
-        banner.style.animation = 'ultimatePopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, gradientBg 2s infinite alternate';
-      } else {
-        banner.style.animation = 'giftPopIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
-      }
-
-      banner.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-      
-      banner.innerHTML = `
-        <div class="icon">${icon}</div>
-        <div class="text-group">
-          <div class="sender">${senderName}</div>
-          <div class="action">Mengirimkan <b>${giftName}</b> (${coins.toLocaleString('id-ID')} 🪙) untuk <b>@${targetName}</b></div>
-        </div>
-      `;
-
+      const value = Number(coins) || 0;
+      const icon = iconsMap[giftName] || '🎁';
+      const size = value >= 50000 ? 150 : value >= 10000 ? 126 : value >= 2000 ? 104 : value >= 500 ? 86 : value >= 50 ? 70 : 58;
+      const duration = value >= 10000 ? 6500 : value >= 1000 ? 5000 : 3600;
+      const banner = document.createElement('div');
+      banner.className = 'cuit-gift-icon-pop';
+      banner.setAttribute('aria-label', 'Gift ' + giftName);
+      banner.textContent = icon;
+      Object.assign(banner.style, {
+        width: size + 'px', height: size + 'px', boxSizing: 'border-box',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: Math.round(size * 0.61) + 'px', lineHeight: '1',
+        borderRadius: '30%',
+        background: 'radial-gradient(circle at 28% 20%, #fffdf3 0%, #ffe9a6 35%, #e9a82e 72%, #a85d08 100%)',
+        border: '3px solid #fff4c4',
+        boxShadow: '0 0 0 3px rgba(255,193,55,.28), 0 12px 35px rgba(84,39,0,.42), inset 0 2px 8px rgba(255,255,255,.9)',
+        margin: '10px auto',
+        animation: 'cuitGiftIconPop ' + duration + 'ms cubic-bezier(.16,1,.3,1) forwards',
+        transformOrigin: 'center center',
+        position: 'relative'
+      });
       container.appendChild(banner);
+      if (value >= 500) {
+        const sparkle = document.createElement('div');
+        sparkle.textContent = '✨';
+        Object.assign(sparkle.style, {position:'absolute',fontSize:Math.round(size*.35)+'px',marginLeft:(size*.55)+'px',marginTop:'-'+(size*.65)+'px',animation:'cuitGiftSparkle 1s ease-in-out infinite alternate'});
+        banner.appendChild(sparkle);
+        if (value >= 2000 && typeof spawnConfetti === 'function') spawnConfetti(value >= 10000 ? 70 : 30, duration);
+      }
+      setTimeout(() => banner.remove(), duration + 150);
+    }
 
-      setTimeout(() => {
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateY(-30px) scale(0.6)';
-        setTimeout(() => banner.remove(), 800);
-      }, stayDuration);
+    if (!document.getElementById('cuitGiftIconAnimationStyles')) {
+      const style = document.createElement('style');
+      style.id = 'cuitGiftIconAnimationStyles';
+      style.textContent = `
+        @keyframes cuitGiftIconPop {
+          0% { opacity:0; transform:translateY(35px) scale(.25) rotate(-14deg); }
+          18% { opacity:1; transform:translateY(-8px) scale(1.12) rotate(5deg); }
+          32% { transform:translateY(0) scale(1) rotate(0); }
+          78% { opacity:1; transform:translateY(-12px) scale(1.03); }
+          100% { opacity:0; transform:translateY(-70px) scale(.7) rotate(8deg); }
+        }
+        @keyframes cuitGiftSparkle { from { transform:scale(.7) rotate(-12deg); opacity:.65; } to { transform:scale(1.2) rotate(15deg); opacity:1; } }
+      `;
+      document.head.appendChild(style);
     }
 
     async function checkUnreadNotifications() {
@@ -3715,7 +3653,7 @@
         .order('created_at', { ascending: false });
 
       if (!transactions || transactions.length === 0) {
-        container.innerHTML = '<p style="text-align:center; font-size:10.5px; color:var(--text-sub);">Belum ada riwayat penerimaan Permata.</p>';
+        container.innerHTML = '<p style="text-align:center; font-size:10.5px; color:var(--text-sub);">Belum ada riwayat Gift masuk.</p>';
         return;
       }
 
@@ -3725,7 +3663,7 @@
             <b>🎁 ${t.gift_name}</b> dari <span style="color:var(--primary);">${t.sender_name}</span>
             <div style="font-size:8.5px; color:var(--text-sub);">${new Date(t.created_at).toLocaleString('id-ID')}</div>
           </div>
-          <div style="font-weight:900; color:#319af0;">+${t.coins_amount} 💎</div>
+          <div style="font-weight:900; color:#319af0;">+${Number(t.coins_amount || 0).toLocaleString('id-ID')} 🪙</div>
         </div>
       `).join('');
     }
