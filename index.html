@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- PERBAIKAN V3: memakai basis tampilan CUIT yang lebih lengkap; memulihkan sorotan beranda dan profil; tidak menimpa berkas asli. -->
   <!-- KODE ANTI-CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <title>CUIT — Versi Baru (Audit Awal)</title>
+  <title>CUIT — Perbaikan v3 (layout dan profil dipulihkan)</title>
   <!-- Versi pengujian terpisah. Jangan timpa index.html produksi sebelum pengujian dan persetujuan. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
@@ -384,16 +385,16 @@
 
 
 .special-windows-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;width:100%;border-top:1px solid #c8102e;position:relative}
-.special-window{display:flex;align-items:center;gap:8px;text-align:left;min-width:0;min-height:82px;padding:8px 9px;border:0;border-radius:0;background:#ffffff;color:#b5122b;cursor:pointer;box-sizing:border-box;position:relative}
+.special-window{display:block;text-align:left;min-width:0;min-height:82px;height:100%;padding:0;border:0;border-radius:0;background:#fffdfd;color:#b5122b;cursor:pointer;box-sizing:border-box;position:relative;overflow:hidden}
 .special-window:nth-child(odd){border-right:1px solid #c8102e}
 .special-window:nth-child(n+3){border-top:1px solid #c8102e}
 .special-window:active{background:#fff5f5}
-.special-window:before{content:"✦";position:absolute;top:5px;right:7px;font-size:10px;color:#d8a33e;opacity:.9}
-.special-window:after{content:"";position:absolute;left:7px;right:7px;bottom:5px;border-bottom:1px dotted #edc1c8}
-.window-number{display:grid;place-items:center;flex-shrink:0;width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#e52342,#a50d27);color:#ffffff;font-size:11px;font-weight:900;box-shadow:0 2px 5px rgba(160,15,40,.22),inset 0 0 0 1px rgba(255,255,255,.45);border:1px solid #f1b9c2}
-.window-label{display:block;font-size:11px;font-weight:900;white-space:nowrap;color:#b5122b}
-.window-hint{display:block;font-size:9px;color:#666;margin-top:4px}
-@media(min-width:600px){.special-windows-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.special-window{min-height:88px}.special-window:nth-child(n){border-top:0;border-right:1px solid #c8102e}.special-window:last-child{border-right:0}}
+.special-window:before{content:none}
+.special-window:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#c8102e,#e8bd65,#c8102e)}
+.window-number{display:none}
+.window-label{display:block;font-size:12px;font-weight:900;white-space:normal;color:#b5122b}
+.window-hint{display:block;font-size:11px;color:#4b4550;margin-top:7px;line-height:1.45;overflow-wrap:anywhere}
+@media(min-width:600px){.special-windows-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.special-window{min-height:92px}.special-window:nth-child(n){border-top:0;border-right:1px solid #c8102e}.special-window:last-child{border-right:0}}
 
 </style>
 
@@ -410,7 +411,7 @@
     <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔔 <span id="notifBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#e74c3c; width:8px; height:8px; border-radius:50%;"></span>
     </button>
-    <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">20</span></div>
+    <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">0</span></div>
     <div class="stat-badge" title="Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
     <div class="stat-badge" title="Permata CUIT Hasil Kerja">💎 <span id="gemsCount">0</span></div>
   </div>
@@ -586,7 +587,7 @@
       <button type="button" onclick="switchTab('pageGame',document.querySelectorAll('.nav-bar .nav-item')[1])"><span class="shortcut-icon game">🎯</span><span>Game</span></button>
       <button type="button" onclick="openDailyCheckin()"><span class="shortcut-icon checkin">📅</span><span>Absen</span></button>
       <button type="button" onclick="switchTab('pageSearch',document.querySelectorAll('.nav-bar .nav-item')[3])"><span class="shortcut-icon king">👑</span><span>Raja Cuit</span></button>
-      <button type="button" onclick="switchTab('pageProfile',document.querySelectorAll('.nav-bar .nav-item')[4])"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
+      <button type="button" id="openTodayProgressButton" aria-label="Buka Progres Hari Ini"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
       <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
     </div>
 
@@ -597,17 +598,17 @@
         CURHATAN ISTIMEWA
       </div>
       <div class="special-windows-grid">
-        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
-          <span class="window-number">01</span><span class="window-label">Jendela #1</span><span class="window-hint">Bagikan ceritamu</span>
+        <button type="button" class="special-window" onclick="openSpecialPostSlot(0)">
+          <span class="window-number" aria-hidden="true"></span><span class="window-label" id="specialSlotTitle0"></span><span class="window-hint" id="specialSlotHint0">Memuat curhatan istimewa…</span>
         </button>
-        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
-          <span class="window-number">02</span><span class="window-label">Jendela #2</span><span class="window-hint">Bagikan ceritamu</span>
+        <button type="button" class="special-window" onclick="openSpecialPostSlot(1)">
+          <span class="window-number" aria-hidden="true"></span><span class="window-label" id="specialSlotTitle1"></span><span class="window-hint" id="specialSlotHint1">Memuat curhatan istimewa…</span>
         </button>
-        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
-          <span class="window-number">03</span><span class="window-label">Jendela #3</span><span class="window-hint">Bagikan ceritamu</span>
+        <button type="button" class="special-window" onclick="openSpecialPostSlot(2)">
+          <span class="window-number" aria-hidden="true"></span><span class="window-label" id="specialSlotTitle2"></span><span class="window-hint" id="specialSlotHint2">Memuat curhatan istimewa…</span>
         </button>
-        <button type="button" class="special-window" onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])">
-          <span class="window-number">04</span><span class="window-label">Jendela #4</span><span class="window-hint">Bagikan ceritamu</span>
+        <button type="button" class="special-window" onclick="openSpecialPostSlot(3)">
+          <span class="window-number" aria-hidden="true"></span><span class="window-label" id="specialSlotTitle3"></span><span class="window-hint" id="specialSlotHint3">Memuat curhatan istimewa…</span>
         </button>
       </div>
     </section>
@@ -619,6 +620,46 @@
       </div>
     </div>
   </div>
+  <!-- MODAL PILIHAN PROMOSI POST -->
+  <div id="promotionChoiceModal" class="modal" style="z-index:100100;">
+    <div class="modal-content" style="width:min(440px,94vw);padding:18px;border-radius:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
+        <h3 style="margin:0;font-size:17px;color:#b91c32;">🚀 Promosikan Curhatan</h3>
+        <button type="button" aria-label="Tutup" onclick="closePromotionModal()" style="border:0;background:#f3f4f6;border-radius:50%;width:32px;height:32px;font-size:18px;">×</button>
+      </div>
+      <p style="font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px;">Pilih jenis promosi dan tentukan durasinya. Biaya dihitung per jam menggunakan Koin Berbayar.</p>
+      <div id="promotionOptionBiasa" class="promotion-option" style="border:1.5px solid #f2b8c0;border-radius:14px;padding:12px;margin-bottom:10px;background:#fffafb;">
+        <div style="font-weight:850;font-size:14px;color:#9f1239;margin-bottom:4px;">⭐ Promosi Biasa</div>
+        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Terbaik</b> selama masa promosi aktif.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="promotionBiasaButton" type="button" onclick="selectPromotionType('biasa')" style="flex:1;min-height:42px;border:0;border-radius:10px;background:#c81e32;color:#fff;font-weight:850;padding:8px;">1 Koin / jam</button>
+          <label for="promotionBiasaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
+          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionBiasaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
+        </div>
+      </div>
+      <div id="promotionOptionIstimewa" class="promotion-option" style="border:1.5px solid #e8d5a0;border-radius:14px;padding:12px;margin-bottom:12px;background:#fffdf5;">
+        <div style="font-weight:850;font-size:14px;color:#946200;margin-bottom:4px;">✨ Promosi Istimewa</div>
+        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Istimewa</b> selama masa promosi aktif.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button id="promotionIstimewaButton" type="button" onclick="selectPromotionType('istimewa')" style="flex:1;min-height:42px;border:1px solid #d7b65e;border-radius:10px;background:#fff;color:#946200;font-weight:850;padding:8px;">5 Koin / jam</button>
+          <label for="promotionIstimewaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
+          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionIstimewaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f8f8fa;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+        <span style="font-size:12px;color:#555;">Total biaya <span id="promotionCostExplain">(1 jam × 1 koin)</span></span>
+        <b id="promotionTotalCost" style="font-size:16px;color:#b91c32;">1 Koin</b>
+      </div>
+      <div style="font-size:11px;color:#666;margin-bottom:12px;">Saldo Koin Berbayar: <b id="promotionBalance">0</b> koin</div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="closePromotionModal()" style="flex:1;border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:750;">Batal</button>
+        <button id="confirmPromotionButton" type="button" onclick="confirmPostPromotion()" style="flex:1;border:0;background:#c81e32;color:#fff;border-radius:10px;padding:11px;font-weight:850;">Oke, Promosikan</button>
+      </div>
+      <div id="promotionFeedback" role="status" style="font-size:11px;color:#b91c32;margin-top:8px;"></div>
+    </div>
+  </div>
+
+
   <!-- MODAL EDIT POSTINGAN SENDIRI -->
   <div id="editPostModal" class="modal">
     <div class="modal-content">
@@ -1267,45 +1308,6 @@
     </div>
   </div>
 
-  <!-- MODAL PILIHAN PROMOSI POST -->
-  <div id="promotionChoiceModal" class="modal" style="z-index:100100;">
-    <div class="modal-content" style="width:min(440px,94vw);padding:18px;border-radius:18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;">
-        <h3 style="margin:0;font-size:17px;color:#b91c32;">🚀 Promosikan Curhatan</h3>
-        <button type="button" aria-label="Tutup" onclick="closePromotionModal()" style="border:0;background:#f3f4f6;border-radius:50%;width:32px;height:32px;font-size:18px;">×</button>
-      </div>
-      <p style="font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px;">Pilih jenis promosi dan tentukan durasinya. Biaya dihitung per jam menggunakan Koin Berbayar.</p>
-      <div id="promotionOptionBiasa" class="promotion-option" style="border:1.5px solid #f2b8c0;border-radius:14px;padding:12px;margin-bottom:10px;background:#fffafb;">
-        <div style="font-weight:850;font-size:14px;color:#9f1239;margin-bottom:4px;">⭐ Promosi Biasa</div>
-        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Terbaik</b> selama masa promosi aktif.</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button id="promotionBiasaButton" type="button" onclick="selectPromotionType('biasa')" style="flex:1;min-height:42px;border:0;border-radius:10px;background:#c81e32;color:#fff;font-weight:850;padding:8px;">1 Koin / jam</button>
-          <label for="promotionBiasaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
-          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionBiasaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
-        </div>
-      </div>
-      <div id="promotionOptionIstimewa" class="promotion-option" style="border:1.5px solid #e8d5a0;border-radius:14px;padding:12px;margin-bottom:12px;background:#fffdf5;">
-        <div style="font-weight:850;font-size:14px;color:#946200;margin-bottom:4px;">✨ Promosi Istimewa</div>
-        <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Istimewa</b> selama masa promosi aktif.</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button id="promotionIstimewaButton" type="button" onclick="selectPromotionType('istimewa')" style="flex:1;min-height:42px;border:1px solid #d7b65e;border-radius:10px;background:#fff;color:#946200;font-weight:850;padding:8px;">5 Koin / jam</button>
-          <label for="promotionIstimewaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
-          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionIstimewaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f8f8fa;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-        <span style="font-size:12px;color:#555;">Total biaya <span id="promotionCostExplain">(1 jam × 1 koin)</span></span>
-        <b id="promotionTotalCost" style="font-size:16px;color:#b91c32;">1 Koin</b>
-      </div>
-      <div style="font-size:11px;color:#666;margin-bottom:12px;">Saldo Koin Berbayar: <b id="promotionBalance">0</b> koin</div>
-      <div style="display:flex;gap:8px;">
-        <button type="button" onclick="closePromotionModal()" style="flex:1;border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:750;">Batal</button>
-        <button id="confirmPromotionButton" type="button" onclick="confirmPostPromotion()" style="flex:1;border:0;background:#c81e32;color:#fff;border-radius:10px;padding:11px;font-weight:850;">Oke, Promosikan</button>
-      </div>
-      <div id="promotionFeedback" role="status" style="font-size:11px;color:#b91c32;margin-top:8px;"></div>
-    </div>
-  </div>
-
   <!-- MODAL DETAIL POSTINGAN PROMOSI/SOROTAN -->
   <div id="promotedDetailModal" class="modal">
     <div class="modal-content" id="promotedDetailContent"></div>
@@ -1316,7 +1318,7 @@
     <div class="modal-content">
       <h3 style="font-size: 16px; font-weight: 900; margin-bottom: 4px;">Konfigurasi Prototipe CUIT</h3>
       <div style="font-size:11.5px; line-height:1.6; color:#333;">
-        • <b>Jatah gratis harian:</b> 20 Koin Gratisan<br>
+        • <b>Bonus absen beruntun:</b> 1, 2, 3, 5, 8, 13, 21 Koin Gratis<br>
         • <b>Skema Curhat:</b> 1 Koin / 1.200 Karakter<br>
         • <b>Nilai Ekonomi:</b> 1 IDR = 1 Koin Berbayar = 1 Permata CUIT<br>
         • <b>Sponsor Referral:</b> Default ADMINCUIT
@@ -1354,90 +1356,49 @@
         <span style="font-size: 9.5px; color: #555;">(Wajib bagi Penonton sebelum mengirim pesan pertama di Live Chat)</span>
       </div>
 
-      <div class="gift-grid">
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Semangat')">🤍 Semangat (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Santai')">☕ Santai (1 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(1, 'Sip!')">👍 Sip! (1 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Peluk Hangat')">🫂 Peluk (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Segerin Dulu')">🧋 Segerin (2 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(2, 'Cokelat Empati')">🍫 Cokelat (2 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Kamu Hebat')">🌟 Hebat (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Bunga Empati')">💐 Bunga (3 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(3, 'Donat Hangat')">🍩 Donat (3 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Inspiratif')">🏆 Inspiratif (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Karya Indah')">💎 Indah (5 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(5, 'Traktir Pizza')">🍕 Pizza (5 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Cerita')">👑 Bintang (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Nobar Seru')">🍿 Nobar (10 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(10, 'Kotak Kejutan')">🎁 Kejutan (10 🪙)</div>
-
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Karya Agung')">🎇 Agung (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pesta Burger')">🍔 Burger (20 🪙)</div>
-        <div class="gift-card-item" onclick="sendGiftAction(20, 'Balon Harapan')">🎈 Balon (20 🪙)</div>
-
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Raja Curhat')">👑 Raja (50 🪙)</div>
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Konser Mini')">🎸 Konser (50 🪙)</div>
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(50, 'Piala Utama')">🏆 Piala (50 🪙)</div>
-
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Super Supporter')">🚀 Super (100 🪙)</div>
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Mobil Balap')">🏎️ Mobil (100 🪙)</div>
-        <div class="gift-card-item" style="background:#fff0f1; border:1px solid #c8e8ff; font-weight:900;" onclick="sendGiftAction(100, 'Kapal Pesiar')">🛥️ Kapal (100 🪙)</div>
-
-        <div class="gift-card-item" style="background:#fff3e0; border:1px solid #ffe0b2; font-weight:900;" onclick="sendGiftAction(200, 'Badai Petir')">⚡ Badai (200 🪙)</div>
-        <div class="gift-card-item" style="background:#fbe9e7; border:1px solid #ffccbc; font-weight:900;" onclick="sendGiftAction(300, 'Gunung Meletus')">🌋 Gunung (300 🪙)</div>
-        <div class="gift-card-item" style="background:#ede7f6; border:1px solid #d1c4e9; font-weight:900;" onclick="sendGiftAction(400, 'Komet Raksasa')">☄️ Komet (400 🪙)</div>
-        
-        <div class="gift-card-item" style="grid-column: span 3; background:#e8eaf6; border:1.5px solid #c5cae9; font-weight:900; padding:8px;" onclick="sendGiftAction(500, 'Supernova')">🌌 Supernova SULTAN (500 🪙)</div>
+      <div class="gift-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Bunga Hati')">🌹 <b>Bunga Hati</b><br><small>5 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Ceria')">⭐ <b>Bintang Ceria</b><br><small>10 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pelukan Manis')">🧸 <b>Pelukan Manis</b><br><small>20 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(50, 'Kejutan Spesial')">🎁 <b>Kejutan Spesial</b><br><small>50 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(100, 'Surat Cinta')">💌 <b>Surat Cinta</b><br><small>100 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(200, 'Kotak Hoki')">🪙 <b>Kotak Hoki</b><br><small>200 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(500, 'Hati Bersinar')">💖 <b>Hati Bersinar</b><br><small>500 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(1000, 'Parfum Aura')">🧴 <b>Parfum Aura</b><br><small>1.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(2000, 'Mahkota Kehormatan')">👑 <b>Mahkota Kehormatan</b><br><small>2.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(5000, 'Phoenix Api')">🔥 <b>Phoenix Api</b><br><small>5.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(10000, 'Kapal Kejayaan')">🚢 <b>Kapal Kejayaan</b><br><small>10.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(20000, 'Kuda Pegasus')">🐎 <b>Kuda Pegasus</b><br><small>20.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(50000, 'Istana Cinta')">🏰 <b>Istana Cinta</b><br><small>50.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(100000, 'Legenda Sempurna')">👑 <b>Legenda Sempurna</b><br><small>100.000 Koin</small></div>
       </div>
 
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
-  <!-- MODAL GIFT SPESIAL SUPER-SULTAN TERPISAH -->
+  <!-- MODAL GIFT KHUSUS LIVE: gunakan katalog Gift CUIT yang sama -->
   <div id="specialGiftModal" class="modal">
-    <div class="modal-content" style="background: linear-gradient(180deg, #1a1c29, #0f1016); color: #fff; border: 2px solid #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);">
-      
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px;">
-        <h3 style="font-size: 16px; font-weight: 900; color: #ffd700;">👑 Gift Spesial Super-Sultan</h3>
-        <button onclick="document.getElementById('specialGiftModal').style.display='none'" style="border:none; background:none; font-size:18px; color:#fff; cursor:pointer;">✕</button>
+    <div class="modal-content" style="max-width:460px;max-height:86vh;overflow:auto;">
+      <h3 style="margin-bottom:8px;color:#9b6a00;">🎁 Gift CUIT untuk Live</h3>
+      <p style="font-size:11px;color:#666;margin-bottom:10px;">Pilih salah satu dari 14 Gift. Harga menggunakan Koin Berbayar.</p>
+      <div class="gift-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+        <div class="gift-card-item" onclick="sendGiftAction(5, 'Bunga Hati')">🌹 <b>Bunga Hati</b><br><small>5 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Ceria')">⭐ <b>Bintang Ceria</b><br><small>10 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(20, 'Pelukan Manis')">🧸 <b>Pelukan Manis</b><br><small>20 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(50, 'Kejutan Spesial')">🎁 <b>Kejutan Spesial</b><br><small>50 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(100, 'Surat Cinta')">💌 <b>Surat Cinta</b><br><small>100 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(200, 'Kotak Hoki')">🪙 <b>Kotak Hoki</b><br><small>200 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(500, 'Hati Bersinar')">💖 <b>Hati Bersinar</b><br><small>500 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(1000, 'Parfum Aura')">🧴 <b>Parfum Aura</b><br><small>1.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(2000, 'Mahkota Kehormatan')">👑 <b>Mahkota Kehormatan</b><br><small>2.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(5000, 'Phoenix Api')">🔥 <b>Phoenix Api</b><br><small>5.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(10000, 'Kapal Kejayaan')">🚢 <b>Kapal Kejayaan</b><br><small>10.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(20000, 'Kuda Pegasus')">🐎 <b>Kuda Pegasus</b><br><small>20.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(50000, 'Istana Cinta')">🏰 <b>Istana Cinta</b><br><small>50.000 Koin</small></div>
+        <div class="gift-card-item" onclick="sendGiftAction(100000, 'Legenda Sempurna')">👑 <b>Legenda Sempurna</b><br><small>100.000 Koin</small></div>
       </div>
-
-      <div style="font-size: 11px; color: #ccc; margin-bottom: 12px; text-align: center;">
-        Apresiasi fantastis dengan animasi *Takeover Screen* & Suasana Megah!
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-        <div onclick="sendGiftAction(1000, 'Naga Meteorit')" style="background: linear-gradient(135deg, #2b1055, #7597de); border: 1.5px solid #60b5f7; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
-          <div style="font-size: 32px; margin-bottom: 4px;">🐉</div>
-          <div style="font-size: 12px; font-weight: 900; color: #fff;">Naga Meteorit</div>
-          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">1.000 🪙</div>
-        </div>
-
-        <div onclick="sendGiftAction(2000, 'Kapal Selam Atlantis')" style="background: linear-gradient(135deg, #093028, #237a57); border: 1.5px solid #55efc4; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
-          <div style="font-size: 32px; margin-bottom: 4px;">🌊</div>
-          <div style="font-size: 12px; font-weight: 900; color: #fff;">Harta Atlantis</div>
-          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">2.000 🪙</div>
-        </div>
-
-        <div onclick="sendGiftAction(5000, 'Wijayakusuma Emas')" style="background: linear-gradient(135deg, #4a154b, #6b1110); border: 1.5px solid #ff7675; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer;">
-          <div style="font-size: 32px; margin-bottom: 4px;">🪷</div>
-          <div style="font-size: 12px; font-weight: 900; color: #fff;">Wijayakusuma Emas</div>
-          <div style="font-size: 11px; font-weight: 800; color: #ffd700; margin-top: 2px;">5.000 🪙</div>
-        </div>
-
-        <div onclick="sendGiftAction(10000, 'Istana Sultan Agung')" style="background: linear-gradient(135deg, #000000, #434343); border: 2px solid #ffd700; padding: 12px 8px; border-radius: 14px; text-align: center; cursor: pointer; grid-column: span 2; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
-          <div style="font-size: 40px; margin-bottom: 4px;">🏰</div>
-          <div style="font-size: 14px; font-weight: 900; color: #ffd700;">Istana Sultan Agung (ULTIMATE)</div>
-          <div style="font-size: 12px; font-weight: 800; color: #fff; margin-top: 2px;">10.000 🪙</div>
-        </div>
-      </div>
-
-      <button class="btn-secondary" style="width: 100%; background: #222; color: #fff; border: 1px solid #444;" onclick="document.getElementById('specialGiftModal').style.display='none'">Tutup</button>
+      <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="document.getElementById('specialGiftModal').style.display='none'">Tutup</button>
     </div>
   </div>
 
@@ -1530,27 +1491,99 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL PROGRES HARI INI -->
+  <div id="todayProgressModal" class="modal" style="display:none;position:fixed;inset:0;z-index:1000000;pointer-events:auto;align-items:center;justify-content:center;background:rgba(30,15,20,.55);padding:12px;box-sizing:border-box;" onclick="if(event.target===this)closeTodayProgress()">
+    <div class="modal-content" style="max-width:480px;width:94%;max-height:85vh;overflow:auto;border-radius:18px;padding:14px;background:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px;"><div><div style="font-size:16px;font-weight:900;color:#7f1730;">🏅 Progres Hari Ini</div><div id="todayProgressDate" style="font-size:11px;color:#777;"></div></div><button type="button" onclick="closeTodayProgress()" style="border:0;background:#f4e8eb;border-radius:50%;width:30px;height:30px;font-size:18px;">×</button></div>
+      <div style="font-size:11px;color:#6b7280;margin:6px 0 10px;">Ringkasan aktivitas akun Anda hari ini.</div>
+      <div id="todayProgressGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;"><div style="grid-column:1/-1;text-align:center;padding:16px;color:#777;">Memuat progres…</div></div>
+      <div style="font-size:10px;color:#777;margin-top:10px;line-height:1.45;">Angka ditampilkan berdasarkan catatan yang tersedia di CUIT. Aktivitas atau transaksi yang belum memiliki tabel pencatatan akan ditandai “Belum terhubung”, bukan dianggap nol.</div>
+    </div>
+  </div>
+
   <script>
+
+    function closeTodayProgress(){ const el=document.getElementById('todayProgressModal'); if(el) { el.style.display='none'; el.style.pointerEvents='none'; } }
+    document.addEventListener('DOMContentLoaded', function(){ const b=document.getElementById('openTodayProgressButton'); const m=document.getElementById('todayProgressModal'); if(m) m.style.pointerEvents='none'; if(b) b.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); const modal=document.getElementById('todayProgressModal'); if(modal) modal.style.pointerEvents='auto'; openTodayProgress(); }); });
+    async function openTodayProgress(){
+      const modal=document.getElementById('todayProgressModal'); const grid=document.getElementById('todayProgressGrid');
+      if(!modal || !grid){ alert('Panel Progres belum tersedia pada file ini.'); return; }
+      modal.style.display='flex'; modal.style.visibility='visible'; modal.style.pointerEvents='auto'; modal.style.zIndex='1000000';
+      grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:16px;color:#777;">Memuat progres hari ini…</div>';
+      try { modal.scrollTop=0; } catch(e) {}
+      const now=new Date(); const day=now.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});
+      document.getElementById('todayProgressDate').textContent=new Date(day+'T12:00:00+07:00').toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Jakarta'});
+      const labels=[['checkin','Absen hari ini','📅'],['watch','Nonton misi','🎬'],['game','Main game','🎯'],['posts','Membuat curhatan','📝'],['likesGiven','Memberi like','❤️'],['commentsGiven','Memberi komentar','💬'],['likesReceived','Menerima like','💗'],['commentsReceived','Menerima komentar','🗨️'],['paidSpent','Koin berbayar keluar','🪙'],['gemsReceived','Permata diterima','💎']];
+      const values={checkin:'Belum',watch:'Belum terhubung',game:'Belum terhubung',posts:0,likesGiven:0,commentsGiven:0,likesReceived:0,commentsReceived:0,paidSpent:'Belum terhubung',gemsReceived:'Belum terhubung'};
+      if(!currentUser){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:14px;">Silakan masuk untuk melihat progres akun.</div>';return;}
+      const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
+      async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
+      const [checkins,posts,likes,comments,reels]=await Promise.all([
+        rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
+        rows('curhat','id,created_at,user_id,author_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
+        rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
+        rows('comments','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
+        rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id))
+      ]);
+      values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
+      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id||x.author_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
+      values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
+      values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
+      values.watch=reels===null?'Belum terhubung':reels.length;
+      grid.innerHTML=labels.map(([key,label,icon])=>`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:#fff8fa;border:1px solid #f0dce2;border-radius:12px;min-width:0;"><span style="font-size:19px;">${icon}</span><div style="min-width:0;flex:1;"><div style="font-size:10px;color:#6b7280;line-height:1.25;">${label}</div><div style="font-size:13px;font-weight:900;color:#8b1e3f;overflow-wrap:anywhere;">${values[key]}</div></div></div>`).join('');
+    }
+
     async function openDailyCheckin() {
       if (!currentUser) { alert('Silakan masuk terlebih dahulu untuk melakukan absen.'); return; }
       const day = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
-      const ok = confirm(`Absen harian CUIT\nTanggal: ${day} WIB\n\nAbsen akan dicatat ke Supabase jika tabel cuit_checkins tersedia. Lanjutkan?`);
+      const rewards = [1, 2, 3, 5, 8, 13, 21];
+      const ok = confirm(`Absen harian CUIT\nTanggal: ${day} WIB\n\nBonus mengikuti urutan 1, 2, 3, 5, 8, 13, 21 Koin Gratis. Jika melewatkan satu hari, urutan kembali ke hari pertama. Lanjutkan?`);
       if (!ok) return;
       try {
         const { data: existing, error: readError } = await supabaseClient.from('cuit_checkins').select('id').eq('user_id', currentUser.id).eq('checkin_date', day).maybeSingle();
         if (readError) throw readError;
-        if (existing) { alert('Kamu sudah absen hari ini.'); return; }
-        const { error } = await supabaseClient.from('cuit_checkins').insert({user_id:currentUser.id, checkin_date:day});
-        if (error) throw error;
-        alert('Absen hari ini berhasil dicatat.');
+        if (existing) { alert('Kamu sudah absen hari ini. Bonus hari ini tidak bisa diambil dua kali.'); return; }
+
+        // Hitung rentetan hari sebelumnya berdasarkan tanggal WIB. Hari terlewat memulai urutan baru.
+        const yesterday = new Date(new Date(day + 'T00:00:00+07:00').getTime() - 86400000);
+        const fromDay = new Date(yesterday.getTime() - 6 * 86400000).toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+        const { data: recent, error: historyError } = await supabaseClient.from('cuit_checkins')
+          .select('checkin_date').eq('user_id', currentUser.id).gte('checkin_date', fromDay).lt('checkin_date', day).order('checkin_date', {ascending:false});
+        if (historyError) throw historyError;
+        const priorDates = new Set((recent || []).map(r => String(r.checkin_date).slice(0,10)));
+        let streak = 0;
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(yesterday.getTime() - i * 86400000).toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+          if (priorDates.has(d)) streak++; else break;
+        }
+        const rewardIndex = Math.min(streak, rewards.length - 1);
+        const reward = rewards[rewardIndex];
+
+        const { error: insertError } = await supabaseClient.from('cuit_checkins').insert({user_id:currentUser.id, checkin_date:day});
+        if (insertError) throw insertError;
+
+        // Tambahkan bonus hanya setelah absen tersimpan. Unique constraint (user_id, checkin_date)
+        // di database tetap disarankan untuk mencegah dua permintaan bersamaan.
+        const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('free_coins').eq('id', currentUser.id).maybeSingle();
+        if (profileError || !profile) throw new Error('Absen sudah tercatat, tetapi saldo tidak bisa dibaca. Bonus perlu diperiksa admin.');
+        const before = Math.max(0, Number(profile.free_coins ?? freeCoins ?? 0));
+        const after = before + reward;
+        const { error: awardError } = await supabaseClient.from('profiles').update({free_coins:after}).eq('id', currentUser.id);
+        if (awardError) throw new Error(`Absen tercatat, tetapi bonus ${reward} Koin Gratis gagal disimpan. Hubungi admin untuk pemeriksaan.`);
+        freeCoins = after;
+        localStorage.setItem('cuit_free_coins', String(freeCoins));
+        await updateCoinUI(true);
+        alert(`Absen berhasil! Bonus hari ke-${rewardIndex + 1}: ${reward} Koin Gratis.\nSaldo Koin Gratis: ${freeCoins.toLocaleString('id-ID')}.`);
       } catch (error) {
         console.error('Absen CUIT:', error);
-        alert('Fitur absen membutuhkan tabel cuit_checkins dan kebijakan RLS di Supabase. Belum ada bonus koin yang diberikan.');
+        const msg = error && error.message ? error.message : 'Absen gagal. Periksa tabel cuit_checkins dan kebijakan RLS di Supabase.';
+        alert(msg);
       }
     }
 
     const CONFIG = {
-      FREE_COINS_DAILY: 20,
+      FREE_COINS_DAILY: 0,
       MAX_CHAR_FREE_CURHAT: 1200,
       COIN_RATE_RP: 1,
       DEFAULT_SPONSOR: 'ADMINCUIT',
@@ -1583,7 +1616,7 @@
     let userHasLeftLive = false;
     let userHasCheckedInLive = {}; 
 
-    let freeCoins = 20;
+    let freeCoins = 0;
     let paidCoins = 0;
     let gems = 0;
     let usedPaidCoins = 0;
@@ -1855,16 +1888,9 @@
 
     }
 
-    function checkDailyCoinReset() {
-      const todayDate = new Date().toISOString().split('T')[0];
-      const lastResetDate = localStorage.getItem('cuit_last_coin_reset_date');
-
-      if (lastResetDate !== todayDate) {
-        freeCoins = CONFIG.FREE_COINS_DAILY;
-        localStorage.setItem('cuit_last_coin_reset_date', todayDate);
-        localStorage.setItem('cuit_free_coins', freeCoins);
-      }
-    }
+    // Tidak ada lagi jatah tetap 20 Koin Gratis harian.
+    // Koin Gratis hanya bertambah dari hadiah aktivitas yang sah, termasuk bonus absen beruntun.
+    function checkDailyCoinReset() { return; }
 
     async function checkUser() {
       initSponsorFromURL();
@@ -1883,7 +1909,7 @@
           .maybeSingle();
 
         if (profile) {
-          freeCoins = profile.free_coins ?? 20;
+          freeCoins = profile.free_coins ?? 0;
           paidCoins = profile.paid_coins ?? 0;
           gems = profile.gems ?? 0;
           usedPaidCoins = profile.used_paid_coins ?? 0;
@@ -1897,7 +1923,7 @@
           const newGuestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
           localStorage.setItem('cuit_guest_identifier', newGuestId);
         }
-        freeCoins = parseInt(localStorage.getItem('cuit_free_coins')) || 20;
+        freeCoins = Math.max(0, parseInt(localStorage.getItem('cuit_free_coins') || '0', 10) || 0);
         paidCoins = 0;
         gems = 0;
         usedPaidCoins = 0;
@@ -2627,21 +2653,7 @@
         const nowMs = Date.now();
         let sorotanItems = [];
 
-        if (activeLivePromos && activeLivePromos.length > 0) {
-          activeLivePromos.forEach(live => {
-            sorotanItems.push({
-              type: 'live',
-              id: live.id,
-              title: live.title,
-              username: live.host_name,
-              user_email: live.host_email,
-              promoted_until: live.promoted_until,
-              updated_at: live.updated_at || live.created_at
-            });
-          });
-        }
-
-        data.filter(p => p.is_promoted && p.promoted_until && new Date(p.promoted_until).getTime() > nowMs)
+        data.filter(p => p.is_promoted && String(p.promotion_type || 'biasa').toLowerCase() !== 'istimewa' && p.promoted_until && new Date(p.promoted_until).getTime() > nowMs)
           .forEach(post => {
             sorotanItems.push({
               type: 'post',
@@ -2660,17 +2672,15 @@
           sorotanItems.forEach(item => {
             let rawName = item.username || 'Pengguna';
             let snippet = item.title.length > 70 ? item.title.substring(0, 70) + '...' : item.title;
-            const isLive = (item.type === 'live');
-
             cardsHTML += `
-              <div onclick="${isLive ? `joinLiveRoomDirect('${item.id}')` : `openPromotedDetail('${item.id}')`}" 
-                   style="min-width: 174px; width: 174px; height: 70px; background: ${isLive ? 'linear-gradient(135deg, #fff5f5 0%, #c8102e 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fff1f3 100%)'}; border-radius: 10px; padding: 6px 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 0 1px rgba(200,16,46,.10), 0 2px 5px rgba(120,20,40,.08); border: 1px solid #c8102e; overflow: hidden; box-sizing:border-box;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
-                  <div style="font-size: 9px; color:#a30f27; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${rawName}</div>
-                  ${isLive ? `<span style="font-size:8px; background:#c8102e; color:#fff; padding:2px 5px; border-radius:6px; font-weight:800; flex-shrink:0;">● LIVE</span>` : ''}
+              <div onclick="openPromotedDetail('${item.id}')" 
+                   style="min-width: 174px; width: 174px; height: 76px; background: linear-gradient(135deg, #ffffff 0%, #fff1f3 100%); border-radius: 10px; padding: 6px 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 0 1px rgba(200,16,46,.10), 0 2px 5px rgba(120,20,40,.08); border: 1px solid #c8102e; overflow: hidden; box-sizing:border-box;">
+                <div style="display:flex;align-items:center;gap:5px;min-width:0;">
+                  <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">${cuitBadgeSvg(getUserLevel((item.rawPost && item.rawPost.user_id && profilesMap[item.rawPost.user_id] !== undefined) ? profilesMap[item.rawPost.user_id] : 0).title)}</div>
+                  <div style="min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden;"><div style="font-size: 9px; color:#a30f27; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(rawName)}</div><div style="font-size:7px;color:#78666b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml((item.rawPost && item.rawPost.feeling) || 'Curhat')}</div></div>
                 </div>
                 <div style="font-size: 10px; color: #34252a; line-height: 1.25; font-weight: 650; overflow: hidden; margin: 3px 0;">${snippet}</div>
-                <div style="font-size: 8px; font-weight: 800; color: #c8102e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">✦ CURHATAN TERPILIH</div>
+                <div style="font-size: 8px; font-weight: 800; color: #c8102e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ketuk untuk membaca curhatan ›</div>
               </div>
             `;
           });
@@ -2681,11 +2691,12 @@
         }
 
         allPostsCache = data;
+        refreshSpecialPostSlots();
         renderFilteredFeed();
 
       } catch (err) {
         console.error("Error loading posts:", err);
-        container.innerHTML = '<p style="text-align: center; color: var(--text-sub); margin-top: 15px;">Gagal memuat postingan. Silakan tekan tombol Refresh.</p>';
+        container.innerHTML = '<p style="text-align:center;color:var(--text-sub);margin-top:15px;">Postingan belum dapat dimuat. Periksa koneksi dan konfigurasi database, lalu tekan Refresh.</p>';
       }
     }
 
@@ -2705,6 +2716,52 @@
       container.innerHTML = filteredData.map(p => renderCardHTML(p)).join('');
     }
 
+    function openSpecialPostSlot(slotIndex) {
+      const specialPosts = (allPostsCache || []).filter(p => p && p.is_promoted && String(p.promotion_type || '').toLowerCase() === 'istimewa' && p.promoted_until && new Date(p.promoted_until).getTime() > Date.now());
+      specialPosts.sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+      const post = specialPosts[slotIndex];
+      if (!post) {
+        alert('Jendela ini belum memiliki curhatan istimewa yang sedang aktif. Promosikan salah satu curhatan dengan pilihan Promosi Istimewa terlebih dahulu.');
+        return;
+      }
+      openPromotedDetail(post.id);
+    }
+
+    function refreshSpecialPostSlots() {
+      const specialPosts = (allPostsCache || []).filter(p => p && p.is_promoted && String(p.promotion_type || '').toLowerCase() === 'istimewa' && p.promoted_until && new Date(p.promoted_until).getTime() > Date.now());
+      specialPosts.sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+      for (let i=0;i<4;i++) {
+        const slot = document.querySelectorAll('#specialPostsSection .special-window')[i];
+        const post = specialPosts[i];
+        if (!slot) continue;
+        slot.setAttribute('aria-label', post ? `Buka curhatan istimewa dari ${post.username || 'Pengguna CUIT'}` : `Jendela istimewa ${i+1}, belum terisi`);
+        if (!post) {
+          slot.innerHTML = `<div style="min-height:82px;height:100%;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:9px;text-align:left;padding:8px 10px;background:linear-gradient(105deg,#fffafa,#fff1f3);"><div style="width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f8dfe5;color:#a50d27;font-size:19px;box-shadow:inset 0 0 0 1px #edc1ca;">👤</div><div style="min-width:0;flex:1;"><div style="font-size:11px;font-weight:850;color:#a50d27;">Belum ada promosi aktif</div><div style="font-size:10px;color:#7b6268;margin-top:2px;">Jendela promosi istimewa</div></div></div>`;
+          continue;
+        }
+        const rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna CUIT');
+        const name = escapeHtml(rawName);
+        const feeling = escapeHtml(post.feeling || 'Curhat');
+        const content = escapeHtml(post.content || 'Curhatan istimewa').replace(/\n/g, '<br>');
+        let authorPoin = 0;
+        if (post.user_id && profilesMap[post.user_id] !== undefined) authorPoin = profilesMap[post.user_id];
+        else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
+        const userLvl = getUserLevel(authorPoin);
+        const badge = cuitBadgeSvg(userLvl.title);
+        slot.innerHTML = `<div style="min-height:82px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:7px 9px 6px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
+          <div style="display:flex;align-items:center;gap:7px;min-width:0;margin-bottom:5px;">
+            <div style="width:30px;height:30px;flex:0 0 30px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
+            <div style="min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
+              <div style="font-size:11px;font-weight:900;color:#30242a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">${name}</div>
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="font-size:8px;font-weight:850;color:#fff;background:${userLvl.color || '#a50d27'};padding:2px 5px;border-radius:5px;">${escapeHtml(userLvl.title || 'Anggota')}</span><span style="font-size:9px;font-weight:700;color:#8b7b82;">${feeling}</span></div>
+            </div>
+          </div>
+          <div style="width:100%;box-sizing:border-box;font-size:11px;line-height:1.35;color:#40353a;overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left;">${content}</div>
+          <div style="margin-top:3px;font-size:9px;font-weight:850;color:#b5122b;text-align:right;">Ketuk untuk membaca ›</div>
+        </div>`;
+      }
+    }
+
     function openPromotedDetail(postId) {
       const post = allPostsCache.find(p => String(p.id) === String(postId));
       if (!post) return;
@@ -2716,8 +2773,12 @@
           <button onclick="document.getElementById('promotedDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
         </div>
         ${renderCardHTML(post)}
+        <section id="promotedInlineComments" style="margin-top:10px;padding-top:10px;border-top:1px solid #f0dce2;">
+          <div style="font-weight:900;font-size:13px;margin-bottom:7px;">💬 Komentar</div>
+          <div id="promotedInlineCommentsList" style="display:flex;flex-direction:column;gap:7px;max-height:32vh;overflow:auto;"><div style="font-size:11px;color:#777;">Ketuk Komentar untuk memuat diskusi.</div></div>
+          <div style="display:flex;gap:6px;margin-top:8px;"><input id="promotedInlineCommentInput" placeholder="Tulis komentar…" style="flex:1;min-width:0;margin:0;"><button class="btn-primary" onclick="submitPromotedInlineComment('${post.id}')" style="padding:8px 10px;">Kirim</button></div>
+        </section>
       `;
-      
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
 
@@ -3117,8 +3178,11 @@
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
-      const listContainer = document.getElementById('commentsList');
-      document.getElementById('commentsModal').style.display = 'flex';
+      const promotedModal = document.getElementById('promotedDetailModal');
+      const inlineOpen = promotedModal && window.getComputedStyle(promotedModal).display !== 'none' && document.getElementById('promotedInlineCommentsList');
+      const listContainer = inlineOpen ? document.getElementById('promotedInlineCommentsList') : document.getElementById('commentsList');
+      if (!inlineOpen) { document.getElementById('commentsModal').style.display = 'flex'; document.getElementById('commentsModal').style.zIndex = '10001'; }
+      else { const section=document.getElementById('promotedInlineComments'); if(section) section.scrollIntoView({block:'nearest',behavior:'smooth'}); }
       listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>';
 
       const { data: comments } = await supabaseClient
@@ -3128,7 +3192,7 @@
         .order('created_at', { ascending: true });
 
       if (!comments || comments.length === 0) {
-        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 20px;">Belum ada komentar. Jadi yang pertama berkomentar!</p>';
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 8px;">Belum ada komentar. Jadilah yang pertama!</p>';
         return;
       }
 
@@ -3141,6 +3205,21 @@
           <div style="font-size: 12px; color: #4a2028; word-break: break-word;">${c.content}</div>
         </div>
       `).join('');
+    }
+
+    async function submitPromotedInlineComment(postId) {
+      const input=document.getElementById('promotedInlineCommentInput');
+      if(!input) return;
+      const text=input.value.trim();
+      if(!text) return alert('Tulis komentar terlebih dahulu.');
+      activeCommentPostId=postId;
+      // Gunakan alur kirim komentar yang sama dengan feed utama.
+      const hiddenInput=document.getElementById('commentInputText');
+      if(!hiddenInput) return alert('Form komentar belum tersedia.');
+      hiddenInput.value=text;
+      await submitCommentAction();
+      input.value='';
+      await openCommentsModal(postId);
     }
 
     async function submitCommentAction() {
@@ -4685,7 +4764,7 @@
         const defaultUsername = email.split('@')[0];
 
         customDisplayName = defaultUsername;
-        freeCoins = 20;
+        freeCoins = 0;
         paidCoins = 0;
         gems = 0;
         usedPaidCoins = 0;
@@ -4698,7 +4777,7 @@
               email: email,
               username: defaultUsername,
               sponsor: sponsorCode,
-              free_coins: 20,
+              free_coins: 0,
               paid_coins: 0,
               gems: 0,
               used_paid_coins: 0,
