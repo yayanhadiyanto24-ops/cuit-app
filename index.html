@@ -985,6 +985,25 @@
       function makeDeck(){letters=shuffle(alphabet).slice(0,8);deck=shuffle(letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]));}
       function render(){grid.innerHTML='';deck.forEach((card,index)=>{const button=document.createElement('button');button.type='button';button.className='kilat-tile'+((card.revealed||card.matched)?' open':'')+(card.matched?' matched':'');button.textContent=(card.revealed||card.matched)?card.letter:'';button.setAttribute('aria-label',(card.revealed||card.matched)?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);button.disabled=!started||ended||lock||card.matched||card.revealed;button.addEventListener('click',()=>flip(index));grid.appendChild(button);});}
       function updateStats(){timeEl.textContent=remaining;foundEl.textContent=`${matches.length}/3`;bar.style.width=`${Math.max(0,remaining/30*100)}%`;roundEl.textContent=matches.length>=3?'Selesai!':started?`Pasangan ${matches.length+1} dari 3`:'Siap bermain';}
+      // Mengatur ulang papan lokal tanpa memanggil RPC yang dapat memotong koin.
+      function init(resetOffer=true){
+        clearInterval(timer); clearTimeout(mismatchTimer);
+        timer=null; mismatchTimer=null; first=null; second=null; lock=false;
+        matches=[]; started=false; ended=false; remaining=30; startedAt=0;
+        gameSession=null; gameStarting=false;
+        if(result) result.classList.remove('show');
+        if(startBtn){startBtn.disabled=false;startBtn.textContent='▶ Mulai Permainan';}
+        if(coinEl) coinEl.textContent='Siap Main';
+        if(rewardEl) rewardEl.textContent='Menunggu validasi';
+        if(speedEl) speedEl.textContent='—';
+        makeDeck(); render(); updateStats();
+        setMessage('Tekan “Mulai Permainan” untuk memulai ronde.');
+      }
+      function tick(){
+        if(!started || ended) return;
+        remaining=Math.max(0,remaining-1); updateStats();
+        if(remaining<=0){clearInterval(timer);timer=null;finish(true);}
+      }
           // 1. Memeriksa Status Biaya Game
   async function refreshOffer() {
     try {
@@ -1024,20 +1043,26 @@
       });
 
       if (error) throw error;
-      if (data.status === 'error') throw new Error(data.message);
+      const sessionData = Array.isArray(data) ? data[0] : data;
+      if (!sessionData) throw new Error('Server tidak mengembalikan data sesi permainan.');
+      if (sessionData.status === 'error' || sessionData.ok === false) throw new Error(sessionData.message || 'Server menolak sesi permainan.');
 
-      // Mulai visual game
-      started = true;
+      // Simpan data sesi dari server sebelum permainan visual dimulai.
+      gameSession = sessionData;
       init(false);
+      started = true;
+      ended = false;
+      startedAt = Date.now();
       makeDeck();
       render();
       updateStats();
+      clearInterval(timer);
       timer = setInterval(tick, 1000);
 
-      if (data.is_free) {
+      if (sessionData.is_free) {
         setMessage('Kesempatan gratis harian digunakan!');
       } else {
-        setMessage(`Sesi berbayar dimulai (${data.fee_applied} Koin dipotong).`);
+        setMessage(`Sesi berbayar dimulai (${sessionData.fee_applied ?? 10} Koin).`);
       }
 
       if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
@@ -4716,255 +4741,7 @@
         nav.style.setProperty('background', '#fff', 'important');
       }
     });
-    
-  <script>
-(() => {
-  // 1. Deteksi Klien Supabase Aman (Mencegah Error 'is not a function')
-  const getSupabase = () => {
-    if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
-    if (typeof supabase !== 'undefined' && supabase && typeof supabase.rpc === 'function') return supabase;
-    return null;
-  };
-
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let letters = [];
-  let deck = [];
-  let first = null;
-  let second = null;
-  let lock = false;
-  let matches = 0;
-  let timer = null;
-  let timeLeft = 30;
-  let started = false;
-  let gameStarting = false;
-  let gameSession = null;
-
-  // Elemen UI Bawaan CUIT
-  const el = id => document.getElementById(id);
-  const grid = el('kilatGrid') || el('gameGrid');
-  const timeEl = el('kilatTimer') || el('timerVal');
-  const pairsEl = el('kilatPairs') || el('pairsVal');
-  const coinEl = el('kilatFeeDisplay') || el('feeVal');
-  const messageEl = el('kilatMessage') || el('msgBox');
-  const startBtn = el('kilatStartBtn') || el('startBtn');
-  const wisdomEl = el('kilatWisdomText') || el('wisdomText');
-
-  function setMessage(text) {
-    if (messageEl) messageEl.textContent = text;
-  }
-
-  function shuffle(items) {
-    const arr = items.slice();
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-
-  function makeDeck() {
-    const pool = alphabet.split('');
-    const picked = shuffle(pool).slice(0, 8);
-    letters = picked;
-    const cards = [];
-    picked.forEach((ch, idx) => {
-      cards.push({ id: idx * 2, char: ch, open: false, matched: false });
-      cards.push({ id: idx * 2 + 1, char: ch, open: false, matched: false });
-    });
-    deck = shuffle(cards);
-  }
-
-  function render() {
-    if (!grid) return;
-    grid.innerHTML = '';
-    deck.forEach((card, index) => {
-      const btn = document.createElement('button');
-      btn.className = 'kilat-card' + (card.open ? ' open' : '') + (card.matched ? ' matched' : '');
-      btn.textContent = card.open || card.matched ? card.char : '✦';
-      btn.disabled = !started || card.matched || card.open || lock;
-      btn.onclick = () => flip(index);
-      grid.appendChild(btn);
-    });
-  }
-
-  function updateStats() {
-    if (timeEl) timeEl.textContent = timeLeft;
-    if (pairsEl) pairsEl.textContent = `${matches}/3`;
-  }
-
-  // FUNGSI INIT BAWAAN (DIJAMIN CEGAH 'init is not defined')
-  window.init = function(loadQuote = true) {
-    clearInterval(timer);
-    timer = null;
-    timeLeft = 30;
-    matches = 0;
-    first = null;
-    second = null;
-    lock = false;
-    started = false;
-    updateStats();
-    makeDeck();
-    render();
-    if (loadQuote) refreshOffer();
-  };
-
-  // CHECK RPC STATUS GAME SUPABASE
-  async function refreshOffer() {
-    try {
-      if (coinEl) coinEl.textContent = 'Cek...';
-      const client = getSupabase();
-      
-      if (!client) {
-        if (coinEl) coinEl.textContent = 'Siap Main';
-        setMessage('Tekan "Mulai Permainan" untuk mengacak huruf.');
-        return;
-      }
-
-      const { data, error } = await client.rpc('cuit_start_word_game', {
-        p_confirmed_fee: 0,
-        p_letters: 'KLT'
-      });
-
-      if (error || !data) throw new Error(error ? error.message : 'Gagal');
-
-      if (data.is_free) {
-        if (coinEl) coinEl.textContent = 'GRATIS';
-        setMessage('Jatah gratis harian tersedia!');
-      } else {
-        if (coinEl) coinEl.textContent = '10 KOIN';
-        setMessage('Sesi berbayar (10 Koin per game).');
-      }
-    } catch (err) {
-      if (coinEl) coinEl.textContent = 'Siap Main';
-      setMessage('Tekan "Mulai Permainan" untuk mengacak huruf.');
-    }
-  }
-
-  // MEMULAI GAME VIA RPC
-  async function startGame() {
-    if (gameStarting) return;
-    gameStarting = true;
-    if (startBtn) startBtn.disabled = true;
-
-    try {
-      const client = getSupabase();
-      if (client) {
-        const { data, error } = await client.rpc('cuit_start_word_game', {
-          p_confirmed_fee: 0,
-          p_letters: 'KLT'
-        });
-
-        if (error) throw error;
-        if (data && data.status === 'error') throw new Error(data.message);
-        gameSession = data;
-      }
-
-      started = true;
-      window.init(false);
-      makeDeck();
-      render();
-      updateStats();
-      timer = setInterval(tick, 1000);
-      setMessage('Permainan dimulai! Cari 3 pasangan cocok.');
-
-      if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
-        await CuitApp.loadProfile();
-      }
-    } catch (err) {
-      setMessage(err.message || 'Gagal memulai permainan.');
-    } finally {
-      gameStarting = false;
-      if (startBtn) startBtn.disabled = false;
-    }
-  }
-
-  function flip(index) {
-    if (!started || lock) return;
-    const card = deck[index];
-    if (!card || card.open || card.matched) return;
-
-    card.open = true;
-    render();
-
-    if (!first) {
-      first = { card, index };
-      return;
-    }
-
-    second = { card, index };
-    lock = true;
-
-    if (first.card.char === second.card.char) {
-      first.card.matched = true;
-      second.card.matched = true;
-      matches++;
-      first = null;
-      second = null;
-      lock = false;
-      updateStats();
-      render();
-
-      if (matches >= 3) {
-        finish(false);
-      }
-    } else {
-      setTimeout(() => {
-        if (first && second) {
-          first.card.open = false;
-          second.card.open = false;
-          first = null;
-          second = null;
-        }
-        lock = false;
-        render();
-      }, 700);
-    }
-  }
-
-  function tick() {
-    timeLeft--;
-    updateStats();
-    if (timeLeft <= 0) {
-      finish(true);
-    }
-  }
-
-  async function finish(timeout) {
-    clearInterval(timer);
-    timer = null;
-    started = false;
-
-    if (timeout) {
-      setMessage('Waktu habis! Coba lagi ya.');
-      render();
-      return;
-    }
-
-    setMessage('Selamat! Kamu berhasil menemukan 3 pasangan.');
-
-    // KATA BIJAK DARI SUPABASE
-    try {
-      const client = getSupabase();
-      if (client && gameSession && gameSession.session_id) {
-        const { data } = await client.rpc('cuit_finish_word_game', {
-          p_session_id: gameSession.session_id,
-          p_matched_pairs: matches
-        });
-        if (data && data.wisdom && wisdomEl) {
-          wisdomEl.textContent = data.wisdom;
-        }
-      }
-    } catch (e) {
-      console.warn('Gagal memuat kata bijak:', e);
-    }
-
-    render();
-  }
-
-  if (startBtn) startBtn.onclick = startGame;
-  window.init(true);
-})();
-</script>
+  </script>
 
 </body>
-          </html>
+  </html>
