@@ -1080,45 +1080,119 @@
         return {text:makeFallbackWisdom(foundLetters),category:'Kata Bijak',quoteId:null,source:'cadangan lokal'};
       }
       async function finish(timeout){
-        if(ended)return;
-        ended=true;started=false;clearInterval(timer);clearTimeout(mismatchTimer);lock=true;
-        matches=matches.slice(0,3);
-        const elapsed=Math.min(30,Math.floor((Date.now()-startedAt)/1000));
-        coinEl.textContent='—';rewardEl.textContent='Menunggu konfirmasi server…';
-        speedEl.textContent=timeout?'Waktu habis':`${elapsed} detik`;
-        resultTitle.textContent=timeout?'Waktu habis':'Tiga pasangan ditemukan!';
-        resultDesc.textContent='Hadiah dan pencatatan permainan ditentukan server CUIT.';
-        el('kilatWisdom').textContent='Memuat kata bijak dari CUIT…';lettersBox.innerHTML='';
-        matches.forEach(letter=>{const item=document.createElement('div');item.className='kilat-letter';item.textContent=letter;lettersBox.appendChild(item);});
-        startBtn.disabled=false;startBtn.textContent='▶ Mulai Lagi';roundEl.textContent='Selesai!';updateStats();render();result.classList.add('show');
-        setMessage('Permainan selesai. Mengirim hasil ke server CUIT…');
-        let poolStatus='Hasil belum dikonfirmasi server.';
-        try{
-          if(!gameSession || !gameSession.session_id) throw new Error('ID sesi tidak ditemukan. Hasil tidak diberi hadiah.');
-          const wisdomDraft=makeFallbackWisdom(matches);
-          const {data,error}=await supabaseClient.rpc('cuit_finish_word_game',{
-            p_session_id:gameSession.session_id,
-            p_matched_pairs:Math.min(3,matches.length),
-            p_letters:matches.join('').toUpperCase(),
-            p_elapsed_seconds:elapsed,
-            p_timed_out:timeout,
-            p_wisdom_quote:wisdomDraft
-          });
-          if(error)throw error;
-          const row=Array.isArray(data)?data[0]:data;
-          if(!row || row.ok!==true)throw new Error(row?.message||'Server menolak hasil permainan.');
-          const awarded=Number(row.coins_awarded||0), feePaid=Number(row.entry_fee||gameSession.entry_fee||0);
-          coinEl.textContent=String(awarded);rewardEl.textContent=awarded>0?`Hadiah ${awarded} koin gratis`:'Tidak ada bonus koin untuk permainan berbayar';
-          poolStatus=feePaid>0?`Biaya ${feePaid} koin berbayar diproses server; tidak ada hadiah untuk sesi berbayar.`:`Kesempatan gratis harian dikonfirmasi server. Hadiah: ${awarded} koin gratis.`;
-          resultDesc.textContent=poolStatus;
-          if(typeof updateCoinUI==='function')await updateCoinUI();
-          if(typeof openTodayProgress==='function'){const pm=document.getElementById('todayProgressModal');if(pm&&pm.style.display==='flex')await openTodayProgress();}
-        }catch(err){rewardEl.textContent='Hadiah belum dikonfirmasi';coinEl.textContent='—';poolStatus=err?.message||'Server tidak mengonfirmasi hasil; saldo tidak boleh diasumsikan berubah.';console.warn('Hasil 3 Huruf Kilat:',err);}
-        let poolNotice=el('kilatPoolStatus');if(!poolNotice){poolNotice=document.createElement('p');poolNotice.id='kilatPoolStatus';poolNotice.className='kilat-note';el('kilatWisdom').insertAdjacentElement('afterend',poolNotice);}poolNotice.textContent=poolStatus;
-        const wisdom=await makeWisdom(matches);el('kilatWisdom').textContent='“'+wisdom.text+'”';
-        const sourceLabel=wisdom.source==='Supabase'?`Sumber: Bank CUIT • ${wisdom.category} • ID ${wisdom.quoteId}`:'Sumber: kutipan cadangan lokal';
-        const oldSource=el('kilatWisdomSource');if(oldSource)oldSource.remove();const source=document.createElement('p');source.id='kilatWisdomSource';source.className='kilat-note';source.textContent=sourceLabel;el('kilatWisdom').insertAdjacentElement('afterend',source);
-      }
+  if(ended)return;
+  ended=true;
+  started=false;
+  clearInterval(timer);
+  clearTimeout(mismatchTimer);
+  lock=true;
+  matches=matches.slice(0,3);
+
+  const elapsed=Math.min(30,Math.floor((Date.now()-startedAt)/1000));
+  coinEl.textContent='—';
+  rewardEl.textContent='Menunggu konfirmasi server…';
+  speedEl.textContent=timeout?'Waktu habis':`${elapsed} detik`;
+  resultTitle.textContent=timeout?'Waktu habis':'Tiga pasangan ditemukan!';
+  resultDesc.textContent='Hadiah dan pencatatan permainan ditentukan server CUIT.';
+  el('kilatWisdom').textContent='Memuat kata bijak dari CUIT…';
+  lettersBox.innerHTML='';
+
+  matches.forEach(letter=>{
+    const item=document.createElement('div');
+    item.className='kilat-letter';
+    item.textContent=letter;
+    lettersBox.appendChild(item);
+  });
+
+  // Kunci tombol selama server menyimpan hasil agar sesi tidak tertimpa.
+  startBtn.disabled=true;
+  startBtn.textContent='Menyimpan hasil…';
+  roundEl.textContent='Selesai!';
+  updateStats();
+  render();
+  result.classList.add('show');
+  setMessage('Permainan selesai. Mengirim hasil ke server CUIT…');
+
+  let poolStatus='Hasil belum dikonfirmasi server.';
+  try{
+    if(!gameSession || !gameSession.session_id){
+      throw new Error('ID sesi tidak ditemukan. Hasil tidak diberi hadiah.');
+    }
+
+    const wisdomDraft=makeFallbackWisdom(matches);
+    const {data,error}=await supabaseClient.rpc('cuit_finish_word_game',{
+      p_session_id:gameSession.session_id,
+      p_matched_pairs:Math.min(3,matches.length),
+      p_letters:matches.join('').toUpperCase(),
+      p_elapsed_seconds:elapsed,
+      p_timed_out:timeout,
+      p_wisdom_quote:wisdomDraft
+    });
+
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row || row.ok!==true){
+      throw new Error(row?.message||'Server menolak hasil permainan.');
+    }
+
+    const awarded=Number(row.coins_awarded||0);
+    const feePaid=Number(row.entry_fee ?? gameSession.entry_fee ?? 0);
+    coinEl.textContent=String(awarded);
+    rewardEl.textContent=awarded>0
+      ?`Hadiah ${awarded} koin gratis`
+      :'Tidak ada bonus koin untuk permainan berbayar';
+
+    poolStatus=feePaid>0
+      ?`Biaya ${feePaid} koin berbayar diproses server; tidak ada hadiah untuk sesi berbayar.`
+      :`Kesempatan gratis harian dikonfirmasi server. Hadiah: ${awarded} koin gratis.`;
+    resultDesc.textContent=poolStatus;
+
+    if(typeof updateCoinUI==='function')await updateCoinUI();
+    if(typeof openTodayProgress==='function'){
+      const pm=document.getElementById('todayProgressModal');
+      if(pm&&pm.style.display==='flex')await openTodayProgress();
+    }
+  }catch(err){
+    rewardEl.textContent='Hadiah belum dikonfirmasi';
+    coinEl.textContent='—';
+    poolStatus=err?.message||'Server tidak mengonfirmasi hasil; saldo tidak boleh diasumsikan berubah.';
+    console.warn('Hasil 3 Huruf Kilat:',err);
+  }
+
+  let poolNotice=el('kilatPoolStatus');
+  if(!poolNotice){
+    poolNotice=document.createElement('p');
+    poolNotice.id='kilatPoolStatus';
+    poolNotice.className='kilat-note';
+    el('kilatWisdom').insertAdjacentElement('afterend',poolNotice);
+  }
+  poolNotice.textContent=poolStatus;
+
+  try{
+    const wisdom=await makeWisdom(matches);
+    el('kilatWisdom').textContent='“'+wisdom.text+'”';
+    const sourceLabel=wisdom.source==='Supabase'
+      ?`Sumber: Bank CUIT • ${wisdom.category} • ID ${wisdom.quoteId}`
+      :'Sumber: kutipan cadangan lokal';
+    const oldSource=el('kilatWisdomSource');
+    if(oldSource)oldSource.remove();
+    const source=document.createElement('p');
+    source.id='kilatWisdomSource';
+    source.className='kilat-note';
+    source.textContent=sourceLabel;
+    el('kilatWisdom').insertAdjacentElement('afterend',source);
+  }catch(wisdomErr){
+    console.warn('Kata bijak CUIT:',wisdomErr);
+    el('kilatWisdom').textContent='Tetap semangat. Setiap langkah kecil adalah kemajuan.';
+  }
+
+  // Status sekarang memperlihatkan hasil server atau pesan kesalahan sebenarnya.
+  setMessage(poolStatus);
+
+  // Tombol baru aktif setelah penyimpanan dan pembaruan tampilan selesai.
+  startBtn.disabled=false;
+  startBtn.textContent='▶ Mulai Lagi';
+}
       function openCurhat(){const quote=el('kilatWisdom').textContent.replace(/^“|”$/g,'').trim();const textarea=document.getElementById('postContent');if(textarea){textarea.value=quote;if(typeof updateCharCount==='function')updateCharCount(textarea);}const navItems=document.querySelectorAll('.nav-bar .nav-item');if(typeof switchTab==='function')switchTab('pageCreate',navItems[2]||null);if(textarea){setTimeout(()=>{textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});},120);} }
       startBtn.addEventListener('click',startGame);resetBtn.addEventListener('click',()=>{init();refreshOffer();});el('kilatPlayAgain').addEventListener('click',()=>{init();refreshOffer();});el('kilatCurhatBtn').addEventListener('click',openCurhat);init();refreshOffer();
     })();
