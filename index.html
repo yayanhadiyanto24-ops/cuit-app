@@ -452,6 +452,82 @@
 .window-hint{display:block;font-size:11px;color:#4b4550;margin-top:7px;line-height:1.45;overflow-wrap:anywhere}
 @media(min-width:600px){.special-windows-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.special-window{min-height:92px}.special-window:nth-child(n){border-top:0;border-right:1px solid #c8102e}.special-window:last-child{border-right:0}}
 
+/* WADAH POOL CUIT */
+.cuit-pool-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 10px 0 12px;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cuit-pool-card {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e8d39a;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #fff9e8, #fff);
+  box-shadow: 0 2px 7px #8d20200a;
+}
+
+.cuit-pool-card.weekly {
+  border-color: #edc4ca;
+  background: linear-gradient(135deg, #fff0f2, #fff);
+}
+
+.cuit-pool-symbol {
+  font-size: 19px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.cuit-pool-label {
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #805b08;
+}
+
+.cuit-pool-card.weekly .cuit-pool-label {
+  color: #a91f35;
+}
+
+.cuit-pool-value {
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 900;
+  color: #805b08;
+  margin-top: 3px;
+}
+
+.cuit-pool-card.weekly .cuit-pool-value {
+  color: #a91f35;
+}
+
+@media (max-width: 360px) {
+  .cuit-pool-card {
+    padding: 8px 7px;
+    gap: 5px;
+  }
+
+  .cuit-pool-symbol {
+    font-size: 17px;
+  }
+
+  .cuit-pool-label {
+    font-size: 9px;
+  }
+
+  .cuit-pool-value {
+    font-size: 12px;
+  }
+}
+
 </style>
 
 </head>
@@ -5017,6 +5093,50 @@ poolStatus=feePaid>0
       }
     });
   </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.page-section').forEach(function(page) {
+    if (page.id === 'pageHome' ||
+        page.querySelector('.cuit-pool-strip')) {
+      return;
+    }
+
+    /* Hapus tombol Pool lama agar tidak rangkap */
+    page.querySelectorAll(':scope > .pool-shortcut').forEach(function(button) {
+      button.remove();
+    });
+
+    const strip = document.createElement('div');
+    strip.className = 'cuit-pool-strip';
+    strip.setAttribute('aria-label', 'Wadah Pool CUIT');
+
+    strip.innerHTML =
+      '<div class="cuit-pool-card">' +
+        '<span class="cuit-pool-symbol">☀️</span>' +
+        '<div>' +
+          '<div class="cuit-pool-label">Pool Harian</div>' +
+          '<div class="cuit-pool-value">— koin</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cuit-pool-card weekly">' +
+        '<span class="cuit-pool-symbol">🏆</span>' +
+        '<div>' +
+          '<div class="cuit-pool-label">Pool Mingguan</div>' +
+          '<div class="cuit-pool-value">— koin</div>' +
+        '</div>' +
+      '</div>';
+
+    const backButton = page.querySelector(':scope > .back-btn');
+
+    if (backButton) {
+      backButton.insertAdjacentElement('afterend', strip);
+    } else {
+      page.insertBefore(strip, page.firstChild);
+    }
+  });
+});
+</script>
 
 </body>
   </html>
