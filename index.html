@@ -5040,47 +5040,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleStartKilatGame(feeInput = 0, letters = 'KLT') {
   try {
-    // 1. Pastikan pengguna sudah terautentikasi Supabase
-    const currentUser = supabase.auth.user();
-    if (!currentUser) {
-      alert('Sesi login telah berakhir. Silakan login kembali.');
+    // 1. Cek sesi auth Supabase
+    const session = supabase.auth.session();
+    if (!session) {
+      alert('Sesi login kamu telah berakhir atau belum terdeteksi. Silakan refresh halaman atau login ulang.');
       return;
     }
 
-    // 2. Pastikan nominal biaya bertipe data NUMERIC / NUMBER
     const confirmedFee = Number(feeInput) || 0;
 
-    // 3. Panggil RPC Supabase Server
+    // 2. Panggil RPC Server
     const { data, error } = await supabase.rpc('cuit_start_word_game', {
       p_confirmed_fee: confirmedFee,
       p_letters: letters
     });
 
     if (error) {
-      // Tangani pesan spesifik dari server (misal: Saldo tidak cukup)
-      console.error('[RPC Error]:', error.message);
-      alert(error.message);
+      alert('Gagal dari Server: ' + error.message);
       return;
     }
 
-    // 4. Sesi Game Berhasil Dimulai
-    console.log('[Game Kilat] Berhasil dimulai:', data);
-
+    // 3. Sesi Game Berhasil
     if (data.is_free) {
-      alert('Gratis! Kesempatan main gratis harian kamu telah digunakan.');
+      alert('Sesi Gratis Dimulai! Selamat bermain.');
     } else {
-      alert(`Berhasil! Sesi berbayar dimulai (${data.fee_applied} Koin dipotong). Saldo sisa: ${data.remaining_coins} Koin.`);
+      alert(`Sesi Berbayar Dimulai (${data.fee_applied} Koin dipotong). Saldo sisa: ${data.remaining_coins} Koin.`);
     }
 
-    // Refresh UI Saldo Profil
+    // Refresh saldo profil
     if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
       await CuitApp.loadProfile();
     }
 
     return data;
   } catch (err) {
-    console.error('[Client Error]:', err.message);
-    alert('Server tidak dapat memeriksa biaya permainan: ' + err.message);
+    alert('Terjadi kesalahan koneksi: ' + err.message);
   }
 }
 
