@@ -4718,176 +4718,252 @@
     });
     
   <script>
-// =============================================================================
-// KODE UTUH INTEGRASI CUIT APP & GAME 3 HURUF KILAT
-// =============================================================================
+(() => {
+  // 1. Deteksi Klien Supabase Aman (Mencegah Error 'is not a function')
+  const getSupabase = () => {
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
+    if (typeof supabase !== 'undefined' && supabase && typeof supabase.rpc === 'function') return supabase;
+    return null;
+  };
 
-const CuitApp = {
-  state: {
-    user: null,
-    profile: null
-  },
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let letters = [];
+  let deck = [];
+  let first = null;
+  let second = null;
+  let lock = false;
+  let matches = 0;
+  let timer = null;
+  let timeLeft = 30;
+  let started = false;
+  let gameStarting = false;
+  let gameSession = null;
 
-  // 1. Inisialisasi Aplikasi
-  async init() {
+  // Elemen UI Bawaan CUIT
+  const el = id => document.getElementById(id);
+  const grid = el('kilatGrid') || el('gameGrid');
+  const timeEl = el('kilatTimer') || el('timerVal');
+  const pairsEl = el('kilatPairs') || el('pairsVal');
+  const coinEl = el('kilatFeeDisplay') || el('feeVal');
+  const messageEl = el('kilatMessage') || el('msgBox');
+  const startBtn = el('kilatStartBtn') || el('startBtn');
+  const wisdomEl = el('kilatWisdomText') || el('wisdomText');
+
+  function setMessage(text) {
+    if (messageEl) messageEl.textContent = text;
+  }
+
+  function shuffle(items) {
+    const arr = items.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function makeDeck() {
+    const pool = alphabet.split('');
+    const picked = shuffle(pool).slice(0, 8);
+    letters = picked;
+    const cards = [];
+    picked.forEach((ch, idx) => {
+      cards.push({ id: idx * 2, char: ch, open: false, matched: false });
+      cards.push({ id: idx * 2 + 1, char: ch, open: false, matched: false });
+    });
+    deck = shuffle(cards);
+  }
+
+  function render() {
+    if (!grid) return;
+    grid.innerHTML = '';
+    deck.forEach((card, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'kilat-card' + (card.open ? ' open' : '') + (card.matched ? ' matched' : '');
+      btn.textContent = card.open || card.matched ? card.char : '✦';
+      btn.disabled = !started || card.matched || card.open || lock;
+      btn.onclick = () => flip(index);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateStats() {
+    if (timeEl) timeEl.textContent = timeLeft;
+    if (pairsEl) pairsEl.textContent = `${matches}/3`;
+  }
+
+  // FUNGSI INIT BAWAAN (DIJAMIN CEGAH 'init is not defined')
+  window.init = function(loadQuote = true) {
+    clearInterval(timer);
+    timer = null;
+    timeLeft = 30;
+    matches = 0;
+    first = null;
+    second = null;
+    lock = false;
+    started = false;
+    updateStats();
+    makeDeck();
+    render();
+    if (loadQuote) refreshOffer();
+  };
+
+  // CHECK RPC STATUS GAME SUPABASE
+  async function refreshOffer() {
     try {
-      // Ambil user secara kompatibel (Supabase v1 / v2)
-      if (typeof supabase.auth.user === 'function') {
-        this.state.user = supabase.auth.user();
-      } else if (supabase.auth.getUser) {
-        const { data } = await supabase.auth.getUser();
-        this.state.user = data?.user || null;
+      if (coinEl) coinEl.textContent = 'Cek...';
+      const client = getSupabase();
+      
+      if (!client) {
+        if (coinEl) coinEl.textContent = 'Siap Main';
+        setMessage('Tekan "Mulai Permainan" untuk mengacak huruf.');
+        return;
       }
 
-      if (this.state.user) {
-        await this.loadProfile();
-        await this.loadPoolStatus();
+      const { data, error } = await client.rpc('cuit_start_word_game', {
+        p_confirmed_fee: 0,
+        p_letters: 'KLT'
+      });
+
+      if (error || !data) throw new Error(error ? error.message : 'Gagal');
+
+      if (data.is_free) {
+        if (coinEl) coinEl.textContent = 'GRATIS';
+        setMessage('Jatah gratis harian tersedia!');
+      } else {
+        if (coinEl) coinEl.textContent = '10 KOIN';
+        setMessage('Sesi berbayar (10 Koin per game).');
+      }
+    } catch (err) {
+      if (coinEl) coinEl.textContent = 'Siap Main';
+      setMessage('Tekan "Mulai Permainan" untuk mengacak huruf.');
+    }
+  }
+
+  // MEMULAI GAME VIA RPC
+  async function startGame() {
+    if (gameStarting) return;
+    gameStarting = true;
+    if (startBtn) startBtn.disabled = true;
+
+    try {
+      const client = getSupabase();
+      if (client) {
+        const { data, error } = await client.rpc('cuit_start_word_game', {
+          p_confirmed_fee: 0,
+          p_letters: 'KLT'
+        });
+
+        if (error) throw error;
+        if (data && data.status === 'error') throw new Error(data.message);
+        gameSession = data;
+      }
+
+      started = true;
+      window.init(false);
+      makeDeck();
+      render();
+      updateStats();
+      timer = setInterval(tick, 1000);
+      setMessage('Permainan dimulai! Cari 3 pasangan cocok.');
+
+      if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
+        await CuitApp.loadProfile();
+      }
+    } catch (err) {
+      setMessage(err.message || 'Gagal memulai permainan.');
+    } finally {
+      gameStarting = false;
+      if (startBtn) startBtn.disabled = false;
+    }
+  }
+
+  function flip(index) {
+    if (!started || lock) return;
+    const card = deck[index];
+    if (!card || card.open || card.matched) return;
+
+    card.open = true;
+    render();
+
+    if (!first) {
+      first = { card, index };
+      return;
+    }
+
+    second = { card, index };
+    lock = true;
+
+    if (first.card.char === second.card.char) {
+      first.card.matched = true;
+      second.card.matched = true;
+      matches++;
+      first = null;
+      second = null;
+      lock = false;
+      updateStats();
+      render();
+
+      if (matches >= 3) {
+        finish(false);
+      }
+    } else {
+      setTimeout(() => {
+        if (first && second) {
+          first.card.open = false;
+          second.card.open = false;
+          first = null;
+          second = null;
+        }
+        lock = false;
+        render();
+      }, 700);
+    }
+  }
+
+  function tick() {
+    timeLeft--;
+    updateStats();
+    if (timeLeft <= 0) {
+      finish(true);
+    }
+  }
+
+  async function finish(timeout) {
+    clearInterval(timer);
+    timer = null;
+    started = false;
+
+    if (timeout) {
+      setMessage('Waktu habis! Coba lagi ya.');
+      render();
+      return;
+    }
+
+    setMessage('Selamat! Kamu berhasil menemukan 3 pasangan.');
+
+    // KATA BIJAK DARI SUPABASE
+    try {
+      const client = getSupabase();
+      if (client && gameSession && gameSession.session_id) {
+        const { data } = await client.rpc('cuit_finish_word_game', {
+          p_session_id: gameSession.session_id,
+          p_matched_pairs: matches
+        });
+        if (data && data.wisdom && wisdomEl) {
+          wisdomEl.textContent = data.wisdom;
+        }
       }
     } catch (e) {
-      console.error('[CUIT Init Error]:', e);
+      console.warn('Gagal memuat kata bijak:', e);
     }
-  },
 
-  // 2. Memuat Profil & Saldo (Anti NULL / 0 Prematur)
-  async loadProfile() {
-    if (!this.state.user) return;
-
-    this.updateUI('profile-gems-display', '...');
-    this.updateUI('profile-coins-display', '...');
-
-    try {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('id, gems, coins, role, email, referrer_id')
-        .eq('id', this.state.user.id)
-        .single();
-
-      if (error) throw error;
-
-      this.state.profile = profile;
-
-      const gemsVal = (profile.gems || 0).toLocaleString('id-ID');
-      const coinsVal = (profile.coins || 0).toLocaleString('id-ID');
-
-      this.updateUI('profile-gems-display', gemsVal);
-      this.updateUI('profile-coins-display', coinsVal);
-
-      this.renderAdminCard(profile);
-    } catch (err) {
-      console.error('[CUIT] Gagal memuat profil:', err.message);
-    }
-  },
-
-  // 3. Tampilan Admin Kartu Surprise Gems
-  async renderAdminCard(profile) {
-    const isAdmin = profile.role === 'admin' || (profile.email && profile.email.endsWith('@admin.cuit.app'));
-    const surpriseCard = document.getElementById('admin-surprise-gems-container');
-
-    if (!surpriseCard) return;
-
-    if (isAdmin) {
-      surpriseCard.style.display = 'block';
-      try {
-        const { data } = await supabase.from('cuit_reward_containers').select('surprise_gems').single();
-        const surpriseVal = (data ? data.surprise_gems : 0).toLocaleString('id-ID');
-        this.updateUI('surprise-gems-val', `${surpriseVal} Gems`);
-      } catch (err) {
-        this.updateUI('surprise-gems-val', '0 Gems');
-      }
-    } else {
-      surpriseCard.style.display = 'none';
-    }
-  },
-
-  // 4. Memuat Pool Harian & Mingguan
-  async loadPoolStatus() {
-    try {
-      const { data: dailyData } = await supabase.rpc('cuit_get_daily_pool_status');
-      if (dailyData) {
-        this.updateUI('daily-pool-display', `${(dailyData.daily_pool_gems || 0).toLocaleString('id-ID')} Gems`);
-      }
-
-      const { data: weeklyData } = await supabase.rpc('cuit_get_weekly_pool_status');
-      if (weeklyData) {
-        this.updateUI('weekly-pool-display', `${(weeklyData.total_pool_gems || 0).toLocaleString('id-ID')} Gems`);
-      }
-    } catch (err) {
-      console.error('[CUIT] Pool load error:', err.message);
-    }
-  },
-
-  // Helper DOM
-  updateUI(id, content) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = content;
+    render();
   }
-};
 
-// =============================================================================
-// FUNGSI UTAMA PEMANGGILAN GAME (TERHUBUNG KE TOMBOL)
-// =============================================================================
-
-async function handleStartKilatGame(feeInput = 0, letters = 'KLT') {
-  try {
-    const confirmedFee = Number(feeInput) || 0;
-
-    // Panggil RPC Server
-    const { data, error } = await supabase.rpc('cuit_start_word_game', {
-      p_confirmed_fee: confirmedFee,
-      p_letters: letters
-    });
-
-    if (error) {
-      alert('Gagal Memulai Game: ' + error.message);
-      return;
-    }
-
-    if (data.status === 'error') {
-      alert(data.message);
-      return;
-    }
-
-    // Berhasil Dimulai
-    if (data.is_free) {
-      alert('Sesi GRATIS Hari Ini Dimulai! Selamat Bermain.');
-    } else {
-      alert(`Sesi Berbayar Dimulai (${data.fee_applied} Koin dipotong). Saldo sisa: ${data.remaining_coins} Koin.`);
-    }
-
-    // Perbarui Tampilan Saldo Profil
-    await CuitApp.loadProfile();
-    return data;
-  } catch (err) {
-    alert('Terjadi kesalahan sistem: ' + err.message);
-  }
-}
-
-async function handleFinishKilatGame(userWord, rewardGems = 1.00) {
-  try {
-    const { data, error } = await supabase.rpc('cuit_finish_word_game', {
-      p_word: userWord,
-      p_reward_gems: rewardGems
-    });
-
-    if (error) throw error;
-
-    if (data.is_first_claim_today) {
-      alert(`Selamat! Anda berhasil mengklaim ${data.reward_gems} Gems.`);
-    } else {
-      alert('Permainan selesai! (Hadiah gratis hari ini sudah pernah diklaim).');
-    }
-
-    await CuitApp.loadProfile();
-    return data;
-  } catch (err) {
-    alert('Gagal menyelesaikan permainan: ' + err.message);
-  }
-}
-
-// Inisialisasi Otomatis saat Halaman Selesai Dimuat
-document.addEventListener('DOMContentLoaded', () => {
-  CuitApp.init();
-});
+  if (startBtn) startBtn.onclick = startGame;
+  window.init(true);
+})();
 </script>
 
 </body>
