@@ -1092,6 +1092,8 @@
           poolStatus=Number(row.entry_fee||0)>0?`Biaya ${row.entry_fee} koin berbayar diproses server; tidak ada hadiah untuk sesi berbayar.`:`Kesempatan gratis harian dikonfirmasi server. Hadiah: ${awarded} Koin Gratis.`;
           resultDesc.textContent=poolStatus;
           if(typeof updateCoinUI==='function')await updateCoinUI();
+          // Panel progres membaca hasil game yang dicatat server.
+          if(typeof openTodayProgress==='function') { const pm=document.getElementById('todayProgressModal'); if(pm && pm.style.display==='flex') await openTodayProgress(); }
         }catch(err){rewardEl.textContent='Hadiah belum dikonfirmasi';coinEl.textContent='—';poolStatus=err?.message||'Server tidak mengonfirmasi hasil; saldo tidak boleh diasumsikan berubah.';console.warn('Hasil 3 Huruf Kilat:',err);}
         let poolNotice=el('kilatPoolStatus');if(!poolNotice){poolNotice=document.createElement('p');poolNotice.id='kilatPoolStatus';poolNotice.className='kilat-note';el('kilatWisdom').insertAdjacentElement('afterend',poolNotice);}poolNotice.textContent=poolStatus;
         const wisdom=await makeWisdom(matches);el('kilatWisdom').textContent='“'+wisdom.text+'”';const sourceLabel=wisdom.source==='Supabase'?`Sumber: Bank CUIT • ${wisdom.category} • ID ${wisdom.quoteId}`:'Sumber: kutipan cadangan lokal (Supabase belum tersedia)';const oldSource=el('kilatWisdomSource');if(oldSource)oldSource.remove();const source=document.createElement('p');source.id='kilatWisdomSource';source.className='kilat-note';source.textContent=sourceLabel;el('kilatWisdom').insertAdjacentElement('afterend',source);}
@@ -4065,32 +4067,32 @@
       document.getElementById('reelsModal').style.display = 'flex';
       container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat 10 misi video...</p>';
 
-      const { data: missions } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
-      let links = {};
-
-      if (missions && missions.length > 0) {
-        missions.forEach(m => {
-          links[`v${m.id}`] = m.facebook_url || '';
-        });
-      }
-
+      if (!currentUser) { container.innerHTML = '<p style="text-align:center;padding:12px;">Silakan masuk untuk menonton dan mengklaim koin.</p>'; return; }
+      const { data: missions, error: missionError } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
+      if (missionError) { container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Daftar video gagal dimuat. Silakan coba lagi.</p>'; return; }
+      const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+      const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
+      const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime()+86400000).toISOString();
+      const { data: claims, error: claimsError } = await supabaseClient.from('reels_claims').select('slot_key,created_at').eq('user_id', currentUser.id).gte('created_at',dayStart).lt('created_at',nextDay);
+      if (claimsError) { container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Status klaim belum bisa diverifikasi. Video dikunci sementara agar koin tidak terduplikasi.</p>'; return; }
+      const claimed = new Set((claims || []).map(x => x.slot_key));
+      const links = {};
+      (missions || []).forEach(m => { links[`v${m.id}`] = m.facebook_url || ''; });
       let html = '';
       for (let i = 1; i <= 10; i++) {
         const slotKey = `v${i}`;
         const url = links[slotKey] || '';
         const isValid = url && url.trim().length > 5 && url !== 'null';
-
+        const isClaimed = claimed.has(slotKey);
+        const canPlay = isValid && !isClaimed && claimed.size < 10;
+        const buttonText = isClaimed ? '🔒 Sudah diklaim' : (!isValid ? 'Belum Ada Video' : (claimed.size >= 10 ? '🔒 Batas harian tercapai' : 'Tonton & Klaim +10 🪙'));
+        const safeUrl = String(url).replace(/&/g,'&amp;').replace(/'/g,'\\\'').replace(/"/g,'&quot;');
         html += `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f9f9f9;">
-            <span style="font-weight: 800; font-size: 12px; color: #333;">🎬 Video ${i}</span>
-            <button ${isValid ? `onclick="playEmbeddedVideo('${url}', '${slotKey}')"` : 'disabled'} 
-              style="background: ${isValid ? '#1877f2' : '#ccc'}; color: #fff; border: none; padding: 5px 10px; border-radius: 8px; font-size: 10.5px; font-weight: 800; cursor: ${isValid ? 'pointer' : 'not-allowed'};">
-              ${isValid ? 'Tonton & Klaim +10 🪙' : 'Belum Ada Video'}
-            </button>
-          </div>
-        `;
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed?'#b8d9c2':'#e0e0e0'};border-radius:12px;background:${isClaimed?'#eef8f0':'#f9f9f9'};">
+            <span style="font-weight:800;font-size:12px;color:#333;">🎬 Video ${i}</span>
+            <button ${canPlay ? `onclick="playEmbeddedVideo('${safeUrl}', '${slotKey}')"` : 'disabled'} style="background:${canPlay?'#1877f2':'#aaa'};color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:10.5px;font-weight:800;cursor:${canPlay?'pointer':'not-allowed'};">${buttonText}</button>
+          </div>`;
       }
-
       container.innerHTML = html;
     }
 
@@ -4190,31 +4192,35 @@
       const btnClose = document.getElementById('btnCloseVideo');
       if (btnClose.disabled) return;
 
+      if (!currentUser) { alert('Silakan masuk terlebih dahulu.'); return; }
+      const slot = activeVideoSlot || 'v1';
+      if (!/^v([1-9]|10)$/.test(slot)) { alert('Slot video tidak valid.'); return; }
+      btnClose.disabled = true;
+      try {
+        const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+        const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
+        const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime()+86400000).toISOString();
+        const { data: existing, error: checkError } = await supabaseClient.from('reels_claims').select('slot_key').eq('user_id',currentUser.id).gte('created_at',dayStart).lt('created_at',nextDay);
+        if (checkError) throw checkError;
+        if ((existing || []).some(x => x.slot_key === slot)) throw new Error('Slot video ini sudah diklaim hari ini.');
+        if ((existing || []).length >= 10) throw new Error('Batas 10 klaim video hari ini sudah tercapai.');
+        const { error: insertError } = await supabaseClient.from('reels_claims').insert([{user_id:currentUser.id,user_email:currentUser.email,slot_key:slot}]);
+        if (insertError) throw insertError;
+        freeCoins += 10;
+        await updateCoinUI(true);
+      } catch (err) {
+        console.error('Klaim video ditolak:',err);
+        alert(err?.message || 'Klaim gagal dicatat. Koin tidak ditambahkan.');
+        btnClose.disabled = false;
+        return;
+      }
       document.getElementById('videoPlayerModal').style.display = 'none';
       document.getElementById('videoFrameContainer').innerHTML = '';
-
-      freeCoins += 10;
-      updateCoinUI(true);
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      try {
-        await supabaseClient.from('reels_claims').insert([
-          {
-            user_id: currentUser ? currentUser.id : null,
-            user_email: myEmail,
-            slot_key: activeVideoSlot || 'v1'
-          }
-        ]);
-      } catch (err) {
-        console.error("Gagal mencatat klaim reels:", err);
-      }
-
-      alert('🎉 Selamat! Kamu telah menonton video dan mendapatkan +10 Koin Gratisan!');
+      alert('🎉 Selamat! Kamu mendapatkan +10 Koin Gratis. Slot ini terkunci sampai besok.');
 
       videoSecondsLeft = 10;
       openReelsModal();
+      if(typeof openTodayProgress==='function') { const pm=document.getElementById('todayProgressModal'); if(pm && pm.style.display==='flex') await openTodayProgress(); }
       loadPosts();
     }
 
