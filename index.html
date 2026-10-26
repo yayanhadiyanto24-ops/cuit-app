@@ -63,7 +63,82 @@
       opacity: 0;
     }
     .cuit-banner-img { width: 100%; height: auto; display: block; object-fit: cover; }
+/* CUIT premium welcome banner */
+.cuit-banner-container {
+  position: relative;
+  max-height: 220px;
+  border-bottom: 1px solid #d4a72c;
+  background: linear-gradient(135deg, #5f0714, #bd0923 52%, #7a0b1b);
+}
+.cuit-banner-container.collapsed {
+  max-height: 0 !important;
+  border: 0 !important;
+  opacity: 0;
+}
+.cuit-welcome {
+  min-height: 142px;
+  padding: 18px 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #fff8e6;
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255,220,100,.2), transparent 35%),
+    linear-gradient(135deg, #650817, #c4142d 55%, #85091e);
+  border-bottom: 2px solid #e4b844;
+  overflow: hidden;
+}
+.cuit-welcome-logo {
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.28));
+}
+.cuit-welcome-copy { min-width: 0; }
+.cuit-welcome-eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 900;
+  color: #ffe38a;
+  margin-bottom: 5px;
+}
+.cuit-welcome-title {
+  font-size: clamp(17px, 5vw, 22px);
+  line-height: 1.15;
+  font-weight: 950;
+  margin-bottom: 6px;
+  color: #fff;
+}
+.cuit-welcome-tagline {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #fff1c7;
+}
+@media (max-width: 360px) {
+  .cuit-welcome { min-height: 126px; padding: 13px 11px; gap: 10px; }
+  .cuit-welcome-logo { width: 64px; height: 64px; flex-basis: 64px; }
+  .cuit-welcome-title { font-size: 17px; }
+}
 
+BAGIAN 2 — GANTI HTML BANNER LAMA
+Cari bagian yang dimulai dengan:
+<!-- Hero Banner -->
+<div class="cuit-banner-container" id="cuitMainBanner">
+
+Hapus hanya blok banner lama sampai penutup </div> yang tepat setelah tag img-nya, lalu ganti dengan:
+
+<!-- CUIT Premium Welcome Banner: otomatis menghilang setelah 3 detik -->
+<div class="cuit-banner-container" id="cuitMainBanner" role="status" aria-label="Selamat datang di CUIT">
+  <div class="cuit-welcome">
+    <img class="cuit-welcome-logo" src="assets/cuit-app-icon.svg" alt="Logo CUIT"
+      onerror="this.onerror=null;this.src='assets/cuit-app-icon.svg';">
+    <div class="cuit-welcome-copy">
+      <div class="cuit-welcome-eyebrow">CURHAT DAPAT DUIT</div>
+      <div class="cuit-welcome-title">SELAMAT DATANG DI CUIT</div>
+      <div class="cuit-welcome-tagline">Curhatmu berharga. Di CUIT, kamu dapat lebih!</div>
+    </div>
+  </div>
+</div>
     /* Page Visibility */
     .page-section { display: none; padding: 12px 14px; }
     .page-section.active { display: block; }
