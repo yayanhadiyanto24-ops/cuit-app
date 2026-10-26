@@ -459,6 +459,33 @@
 
   <div id="giftOverlayContainer"></div>
 
+<!-- CUIT Premium Welcome Banner -->
+<div class="cuit-banner-container" id="cuitMainBanner"
+     role="status" aria-label="Selamat datang di CUIT"
+     style="position:fixed;inset:0;width:100%;height:100vh;height:100dvh;
+     max-height:none;z-index:99999;display:flex;align-items:center;
+     justify-content:center;box-sizing:border-box;
+     background:linear-gradient(135deg,#45040e,#c4142d 55%,#650817);
+     transition:opacity .5s ease;">
+  <div class="cuit-welcome" style="width:100%;min-height:100vh;
+       min-height:100dvh;box-sizing:border-box;justify-content:center;
+       flex-direction:column;text-align:center;border:0;padding:24px;">
+    <img class="cuit-welcome-logo"
+         src="assets/cuit-app-icon.svg"
+         alt="Logo CUIT"
+         style="width:120px;height:120px;flex-basis:120px;object-fit:contain;">
+    <div class="cuit-welcome-copy">
+      <div class="cuit-welcome-eyebrow">CURHAT DAPAT DUIT</div>
+      <div class="cuit-welcome-title" style="font-size:26px;">
+        SELAMAT DATANG DI CUIT
+      </div>
+      <div class="cuit-welcome-tagline" style="font-size:14px;">
+        Curhatmu berharga. Di CUIT, kamu dapat lebih!
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
