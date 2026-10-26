@@ -5040,10 +5040,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleStartKilatGame(feeInput = 0, letters = 'KLT') {
   try {
-    // 1. Cek sesi auth Supabase
-    const session = supabase.auth.session();
-    if (!session) {
-      alert('Sesi login kamu telah berakhir atau belum terdeteksi. Silakan refresh halaman atau login ulang.');
+    // 1. Ambil user secara kompatibel untuk Supabase v1 maupun v2
+    const user = supabase.auth.user ? supabase.auth.user() : (await supabase.auth.getUser())?.data?.user;
+    
+    if (!user) {
+      alert('Sesi login tidak terdeteksi. Silakan login atau refresh halaman terlebih dahulu.');
       return;
     }
 
@@ -5056,25 +5057,26 @@ async function handleStartKilatGame(feeInput = 0, letters = 'KLT') {
     });
 
     if (error) {
-      alert('Gagal dari Server: ' + error.message);
+      alert('Pesan dari Server: ' + error.message);
       return;
     }
 
-    // 3. Sesi Game Berhasil
+    // 3. Tanggapan Sesi Game Berhasil
     if (data.is_free) {
-      alert('Sesi Gratis Dimulai! Selamat bermain.');
+      alert('Sesi Gratis Hari Ini Dimulai! Selamat bermain.');
     } else {
       alert(`Sesi Berbayar Dimulai (${data.fee_applied} Koin dipotong). Saldo sisa: ${data.remaining_coins} Koin.`);
     }
 
-    // Refresh saldo profil
+    // Perbarui Tampilan Saldo Profil
     if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
       await CuitApp.loadProfile();
     }
 
     return data;
   } catch (err) {
-    alert('Terjadi kesalahan koneksi: ' + err.message);
+    console.error('[Error Detail]:', err);
+    alert('Detail Masalah: ' + err.message);
   }
 }
 
