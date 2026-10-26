@@ -4853,5 +4853,188 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
   </script>
+  <script>
+// =============================================================================
+// MODUL INTEGRASI LENGKAP CUIT APP (PERBAIKAN TOTAL)
+// =============================================================================
+
+const CuitApp = {
+  state: {
+    user: null,
+    profile: null,
+    isLoading: true
+  },
+
+  // 1. Inisialisasi Aplikasi saat Load
+  async init() {
+    this.state.user = supabase.auth.user();
+    if (!this.state.user) return;
+
+    await this.loadProfile();
+    await this.loadPoolStatus();
+  },
+
+  // 2. Memuat Saldo Profil Anggota
+  async loadProfile() {
+    // Tampilkan indikator loading agar tidak muncul angka 0 prematur
+    this.updateUIElement('profile-gems-display', '...');
+    this.updateUIElement('profile-coins-display', '...');
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, gems, coins, role, email, referrer_id')
+        .eq('id', this.state.user.id)
+        .single();
+
+      if (error) throw error;
+
+      this.state.profile = profile;
+      this.state.isLoading = false;
+
+      // Update tampilan saldo aktual
+      const gemsVal = (profile.gems || 0).toLocaleString('id-ID');
+      const coinsVal = (profile.coins || 0).toLocaleString('id-ID');
+
+      this.updateUIElement('profile-gems-display', gemsVal);
+      this.updateUIElement('profile-coins-display', coinsVal);
+
+      // Verifikasi Admin untuk Permata Kejutan
+      this.verifyAndRenderAdminCards(profile);
+    } catch (err) {
+      console.error('[CUIT] Gagal memuat profil:', err.message);
+      this.updateUIElement('profile-gems-display', 'Error');
+    }
+  },
+
+  // 3. Tampilan Permata Kejutan Khusus Admin
+  async verifyAndRenderAdminCards(profile) {
+    const isAdmin = profile.role === 'admin' || (profile.email && profile.email.endsWith('@admin.cuit.app'));
+    const surpriseCard = document.getElementById('admin-surprise-gems-container');
+
+    if (!surpriseCard) return;
+
+    if (isAdmin) {
+      surpriseCard.style.display = 'block';
+      this.updateUIElement('surprise-gems-val', '...');
+
+      try {
+        const { data, error } = await supabase
+          .from('cuit_reward_containers')
+          .select('surprise_gems')
+          .single();
+
+        if (error) throw error;
+
+        const surpriseVal = (data ? data.surprise_gems : 0).toLocaleString('id-ID');
+        this.updateUIElement('surprise-gems-val', `${surpriseVal} Gems`);
+      } catch (err) {
+        console.error('[CUIT] Gagal memuat Surprise Gems:', err.message);
+        this.updateUIElement('surprise-gems-val', 'Akses Ditolak');
+      }
+    } else {
+      surpriseCard.style.display = 'none';
+    }
+  },
+
+  // 4. Memuat Pool Harian & Pool Mingguan
+  async loadPoolStatus() {
+    try {
+      const { data: dailyData } = await supabase.rpc('cuit_get_daily_pool_status');
+      if (dailyData) {
+        const dailyGems = (dailyData.daily_pool_gems || 0).toLocaleString('id-ID');
+        this.updateUIElement('daily-pool-display', `${dailyGems} Gems`);
+      }
+
+      const { data: weeklyData } = await supabase.rpc('cuit_get_weekly_pool_status');
+      if (weeklyData) {
+        const weeklyGems = (weeklyData.total_pool_gems || 0).toLocaleString('id-ID');
+        this.updateUIElement('weekly-pool-display', `${weeklyGems} Gems`);
+      }
+    } catch (err) {
+      console.error('[CUIT] Gagal memuat status pool:', err.message);
+    }
+  },
+
+  // 5. Game 3 Huruf Kilat - Mulai Sesi (Sudah mendukung p_confirmed_fee!)
+  async startKilatGame(confirmedFee = 0, letters = 'KLT') {
+    try {
+      const { data, error } = await supabase.rpc('cuit_start_word_game', {
+        p_confirmed_fee: confirmedFee,
+        p_letters: letters
+      });
+
+      if (error) throw error;
+
+      console.log('[Game Kilat] Berhasil dimulai:', data);
+
+      if (data.is_free) {
+        console.log('[Game Kilat] Menggunakan kesempatan gratis harian.');
+      } else {
+        console.log(`[Game Kilat] Berbayar: Potong ${data.fee_applied} koin.`);
+        await this.loadProfile(); // Refresh saldo jika koin terpotong
+      }
+
+      return data;
+    } catch (err) {
+      console.error('[Game Kilat] Gagal memulai:', err.message);
+      alert('Gagal memulai permainan: ' + err.message);
+    }
+  },
+
+  // 6. Game 3 Huruf Kilat - Selesai & Klaim Hadiah
+  async finishKilatGame(userWord, rewardGems = 1.00) {
+    try {
+      const { data, error } = await supabase.rpc('cuit_finish_word_game', {
+        p_word: userWord,
+        p_reward_gems: rewardGems
+      });
+
+      if (error) throw error;
+
+      if (data.is_first_claim_today) {
+        alert(`Selamat! Anda berhasil mendapatkan ${data.reward_gems} Gems.`);
+      } else {
+        alert('Permainan selesai! Hadiah gratis hari ini sudah diklaim sebelumnya.');
+      }
+
+      await this.loadProfile(); // Refresh saldo permata
+      return data;
+    } catch (err) {
+      alert('Gagal menyelesaikan permainan: ' + err.message);
+    }
+  },
+
+  // 7. Pembagian Bonus Sponsor (50:10:40)
+  async distributeBonus(transactionId, recipientId, totalAmount) {
+    try {
+      const { data, error } = await supabase.rpc('cuit_distribute_bonus', {
+        p_transaction_id: transactionId,
+        p_recipient_id: recipientId,
+        p_amount: totalAmount
+      });
+
+      if (error) throw error;
+
+      await this.loadProfile();
+      return data;
+    } catch (err) {
+      console.error('[CUIT] Gagal distribusi bonus:', err.message);
+    }
+  },
+
+  // Helper Update UI
+  updateUIElement(id, content) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = content;
+  }
+};
+
+// Eksekusi Otomatis saat Halaman Dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  CuitApp.init();
+});
+</script>
+
 </body>
           </html>
