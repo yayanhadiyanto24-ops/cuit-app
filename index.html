@@ -1137,15 +1137,14 @@
 
     const awarded=Number(row.coins_awarded||0);
     const feePaid=Number(row.entry_fee ?? gameSession.entry_fee ?? 0);
-    coinEl.textContent=String(awarded);
-    rewardEl.textContent=awarded>0
-      ?`Hadiah ${awarded} koin gratis`
-      :'Tidak ada bonus koin untuk permainan berbayar';
+    coinEl.textContent=String(awarded); 
+rewardEl.textContent=awarded>0
+  ?`Hadiah ${awarded} koin gratis`
+  :'Belum memperoleh hadiah koin';
 
-    poolStatus=feePaid>0
-      ?`Biaya ${feePaid} koin berbayar diproses server; tidak ada hadiah untuk sesi berbayar.`
-      :`Kesempatan gratis harian dikonfirmasi server. Hadiah: ${awarded} koin gratis.`;
-    resultDesc.textContent=poolStatus;
+poolStatus=feePaid>0
+  ?`Biaya ${feePaid} koin berbayar telah diproses server. Hadiah: ${awarded} koin gratis.`
+  :`Kesempatan gratis harian dikonfirmasi server. Hadiah: ${awarded} koin gratis.`;
 
     if(typeof updateCoinUI==='function')await updateCoinUI();
     if(typeof openTodayProgress==='function'){
