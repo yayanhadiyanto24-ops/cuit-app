@@ -4698,6 +4698,160 @@ Tekan Oke untuk membayar dan memulai permainan, atau Batal untuk kembali tanpa p
         nav.style.setProperty('background', '#fff', 'important');
       }
     });
+    // =============================================================================
+// CUIT APP INTEGRATION MODULE (INDEX.HTML PATCH)
+// =============================================================================
+
+const CuitApp = {
+  state: {
+    user: null,
+    profile: null,
+    isLoading: true
+  },
+
+  // 1. INSIALISASI DAN PEMUATAN PROFIL UTAMA
+  async init() {
+    this.state.user = supabase.auth.user();
+    if (!this.state.user) return;
+
+    await this.loadProfile();
+    await this.loadPoolStatus();
+  },
+
+  async loadProfile() {
+    // Tampilkan skeleton/loading state untuk mencegah timpa angka 0 prematur
+    this.updateUIElement('profile-gems-display', '...');
+    this.updateUIElement('profile-coins-display', '...');
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, gems, coins, role, email, referrer_id')
+        .eq('id', this.state.user.id)
+        .single();
+
+      if (error) throw error;
+
+      this.state.profile = profile;
+      this.state.isLoading = false;
+
+      // Render saldo dari data aktual server
+      const gemsVal = (profile.gems || 0).toLocaleString('id-ID');
+      const coinsVal = (profile.coins || 0).toLocaleString('id-ID');
+
+      this.updateUIElement('profile-gems-display', gemsVal);
+      this.updateUIElement('profile-coins-display', coinsVal);
+
+      // Verifikasi peran admin dari server untuk menampilkan kartu Surprise Gems & Platform Pool
+      this.verifyAndRenderAdminCards(profile);
+    } catch (err) {
+      console.error('[CUIT] Gagal memuat profil:', err.message);
+      this.updateUIElement('profile-gems-display', 'Error');
+    }
+  },
+
+  // 2. PEMULIHAN KARTU SURPRISE GEMS KHUSUS ADMIN
+  async verifyAndRenderAdminCards(profile) {
+    const isAdmin = profile.role === 'admin' || (profile.email && profile.email.endsWith('@admin.cuit.app'));
+    const surpriseCard = document.getElementById('admin-surprise-gems-container');
+
+    if (!surpriseCard) return;
+
+    if (isAdmin) {
+      surpriseCard.style.display = 'block';
+      this.updateUIElement('surprise-gems-val', '...');
+
+      try {
+        const { data, error } = await supabase
+          .from('cuit_reward_containers')
+          .select('surprise_gems')
+          .single();
+
+        if (error) throw error;
+
+        const surpriseVal = (data ? data.surprise_gems : 0).toLocaleString('id-ID');
+        this.updateUIElement('surprise-gems-val', `${surpriseVal} Gems`);
+      } catch (err) {
+        console.error('[CUIT] Gagal memuat Surprise Gems:', err.message);
+        this.updateUIElement('surprise-gems-val', 'Akses Ditolak');
+      }
+    } else {
+      surpriseCard.style.display = 'none';
+    }
+  },
+
+  // 3. PEMANTAUAN POOL HARIAN DAN POOL MINGGUAN
+  async loadPoolStatus() {
+    try {
+      // Panggil RPC Pool Harian
+      const { data: dailyData, error: dailyErr } = await supabase.rpc('cuit_get_daily_pool_status');
+      if (!dailyErr && dailyData) {
+        const dailyGems = (dailyData.daily_pool_gems || 0).toLocaleString('id-ID');
+        this.updateUIElement('daily-pool-display', `${dailyGems} Gems`);
+      }
+
+      // Panggil RPC Pool Mingguan
+      const { data: weeklyData, error: weeklyErr } = await supabase.rpc('cuit_get_weekly_pool_status');
+      if (!weeklyErr && weeklyData) {
+        const weeklyGems = (weeklyData.total_pool_gems || 0).toLocaleString('id-ID');
+        this.updateUIElement('weekly-pool-display', `${weeklyGems} Gems`);
+      }
+    } catch (err) {
+      console.error('[CUIT] Gagal memuat status pool:', err.message);
+    }
+  },
+
+  // 4. INTEGRASI GAME 3 HURUF KILAT (TERVALIDASI SERVER)
+  async startKilatGame(letters = 'KLT') {
+    try {
+      const { data, error } = await supabase.rpc('cuit_start_word_game', { p_letters: letters });
+      if (error) throw error;
+
+      if (data.is_free) {
+        console.log('[Game Kilat] Kesempatan gratis harian aktif.');
+      } else {
+        console.log('[Game Kilat] Kesempatan berbayar digunakan.');
+      }
+      return data;
+    } catch (err) {
+      alert('Gagal memulai Game Kilat: ' + err.message);
+    }
+  },
+
+  async finishKilatGame(userWord, rewardGems = 1.00) {
+    try {
+      const { data, error } = await supabase.rpc('cuit_finish_word_game', {
+        p_word: userWord,
+        p_reward_gems: rewardGems
+      });
+      if (error) throw error;
+
+      if (data.is_first_claim_today) {
+        alert(`Selamat! Anda berhasil mengklaim ${data.reward_gems} Gems.`);
+      } else {
+        alert('Permainan selesai! Hadiah gratis hari ini sudah diklaim sebelumnya.');
+      }
+
+      // Perbarui saldo profil aktual setelah permainan selesai
+      await this.loadProfile();
+      return data;
+    } catch (err) {
+      alert('Gagal menyelesaikan Game Kilat: ' + err.message);
+    }
+  },
+
+  // HELPER UNTUK UPDATE DOM
+  updateUIElement(id, content) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = content;
+  }
+};
+
+// Inisialisasi Otomatis saat Dokumen Siap
+document.addEventListener('DOMContentLoaded', () => {
+  CuitApp.init();
+});
+
   </script>
 </body>
           </html>
