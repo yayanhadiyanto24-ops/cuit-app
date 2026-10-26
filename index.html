@@ -1067,18 +1067,85 @@
 
       function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},700);}}
       function makeFallbackWisdom(foundLetters){return 'Jangan berkecil hati karena belum berhasil. Setiap kesempatan adalah awal yang baru. Tarik napas, bangkitkan semangat, dan cobalah kembali. Siapa tahu, keberhasilanmu sudah menunggu di percobaan berikutnya.';}
-      async function makeWisdom(foundLetters){
-        const code=foundLetters.join('').toUpperCase();
-        try {
-          if(typeof supabaseClient!=='undefined' && supabaseClient && code.length===3){
-            const {data,error}=await supabaseClient.rpc('cuit_get_wisdom_by_letters',{p_letters:code});
-            const row=Array.isArray(data)?data[0]:data;
-            if(!error && row && row.quote_text) return {text:row.quote_text,category:row.category||'Kata Bijak',quoteId:row.quote_id,source:'Supabase'};
-            console.warn('Kata bijak belum tersedia:',error?.message||'Kutipan tidak ditemukan');
-          }
-        } catch(err){console.warn('Gagal mengambil kata bijak:',err);}
-        return {text:makeFallbackWisdom(foundLetters),category:'Kata Bijak',quoteId:null,source:'cadangan lokal'};
+      
+async function makeWisdom(foundLetters) {
+  const code = foundLetters.join('').toUpperCase();
+
+  try {
+    const client =
+      typeof supabaseClient !== 'undefined'
+        ? supabaseClient
+        : (typeof supabase !== 'undefined' ? supabase : null);
+
+    if (!client || !code.length || code.length > 3) {
+      throw new Error('Huruf belum tersedia untuk mencari kata bijak.');
+    }
+
+    let quoteId;
+
+    if (code.length === 3) {
+      const { data, error } = await client.rpc(
+        'cuit_quote_id_from_letters',
+        { p_letters: code }
+      );
+
+      if (error) throw error;
+      quoteId = Number(data);
+    } else {
+      const { data, error } = await client.rpc(
+        'cuit_letter_value',
+        { p_letter: code[0] }
+      );
+
+      if (error) throw error;
+
+      quoteId = Number(data);
+
+      if (code.length === 2) {
+        const { data: secondValue, error: secondError } =
+          await client.rpc('cuit_letter_value', {
+            p_letter: code[1]
+          });
+
+        if (secondError) throw secondError;
+        quoteId *= Number(secondValue);
       }
+    }
+
+    if (!Number.isInteger(quoteId) || quoteId < 1) {
+      throw new Error('ID kata bijak tidak valid.');
+    }
+
+    const { data, error } = await client
+      .from('cuit_wisdom_quotes')
+      .select('quote_id, quote_text, category')
+      .eq('quote_id', quoteId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (data && data.quote_text) {
+      return {
+        text: data.quote_text,
+        category: data.category || 'Kata Bijak',
+        quoteId: data.quote_id,
+        source: 'Supabase'
+      };
+    }
+
+    throw new Error('Kutipan tidak ditemukan.');
+  } catch (err) {
+    console.warn('Gagal mengambil kata bijak CUIT:', err);
+
+    return {
+      text: makeFallbackWisdom(foundLetters),
+      category: 'Penyemangat',
+      quoteId: null,
+      source: 'cadangan lokal'
+    };
+  }
+}
+
       async function finish(timeout){
   if(ended)return;
   ended=true;
