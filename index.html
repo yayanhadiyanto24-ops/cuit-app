@@ -120,25 +120,6 @@
   .cuit-welcome-title { font-size: 17px; }
 }
 
-BAGIAN 2 — GANTI HTML BANNER LAMA
-Cari bagian yang dimulai dengan:
-<!-- Hero Banner -->
-<div class="cuit-banner-container" id="cuitMainBanner">
-
-Hapus hanya blok banner lama sampai penutup </div> yang tepat setelah tag img-nya, lalu ganti dengan:
-
-<!-- CUIT Premium Welcome Banner: otomatis menghilang setelah 3 detik -->
-<div class="cuit-banner-container" id="cuitMainBanner" role="status" aria-label="Selamat datang di CUIT">
-  <div class="cuit-welcome">
-    <img class="cuit-welcome-logo" src="assets/cuit-app-icon.svg" alt="Logo CUIT"
-      onerror="this.onerror=null;this.src='assets/cuit-app-icon.svg';">
-    <div class="cuit-welcome-copy">
-      <div class="cuit-welcome-eyebrow">CURHAT DAPAT DUIT</div>
-      <div class="cuit-welcome-title">SELAMAT DATANG DI CUIT</div>
-      <div class="cuit-welcome-tagline">Curhatmu berharga. Di CUIT, kamu dapat lebih!</div>
-    </div>
-  </div>
-</div>
     /* Page Visibility */
     .page-section { display: none; padding: 12px 14px; }
     .page-section.active { display: block; }
@@ -2115,7 +2096,7 @@ poolStatus=feePaid>0
         if (banner) {
           banner.classList.add('collapsed');
         }
-      }, 3000);
+      }, 5000);
     }
 
     function spawnConfetti(count, duration) {
