@@ -985,11 +985,12 @@
       function makeDeck(){letters=shuffle(alphabet).slice(0,8);deck=shuffle(letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]));}
       function render(){grid.innerHTML='';deck.forEach((card,index)=>{const button=document.createElement('button');button.type='button';button.className='kilat-tile'+((card.revealed||card.matched)?' open':'')+(card.matched?' matched':'');button.textContent=(card.revealed||card.matched)?card.letter:'';button.setAttribute('aria-label',(card.revealed||card.matched)?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);button.disabled=!started||ended||lock||card.matched||card.revealed;button.addEventListener('click',()=>flip(index));grid.appendChild(button);});}
       function updateStats(){timeEl.textContent=remaining;foundEl.textContent=`${matches.length}/3`;bar.style.width=`${Math.max(0,remaining/30*100)}%`;roundEl.textContent=matches.length>=3?'Selesai!':started?`Pasangan ${matches.length+1} dari 3`:'Siap bermain';}
-        // 1. Memeriksa Status Biaya Game
+          // 1. Memeriksa Status Biaya Game
   async function refreshOffer() {
     try {
       coinEl.textContent = 'Cek biaya...';
-      const { data, error } = await supabase.rpc('cuit_start_word_game', {
+      const client = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
+      const { data, error } = await client.rpc('cuit_start_word_game', {
         p_confirmed_fee: 0,
         p_letters: 'KLT'
       });
@@ -1016,9 +1017,9 @@
     startBtn.disabled = true;
 
     try {
-      // Panggil RPC aman Supabase
-      const { data, error } = await supabase.rpc('cuit_start_word_game', {
-        p_confirmed_fee: 0, // ganti angka jika ingin biaya koin
+      const client = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
+      const { data, error } = await client.rpc('cuit_start_word_game', {
+        p_confirmed_fee: 0,
         p_letters: 'KLT'
       });
 
@@ -1039,7 +1040,6 @@
         setMessage(`Sesi berbayar dimulai (${data.fee_applied} Koin dipotong).`);
       }
 
-      // Refresh saldo di UI profil
       if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
         await CuitApp.loadProfile();
       }
