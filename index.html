@@ -2349,11 +2349,23 @@ poolStatus=feePaid>0
 
     // Tidak ada lagi jatah tetap 20 Koin Gratis harian.
     // Koin Gratis hanya bertambah dari hadiah aktivitas yang sah, termasuk bonus absen beruntun.
-    function checkDailyCoinReset() { return; }
+    async function checkDailyCoinReset() {
+  if (!currentUser) return false;
 
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      'cuit_reset_daily_free_coins'
+    );
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Gagal reset Koin Gratis:', err);
+    return false;
+  }
+}
     async function checkUser() {
       initSponsorFromURL();
-      checkDailyCoinReset();
       checkWeeklyLeagueReset();
       initAutoCollapseBanner();
 
@@ -2361,6 +2373,7 @@ poolStatus=feePaid>0
       currentUser = data.user;
 
       if (currentUser) {
+        await checkDailyCoinReset();
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
