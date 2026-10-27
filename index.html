@@ -2700,6 +2700,42 @@ poolStatus=feePaid>0
         const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allProfilesRes].filter(r=>r.error);
         if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));
         const byPeriod = (rows,start) => (rows||[]).filter(r => r.created_at && new Date(r.created_at) >= start);
+        
+const [dailyGameRes, weeklyGameRes] = await Promise.all([
+  supabaseClient.rpc('cuit_get_king_game_ranking', {
+    p_period: 'daily'
+  }),
+  supabaseClient.rpc('cuit_get_king_game_ranking', {
+    p_period: 'weekly'
+  })
+]);
+
+function gameWinnerResult(res) {
+  if (res.error) {
+    console.error('Raja Game gagal dimuat:', res.error);
+    return {
+      name: 'Data belum tersedia',
+      scoreLabel: 'Gagal memuat data',
+      note: 'periksa koneksi game'
+    };
+  }
+
+  const winner = res.data?.[0];
+  if (!winner) {
+    return {
+      name: 'Belum Ada',
+      scoreLabel: '0 permainan',
+      note: 'jumlah permainan'
+    };
+  }
+
+  return {
+    name: winner.username || 'Anggota CUIT',
+    scoreLabel: `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`,
+    note: 'jumlah permainan'
+  };
+}
+
         function makeResults(start) {
           const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
           const results = {};
@@ -2707,7 +2743,7 @@ poolStatus=feePaid>0
           w=winnerFromCounts(countBy(gifts,g=>g.sender_id||g.sender_email||g.sender_name,g=>g.coins_amount||g.amount||0));
           if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
           // Data Raja Game dihitung dari sumber data yang tersedia; tidak menggunakan fitur siaran.
-          results.game={name:'Belum tersedia',scoreLabel:'Data game belum terhubung',note:'menunggu audit sumber transaksi game'};
+          results.game = null;
           const postEngagement = {};
           posts.forEach(p=>{const key=p.user_id||p.user_email||p.email||p.username;if(!key)return;const value=Number(p.likes_count||0)+Number(p.comments_count||0);postEngagement[key]=(postEngagement[key]||0)+value;});
           w=winnerFromCounts(postEngagement); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.curhat={name:safeNameFromRow(p),scoreLabel:`${w.score.toLocaleString('id-ID')} interaksi`,note:'interaksi pada curhatan'};}
@@ -2742,6 +2778,8 @@ if(w){
         }
         const dailyResults = makeResults(dayStart);
         const weeklyResults = makeResults(weekStart);
+        dailyResults.game = gameWinnerResult(dailyGameRes);
+weeklyResults.game = gameWinnerResult(weeklyGameRes);
         // Kategori tanpa hasil tetap ditampilkan; jangan menyamarkan data kosong sebagai pemenang.
         renderKingCategories('dailyKings',dailyResults);
         renderKingCategories('weeklyKings',weeklyResults);
