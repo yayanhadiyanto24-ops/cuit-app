@@ -5287,16 +5287,16 @@ try {
       }
     });
   </script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.page-section').forEach(function(page) {
-    if (page.id === 'pageHome' ||
-        page.querySelector('.cuit-pool-strip')) {
+    if (
+      page.id === 'pageHome' ||
+      page.querySelector('.cuit-pool-strip')
+    ) {
       return;
     }
 
-    /* Hapus tombol Pool lama agar tidak rangkap */
     page.querySelectorAll(':scope > .pool-shortcut').forEach(function(button) {
       button.remove();
     });
@@ -5310,14 +5310,14 @@ document.addEventListener('DOMContentLoaded', function () {
         '<span class="cuit-pool-symbol">☀️</span>' +
         '<div>' +
           '<div class="cuit-pool-label">Pool Harian</div>' +
-          '<div class="cuit-pool-value">— koin</div>' +
+          '<div class="cuit-pool-value cuit-daily-pool-value">Memuat...</div>' +
         '</div>' +
       '</div>' +
       '<div class="cuit-pool-card weekly">' +
         '<span class="cuit-pool-symbol">🏆</span>' +
         '<div>' +
           '<div class="cuit-pool-label">Pool Mingguan</div>' +
-          '<div class="cuit-pool-value">— koin</div>' +
+          '<div class="cuit-pool-value cuit-weekly-pool-value">Memuat...</div>' +
         '</div>' +
       '</div>';
 
@@ -5329,6 +5329,76 @@ document.addEventListener('DOMContentLoaded', function () {
       page.insertBefore(strip, page.firstChild);
     }
   });
+
+  async function loadCuitPoolValues() {
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+      document.querySelectorAll(
+        '.cuit-daily-pool-value, .cuit-weekly-pool-value'
+      ).forEach(function(el) {
+        el.textContent = 'Belum tersedia';
+      });
+      return;
+    }
+
+    const dailyElements = document.querySelectorAll('.cuit-daily-pool-value');
+    const weeklyElements = document.querySelectorAll('.cuit-weekly-pool-value');
+
+    try {
+      const results = await Promise.all([
+        supabaseClient.rpc('cuit_get_daily_pool_status'),
+        supabaseClient.rpc('cuit_get_weekly_pool_status')
+      ]);
+
+      const dailyResult = results[0];
+      const weeklyResult = results[1];
+
+      function extractRow(result) {
+        if (result.error || !result.data) return null;
+        return Array.isArray(result.data) ? result.data[0] : result.data;
+      }
+
+      function formatPool(row) {
+        if (!row || row.total_coins === undefined || row.total_coins === null) {
+          return 'Belum tersedia';
+        }
+
+        const amount = Number(row.total_coins);
+        if (!Number.isFinite(amount)) return 'Belum tersedia';
+
+        return amount.toLocaleString('id-ID', {
+          maximumFractionDigits: 2
+        }) + ' koin';
+      }
+
+      const dailyText = formatPool(extractRow(dailyResult));
+      const weeklyText = formatPool(extractRow(weeklyResult));
+
+      dailyElements.forEach(function(el) {
+        el.textContent = dailyText;
+      });
+
+      weeklyElements.forEach(function(el) {
+        el.textContent = weeklyText;
+      });
+
+      if (dailyResult.error) {
+        console.error('Gagal memuat Pool Harian CUIT:', dailyResult.error);
+      }
+      if (weeklyResult.error) {
+        console.error('Gagal memuat Pool Mingguan CUIT:', weeklyResult.error);
+      }
+    } catch (error) {
+      console.error('Gagal memuat data Pool CUIT:', error);
+
+      document.querySelectorAll(
+        '.cuit-daily-pool-value, .cuit-weekly-pool-value'
+      ).forEach(function(el) {
+        el.textContent = 'Belum tersedia';
+      });
+    }
+  }
+
+  loadCuitPoolValues();
 });
 </script>
 
