@@ -1981,7 +1981,7 @@ poolStatus=feePaid>0
       async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
       const [checkins,posts,likes,comments,reels,games,giftRows]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
-        rows('curhat','id,created_at,user_id,author_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
+        rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('comments','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
