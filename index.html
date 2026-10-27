@@ -2695,7 +2695,7 @@ poolStatus=feePaid>0
           supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
           supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
           supabaseClient.from('reels_claims').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at').gte('created_at', weekStart.toISOString())
+          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at')
         ]);
         const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allProfilesRes].filter(r=>r.error);
         if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));
