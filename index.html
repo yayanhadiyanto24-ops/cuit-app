@@ -2080,6 +2080,7 @@ poolStatus=feePaid>0
     let usedPaidCoins = 0;
 
     let activeVideoSlot = null;
+    let activeVideoExtraMode = false;
     let videoTimerInterval = null;
 
     let currentChampKoinData = { name: 'Belum Ada', coins: 0 };
@@ -3000,52 +3001,31 @@ poolStatus=feePaid>0
         }
 
         // --- 9. KALKULASI RAJA NONTON ---
-        if (weeklyReelsClaims && weeklyReelsClaims.length > 0) {
-          const nontonCounts = {};
+        // Gunakan peringkat dari Supabase agar klaim berhadiah dihitung lebih dulu,
+        // lalu tontonan tambahan hanya menjadi pemecah seri.
+        try {
+          const { data: nontonRanking, error: nontonRankingError } =
+            await supabaseClient.rpc('cuit_get_weekly_nonton_ranking');
 
-          weeklyReelsClaims.forEach(r => {
-            const key = r.user_id || (r.user_email ? r.user_email.toLowerCase() : null);
+          if (nontonRankingError) throw nontonRankingError;
 
-            if (key) {
-              nontonCounts[key] = (nontonCounts[key] || 0) + 1;
-            }
-          });
-
-          const sortedNonton = Object.keys(nontonCounts).sort(
-            (a, b) => nontonCounts[b] - nontonCounts[a]
-          );
-
-          let topNontonName = null;
-          let topNontonScore = 0;
-
-          for (const key of sortedNonton) {
-            const prof = (profilesData || []).find(p =>
-              p.id === key ||
-              (p.email && p.email.toLowerCase() === String(key).toLowerCase())
-            );
-
-            if (prof) {
-              topNontonName =
-                prof.username ||
-                (prof.email ? prof.email.split('@')[0] : 'Pengguna');
-
-              topNontonScore = nontonCounts[key];
-              break;
-            }
-          }
-
-          if (topNontonName) {
-            document.getElementById('champNontonName').innerText = topNontonName;
+          const topNonton = Array.isArray(nontonRanking) ? nontonRanking[0] : null;
+          if (topNonton && topNonton.nama_anggota) {
+            document.getElementById('champNontonName').innerText = topNonton.nama_anggota;
+            const claimsScore = Number(topNonton.klaim_berhadiah || 0);
+            const extraScore = Number(topNonton.tontonan_tambahan || 0);
             document.getElementById('champNontonScore').innerText =
-              `${topNontonScore} Video`;
+              `${claimsScore} klaim · +${extraScore}`;
           } else {
             document.getElementById('champNontonName').innerText = 'Belum Ada';
-            document.getElementById('champNontonScore').innerText = '0 Video';
+            document.getElementById('champNontonScore').innerText = '0 klaim · +0';
           }
-        } else {
-          document.getElementById('champNontonName').innerText = 'Belum Ada';
-          document.getElementById('champNontonScore').innerText = '0 Video';
+        } catch (nontonRankingError) {
+          console.error('Peringkat Raja Nonton dari Supabase gagal dimuat:', nontonRankingError);
+          document.getElementById('champNontonName').innerText = 'Data belum tersedia';
+          document.getElementById('champNontonScore').innerText = 'Periksa Supabase';
         }
+
 
         // --- 10. KALKULASI RAJA LIKE ---
         if (weeklyLikes && weeklyLikes.length > 0) {
@@ -4447,41 +4427,75 @@ poolStatus=feePaid>0
       document.getElementById('reelsModal').style.display = 'flex';
       container.innerHTML = '<p style="text-align:center; font-size:11px;">Memuat 10 misi video...</p>';
 
-      if (!currentUser) { container.innerHTML = '<p style="text-align:center;padding:12px;">Silakan masuk untuk menonton dan mengklaim koin.</p>'; return; }
-      const { data: missions, error: missionError } = await supabaseClient.from('reels_missions').select('*').order('id', { ascending: true });
-      if (missionError) { container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Daftar video gagal dimuat. Silakan coba lagi.</p>'; return; }
-      const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+      if (!currentUser) {
+        container.innerHTML = '<p style="text-align:center;padding:12px;">Silakan masuk untuk menonton dan mengklaim koin.</p>';
+        return;
+      }
+
+      const { data: missions, error: missionError } = await supabaseClient
+        .from('reels_missions').select('*').order('id', { ascending: true });
+      if (missionError) {
+        console.error('Gagal memuat misi video:', missionError);
+        container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Daftar video gagal dimuat. Silakan coba lagi.</p>';
+        return;
+      }
+
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
       const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
-      const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime()+86400000).toISOString();
-      const { data: claims, error: claimsError } = await supabaseClient.from('reels_claims').select('slot_key,created_at').eq('user_id', currentUser.id).gte('created_at',dayStart).lt('created_at',nextDay);
-      if (claimsError) { container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Status klaim belum bisa diverifikasi. Video dikunci sementara agar koin tidak terduplikasi.</p>'; return; }
+      const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime() + 86400000).toISOString();
+      const { data: claims, error: claimsError } = await supabaseClient
+        .from('reels_claims')
+        .select('slot_key,created_at')
+        .eq('user_id', currentUser.id)
+        .gte('created_at', dayStart)
+        .lt('created_at', nextDay);
+
+      if (claimsError) {
+        console.error('Gagal memverifikasi klaim video:', claimsError);
+        container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Status klaim belum bisa diverifikasi. Video dikunci sementara agar koin tidak terduplikasi.</p>';
+        return;
+      }
+
       const claimed = new Set((claims || []).map(x => x.slot_key));
+      const claimsComplete = (claims || []).length >= 10;
       const links = {};
       (missions || []).forEach(m => { links[`v${m.id}`] = m.facebook_url || ''; });
+
       let html = '';
       for (let i = 1; i <= 10; i++) {
         const slotKey = `v${i}`;
         const url = links[slotKey] || '';
-        const isValid = url && url.trim().length > 5 && url !== 'null';
+        const isValid = typeof url === 'string' && url.trim().length > 5 && url !== 'null';
         const isClaimed = claimed.has(slotKey);
-        const canPlay = isValid && !isClaimed && claimed.size < 10;
-        const buttonText = isClaimed ? '🔒 Sudah diklaim' : (!isValid ? 'Belum Ada Video' : (claimed.size >= 10 ? '🔒 Batas harian tercapai' : 'Tonton & Klaim +10 🪙'));
-        const safeUrl = String(url).replace(/&/g,'&amp;').replace(/'/g,'\\\'').replace(/"/g,'&quot;');
+        const canPlay = isValid && (claimsComplete || !isClaimed);
+        const buttonText = !isValid
+          ? 'Belum Ada Video'
+          : (claimsComplete
+              ? '▶ Tonton tambahan · tanpa koin'
+              : (isClaimed ? '🔒 Sudah diklaim' : 'Tonton & Klaim +10 🪙'));
+        const safeUrl = String(url).replace(/&/g, '&amp;').replace(/'/g, '\\\'').replace(/"/g, '&quot;');
         html += `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed?'#b8d9c2':'#e0e0e0'};border-radius:12px;background:${isClaimed?'#eef8f0':'#f9f9f9'};">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed ? '#b8d9c2' : '#e0e0e0'};border-radius:12px;background:${isClaimed ? '#eef8f0' : '#f9f9f9'};">
             <span style="font-weight:800;font-size:12px;color:#333;">🎬 Video ${i}</span>
-            <button ${canPlay ? `onclick="playEmbeddedVideo('${safeUrl}', '${slotKey}')"` : 'disabled'} style="background:${canPlay?'#1877f2':'#aaa'};color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:10.5px;font-weight:800;cursor:${canPlay?'pointer':'not-allowed'};">${buttonText}</button>
+            <button ${canPlay ? `onclick="playEmbeddedVideo('${safeUrl}', '${slotKey}', ${claimsComplete})"` : 'disabled'} style="background:${canPlay ? (claimsComplete ? '#0f766e' : '#1877f2') : '#aaa'};color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:10.5px;font-weight:800;cursor:${canPlay ? 'pointer' : 'not-allowed'};">${buttonText}</button>
           </div>`;
+      }
+
+      if (claimsComplete) {
+        html = '<p style="font-size:11px;color:#0f766e;margin:0 0 8px;">🎉 Batas 10 klaim berhadiah hari ini tercapai. Tontonan tambahan dicatat untuk pemecah seri Raja Nonton, tanpa tambahan koin.</p>' + html;
+      } else {
+        html = `<p style="font-size:11px;color:#555;margin:0 0 8px;">Klaim berhadiah hari ini: ${(claims || []).length}/10. Setiap video yang memenuhi misi memberi 10 koin gratis.</p>` + html;
       }
       container.innerHTML = html;
     }
 
-    function playEmbeddedVideo(targetUrl, slot) {
+    function playEmbeddedVideo(targetUrl, slot, extraMode = false) {
       if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
       }
 
       activeVideoSlot = slot;
+      activeVideoExtraMode = extraMode === true;
 
       const reelsModal = document.getElementById('reelsModal');
       if (reelsModal) reelsModal.style.display = 'none';
@@ -4549,7 +4563,9 @@ poolStatus=feePaid>0
             btnClose.style.opacity = '1';
             btnClose.style.cursor = 'pointer';
             btnClose.style.background = '#2ecc71';
-            btnClose.innerText = '✕ Tutup & Klaim +10 🪙';
+            btnClose.innerText = activeVideoExtraMode
+              ? '✕ Tutup & Catat Tontonan'
+              : '✕ Tutup & Klaim +10 🪙';
           }
           document.getElementById('videoTimerStatusText').innerText = '🎉 Misi Selesai!';
         }
@@ -4570,37 +4586,83 @@ poolStatus=feePaid>0
 
     async function claimVideoRewardAndClose() {
       const btnClose = document.getElementById('btnCloseVideo');
-      if (btnClose.disabled) return;
+      if (!btnClose || btnClose.disabled) return;
 
-      if (!currentUser) { alert('Silakan masuk terlebih dahulu.'); return; }
+      if (!currentUser) {
+        alert('Silakan masuk terlebih dahulu.');
+        return;
+      }
+
       const slot = activeVideoSlot || 'v1';
-      if (!/^v([1-9]|10)$/.test(slot)) { alert('Slot video tidak valid.'); return; }
+      if (!/^v([1-9]|10)$/.test(slot)) {
+        alert('Slot video tidak valid.');
+        return;
+      }
+
       btnClose.disabled = true;
+      let extraViewRecorded = false;
+
       try {
-        const today = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
+        const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
         const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
-        const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime()+86400000).toISOString();
-        const { data: existing, error: checkError } = await supabaseClient.from('reels_claims').select('slot_key').eq('user_id',currentUser.id).gte('created_at',dayStart).lt('created_at',nextDay);
+        const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime() + 86400000).toISOString();
+
+        const { data: existing, error: checkError } = await supabaseClient
+          .from('reels_claims')
+          .select('slot_key,created_at')
+          .eq('user_id', currentUser.id)
+          .gte('created_at', dayStart)
+          .lt('created_at', nextDay);
+
         if (checkError) throw checkError;
-        if ((existing || []).some(x => x.slot_key === slot)) throw new Error('Slot video ini sudah diklaim hari ini.');
-        if ((existing || []).length >= 10) throw new Error('Batas 10 klaim video hari ini sudah tercapai.');
-        const { error: insertError } = await supabaseClient.from('reels_claims').insert([{user_id:currentUser.id,user_email:currentUser.email,slot_key:slot}]);
-        if (insertError) throw insertError;
-        freeCoins += 10;
-        await updateCoinUI(true);
+
+        // Keputusan berdasarkan data Supabase terbaru, bukan hanya mode tombol di layar.
+        if ((existing || []).length >= 10) {
+          const { data: recorded, error: extraError } = await supabaseClient.rpc(
+            'cuit_record_extra_reel_view',
+            { p_slot_key: slot }
+          );
+          if (extraError) throw extraError;
+          if (recorded !== true) {
+            throw new Error('Tontonan tambahan belum dapat dicatat. Slot video yang sama hanya bisa dicatat kembali setelah jeda 10 menit.');
+          }
+          extraViewRecorded = true;
+        } else {
+          if ((existing || []).some(x => x.slot_key === slot)) {
+            throw new Error('Slot video ini sudah diklaim hari ini.');
+          }
+
+          const { error: insertError } = await supabaseClient
+            .from('reels_claims')
+            .insert([{ user_id: currentUser.id, user_email: currentUser.email, slot_key: slot }]);
+          if (insertError) throw insertError;
+
+          freeCoins += 10;
+          await updateCoinUI(true);
+        }
       } catch (err) {
-        console.error('Klaim video ditolak:',err);
-        alert(err?.message || 'Klaim gagal dicatat. Koin tidak ditambahkan.');
+        console.error('Pencatatan tontonan/klaim video gagal:', err);
+        alert(err?.message || 'Pencatatan gagal. Koin tidak ditambahkan.');
         btnClose.disabled = false;
         return;
       }
+
       document.getElementById('videoPlayerModal').style.display = 'none';
       document.getElementById('videoFrameContainer').innerHTML = '';
-      alert('🎉 Selamat! Kamu mendapatkan +10 Koin Gratis. Slot ini terkunci sampai besok.');
-
       videoSecondsLeft = 10;
+      activeVideoExtraMode = false;
+
+      if (extraViewRecorded) {
+        alert('Tontonan tambahan berhasil dicatat untuk pemecah seri Raja Nonton. Tidak ada koin tambahan.');
+      } else {
+        alert('🎉 Selamat! Kamu mendapatkan +10 Koin Gratis. Slot ini terkunci sampai besok.');
+      }
+
       openReelsModal();
-      if(typeof openTodayProgress==='function') { const pm=document.getElementById('todayProgressModal'); if(pm && pm.style.display==='flex') await openTodayProgress(); }
+      if (typeof openTodayProgress === 'function') {
+        const pm = document.getElementById('todayProgressModal');
+        if (pm && pm.style.display === 'flex') await openTodayProgress();
+      }
       loadPosts();
     }
 
