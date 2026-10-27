@@ -2714,7 +2714,27 @@ poolStatus=feePaid>0
           w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
           w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
           w=winnerFromCounts(countBy(follows,f=>f.following_email||f.following_id)); if(w){const p=(profiles||[]).find(p=>p.email===w.key||p.id===w.key);results.jaringan={name:p?.username||(p?.email? p.email.split('@')[0]:String(w.key).split('@')[0]),scoreLabel:`${w.score} pengikut`,note:'pengikut baru tercatat'};}
-          w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0)); if(w){const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);results.koin={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'koin gift diterima'};}
+          
+w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0));
+if(w){
+  const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);
+  const recipientKey=String(w.key).trim().toLowerCase();
+  const recipientProfile=(allProfilesRes.data||[]).find(p=>
+    String(p.id||'').trim().toLowerCase()===recipientKey ||
+    String(p.email||'').trim().toLowerCase()===recipientKey ||
+    String(p.username||'').trim().toLowerCase()===recipientKey
+  );
+  const recipientName=recipientProfile?.username ||
+    (recipientProfile?.email ? recipientProfile.email.split('@')[0] : '') ||
+    row?.recipient_name ||
+    (row?.recipient_email ? String(row.recipient_email).split('@')[0] : '') ||
+    'Member CUIT';
+  results.koin={
+    name:recipientName,
+    scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,
+    note:'koin gift diterima'
+  };
+}
           w=winnerFromCounts(countBy(newProfiles,p=>p.sponsor)); if(w){const p=(profiles||[]).find(p=>p.username===w.key||p.email===w.key);results.sponsor={name:p?.username||(p?.email?p.email.split('@')[0]:String(w.key)),scoreLabel:`${w.score} member`,note:'member terdaftar melalui sponsor'};}
           w=winnerFromCounts(countBy(reels,r=>r.user_id||r.user_email)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.nonton={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} klaim`,note:'klaim misi nonton'};}
           w=winnerFromCounts(countBy(likes,l=>l.user_id||l.user_email||l.guest_token)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.like={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} like`,note:'like diberikan'};}
