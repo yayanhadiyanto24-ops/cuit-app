@@ -2843,12 +2843,38 @@ if(w){
         }
 
         // --- 2. RAJA GAME ---
-        // Belum ada tabel transaksi game yang terverifikasi pada file ini.
-        // Jangan memakai data dari fitur yang sudah dihapus sebagai pengganti pemenang game.
-        const gameNameEl = document.getElementById('champGameName');
-        const gameScoreEl = document.getElementById('champGameScore');
-        if (gameNameEl) gameNameEl.innerText = 'Data game belum terhubung';
-        if (gameScoreEl) gameScoreEl.innerText = 'Menunggu audit tabel game';
+const gameNameEl = document.getElementById('champGameName');
+const gameScoreEl = document.getElementById('champGameScore');
+
+try {
+  const { data: gameRanking, error: gameRankingError } =
+    await supabaseClient.rpc('cuit_get_king_game_ranking', {
+      p_period: 'weekly'
+    });
+
+  if (gameRankingError) throw gameRankingError;
+
+  if (gameRanking && gameRanking.length > 0) {
+    const winner = gameRanking[0];
+
+    if (gameNameEl) {
+      gameNameEl.innerText = winner.username || 'Anggota CUIT';
+    }
+
+    if (gameScoreEl) {
+      gameScoreEl.innerText =
+        `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`;
+    }
+  } else {
+    if (gameNameEl) gameNameEl.innerText = 'Belum Ada';
+    if (gameScoreEl) gameScoreEl.innerText = '0 permainan';
+  }
+} catch (error) {
+  console.error('Gagal memuat Raja Game:', error);
+
+  if (gameNameEl) gameNameEl.innerText = 'Data belum tersedia';
+  if (gameScoreEl) gameScoreEl.innerText = 'Coba muat ulang';
+}
 
         // --- 3. RAJA CURHAT ---
         if (data && data.length > 0) {
