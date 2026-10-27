@@ -1989,7 +1989,7 @@ poolStatus=feePaid>0
         rows('gift_transactions','id,created_at,sender_name,coins_amount,recipient_email',q=>q.gte('created_at',start).lt('created_at',end))
       ]);
       values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
-      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id||x.author_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
+      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
       values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
       values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
       values.watch=reels===null?'Belum terhubung':reels.length;
