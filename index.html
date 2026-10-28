@@ -3366,131 +3366,123 @@ promotedCarousel.innerHTML = cardsHTML;
       document.getElementById('confirmPromotionButton').disabled = !valid || cost > Number(paidCoins || 0) || promotionSubmitting;
     }
 
-    async function confirmPostPromotion() {
-      if (promotionSubmitting) return;
-      const inputId = selectedPromotionType === 'istimewa' ? 'promotionIstimewaHours' : 'promotionBiasaHours';
-      const raw = document.getElementById(inputId).value;
-      const hours = Number(raw);
-      const rate = selectedPromotionType === 'istimewa' ? 5 : 1;
-      const cost = hours * rate;
-      if (!pendingPromotionPostId) return;
-      if (!Number.isInteger(hours) || hours < 1) {
-        document.getElementById('promotionFeedback').textContent = 'Durasi harus berupa bilangan bulat minimal 1 jam.';
-        return;
+    
+async function confirmPostPromotion() {
+  if (promotionSubmitting) return;
+
+  const inputId = selectedPromotionType === 'istimewa'
+    ? 'promotionIstimewaHours'
+    : 'promotionBiasaHours';
+
+  const hours = Number(document.getElementById(inputId).value);
+  const cost = hours * (selectedPromotionType === 'istimewa' ? 5 : 1);
+
+  if (!pendingPromotionPostId) return;
+
+  if (!Number.isInteger(hours) || hours < 1 || hours > 720) {
+    document.getElementById('promotionFeedback').textContent =
+      'Durasi harus antara 1 sampai 720 jam.';
+    return;
+  }
+
+  if (Number(paidCoins || 0) < cost) {
+    document.getElementById('promotionFeedback').textContent =
+      `Saldo tidak cukup. Dibutuhkan ${cost} Koin Berbayar.`;
+    return;
+  }
+
+  const post = allPostsCache.find(
+    p => String(p.id) === String(pendingPromotionPostId)
+  );
+
+  if (!post) {
+    document.getElementById('promotionFeedback').textContent =
+      'Curhatan tidak ditemukan. Muat ulang beranda.';
+    return;
+  }
+
+  const oldType =
+    String(post.promotion_type || 'biasa').toLowerCase() === 'istimewa'
+      ? 'istimewa'
+      : 'biasa';
+
+  const promoMasihAktif =
+    post.is_promoted === true &&
+    post.promoted_until &&
+    new Date(post.promoted_until).getTime() > Date.now();
+
+  if (promoMasihAktif && oldType !== selectedPromotionType) {
+    const namaLama = oldType === 'istimewa'
+      ? 'Promosi Istimewa'
+      : 'Curhatan Terbaik / Promosi Biasa';
+
+    const namaBaru = selectedPromotionType === 'istimewa'
+      ? 'Promosi Istimewa'
+      : 'Curhatan Terbaik / Promosi Biasa';
+
+    if (!window.confirm(
+      'PERINGATAN PERUBAHAN PROMOSI\n\n' +
+      'Curhatan masih aktif di ' + namaLama + '.\n' +
+      'Jika dilanjutkan, curhatan berpindah ke ' + namaBaru +
+      ' dan tidak tampil di kategori sebelumnya.\n\n' +
+      'Lanjutkan?'
+    )) return;
+  }
+
+  promotionSubmitting = true;
+  const confirmBtn = document.getElementById('confirmPromotionButton');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Memproses…';
+  document.getElementById('promotionFeedback').textContent =
+    'Memproses promosi…';
+
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      'cuit_promote_post_transaction',
+      {
+        p_post_id: Number(pendingPromotionPostId),
+        p_promotion_type: selectedPromotionType,
+        p_hours: hours
       }
-      if (Number(paidCoins || 0) < cost) {
-        document.getElementById('promotionFeedback').textContent = `Saldo tidak cukup. Dibutuhkan ${cost} Koin Berbayar.`;
-        return;
-      }
-      const post = allPostsCache.find(p => String(p.id) === String(pendingPromotionPostId));
-      
-      if (!post) {
-        document.getElementById('promotionFeedback').textContent = 'Curhatan tidak ditemukan. Tutup lalu muat ulang beranda.';
-        return;
-      }
+    );
 
-      // Peringatan jika curhatan masih aktif di kategori promosi lain
-      const oldType = String(post.promotion_type || 'biasa').toLowerCase() === 'istimewa'
-        ? 'istimewa'
-        : 'biasa';
+    if (error) throw error;
 
-      const promoMasihAktif =
-        post.is_promoted === true &&
-        post.promoted_until &&
-        new Date(post.promoted_until).getTime() > Date.now();
-
-      if (promoMasihAktif && oldType !== selectedPromotionType) {
-        const namaLama = oldType === 'istimewa'
-          ? 'Promosi Istimewa'
-          : 'Curhatan Terbaik / Promosi Biasa';
-
-        const namaBaru = selectedPromotionType === 'istimewa'
-          ? 'Promosi Istimewa'
-          : 'Curhatan Terbaik / Promosi Biasa';
-
-        const lanjut = window.confirm(
-          '⚠️ PERINGATAN PERUBAHAN PROMOSI\n\n' +
-          'Curhatan ini masih aktif di ' + namaLama + '.\n\n' +
-          'Jika dilanjutkan ke ' + namaBaru +
-          ', curhatan akan berpindah kategori dan tidak lagi tampil di kategori sebelumnya.\n\n' +
-          'Curhatan tidak akan ditampilkan di dua jendela sekaligus.\n\n' +
-          'Apakah Anda ingin melanjutkan?'
-        );
-
-        if (!lanjut) return;
-      }
-
-      promotionSubmitting = true;
-
-      const confirmBtn = document.getElementById('confirmPromotionButton');
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Memproses…';
-      document.getElementById('promotionFeedback').textContent = 'Menyimpan promosi…';
-      
-      try {
-        const { data, error } = await supabaseClient.rpc(
-          'cuit_promote_post_transaction',
-          {
-            p_post_id: Number(pendingPromotionPostId),
-            p_promotion_type: selectedPromotionType,
-            p_hours: hours
-          }
-        );
-
-        if (error) {
-          throw error;
-        }
-
-        if (!data || data.ok !== true) {
-          document.getElementById('promotionFeedback').textContent =
-            data?.message || 'Promosi gagal diproses.';
-          promotionSubmitting = false;
-          confirmBtn.disabled = false;
-          confirmBtn.textContent = 'Coba Lagi';
-          return;
-        }
-
-        const biayaAktual = Number(data.cost ?? cost);
-
-        paidCoins = Math.max(0, Number(paidCoins || 0) - biayaAktual);
-        usedPaidCoins = Number(usedPaidCoins || 0) + biayaAktual;
-
-        document.getElementById('promotionFeedback').textContent =
-          `Promosi berhasil! ${biayaAktual} Koin Berbayar telah digunakan.`;
-
-        alert(
-          `Promosi ${selectedPromotionType === 'istimewa' ? 'Istimewa' : 'Biasa'} berhasil diaktifkan selama ${hours} jam.\n` +
-          `Koin Berbayar digunakan: ${biayaAktual}.`
-        );
-
-        document.getElementById('promotionChoiceModal').style.display = 'none';
-        pendingPromotionPostId = null;
-        promotionSubmitting = false;
-
-        await loadPosts();
-      } catch (err) {
-        document.getElementById('promotionFeedback').textContent =
-          'Promosi gagal diproses. Periksa saldo dan status promosi. ' +
-          (err?.message || err);
-
-        promotionSubmitting = false;
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Coba Lagi';
-      }
-
-            } catch (err) {
-        document.getElementById('promotionFeedback').textContent =
-          'Promosi gagal diproses. Periksa saldo dan status promosi. ' +
-          (err?.message || err);
-
-        promotionSubmitting = false;
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Coba Lagi';
-      }
+    if (!data || data.ok !== true) {
+      document.getElementById('promotionFeedback').textContent =
+        data?.message || 'Promosi gagal diproses.';
+      return;
     }
 
-    function renderCardHTML(p) {
-    function renderCardHTML(p) {
+    const biayaAktual = Number(data.cost ?? cost);
+    paidCoins = Math.max(0, Number(paidCoins || 0) - biayaAktual);
+    usedPaidCoins = Number(usedPaidCoins || 0) + biayaAktual;
+
+    document.getElementById('promotionFeedback').textContent =
+      `Promosi berhasil! ${biayaAktual} Koin Berbayar digunakan.`;
+
+    alert(
+      `Promosi berhasil selama ${hours} jam.\n` +
+      `Koin Berbayar digunakan: ${biayaAktual}.`
+    );
+
+    document.getElementById('promotionChoiceModal').style.display = 'none';
+    pendingPromotionPostId = null;
+    await loadPosts();
+
+  } catch (err) {
+    document.getElementById('promotionFeedback').textContent =
+      'Promosi gagal diproses: ' + (err?.message || err);
+
+  } finally {
+    promotionSubmitting = false;
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Konfirmasi Promosi';
+  }
+}
+
+function renderCardHTML(p) {
+
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
   let feelingTag = p.feeling || 'Bahagia';
   const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
