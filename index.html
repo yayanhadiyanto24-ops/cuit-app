@@ -3691,8 +3691,8 @@ try {
       const comm = input.value.trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
-      const requiredCoins = Math.ceil(comm.length / 100);
-const success = await deductCoin(requiredCoins);
+      const success = await deductCoin(1);
+      if (!success) {
         return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
       }
 
