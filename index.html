@@ -1759,7 +1759,6 @@ poolStatus=feePaid>0
         
 <textarea id="commentInputText" rows="2" placeholder="Tulis komentar kamu..." style="margin-bottom:6px;" oninput="updateCommentCharCount(this)"></textarea>
 <div id="commentCharCount" style="font-size:12px;color:var(--text-sub);margin-bottom:8px;">0 karakter · Biaya: 1 koin</div>
-<div id="commentCharCount" style="font-size:12px;color:var(--text-sub);margin-bottom:8px;">0 karakter · Biaya: 1 koin</div>
 
         <button class="btn-primary" style="width: 100%;" onclick="submitCommentAction()">Kirim Komentar</button>
       </div>
@@ -4098,19 +4097,7 @@ async function toggleLike(postId) {
       `).join('');
     }
 
-
-
-
-
-
-
     let processedMsgIds = new Set();
-
-
-
-
-
-
 
     function filterByTag(tagName) {
       document.getElementById('searchInput').value = tagName;
