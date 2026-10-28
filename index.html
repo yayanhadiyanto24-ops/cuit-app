@@ -4995,62 +4995,130 @@ function updateCommentCharCount(input) {
     display.textContent = `${count} karakter · Biaya: ${fee} koin`;
   }
 }
-    async function submitNewPost() {
-      const content = document.getElementById('postContent').value.trim();
-      const feeling = document.getElementById('postFeeling').value;
-      const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
-      const postStyle = cuitPostStyleRead();
-      const styleLevel = cuitCurrentStyleLevel();
-      if ((postStyle.border !== 'solid' && styleLevel < 3) || (postStyle.background !== '#ffffff' && styleLevel < 4) || (postStyle.bold && styleLevel < 5) || (postStyle.italic && styleLevel < 6) || (postStyle.decorBorder !== 'none' && styleLevel < 7) || (postStyle.decorBackground !== 'none' && styleLevel < 8) || (postStyle.textColor !== '#4a2028' && styleLevel < 9) || (postStyle.fontFamily !== 'system-ui, sans-serif' && styleLevel < 10)) return alert('Ada fasilitas tampilan yang belum terbuka pada levelmu. Pilih kembali fasilitas yang tersedia.');
+    
+async function submitNewPost() {
+  const content = document.getElementById('postContent').value.trim();
+  const feeling = document.getElementById('postFeeling').value;
+  const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
+  const postStyle = cuitPostStyleRead();
+  const styleLevel = cuitCurrentStyleLevel();
 
-      if (!content) return alert('Isi curhatan tidak boleh kosong!');
+  if (
+    (postStyle.border !== 'solid' && styleLevel < 3) ||
+    (postStyle.background !== '#ffffff' && styleLevel < 4) ||
+    (postStyle.bold && styleLevel < 5) ||
+    (postStyle.italic && styleLevel < 6) ||
+    (postStyle.decorBorder !== 'none' && styleLevel < 7) ||
+    (postStyle.decorBackground !== 'none' && styleLevel < 8) ||
+    (postStyle.textColor !== '#4a2028' && styleLevel < 9) ||
+    (postStyle.fontFamily !== 'system-ui, sans-serif' && styleLevel < 10)
+  ) {
+    return alert('Ada fasilitas tampilan yang belum terbuka pada levelmu.');
+  }
 
-      const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
+  if (!content) return alert('Isi curhatan tidak boleh kosong!');
+  if (rewardCoins < 0 || !Number.isSafeInteger(rewardCoins)) {
+    return alert('Jumlah Koin Beruntung tidak valid.');
+  }
 
-      const success = await deductCoin(requiredCoins);
-      if (!success) {
-        return alert(`Saldo Koin tidak cukup! Kamu butuh ${requiredCoins} Koin.`);
+  const myName = customDisplayName || 'Penilik Bageur';
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+
+  // AKUN TERDAFTAR: transaksi koin dilakukan di database.
+  if (currentUser && currentUser.id) {
+    const { data, error } = await supabaseClient.rpc(
+      'cuit_submit_post_transaction',
+      {
+        p_content: content,
+        p_feeling: feeling,
+        p_reward_coins: rewardCoins,
+        p_username: myName
       }
+    );
 
-      if (rewardCoins > 0) {
-        if (paidCoins < rewardCoins) {
-          return alert(`Saldo Bank Koin kamu tidak cukup! Memasang Koin Beruntung butuh ${rewardCoins} Koin Berbayar.`);
-        }
-        paidCoins -= rewardCoins;
-        usedPaidCoins += rewardCoins;
-        updateCoinUI(true);
-      }
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'Penilik Bageur';
-
-      const { data: insertedPosts, error } = await supabaseClient.from('curhat').insert([
-        {
-          content: content,
-          feeling: feeling,
-          user_id: currentUser ? currentUser.id : 'demo_id',
-          user_email: myEmail,
-          username: myName,
-          reward_coins: rewardCoins,
-          remaining_reward_coins: rewardCoins
-        }
-      ]).select('id');
-
-      if (!error) {
-        if (insertedPosts && insertedPosts[0] && insertedPosts[0].id) cuitSavePostStyle(insertedPosts[0].id, postStyle);
-        document.getElementById('postContent').value = '';
-        document.getElementById('postRewardCoins').value = '';
-        cuitResetPostStyle();
-        alert(rewardCoins > 0 
-          ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` 
-          : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin)`);
-        switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
-        loadPosts();
-      } else {
-        alert('Gagal menerbitkan: ' + error.message);
-      }
+    if (error) {
+      return alert('Posting gagal diproses: ' + error.message);
     }
+
+    if (!data || data.ok !== true) {
+      return alert(data?.message || 'Posting gagal. Saldo tidak diubah.');
+    }
+
+    await updateCoinUI(false);
+
+    if (data.post_id) {
+      cuitSavePostStyle(data.post_id, postStyle);
+    }
+
+    document.getElementById('postContent').value = '';
+    document.getElementById('postRewardCoins').value = '';
+    if (typeof updateCharCount === 'function') {
+      updateCharCount(document.getElementById('postContent'));
+    }
+    cuitResetPostStyle();
+
+    alert(
+      rewardCoins > 0
+        ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!`
+        : `Curhatan berhasil diterbitkan! Biaya: ${data.fee} koin.`
+    );
+
+    switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+    loadPosts();
+    return;
+  }
+
+  // TAMU: jalur lama dipertahankan.
+  const requiredCoins =
+    Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
+
+  if (paidCoins < rewardCoins) {
+    return alert('Saldo Koin Berbayar tidak cukup untuk Koin Beruntung.');
+  }
+
+  const success = await deductCoin(requiredCoins);
+  if (!success) {
+    return alert(`Saldo Koin tidak cukup! Kamu butuh ${requiredCoins} Koin.`);
+  }
+
+  if (rewardCoins > 0) {
+    paidCoins -= rewardCoins;
+    usedPaidCoins += rewardCoins;
+    updateCoinUI(true);
+  }
+
+  const { data: insertedPosts, error } = await supabaseClient
+    .from('curhat')
+    .insert([{
+      content,
+      feeling,
+      user_id: 'demo_id',
+      user_email: guestId,
+      username: myName,
+      reward_coins: rewardCoins,
+      remaining_reward_coins: rewardCoins
+    }])
+    .select('id');
+
+  if (error) {
+    return alert('Gagal menerbitkan: ' + error.message);
+  }
+
+  if (insertedPosts?.[0]?.id) {
+    cuitSavePostStyle(insertedPosts[0].id, postStyle);
+  }
+
+  document.getElementById('postContent').value = '';
+  document.getElementById('postRewardCoins').value = '';
+  if (typeof updateCharCount === 'function') {
+    updateCharCount(document.getElementById('postContent'));
+  }
+  cuitResetPostStyle();
+
+  alert(`Curhatan berhasil diterbitkan! (-${requiredCoins} Koin)`);
+  switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
+  loadPosts();
+}
 
     window.alert = function(message) {
       return new Promise((resolve) => {
