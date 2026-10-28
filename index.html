@@ -1018,7 +1018,6 @@
     <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
       <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea> 
 <div id="charCount" style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">0 karakter · Biaya: 1 koin</div>
-      <div style="font-size: 10px; color: var(--text-sub); margin-bottom: 10px;" id="charCount">0 karakter (Biaya: 1 Koin)</div>
 
       <section id="postStyleEditor" class="post-style-editor" aria-label="Pengaturan tampilan curhatan">
         <div class="post-style-title">🎨 Tampilan Curhatan</div>
@@ -4967,6 +4966,16 @@ async function toggleLike(postId) {
         alert('Gagal mendaftar: ' + error.message);
       }
     }
+
+function updateCharCount(input) {
+  const count = input.value.length;
+  const fee = Math.max(1, Math.ceil(count / 100));
+  const display = document.getElementById('charCount');
+
+  if (display) {
+    display.textContent = `${count} karakter · Biaya: ${fee} koin`;
+  }
+}
 
     async function submitNewPost() {
       const content = document.getElementById('postContent').value.trim();
