@@ -5939,5 +5939,68 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<style>
+/* CUIT PREMIUM — PANEL PROMOSI */
+#promotionChoiceModal .modal-content {
+  background: linear-gradient(160deg, #ffffff 0%, #fffaf0 100%) !important;
+  border: 1px solid #d9b65b !important;
+  border-radius: 22px !important;
+  box-shadow: 0 18px 55px rgba(90, 15, 25, .28),
+              0 0 0 3px rgba(217, 182, 91, .15) !important;
+  padding: 18px !important;
+}
+
+#promotionChoiceModal h3 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: #a51026 !important;
+}
+
+#promotionChoiceModal h3::before {
+  content: "";
+  display: inline-block;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  background: url("assets/cuit-app-icon.svg") center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(180, 130, 20, .25));
+}
+
+#promotionChoiceModal .promotion-option {
+  box-shadow: 0 4px 12px rgba(90, 15, 25, .06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+#promotionChoiceModal #promotionOptionBiasa {
+  border-color: #dba0a8 !important;
+  border-radius: 16px !important;
+}
+
+#promotionChoiceModal #promotionOptionIstimewa {
+  border-color: #d8b454 !important;
+  border-radius: 16px !important;
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 84, .12);
+}
+
+#promotionChoiceModal #promotionTotalCost {
+  color: #a51026 !important;
+  font-weight: 900 !important;
+}
+
+#promotionChoiceModal #confirmPromotionButton {
+  background: linear-gradient(135deg, #e32636, #9f1025) !important;
+  box-shadow: 0 4px 10px rgba(159, 16, 37, .22);
+}
+
+#promotionChoiceModal button {
+  transition: filter .15s ease, transform .15s ease;
+}
+
+#promotionChoiceModal button:active {
+  transform: scale(.98);
+}
+</style>
+
 </body>
   </html>
