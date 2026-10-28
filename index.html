@@ -3567,70 +3567,114 @@ try {
         }).subscribe();
     }
 
-    async function toggleLike(postId) {
-      let guestToken = localStorage.getItem('cuit_guest_token');
-      if (!guestToken) {
-        guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
-        localStorage.setItem('cuit_guest_token', guestToken);
-      }
+    
+async function toggleLike(postId) {
+  let guestToken = localStorage.getItem('cuit_guest_token');
+  if (!guestToken) {
+    guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
+    localStorage.setItem('cuit_guest_token', guestToken);
+  }
 
-      const strPostId = String(postId);
-      const currentPost = allPostsCache.find(p => String(p.id) === String(strPostId));
-      if (!currentPost) return;
+  const strPostId = String(postId);
+  const currentPost = allPostsCache.find(
+    p => String(p.id) === strPostId
+  );
+  if (!currentPost) return;
 
-      const isAlreadyLiked = userLikedPostsSet.has(strPostId);
+  const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
-      if (isAlreadyLiked) {
-        userLikedPostsSet.delete(strPostId);
-        const newLikeCount = Math.max(0, (currentPost.likes_count || 0) - 1);
-        currentPost.likes_count = newLikeCount;
-        
-        renderFilteredFeed();
+  if (isAlreadyLiked) {
+    userLikedPostsSet.delete(strPostId);
+    currentPost.likes_count = Math.max(
+      0, (currentPost.likes_count || 0) - 1
+    );
+    renderFilteredFeed();
 
-        let delQuery = supabaseClient.from('post_likes').delete().eq('post_id', postId);
-        if (currentUser && currentUser.id) {
-          delQuery = delQuery.eq('user_id', currentUser.id);
-        } else {
-          delQuery = delQuery.eq('guest_token', guestToken);
-        }
-        
-        await Promise.all([
-          delQuery,
-          supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId)
-        ]);
+    let query = supabaseClient
+      .from('post_likes')
+      .delete()
+      .eq('post_id', postId);
 
-      } else {
-        const success = await deductCoin(1);
-        if (!success) {
-          return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis! Tonton video Misi Reels FB untuk isi koin.');
-        }
-
-        userLikedPostsSet.add(strPostId);
-        const newLikeCount = (currentPost.likes_count || 0) + 1;
-        currentPost.likes_count = newLikeCount;
-
-        renderFilteredFeed();
-
-        const payload = { 
-          post_id: postId,
-          user_id: (currentUser && currentUser.id) ? currentUser.id : null,
-          guest_token: (currentUser && currentUser.id) ? null : guestToken
-        };
-
-        const { error } = await supabaseClient.from('post_likes').insert([payload]);
-
-        if (error) {
-          userLikedPostsSet.delete(strPostId);
-          currentPost.likes_count = Math.max(0, newLikeCount - 1);
-          renderFilteredFeed();
-          alert("Gagal menyimpan Like: " + error.message);
-          return;
-        }
-
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
-      }
+    if (currentUser && currentUser.id) {
+      query = query.eq('user_id', currentUser.id);
+    } else {
+      query = query.eq('guest_token', guestToken);
     }
 
+    const { error } = await query;
+    if (error) {
+      alert('Gagal membatalkan Like: ' + error.message);
+      return;
+    }
+
+    await supabaseClient
+      .from('curhat')
+      .update({ likes_count: currentPost.likes_count })
+      .eq('id', postId);
+
+    return;
+  }
+
+  if (currentUser && currentUser.id) {
+    // Saldo pengguna login dipotong dan disimpan oleh Supabase.
+    const { data: result, error } = await supabaseClient.rpc(
+      'cuit_pay_like',
+      { p_post_id: Number(postId) }
+    );
+
+    if (error) {
+      alert('Like gagal: ' + error.message);
+      return;
+    }
+
+    if (!result || result.ok !== true) {
+      alert('Transaksi Like tidak berhasil.');
+      return;
+    }
+
+    freeCoins = Math.max(
+      0, freeCoins - Number(result.free_coins_used || 0)
+    );
+    paidCoins = Math.max(
+      0, paidCoins - Number(result.paid_coins_used || 0)
+    );
+    usedPaidCoins += Number(result.paid_coins_used || 0);
+    updateCoinUI(true);
+  } else {
+    // Tamu tetap memakai jalur tamu yang sudah tersedia.
+    const success = await deductCoin(1);
+    if (!success) {
+      alert('Saldo koin gratis tidak mencukupi.');
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('post_likes')
+      .insert([{
+        post_id: postId,
+        user_id: null,
+        guest_token: guestToken
+      }]);
+
+    if (error) {
+      alert('Gagal menyimpan Like: ' + error.message);
+      return;
+    }
+
+    currentPost.likes_count =
+      (currentPost.likes_count || 0) + 1;
+
+    await supabaseClient
+      .from('curhat')
+      .update({ likes_count: currentPost.likes_count })
+      .eq('id', postId);
+  }
+
+  userLikedPostsSet.add(strPostId);
+  currentPost.likes_count =
+    (currentPost.likes_count || 0) + 1;
+  renderFilteredFeed();
+}
 
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
