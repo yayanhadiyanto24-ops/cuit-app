@@ -1994,7 +1994,38 @@ poolStatus=feePaid>0
       values.watch=reels===null?'Belum terhubung':reels.length;
       values.game=games===null?'Belum terhubung':games.length;
       // Debit koin dan kredit permata perlu ledger transaksi yang otoritatif; jangan mengira-ngira dari gift log.
-      values.paidSpent='Belum terhubung'; values.gemsReceived='Belum terhubung';
+      
+values.paidSpent = 'Belum terhubung';
+
+try {
+  const { data: gemRows, error: gemError } = await supabaseClient
+    .from('cuit_post_gift_ledger')
+    .select('creator_id,sponsor_id,creator_gems,sponsor_coins,surprise_gems,created_at')
+    .gte('created_at', start)
+    .lt('created_at', end);
+
+  if (gemError) {
+    values.gemsReceived = 'Belum terhubung';
+  } else {
+    values.gemsReceived = (gemRows || []).reduce((sum, row) => {
+      let gems = 0;
+
+      if (row.creator_id === currentUser.id) {
+        gems += Number(row.creator_gems || 0);
+        gems += Number(row.surprise_gems || 0);
+      }
+
+      if (row.sponsor_id === currentUser.id) {
+        gems += Number(row.sponsor_coins || 0);
+      }
+
+      return sum + gems;
+    }, 0);
+  }
+} catch (e) {
+  values.gemsReceived = 'Belum terhubung';
+}
+
       grid.innerHTML=labels.map(([key,label,icon])=>`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:#fff8fa;border:1px solid #f0dce2;border-radius:12px;min-width:0;"><span style="font-size:19px;">${icon}</span><div style="min-width:0;flex:1;"><div style="font-size:10px;color:#6b7280;line-height:1.25;">${label}</div><div style="font-size:13px;font-weight:900;color:#8b1e3f;overflow-wrap:anywhere;">${values[key]}</div></div></div>`).join('');
     }
 
