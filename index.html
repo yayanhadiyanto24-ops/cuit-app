@@ -2109,27 +2109,19 @@ poolStatus=feePaid>0
       "🔥 Semangat bareng-bareng!"
     ];
 
-    
-async function deductCoin(amount = 1) {
-  amount = Math.max(1, Math.ceil(Number(amount) || 1));
-
-  if ((freeCoins + paidCoins) < amount) {
-    return false;
-  }
-
-  const freeUsed = Math.min(freeCoins, amount);
-  const paidUsed = amount - freeUsed;
-
-  freeCoins -= freeUsed;
-  paidCoins -= paidUsed;
-  usedPaidCoins += paidUsed;
-
-  localStorage.setItem('cuit_free_coins', String(freeCoins));
-  localStorage.setItem('cuit_paid_coins', String(paidCoins));
-
-  await updateCoinUI(true);
-  return true;
-}
+    async function deductCoin(amount = 1) {
+      if (freeCoins >= amount) {
+        freeCoins -= amount;
+      } else {
+        const remainingToDeduct = amount - freeCoins;
+        if (paidCoins >= remainingToDeduct) {
+          freeCoins = 0;
+          paidCoins -= remainingToDeduct;
+          usedPaidCoins += remainingToDeduct;
+        } else {
+          return false;
+        }
+      }
 
       localStorage.setItem('cuit_free_coins', freeCoins);
       localStorage.setItem('cuit_paid_coins', paidCoins);
