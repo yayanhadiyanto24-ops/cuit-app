@@ -596,22 +596,7 @@
     </div>
   </div>
 </div>
-<script>
-(function () {
-  setTimeout(function () {
-    var banner = document.getElementById('cuitMainBanner');
-    if (banner) {
-      banner.style.setProperty('height', '0', 'important');
-      banner.style.setProperty('min-height', '0', 'important');
-      banner.style.setProperty('max-height', '0', 'important');
-      banner.style.setProperty('overflow', 'hidden', 'important');
-      banner.style.setProperty('opacity', '0', 'important');
-      banner.style.setProperty('visibility', 'hidden', 'important');
-      banner.style.setProperty('pointer-events', 'none', 'important');
-    }
-  }, 5000);
-})();
-</script>
+
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
@@ -3706,12 +3691,10 @@ try {
       const comm = input.value.trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
-      const requiredCoins = Math.max(1, Math.ceil(comm.length / 100));
+      const requiredCoins = Math.ceil(comm.length / 100);
 const success = await deductCoin(requiredCoins);
-
-if (!success) {
-  return alert(`Saldo koin tidak cukup! Komentar ini membutuhkan ${requiredCoins} koin. Tonton video Misi Reels FB untuk menambah Koin Gratisan.`);
-}
+        return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
+      }
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
@@ -4077,7 +4060,19 @@ if (!success) {
       `).join('');
     }
 
+
+
+
+
+
+
     let processedMsgIds = new Set();
+
+
+
+
+
+
 
     function filterByTag(tagName) {
       document.getElementById('searchInput').value = tagName;
@@ -4945,7 +4940,7 @@ if (!success) {
 
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
 
-      const requiredCoins = Math.max(1, Math.ceil(content.length / 100));
+      const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
 
       const success = await deductCoin(requiredCoins);
       if (!success) {
