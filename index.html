@@ -6033,5 +6033,64 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 </style>
 
+<style>
+/* CUIT PREMIUM — PANEL PROGRES HARI INI */
+#todayProgressModal .modal-content {
+  background: linear-gradient(155deg, #fff 0%, #fff9ed 100%) !important;
+  border: 1px solid #d9b65b !important;
+  border-radius: 22px !important;
+  padding: 18px !important;
+  box-shadow: 0 18px 50px rgba(90, 15, 25, .25),
+              0 0 0 3px rgba(217, 182, 91, .13) !important;
+}
+
+#todayProgressModal #todayProgressDate {
+  color: #92701c !important;
+  font-weight: 700 !important;
+}
+
+#todayProgressModal .modal-content > div:first-child {
+  gap: 10px !important;
+}
+
+#todayProgressModal .modal-content > div:first-child > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#todayProgressModal .modal-content > div:first-child > div:first-child::before {
+  content: "";
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  background: url("assets/cuit-app-icon.svg") center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(180, 130, 20, .2));
+}
+
+#todayProgressModal .modal-content > div:first-child > div:first-child > div:first-child {
+  color: #a51026 !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+}
+
+#todayProgressModal #todayProgressGrid {
+  gap: 9px !important;
+}
+
+#todayProgressModal #todayProgressGrid > div {
+  border-radius: 13px !important;
+}
+
+#todayProgressModal button {
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+#todayProgressModal button:active {
+  transform: scale(.97);
+}
+</style>
+
 </body>
   </html>
