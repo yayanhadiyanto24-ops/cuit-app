@@ -1998,17 +1998,17 @@ poolStatus=feePaid>0
 values.paidSpent = 'Belum terhubung';
 
 try {
-  const { data: gemRows, error: gemError } = await supabaseClient
-    const { data: gems, error } = await supabaseClient.rpc(
-  'cuit_get_today_gems_received'
-);
+  const { data, error } = await supabaseClient.rpc(
+    'cuit_get_today_gems_received'
+  );
 
-values.gemsReceived = error
-  ? 'Belum terhubung'
-  : Number(gems || 0);
-
-  if (gemError) {
-    values.gemsReceived = 'Belum terhubung';
+  values.gemsReceived = error
+    ? 'Belum terhubung'
+    : Number(data || 0);
+} catch (e) {
+  values.gemsReceived = 'Belum terhubung';
+}
+    
   } else {
     values.gemsReceived = (gemRows || []).reduce((sum, row) => {
       let gems = 0;
