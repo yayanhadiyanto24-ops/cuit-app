@@ -3440,23 +3440,6 @@ async function confirmPostPromotion() {
     }
   }
 
-    const namaLama = oldType === 'istimewa'
-      ? 'Promosi Istimewa'
-      : 'Curhatan Terbaik / Promosi Biasa';
-
-    const namaBaru = selectedPromotionType === 'istimewa'
-      ? 'Promosi Istimewa'
-      : 'Curhatan Terbaik / Promosi Biasa';
-
-    if (!window.confirm(
-      'PERINGATAN PERUBAHAN PROMOSI\n\n' +
-      'Curhatan masih aktif di ' + namaLama + '.\n' +
-      'Jika dilanjutkan, curhatan berpindah ke ' + namaBaru +
-      ' dan tidak tampil di kategori sebelumnya.\n\n' +
-      'Lanjutkan?'
-    )) return;
-  }
-
   promotionSubmitting = true;
   const confirmBtn = document.getElementById('confirmPromotionButton');
   confirmBtn.disabled = true;
