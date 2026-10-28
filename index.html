@@ -3383,11 +3383,45 @@ promotedCarousel.innerHTML = cardsHTML;
         return;
       }
       const post = allPostsCache.find(p => String(p.id) === String(pendingPromotionPostId));
+      
       if (!post) {
         document.getElementById('promotionFeedback').textContent = 'Curhatan tidak ditemukan. Tutup lalu muat ulang beranda.';
         return;
       }
+
+      // Peringatan jika curhatan masih aktif di kategori promosi lain
+      const oldType = String(post.promotion_type || 'biasa').toLowerCase() === 'istimewa'
+        ? 'istimewa'
+        : 'biasa';
+
+      const promoMasihAktif =
+        post.is_promoted === true &&
+        post.promoted_until &&
+        new Date(post.promoted_until).getTime() > Date.now();
+
+      if (promoMasihAktif && oldType !== selectedPromotionType) {
+        const namaLama = oldType === 'istimewa'
+          ? 'Promosi Istimewa'
+          : 'Curhatan Terbaik / Promosi Biasa';
+
+        const namaBaru = selectedPromotionType === 'istimewa'
+          ? 'Promosi Istimewa'
+          : 'Curhatan Terbaik / Promosi Biasa';
+
+        const lanjut = window.confirm(
+          '⚠️ PERINGATAN PERUBAHAN PROMOSI\n\n' +
+          'Curhatan ini masih aktif di ' + namaLama + '.\n\n' +
+          'Jika dilanjutkan ke ' + namaBaru +
+          ', curhatan akan berpindah kategori dan tidak lagi tampil di kategori sebelumnya.\n\n' +
+          'Curhatan tidak akan ditampilkan di dua jendela sekaligus.\n\n' +
+          'Apakah Anda ingin melanjutkan?'
+        );
+
+        if (!lanjut) return;
+      }
+
       promotionSubmitting = true;
+
       const confirmBtn = document.getElementById('confirmPromotionButton');
       confirmBtn.disabled = true;
       confirmBtn.textContent = 'Memproses…';
