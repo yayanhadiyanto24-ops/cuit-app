@@ -3499,7 +3499,9 @@ try {
       </div>
 
       <!-- ISI CURHATAN -->
-      <div class="post-body"${cuitStyleInlineForPost(p.id)}>${escapeHtml(p.content || '')}</div>
+      <div class="section-sub">
+  Tarif posting: 1 koin per 100 karakter, dibulatkan ke atas.
+</div>
       
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
         <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 800; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);">
@@ -4060,19 +4062,7 @@ const success = await deductCoin(requiredCoins);
       `).join('');
     }
 
-
-
-
-
-
-
     let processedMsgIds = new Set();
-
-
-
-
-
-
 
     function filterByTag(tagName) {
       document.getElementById('searchInput').value = tagName;
@@ -4940,7 +4930,7 @@ const success = await deductCoin(requiredCoins);
 
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
 
-      const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
+      const requiredCoins = Math.max(1, Math.ceil(content.length / 100));
 
       const success = await deductCoin(requiredCoins);
       if (!success) {
