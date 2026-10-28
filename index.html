@@ -3411,7 +3411,35 @@ async function confirmPostPromotion() {
     post.promoted_until &&
     new Date(post.promoted_until).getTime() > Date.now();
 
-  if (promoMasihAktif && oldType !== selectedPromotionType) {
+  
+  if (promoMasihAktif) {
+    const namaLama = oldType === 'istimewa'
+      ? 'Promosi Istimewa'
+      : 'Curhatan Terbaik / Promosi Biasa';
+
+    const namaBaru = selectedPromotionType === 'istimewa'
+      ? 'Promosi Istimewa'
+      : 'Curhatan Terbaik / Promosi Biasa';
+
+    const jenisSama = oldType === selectedPromotionType;
+
+    const pesan = jenisSama
+      ? 'Curhatan ini masih aktif di ' + namaLama + '.\n\n' +
+        'Jika dimulai ulang, masa promosi sebelumnya dianggap selesai. ' +
+        'Durasi akan dihitung dari awal dan koin akan dipotong kembali.'
+      : 'Curhatan ini masih aktif di ' + namaLama + '.\n\n' +
+        'Jika dilanjutkan, curhatan berpindah ke ' + namaBaru +
+        '. Promosi sebelumnya dianggap selesai, durasi dimulai dari awal, ' +
+        'dan koin akan dipotong kembali.';
+
+    if (!window.confirm(
+      'PERINGATAN: PROMOSI MASIH AKTIF\n\n' +
+      pesan + '\n\nApakah Anda menyetujui untuk memulai ulang?'
+    )) {
+      return;
+    }
+  }
+
     const namaLama = oldType === 'istimewa'
       ? 'Promosi Istimewa'
       : 'Curhatan Terbaik / Promosi Biasa';
