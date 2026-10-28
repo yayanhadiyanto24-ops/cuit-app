@@ -4964,7 +4964,15 @@ function updateCharCount(input) {
     display.textContent = `${count} karakter · Biaya: ${fee} koin`;
   }
 }
+function updateCommentCharCount(input) {
+  const count = input.value.length;
+  const fee = Math.max(1, Math.ceil(count / 100));
+  const display = document.getElementById('commentCharCount');
 
+  if (display) {
+    display.textContent = `${count} karakter · Biaya: ${fee} koin`;
+  }
+}
     async function submitNewPost() {
       const content = document.getElementById('postContent').value.trim();
       const feeling = document.getElementById('postFeeling').value;
