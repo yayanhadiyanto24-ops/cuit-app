@@ -596,7 +596,22 @@
     </div>
   </div>
 </div>
-
+<script>
+(function () {
+  setTimeout(function () {
+    var banner = document.getElementById('cuitMainBanner');
+    if (banner) {
+      banner.style.setProperty('height', '0', 'important');
+      banner.style.setProperty('min-height', '0', 'important');
+      banner.style.setProperty('max-height', '0', 'important');
+      banner.style.setProperty('overflow', 'hidden', 'important');
+      banner.style.setProperty('opacity', '0', 'important');
+      banner.style.setProperty('visibility', 'hidden', 'important');
+      banner.style.setProperty('pointer-events', 'none', 'important');
+    }
+  }, 5000);
+})();
+</script>
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
     <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
