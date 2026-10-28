@@ -3188,7 +3188,12 @@ try {
             let snippet = item.title.length > 70 ? item.title.substring(0, 70) + '...' : item.title;
             cardsHTML += `
               <div onclick="openPromotedDetail('${item.id}')" 
-                   style="min-width: 174px; width: 174px; height: 76px; background: linear-gradient(135deg, #ffffff 0%, #fff1f3 100%); border-radius: 10px; padding: 6px 8px; cursor: pointer; flex-shrink: 0; position: relative; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 0 1px rgba(200,16,46,.10), 0 2px 5px rgba(120,20,40,.08); border: 1px solid #c8102e; overflow: hidden; box-sizing:border-box;">
+                   style="min-width:100%;
+width:100%;
+height:58px;
+border-radius:0;
+padding:4px 8px;
+flex-shrink:0;">
                 <div style="display:flex;align-items:center;gap:5px;min-width:0;">
                   <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">${cuitBadgeSvg(getUserLevel((item.rawPost && item.rawPost.user_id && profilesMap[item.rawPost.user_id] !== undefined) ? profilesMap[item.rawPost.user_id] : 0).title)}</div>
                   <div style="min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden;"><div style="font-size: 9px; color:#a30f27; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(rawName)}</div><div style="font-size:7px;color:#78666b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml((item.rawPost && item.rawPost.feeling) || 'Curhat')}</div></div>
