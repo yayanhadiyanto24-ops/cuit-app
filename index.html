@@ -5464,6 +5464,37 @@ async function submitNewPost() {
       });
     };
 
+function cuitConfirm(message) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('cuitSystemModal');
+    const text = document.getElementById('cuitModalText');
+    const input = document.getElementById('cuitModalInput');
+    const ok = document.getElementById('cuitModalOkBtn');
+    const cancel = document.getElementById('cuitModalCancelBtn');
+
+    text.innerText = message;
+    input.style.display = 'none';
+    cancel.style.display = 'block';
+    ok.innerText = 'LANJUTKAN';
+    cancel.innerText = 'BATAL';
+    modal.style.display = 'flex';
+
+    ok.onclick = function() {
+      modal.style.display = 'none';
+      ok.innerText = 'MENGERTI';
+      cancel.style.display = 'none';
+      resolve(true);
+    };
+
+    cancel.onclick = function() {
+      modal.style.display = 'none';
+      ok.innerText = 'MENGERTI';
+      cancel.style.display = 'none';
+      resolve(false);
+    };
+  });
+}
+
     async function copyMySponsorLink() {
       const isAdmin = (currentUser && currentUser.email === 'mantanperamal@gmail.com');
       const displayName = customDisplayName || 'Penilik Bageur';
