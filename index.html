@@ -1999,10 +1999,13 @@ values.paidSpent = 'Belum terhubung';
 
 try {
   const { data: gemRows, error: gemError } = await supabaseClient
-    .from('cuit_post_gift_ledger')
-    .select('creator_id,sponsor_id,creator_gems,sponsor_coins,surprise_gems,created_at')
-    .gte('created_at', start)
-    .lt('created_at', end);
+    const { data: gems, error } = await supabaseClient.rpc(
+  'cuit_get_today_gems_received'
+);
+
+values.gemsReceived = error
+  ? 'Belum terhubung'
+  : Number(gems || 0);
 
   if (gemError) {
     values.gemsReceived = 'Belum terhubung';
