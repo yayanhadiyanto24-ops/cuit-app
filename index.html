@@ -3723,88 +3723,110 @@ async function toggleLike(postId) {
       await openCommentsModal(postId);
     }
 
-    async function submitCommentAction() {
-      const input = document.getElementById('commentInputText');
-      const comm = input.value.trim();
-      if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
+    
+async function submitCommentAction() {
+  const input = document.getElementById('commentInputText');
+  const comm = input.value.trim();
 
-      const success = await deductCoin(1);
-      if (!success) {
-        return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
+  if (!comm || !activeCommentPostId) {
+    return alert('Isi komentar tidak boleh kosong!');
+  }
+
+  const authorName = customDisplayName ||
+    (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
+  const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+  const authorEmail = currentUser ? currentUser.email : guestId;
+  const postId = activeCommentPostId;
+
+  if (currentUser && currentUser.id) {
+    const { data, error } = await supabaseClient.rpc(
+      'cuit_submit_comment_transaction',
+      {
+        p_post_id: Number(postId),
+        p_content: comm,
+        p_username: authorName
       }
+    );
 
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const authorEmail = currentUser ? currentUser.email : guestId;
-
-      const { error } = await supabaseClient.from('comments').insert([
-        {
-          post_id: activeCommentPostId,
-          content: comm,
-          user_id: currentUser ? currentUser.id : 'demo_id',
-          user_email: authorEmail,
-          username: authorName
-        }
-      ]);
-
-      if (error) return alert('Gagal mengirim komentar: ' + error.message);
-
-      const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
-      
-      if (currentPost && currentPost.remaining_reward_coins > 0) {
-        const { data: existingClaim } = await supabaseClient
-          .from('post_reward_claims')
-          .select('id')
-          .eq('post_id', activeCommentPostId)
-          .eq('user_email', authorEmail)
-          .maybeSingle();
-
-        if (!existingClaim) {
-          const { error: claimErr } = await supabaseClient
-            .from('post_reward_claims')
-            .insert([{ post_id: activeCommentPostId, user_email: authorEmail }]);
-
-          if (!claimErr) {
-            const newRemaining = currentPost.remaining_reward_coins - 1;
-            currentPost.remaining_reward_coins = newRemaining;
-
-            await supabaseClient
-              .from('curhat')
-              .update({ remaining_reward_coins: newRemaining })
-              .eq('id', activeCommentPostId);
-
-            paidCoins += 1;
-            updateCoinUI(true);
-
-            await supabaseClient.from('user_notifications').insert([
-              { 
-                recipient_email: authorEmail, 
-                sender_name: 'Sistem CUIT', 
-                message: `🎉 Selamat! Kamu menjadi komentator tercepat dan mendapatkan +1 Koin Berbayar (Siap disawerkan)!` 
-              }
-            ]);
-
-            alert('🎉 Selamat! Kamu mendapatkan +1 Koin Berbayar karena menjadi salah satu komentator tercepat! Koin bisa kamu pakai untuk menyawer.');
-          }
-        }
-      }
-
-      const newCount = ((currentPost && currentPost.comments_count) || 0) + 1;
-      if (currentPost) currentPost.comments_count = newCount;
-      await supabaseClient.from('curhat').update({ comments_count: newCount }).eq('id', activeCommentPostId);
-
-      input.value = '';
-      openCommentsModal(activeCommentPostId);
-      loadPosts();
+    if (error) {
+      return alert('Komentar gagal dikirim: ' + error.message);
     }
+
+    if (!data || data.ok !== true) {
+      return alert(data?.message || 'Komentar gagal dikirim.');
+    }
+
+    await updateCoinUI(false);
+
+    const currentPost = allPostsCache.find(
+      p => String(p.id) === String(postId)
+    );
+
+    if (currentPost) {
+      currentPost.comments_count =
+        (currentPost.comments_count || 0) + 1;
+
+      if (data.reward_earned) {
+        currentPost.remaining_reward_coins = Math.max(
+          0,
+          (currentPost.remaining_reward_coins || 0) - 1
+        );
+        alert('🎉 Kamu mendapatkan 1 Koin Berbayar dari hadiah komentar!');
+      }
+    }
+
+    input.value = '';
+    if (typeof updateCommentCharCount === 'function') {
+      updateCommentCharCount(input);
+    }
+
+    openCommentsModal(postId);
+    loadPosts();
+    return;
+  }
+
+  // Jalur tamu: tetap menggunakan cara lama.
+  const success = await deductCoin(1);
+  if (!success) {
+    return alert('Saldo Koin kamu habis! Tonton video misi untuk memperoleh Koin Gratis.');
+  }
+
+  const { error } = await supabaseClient.from('comments').insert([{
+    post_id: postId,
+    content: comm,
+    user_id: 'demo_id',
+    user_email: authorEmail,
+    username: authorName
+  }]);
+
+  if (error) {
+    return alert('Gagal mengirim komentar: ' + error.message);
+  }
+
+  const currentPost = allPostsCache.find(
+    p => String(p.id) === String(postId)
+  );
+
+  if (currentPost) {
+    currentPost.comments_count = (currentPost.comments_count || 0) + 1;
+    await supabaseClient.from('curhat')
+      .update({ comments_count: currentPost.comments_count })
+      .eq('id', postId);
+  }
+
+  input.value = '';
+  if (typeof updateCommentCharCount === 'function') {
+    updateCommentCharCount(input);
+  }
+
+  openCommentsModal(postId);
+  loadPosts();
+}
 
     function openGiftModal(postId) {
       activeTargetPostId = postId;
       document.getElementById('giftModal').style.display = 'flex';
     }
-
-
-
 
     function sendGiftAction(cost, giftName) {
       if (paidCoins < cost) return alert('Saldo Bank Koin Berbayar tidak mencukupi!');
