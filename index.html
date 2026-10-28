@@ -3478,15 +3478,18 @@ promotedCarousel.innerHTML = cardsHTML;
         confirmBtn.textContent = 'Coba Lagi';
       }
 
-      } catch (err) {
-        document.getElementById('promotionFeedback').textContent = 'Terjadi kendala. Tidak ada pemotongan saldo yang dilakukan: ' + (err?.message || err);
+            } catch (err) {
+        document.getElementById('promotionFeedback').textContent =
+          'Promosi gagal diproses. Periksa saldo dan status promosi. ' +
+          (err?.message || err);
+
         promotionSubmitting = false;
         confirmBtn.disabled = false;
         confirmBtn.textContent = 'Coba Lagi';
       }
     }
 
-
+    function renderCardHTML(p) {
     function renderCardHTML(p) {
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
   let feelingTag = p.feeling || 'Bahagia';
