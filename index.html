@@ -3693,10 +3693,12 @@ try {
       const comm = input.value.trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
 
-      const requiredCoins = Math.ceil(comm.length / 100);
+      const requiredCoins = Math.max(1, Math.ceil(comm.length / 100));
 const success = await deductCoin(requiredCoins);
-        return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
-      }
+
+if (!success) {
+  return alert(`Saldo koin tidak cukup! Komentar ini membutuhkan ${requiredCoins} koin. Tonton video Misi Reels FB untuk menambah Koin Gratisan.`);
+}
 
       const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
