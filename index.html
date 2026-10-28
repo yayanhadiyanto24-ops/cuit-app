@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- PERBAIKAN V3: memakai basis tampilan CUIT yang lebih lengkap; memulihkan sorotan beranda dan profil; tidak menimpa berkas asli. -->
+  <!-- CUIT: kandidat perbaikan sinkronisasi transaksi. Pasangkan dengan SQL CUIT-Transaksi-Atomik.sql sebelum dipakai. -->
   <!-- KODE ANTI-CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <title>CUIT — Perbaikan v3 (layout dan profil dipulihkan)</title>
-  <!-- Versi pengujian terpisah. Jangan timpa index.html produksi sebelum pengujian dan persetujuan. -->
+  <title>CUIT — Kandidat Perbaikan Transaksi</title>
+  <!-- Kandidat file lengkap; pasangkan dengan SQL RPC sebelum digunakan. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
 
@@ -1032,6 +1032,7 @@
         <div class="style-editor-note">Catatan: pilihan tampilan disimpan di perangkat ini pada versi uji coba. Agar tampil di semua perangkat, kolom metadata gaya perlu ditambahkan dan dihubungkan ke Supabase.</div>
       </section>
 
+      <div style="background:#fff7d6;border:1px solid #e7cf7a;border-radius:10px;padding:8px 10px;margin:8px 0 12px;font-size:11px;color:#6f4d00;font-weight:700;">Biaya menerbitkan curhatan: 3 Koin Berbayar. Koin Beruntung yang dipasang akan dipotong terpisah sesuai jumlahnya. Saldo diproses di server.</div>
       <label style="font-size: 12px; font-weight: 800; color: #321016; display: block; margin-bottom: 6px;">Pilih Perasaan:</label>
       <select id="postFeeling">
         <option value="Bahagia">🌱 Bahagia</option>
@@ -1981,7 +1982,7 @@ poolStatus=feePaid>0
       async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
       const [checkins,posts,likes,comments,reels,games,giftRows]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
-        rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
+        rows('curhat','id,created_at,user_id,author_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('comments','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
@@ -1989,7 +1990,7 @@ poolStatus=feePaid>0
         rows('gift_transactions','id,created_at,sender_name,coins_amount,recipient_email',q=>q.gte('created_at',start).lt('created_at',end))
       ]);
       values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
-      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
+      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id||x.author_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
       values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
       values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
       values.watch=reels===null?'Belum terhubung':reels.length;
@@ -2349,23 +2350,11 @@ poolStatus=feePaid>0
 
     // Tidak ada lagi jatah tetap 20 Koin Gratis harian.
     // Koin Gratis hanya bertambah dari hadiah aktivitas yang sah, termasuk bonus absen beruntun.
-    async function checkDailyCoinReset() {
-  if (!currentUser) return false;
+    function checkDailyCoinReset() { return; }
 
-  try {
-    const { data, error } = await supabaseClient.rpc(
-      'cuit_reset_daily_free_coins'
-    );
-
-    if (error) throw error;
-    return data;
-  } catch (err) {
-    console.error('Gagal reset Koin Gratis:', err);
-    return false;
-  }
-}
     async function checkUser() {
       initSponsorFromURL();
+      checkDailyCoinReset();
       checkWeeklyLeagueReset();
       initAutoCollapseBanner();
 
@@ -2373,7 +2362,6 @@ poolStatus=feePaid>0
       currentUser = data.user;
 
       if (currentUser) {
-        await checkDailyCoinReset();
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
@@ -2695,47 +2683,11 @@ poolStatus=feePaid>0
           supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
           supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
           supabaseClient.from('reels_claims').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at')
+          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at').gte('created_at', weekStart.toISOString())
         ]);
         const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allProfilesRes].filter(r=>r.error);
         if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));
         const byPeriod = (rows,start) => (rows||[]).filter(r => r.created_at && new Date(r.created_at) >= start);
-        
-const [dailyGameRes, weeklyGameRes] = await Promise.all([
-  supabaseClient.rpc('cuit_get_king_game_ranking', {
-    p_period: 'daily'
-  }),
-  supabaseClient.rpc('cuit_get_king_game_ranking', {
-    p_period: 'weekly'
-  })
-]);
-
-function gameWinnerResult(res) {
-  if (res.error) {
-    console.error('Raja Game gagal dimuat:', res.error);
-    return {
-      name: 'Data belum tersedia',
-      scoreLabel: 'Gagal memuat data',
-      note: 'periksa koneksi game'
-    };
-  }
-
-  const winner = res.data?.[0];
-  if (!winner) {
-    return {
-      name: 'Belum Ada',
-      scoreLabel: '0 permainan',
-      note: 'jumlah permainan'
-    };
-  }
-
-  return {
-    name: winner.username || 'Anggota CUIT',
-    scoreLabel: `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`,
-    note: 'jumlah permainan'
-  };
-}
-
         function makeResults(start) {
           const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
           const results = {};
@@ -2743,34 +2695,14 @@ function gameWinnerResult(res) {
           w=winnerFromCounts(countBy(gifts,g=>g.sender_id||g.sender_email||g.sender_name,g=>g.coins_amount||g.amount||0));
           if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
           // Data Raja Game dihitung dari sumber data yang tersedia; tidak menggunakan fitur siaran.
-          results.game = null;
+          results.game={name:'Belum tersedia',scoreLabel:'Data game belum terhubung',note:'menunggu audit sumber transaksi game'};
           const postEngagement = {};
           posts.forEach(p=>{const key=p.user_id||p.user_email||p.email||p.username;if(!key)return;const value=Number(p.likes_count||0)+Number(p.comments_count||0);postEngagement[key]=(postEngagement[key]||0)+value;});
           w=winnerFromCounts(postEngagement); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.curhat={name:safeNameFromRow(p),scoreLabel:`${w.score.toLocaleString('id-ID')} interaksi`,note:'interaksi pada curhatan'};}
           w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
           w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
           w=winnerFromCounts(countBy(follows,f=>f.following_email||f.following_id)); if(w){const p=(profiles||[]).find(p=>p.email===w.key||p.id===w.key);results.jaringan={name:p?.username||(p?.email? p.email.split('@')[0]:String(w.key).split('@')[0]),scoreLabel:`${w.score} pengikut`,note:'pengikut baru tercatat'};}
-          
-w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0));
-if(w){
-  const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);
-  const recipientKey=String(w.key).trim().toLowerCase();
-  const recipientProfile=(allProfilesRes.data||[]).find(p=>
-    String(p.id||'').trim().toLowerCase()===recipientKey ||
-    String(p.email||'').trim().toLowerCase()===recipientKey ||
-    String(p.username||'').trim().toLowerCase()===recipientKey
-  );
-  const recipientName=recipientProfile?.username ||
-    (recipientProfile?.email ? recipientProfile.email.split('@')[0] : '') ||
-    row?.recipient_name ||
-    (row?.recipient_email ? String(row.recipient_email).split('@')[0] : '') ||
-    'Member CUIT';
-  results.koin={
-    name:recipientName,
-    scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,
-    note:'koin gift diterima'
-  };
-}
+          w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0)); if(w){const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);results.koin={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'koin gift diterima'};}
           w=winnerFromCounts(countBy(newProfiles,p=>p.sponsor)); if(w){const p=(profiles||[]).find(p=>p.username===w.key||p.email===w.key);results.sponsor={name:p?.username||(p?.email?p.email.split('@')[0]:String(w.key)),scoreLabel:`${w.score} member`,note:'member terdaftar melalui sponsor'};}
           w=winnerFromCounts(countBy(reels,r=>r.user_id||r.user_email)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.nonton={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} klaim`,note:'klaim misi nonton'};}
           w=winnerFromCounts(countBy(likes,l=>l.user_id||l.user_email||l.guest_token)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.like={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} like`,note:'like diberikan'};}
@@ -2778,8 +2710,6 @@ if(w){
         }
         const dailyResults = makeResults(dayStart);
         const weeklyResults = makeResults(weekStart);
-        dailyResults.game = gameWinnerResult(dailyGameRes);
-weeklyResults.game = gameWinnerResult(weeklyGameRes);
         // Kategori tanpa hasil tetap ditampilkan; jangan menyamarkan data kosong sebagai pemenang.
         renderKingCategories('dailyKings',dailyResults);
         renderKingCategories('weeklyKings',weeklyResults);
@@ -2881,38 +2811,12 @@ weeklyResults.game = gameWinnerResult(weeklyGameRes);
         }
 
         // --- 2. RAJA GAME ---
-const gameNameEl = document.getElementById('champGameName');
-const gameScoreEl = document.getElementById('champGameScore');
-
-try {
-  const { data: gameRanking, error: gameRankingError } =
-    await supabaseClient.rpc('cuit_get_king_game_ranking', {
-      p_period: 'weekly'
-    });
-
-  if (gameRankingError) throw gameRankingError;
-
-  if (gameRanking && gameRanking.length > 0) {
-    const winner = gameRanking[0];
-
-    if (gameNameEl) {
-      gameNameEl.innerText = winner.username || 'Anggota CUIT';
-    }
-
-    if (gameScoreEl) {
-      gameScoreEl.innerText =
-        `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`;
-    }
-  } else {
-    if (gameNameEl) gameNameEl.innerText = 'Belum Ada';
-    if (gameScoreEl) gameScoreEl.innerText = '0 permainan';
-  }
-} catch (error) {
-  console.error('Gagal memuat Raja Game:', error);
-
-  if (gameNameEl) gameNameEl.innerText = 'Data belum tersedia';
-  if (gameScoreEl) gameScoreEl.innerText = 'Coba muat ulang';
-}
+        // Belum ada tabel transaksi game yang terverifikasi pada file ini.
+        // Jangan memakai data dari fitur yang sudah dihapus sebagai pengganti pemenang game.
+        const gameNameEl = document.getElementById('champGameName');
+        const gameScoreEl = document.getElementById('champGameScore');
+        if (gameNameEl) gameNameEl.innerText = 'Data game belum terhubung';
+        if (gameScoreEl) gameScoreEl.innerText = 'Menunggu audit tabel game';
 
         // --- 3. RAJA CURHAT ---
         if (data && data.length > 0) {
@@ -3350,59 +3254,47 @@ try {
     async function confirmPostPromotion() {
       if (promotionSubmitting) return;
       const inputId = selectedPromotionType === 'istimewa' ? 'promotionIstimewaHours' : 'promotionBiasaHours';
-      const raw = document.getElementById(inputId).value;
+      const raw = document.getElementById(inputId)?.value;
       const hours = Number(raw);
-      const rate = selectedPromotionType === 'istimewa' ? 5 : 1;
-      const cost = hours * rate;
+      const type = selectedPromotionType;
+      if (!currentUser || !currentUser.id) return alert('Silakan masuk ke akun CUIT untuk mempromosikan curhatan.');
       if (!pendingPromotionPostId) return;
-      if (!Number.isInteger(hours) || hours < 1) {
-        document.getElementById('promotionFeedback').textContent = 'Durasi harus berupa bilangan bulat minimal 1 jam.';
+      if (!Number.isInteger(hours) || hours < 1 || hours > 720) {
+        document.getElementById('promotionFeedback').textContent = 'Durasi harus bilangan bulat antara 1 dan 720 jam.';
         return;
       }
+      const cost = hours * (type === 'istimewa' ? 5 : 1);
       if (Number(paidCoins || 0) < cost) {
         document.getElementById('promotionFeedback').textContent = `Saldo tidak cukup. Dibutuhkan ${cost} Koin Berbayar.`;
         return;
       }
-      const post = allPostsCache.find(p => String(p.id) === String(pendingPromotionPostId));
-      if (!post) {
-        document.getElementById('promotionFeedback').textContent = 'Curhatan tidak ditemukan. Tutup lalu muat ulang beranda.';
-        return;
-      }
       promotionSubmitting = true;
       const confirmBtn = document.getElementById('confirmPromotionButton');
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Memproses…';
-      document.getElementById('promotionFeedback').textContent = 'Menyimpan promosi…';
-      const expiryISO = new Date(Date.now() + hours * 3600 * 1000).toISOString();
+      if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Memproses…'; }
+      const feedback = document.getElementById('promotionFeedback');
+      if (feedback) feedback.textContent = 'Memproses transaksi di server…';
       try {
-        const { error } = await supabaseClient.from('curhat').update({
-          is_promoted: true,
-          promoted_until: expiryISO,
-          promotion_type: selectedPromotionType,
-          updated_at: new Date().toISOString()
-        }).eq('id', pendingPromotionPostId);
-        if (error) {
-          document.getElementById('promotionFeedback').textContent = 'Promosi belum tersimpan. Saldo tidak dipotong. Pastikan kolom promosi tersedia di Supabase. ' + error.message;
-          promotionSubmitting = false;
-          confirmBtn.disabled = false;
-          confirmBtn.textContent = 'Coba Lagi';
-          return;
-        }
-        // Current client-side wallet is a local state only. Do not claim an atomic charge/ledger transaction here.
-        document.getElementById('promotionFeedback').textContent = 'Promosi tersimpan pada data curhatan. Pemotongan saldo yang aman memerlukan transaksi/RPC di server; saldo tidak diubah oleh prototipe ini.';
-        alert(`Data promosi ${selectedPromotionType === 'istimewa' ? 'Istimewa' : 'Biasa'} (${hours} jam) tersimpan. Catatan: saldo belum dipotong karena transaksi saldo aman belum tersedia.`);
+        const { data, error } = await supabaseClient.rpc('cuit_promote_post_transaction', {
+          p_post_id: Number(pendingPromotionPostId), p_promotion_type: type, p_hours: hours
+        });
+        if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result || result.ok !== true) throw new Error(result?.message || 'Server belum mengonfirmasi promosi.');
         document.getElementById('promotionChoiceModal').style.display = 'none';
         pendingPromotionPostId = null;
-        promotionSubmitting = false;
-        loadPosts();
+        await updateCoinUI(false);
+        await loadPosts();
+        alert(`Promosi ${type === 'istimewa' ? 'Istimewa' : 'Biasa'} aktif selama ${hours} jam.`);
       } catch (err) {
-        document.getElementById('promotionFeedback').textContent = 'Terjadi kendala. Tidak ada pemotongan saldo yang dilakukan: ' + (err?.message || err);
+        console.error('Transaksi promosi gagal:', err);
+        if (feedback) feedback.textContent = 'Promosi gagal; saldo tidak dipotong jika transaksi gagal. ' + (err?.message || err);
+        await updateCoinUI(false);
+      } finally {
         promotionSubmitting = false;
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Coba Lagi';
+        if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Konfirmasi Promosi'; }
+        if (typeof updatePromotionCost === 'function') updatePromotionCost();
       }
     }
-
 
     function renderCardHTML(p) {
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
@@ -3600,34 +3492,23 @@ try {
         ]);
 
       } else {
-        const success = await deductCoin(1);
-        if (!success) {
-          return alert('Saldo Koin Gratisan dan Koin Berbayar kamu habis! Tonton video Misi Reels FB untuk isi koin.');
+        if (!currentUser || !currentUser.id) {
+          return alert('Silakan masuk ke akun CUIT untuk memberi Like.');
         }
-
-        userLikedPostsSet.add(strPostId);
-        const newLikeCount = (currentPost.likes_count || 0) + 1;
-        currentPost.likes_count = newLikeCount;
-
-        renderFilteredFeed();
-
-        const payload = { 
-          post_id: postId,
-          user_id: (currentUser && currentUser.id) ? currentUser.id : null,
-          guest_token: (currentUser && currentUser.id) ? null : guestToken
-        };
-
-        const { error } = await supabaseClient.from('post_likes').insert([payload]);
-
-        if (error) {
-          userLikedPostsSet.delete(strPostId);
-          currentPost.likes_count = Math.max(0, newLikeCount - 1);
+        try {
+          const { data, error } = await supabaseClient.rpc('cuit_pay_like', { p_post_id: Number(postId) });
+          if (error) throw error;
+          const result = Array.isArray(data) ? data[0] : data;
+          if (!result || result.ok !== true) throw new Error(result?.message || 'Transaksi Like tidak dikonfirmasi server.');
+          userLikedPostsSet.add(strPostId);
+          currentPost.likes_count = Number(currentPost.likes_count || 0) + 1;
+          await updateCoinUI(false);
           renderFilteredFeed();
-          alert("Gagal menyimpan Like: " + error.message);
-          return;
+        } catch (err) {
+          console.error('Transaksi Like gagal:', err);
+          await updateCoinUI(false);
+          alert('Like belum tersimpan dan saldo tidak diubah: ' + (err?.message || err));
         }
-
-        await supabaseClient.from('curhat').update({ likes_count: newLikeCount }).eq('id', postId);
       }
     }
 
@@ -3680,77 +3561,30 @@ try {
 
     async function submitCommentAction() {
       const input = document.getElementById('commentInputText');
-      const comm = input.value.trim();
+      const comm = (input?.value || '').trim();
       if (!comm || !activeCommentPostId) return alert('Isi komentar tidak boleh kosong!');
+      if (!currentUser || !currentUser.id) return alert('Silakan masuk ke akun CUIT untuk mengirim komentar.');
 
-      const success = await deductCoin(1);
-      if (!success) {
-        return alert('Saldo Koin kamu habis! Tonton video Misi Reels FB untuk menambah Koin Gratisan agar bisa mengirim komentar.');
+      const authorName = customDisplayName || (currentUser.email || '').split('@')[0] || 'Anggota CUIT';
+      try {
+        const { data, error } = await supabaseClient.rpc('cuit_submit_comment_transaction', {
+          p_post_id: Number(activeCommentPostId),
+          p_content: comm,
+          p_username: authorName
+        });
+        if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result || result.ok !== true) throw new Error(result?.message || 'Server belum mengonfirmasi komentar.');
+        input.value = '';
+        await updateCoinUI(false);
+        if (result.reward_earned) alert('Komentar berhasil! Kamu juga memperoleh +1 Koin Berbayar sebagai hadiah komentar.');
+        await openCommentsModal(activeCommentPostId);
+        await loadPosts();
+      } catch (err) {
+        console.error('Transaksi komentar gagal:', err);
+        await updateCoinUI(false);
+        alert('Komentar belum tersimpan. Saldo tidak dipotong jika transaksi gagal. ' + (err?.message || err));
       }
-
-      const authorName = customDisplayName || (currentUser ? currentUser.email.split('@')[0] : 'Penilik Bageur');
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const authorEmail = currentUser ? currentUser.email : guestId;
-
-      const { error } = await supabaseClient.from('comments').insert([
-        {
-          post_id: activeCommentPostId,
-          content: comm,
-          user_id: currentUser ? currentUser.id : 'demo_id',
-          user_email: authorEmail,
-          username: authorName
-        }
-      ]);
-
-      if (error) return alert('Gagal mengirim komentar: ' + error.message);
-
-      const currentPost = allPostsCache.find(p => String(p.id) === String(activeCommentPostId));
-      
-      if (currentPost && currentPost.remaining_reward_coins > 0) {
-        const { data: existingClaim } = await supabaseClient
-          .from('post_reward_claims')
-          .select('id')
-          .eq('post_id', activeCommentPostId)
-          .eq('user_email', authorEmail)
-          .maybeSingle();
-
-        if (!existingClaim) {
-          const { error: claimErr } = await supabaseClient
-            .from('post_reward_claims')
-            .insert([{ post_id: activeCommentPostId, user_email: authorEmail }]);
-
-          if (!claimErr) {
-            const newRemaining = currentPost.remaining_reward_coins - 1;
-            currentPost.remaining_reward_coins = newRemaining;
-
-            await supabaseClient
-              .from('curhat')
-              .update({ remaining_reward_coins: newRemaining })
-              .eq('id', activeCommentPostId);
-
-            paidCoins += 1;
-            updateCoinUI(true);
-
-            await supabaseClient.from('user_notifications').insert([
-              { 
-                recipient_email: authorEmail, 
-                sender_name: 'Sistem CUIT', 
-                message: `🎉 Selamat! Kamu menjadi komentator tercepat dan mendapatkan +1 Koin Berbayar (Siap disawerkan)!` 
-              }
-            ]);
-
-            alert('🎉 Selamat! Kamu mendapatkan +1 Koin Berbayar karena menjadi salah satu komentator tercepat! Koin bisa kamu pakai untuk menyawer.');
-          }
-        }
-      }
-
-      const newCount = ((currentPost && currentPost.comments_count) || 0) + 1;
-      if (currentPost) currentPost.comments_count = newCount;
-      await supabaseClient.from('curhat').update({ comments_count: newCount }).eq('id', activeCommentPostId);
-
-      input.value = '';
-      openCommentsModal(activeCommentPostId);
-      loadPosts();
     }
 
     function openGiftModal(postId) {
@@ -4391,7 +4225,7 @@ try {
     function cuitGetPostStyle(postId){try{return JSON.parse(localStorage.getItem('cuit_post_styles_v1')||'{}')[String(postId)]||null;}catch(e){return null;}}
     function cuitStyleInlineForPost(postId){const style=cuitGetPostStyle(postId);return style?` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`:'';}
     function cuitResetPostStyle(){Object.entries({postBorderStyle:'solid',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
-    document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();if(currentUser)cuitRefreshMyLevel();});
+    document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();restoreDraftLocally();if(currentUser)cuitRefreshMyLevel();});
 
     function cuitActivityKey() {
       const id = currentUser?.id || localStorage.getItem('cuit_guest_identifier') || 'guest';
@@ -4729,13 +4563,17 @@ try {
             throw new Error('Slot video ini sudah diklaim hari ini.');
           }
 
-          const { error: insertError } = await supabaseClient
-            .from('reels_claims')
-            .insert([{ user_id: currentUser.id, user_email: currentUser.email, slot_key: slot }]);
-          if (insertError) throw insertError;
-
-          freeCoins += 10;
-          await updateCoinUI(true);
+          const { data: claimData, error: claimError } = await supabaseClient.rpc(
+            'cuit_claim_video_reward', { p_slot_key: slot }
+          );
+          if (claimError) throw claimError;
+          const claimResult = Array.isArray(claimData) ? claimData[0] : claimData;
+          if (!claimResult || claimResult.ok !== true) {
+            throw new Error(claimResult?.message || 'Server belum mengonfirmasi hadiah video.');
+          }
+          freeCoins = Number(claimResult.free_coins ?? freeCoins);
+          localStorage.setItem('cuit_free_coins', String(freeCoins));
+          await updateCoinUI(false);
         }
       } catch (err) {
         console.error('Pencatatan tontonan/klaim video gagal:', err);
@@ -4923,60 +4761,69 @@ try {
     }
 
     async function submitNewPost() {
-      const content = document.getElementById('postContent').value.trim();
-      const feeling = document.getElementById('postFeeling').value;
-      const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
+      const content = (document.getElementById('postContent')?.value || '').trim();
+      const feeling = document.getElementById('postFeeling')?.value || '';
+      const rewardCoins = Math.max(0, parseInt(document.getElementById('postRewardCoins')?.value, 10) || 0);
       const postStyle = cuitPostStyleRead();
       const styleLevel = cuitCurrentStyleLevel();
       if ((postStyle.border !== 'solid' && styleLevel < 3) || (postStyle.background !== '#ffffff' && styleLevel < 4) || (postStyle.bold && styleLevel < 5) || (postStyle.italic && styleLevel < 6) || (postStyle.decorBorder !== 'none' && styleLevel < 7) || (postStyle.decorBackground !== 'none' && styleLevel < 8) || (postStyle.textColor !== '#4a2028' && styleLevel < 9) || (postStyle.fontFamily !== 'system-ui, sans-serif' && styleLevel < 10)) return alert('Ada fasilitas tampilan yang belum terbuka pada levelmu. Pilih kembali fasilitas yang tersedia.');
-
       if (!content) return alert('Isi curhatan tidak boleh kosong!');
-
-      const requiredCoins = Math.ceil(content.length / CONFIG.MAX_CHAR_FREE_CURHAT) || 1;
-
-      const success = await deductCoin(requiredCoins);
-      if (!success) {
-        return alert(`Saldo Koin tidak cukup! Kamu butuh ${requiredCoins} Koin.`);
-      }
-
-      if (rewardCoins > 0) {
-        if (paidCoins < rewardCoins) {
-          return alert(`Saldo Bank Koin kamu tidak cukup! Memasang Koin Beruntung butuh ${rewardCoins} Koin Berbayar.`);
-        }
-        paidCoins -= rewardCoins;
-        usedPaidCoins += rewardCoins;
-        updateCoinUI(true);
-      }
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const myName = customDisplayName || 'Penilik Bageur';
-
-      const { data: insertedPosts, error } = await supabaseClient.from('curhat').insert([
-        {
-          content: content,
-          feeling: feeling,
-          user_id: currentUser ? currentUser.id : 'demo_id',
-          user_email: myEmail,
-          username: myName,
-          reward_coins: rewardCoins,
-          remaining_reward_coins: rewardCoins
-        }
-      ]).select('id');
-
-      if (!error) {
-        if (insertedPosts && insertedPosts[0] && insertedPosts[0].id) cuitSavePostStyle(insertedPosts[0].id, postStyle);
+      if (!currentUser || !currentUser.id) return alert('Silakan masuk ke akun CUIT untuk menerbitkan curhatan.');
+      if (content.length > 12000) return alert('Curhatan terlalu panjang. Maksimal 12.000 karakter.');
+      if (!Number.isSafeInteger(rewardCoins) || rewardCoins < 0) return alert('Jumlah Koin Beruntung tidak valid.');
+      try {
+        const { data, error } = await supabaseClient.rpc('cuit_submit_post_transaction', {
+          p_content: content,
+          p_feeling: feeling,
+          p_reward_coins: rewardCoins,
+          p_username: customDisplayName || (currentUser.email || '').split('@')[0] || 'Anggota CUIT'
+        });
+        if (error) throw error;
+        const result = Array.isArray(data) ? data[0] : data;
+        if (!result || result.ok !== true || !result.post_id) throw new Error(result?.message || 'Server belum mengonfirmasi penerbitan curhatan.');
+        cuitSavePostStyle(result.post_id, postStyle);
         document.getElementById('postContent').value = '';
         document.getElementById('postRewardCoins').value = '';
         cuitResetPostStyle();
-        alert(rewardCoins > 0 
-          ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` 
-          : `Curhatan berhasil diterbitkan! (-${requiredCoins} Koin)`);
+        await updateCoinUI(false);
+        alert(rewardCoins > 0 ? `Curhatan terbit dengan ${rewardCoins} Koin Beruntung!` : 'Curhatan berhasil diterbitkan!');
         switchTab('pageHome', document.querySelectorAll('.nav-bar .nav-item')[0]);
-        loadPosts();
-      } else {
-        alert('Gagal menerbitkan: ' + error.message);
+        await loadPosts();
+      } catch (err) {
+        console.error('Transaksi penerbitan curhatan gagal:', err);
+        await updateCoinUI(false);
+        alert('Curhatan belum diterbitkan. Saldo tidak dipotong jika transaksi gagal. ' + (err?.message || err));
       }
+    }
+
+    function saveDraftLocally() {
+      const content = (document.getElementById('postContent')?.value || '').trim();
+      const feeling = document.getElementById('postFeeling')?.value || '';
+      const reward = document.getElementById('postRewardCoins')?.value || '';
+      try {
+        localStorage.setItem('cuit_post_draft_v1', JSON.stringify({ content, feeling, reward, saved_at: new Date().toISOString() }));
+        alert('Draf tersimpan di perangkat ini. Draf tidak tersinkron ke perangkat lain.');
+      } catch (err) {
+        alert('Draf tidak dapat disimpan pada perangkat ini: ' + (err?.message || err));
+      }
+    }
+
+    function restoreDraftLocally() {
+      try {
+        const raw = localStorage.getItem('cuit_post_draft_v1');
+        if (!raw) return;
+        const draft = JSON.parse(raw);
+        const content = document.getElementById('postContent');
+        const feeling = document.getElementById('postFeeling');
+        const reward = document.getElementById('postRewardCoins');
+        if (content && !content.value) content.value = draft.content || '';
+        if (feeling && draft.feeling) feeling.value = draft.feeling;
+        if (reward && !reward.value) reward.value = draft.reward || '';
+      } catch (err) { console.warn('Draf lokal tidak dapat dipulihkan:', err); }
+    }
+
+    function downloadAPK() {
+      alert('CUIT belum menyediakan berkas APK mandiri. Untuk memasang sebagai aplikasi, buka menu browser lalu pilih “Tambahkan ke layar utama” atau “Instal aplikasi” jika tersedia.');
     }
 
     window.alert = function(message) {
@@ -5287,16 +5134,16 @@ try {
       }
     });
   </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.page-section').forEach(function(page) {
-    if (
-      page.id === 'pageHome' ||
-      page.querySelector('.cuit-pool-strip')
-    ) {
+    if (page.id === 'pageHome' ||
+        page.querySelector('.cuit-pool-strip')) {
       return;
     }
 
+    /* Hapus tombol Pool lama agar tidak rangkap */
     page.querySelectorAll(':scope > .pool-shortcut').forEach(function(button) {
       button.remove();
     });
@@ -5310,14 +5157,14 @@ document.addEventListener('DOMContentLoaded', function () {
         '<span class="cuit-pool-symbol">☀️</span>' +
         '<div>' +
           '<div class="cuit-pool-label">Pool Harian</div>' +
-          '<div class="cuit-pool-value cuit-daily-pool-value">Memuat...</div>' +
+          '<div class="cuit-pool-value">— koin</div>' +
         '</div>' +
       '</div>' +
       '<div class="cuit-pool-card weekly">' +
         '<span class="cuit-pool-symbol">🏆</span>' +
         '<div>' +
           '<div class="cuit-pool-label">Pool Mingguan</div>' +
-          '<div class="cuit-pool-value cuit-weekly-pool-value">Memuat...</div>' +
+          '<div class="cuit-pool-value">— koin</div>' +
         '</div>' +
       '</div>';
 
@@ -5329,78 +5176,8 @@ document.addEventListener('DOMContentLoaded', function () {
       page.insertBefore(strip, page.firstChild);
     }
   });
-
-  async function loadCuitPoolValues() {
-    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-      document.querySelectorAll(
-        '.cuit-daily-pool-value, .cuit-weekly-pool-value'
-      ).forEach(function(el) {
-        el.textContent = 'Belum tersedia';
-      });
-      return;
-    }
-
-    const dailyElements = document.querySelectorAll('.cuit-daily-pool-value');
-    const weeklyElements = document.querySelectorAll('.cuit-weekly-pool-value');
-
-    try {
-      const results = await Promise.all([
-        supabaseClient.rpc('cuit_get_daily_pool_status'),
-        supabaseClient.rpc('cuit_get_weekly_pool_status')
-      ]);
-
-      const dailyResult = results[0];
-      const weeklyResult = results[1];
-
-      function extractRow(result) {
-        if (result.error || !result.data) return null;
-        return Array.isArray(result.data) ? result.data[0] : result.data;
-      }
-
-      function formatPool(row) {
-        if (!row || row.total_coins === undefined || row.total_coins === null) {
-          return 'Belum tersedia';
-        }
-
-        const amount = Number(row.total_coins);
-        if (!Number.isFinite(amount)) return 'Belum tersedia';
-
-        return amount.toLocaleString('id-ID', {
-          maximumFractionDigits: 2
-        }) + ' koin';
-      }
-
-      const dailyText = formatPool(extractRow(dailyResult));
-      const weeklyText = formatPool(extractRow(weeklyResult));
-
-      dailyElements.forEach(function(el) {
-        el.textContent = dailyText;
-      });
-
-      weeklyElements.forEach(function(el) {
-        el.textContent = weeklyText;
-      });
-
-      if (dailyResult.error) {
-        console.error('Gagal memuat Pool Harian CUIT:', dailyResult.error);
-      }
-      if (weeklyResult.error) {
-        console.error('Gagal memuat Pool Mingguan CUIT:', weeklyResult.error);
-      }
-    } catch (error) {
-      console.error('Gagal memuat data Pool CUIT:', error);
-
-      document.querySelectorAll(
-        '.cuit-daily-pool-value, .cuit-weekly-pool-value'
-      ).forEach(function(el) {
-        el.textContent = 'Belum tersedia';
-      });
-    }
-  }
-
-  loadCuitPoolValues();
 });
 </script>
 
 </body>
-  </html>
+                                     </html>
