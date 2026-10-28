@@ -1998,53 +1998,265 @@ poolStatus=feePaid>0
       grid.innerHTML=labels.map(([key,label,icon])=>`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:#fff8fa;border:1px solid #f0dce2;border-radius:12px;min-width:0;"><span style="font-size:19px;">${icon}</span><div style="min-width:0;flex:1;"><div style="font-size:10px;color:#6b7280;line-height:1.25;">${label}</div><div style="font-size:13px;font-weight:900;color:#8b1e3f;overflow-wrap:anywhere;">${values[key]}</div></div></div>`).join('');
     }
 
-    async function openDailyCheckin() {
-      if (!currentUser) { alert('Silakan masuk terlebih dahulu untuk melakukan absen.'); return; }
-      const day = new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
-      const rewards = [1, 2, 3, 5, 8, 13, 21];
-      const ok = confirm(`Absen harian CUIT\nTanggal: ${day} WIB\n\nBonus mengikuti urutan 1, 2, 3, 5, 8, 13, 21 Koin Gratis. Jika melewatkan satu hari, urutan kembali ke hari pertama. Lanjutkan?`);
-      if (!ok) return;
-      try {
-        const { data: existing, error: readError } = await supabaseClient.from('cuit_checkins').select('id').eq('user_id', currentUser.id).eq('checkin_date', day).maybeSingle();
-        if (readError) throw readError;
-        if (existing) { alert('Kamu sudah absen hari ini. Bonus hari ini tidak bisa diambil dua kali.'); return; }
+    
+function showCuitCheckinModal(day) {
+  return new Promise(resolve => {
+    const old = document.getElementById('cuitCheckinPremiumModal');
+    if (old) old.remove();
 
-        // Hitung rentetan hari sebelumnya berdasarkan tanggal WIB. Hari terlewat memulai urutan baru.
-        const yesterday = new Date(new Date(day + 'T00:00:00+07:00').getTime() - 86400000);
-        const fromDay = new Date(yesterday.getTime() - 6 * 86400000).toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
-        const { data: recent, error: historyError } = await supabaseClient.from('cuit_checkins')
-          .select('checkin_date').eq('user_id', currentUser.id).gte('checkin_date', fromDay).lt('checkin_date', day).order('checkin_date', {ascending:false});
-        if (historyError) throw historyError;
-        const priorDates = new Set((recent || []).map(r => String(r.checkin_date).slice(0,10)));
-        let streak = 0;
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(yesterday.getTime() - i * 86400000).toLocaleDateString('en-CA', {timeZone:'Asia/Jakarta'});
-          if (priorDates.has(d)) streak++; else break;
-        }
-        const rewardIndex = Math.min(streak, rewards.length - 1);
-        const reward = rewards[rewardIndex];
+    const rewards = [1, 2, 3, 5, 8, 13, 21];
+    const overlay = document.createElement('div');
+    overlay.id = 'cuitCheckinPremiumModal';
 
-        const { error: insertError } = await supabaseClient.from('cuit_checkins').insert({user_id:currentUser.id, checkin_date:day});
-        if (insertError) throw insertError;
+    overlay.style.cssText = `
+      position:fixed;inset:0;z-index:100000;
+      background:rgba(25,0,5,.78);display:flex;
+      align-items:center;justify-content:center;
+      padding:10px;box-sizing:border-box;
+    `;
 
-        // Tambahkan bonus hanya setelah absen tersimpan. Unique constraint (user_id, checkin_date)
-        // di database tetap disarankan untuk mencegah dua permintaan bersamaan.
-        const { data: profile, error: profileError } = await supabaseClient.from('profiles').select('free_coins').eq('id', currentUser.id).maybeSingle();
-        if (profileError || !profile) throw new Error('Absen sudah tercatat, tetapi saldo tidak bisa dibaca. Bonus perlu diperiksa admin.');
-        const before = Math.max(0, Number(profile.free_coins ?? freeCoins ?? 0));
-        const after = before + reward;
-        const { error: awardError } = await supabaseClient.from('profiles').update({free_coins:after}).eq('id', currentUser.id);
-        if (awardError) throw new Error(`Absen tercatat, tetapi bonus ${reward} Koin Gratis gagal disimpan. Hubungi admin untuk pemeriksaan.`);
-        freeCoins = after;
-        localStorage.setItem('cuit_free_coins', String(freeCoins));
-        await updateCoinUI(true);
-        alert(`Absen berhasil! Bonus hari ke-${rewardIndex + 1}: ${reward} Koin Gratis.\nSaldo Koin Gratis: ${freeCoins.toLocaleString('id-ID')}.`);
-      } catch (error) {
-        console.error('Absen CUIT:', error);
-        const msg = error && error.message ? error.message : 'Absen gagal. Periksa tabel cuit_checkins dan kebijakan RLS di Supabase.';
-        alert(msg);
-      }
+    const cards = rewards.map((n, i) => `
+      <div style="
+        min-width:0;border:1px solid #e6c66e;
+        border-radius:11px;padding:7px 2px 9px;
+        background:linear-gradient(#fffdf7,#ffedc4);
+        text-align:center;box-shadow:0 3px 7px #6b240b20;
+      ">
+        <div style="font-size:clamp(9px,2.6vw,12px);
+          font-weight:900;color:#941126;margin-bottom:7px">
+          HARI ${i + 1}
+        </div>
+        <div style="
+          display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+          gap:2px;justify-items:center;align-content:center;
+          min-height:54px;padding:0 1px;
+        ">
+          ${Array.from({length:n}, () => `
+            <span style="
+              width:clamp(6px,2.1vw,13px);
+              height:clamp(6px,2.1vw,13px);
+              max-width:13px;max-height:13px;
+              border-radius:50%;display:block;
+              background:radial-gradient(circle at 30% 25%,#fff4a3,#f5b51d 48%,#a96708);
+              border:1px solid #b57a12;
+              box-shadow:0 1px 2px #6b3908;
+            "></span>
+          `).join('')}
+        </div>
+        <div style="
+          color:#a20f25;font-size:clamp(13px,3.7vw,19px);
+          font-weight:950;margin-top:5px
+        ">${n}</div>
+        <div style="font-size:9px;color:#79501b;font-weight:800">KOIN</div>
+      </div>
+    `).join('');
+
+    overlay.innerHTML = `
+      <div style="
+        width:100%;max-width:540px;max-height:92dvh;overflow:auto;
+        border:2px solid #f2d477;border-radius:20px;
+        background:linear-gradient(145deg,#fffdf6,#ffe9bd);
+        box-shadow:0 12px 40px #0008;
+        font-family:Arial,sans-serif;color:#54111a;
+      ">
+        <div style="
+          position:relative;text-align:center;padding:17px 10px 15px;
+          color:white;border-bottom:4px solid #e8c15c;
+          background:linear-gradient(120deg,#790719,#d71932,#87091b);
+        ">
+          <img src="assets/cuit-app-icon.svg" alt="Logo CUIT"
+            style="width:58px;height:58px;object-fit:contain;
+            display:block;margin:0 auto 7px;
+            border:2px solid #f5d779;border-radius:14px;
+            background:#fff4d5">
+          <div style="font-size:clamp(19px,5vw,26px);font-weight:950">
+            ABSEN HARIAN CUIT
+          </div>
+          <div style="
+            display:inline-block;margin-top:8px;padding:6px 13px;
+            border-radius:30px;color:#79101a;
+            background:linear-gradient(#fff0a9,#e9b943);
+            font-weight:900;font-size:clamp(10px,3vw,13px)
+          ">KLAIM KOIN GRATIS SETIAP HARI</div>
+        </div>
+
+        <div style="padding:14px 10px 12px">
+          <div style="
+            text-align:center;font-size:12px;font-weight:800;
+            color:#80551c;margin-bottom:12px
+          ">Tanggal ${day} WIB · Bonus 7 Hari Berurutan</div>
+
+          <div style="
+            display:grid;grid-template-columns:repeat(7,minmax(0,1fr));
+            gap:clamp(3px,1.2vw,7px)
+          ">${cards}</div>
+
+          <div style="
+            display:flex;align-items:center;justify-content:center;
+            gap:10px;margin-top:13px;padding:11px 6px;
+            border:1px solid #d9ad43;border-radius:12px;
+            color:#ffe99b;
+            background:linear-gradient(120deg,#780719,#c8102e,#780719);
+          ">
+            <div style="font-size:clamp(25px,7vw,38px);font-weight:950">53</div>
+            <div style="font-size:12px;font-weight:900;line-height:1.5">
+              TOTAL HADIAH<br>7 HARI · KOIN GRATIS
+            </div>
+          </div>
+
+          <div style="
+            margin:11px 2px;font-size:11px;line-height:1.5;
+            color:#704b32;text-align:center
+          ">
+            Jika melewatkan satu hari, urutan kembali ke hari pertama.
+            Koin Gratis tidak dapat digunakan untuk fitur berbayar.
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button type="button" data-checkin-cancel style="
+              flex:1;min-height:43px;border:1px solid #d9c8c4;
+              border-radius:11px;background:#fff;color:#8e1528;
+              font-weight:900
+            ">BATAL</button>
+            <button type="button" data-checkin-ok style="
+              flex:1.5;min-height:43px;border:1px solid #f1d16a;
+              border-radius:11px;
+              background:linear-gradient(#e51c35,#a60922);
+              color:#fff;font-weight:950;
+              box-shadow:0 3px 8px #8c0b2435
+            ">ABSEN SEKARANG</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    function finish(value) {
+      overlay.remove();
+      document.body.style.overflow = '';
+      resolve(value);
     }
+
+    overlay.querySelector('[data-checkin-cancel]')
+      .onclick = () => finish(false);
+    overlay.querySelector('[data-checkin-ok]')
+      .onclick = () => finish(true);
+  });
+}
+
+async function openDailyCheckin() {
+  if (!currentUser) {
+    alert('Silakan masuk terlebih dahulu untuk melakukan absen.');
+    return;
+  }
+
+  const day = new Date().toLocaleDateString('en-CA', {
+    timeZone: 'Asia/Jakarta'
+  });
+
+  const rewards = [1, 2, 3, 5, 8, 13, 21];
+  const ok = await showCuitCheckinModal(day);
+  if (!ok) return;
+
+  try {
+    const { data: existing, error: readError } =
+      await supabaseClient.from('cuit_checkins')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('checkin_date', day)
+        .maybeSingle();
+
+    if (readError) throw readError;
+
+    if (existing) {
+      alert('Kamu sudah absen hari ini. Bonus tidak bisa diambil dua kali.');
+      return;
+    }
+
+    const yesterday = new Date(
+      new Date(day + 'T00:00:00+07:00').getTime() - 86400000
+    );
+
+    const fromDay = new Date(
+      yesterday.getTime() - 6 * 86400000
+    ).toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
+
+    const { data: recent, error: historyError } =
+      await supabaseClient.from('cuit_checkins')
+        .select('checkin_date')
+        .eq('user_id', currentUser.id)
+        .gte('checkin_date', fromDay)
+        .lt('checkin_date', day)
+        .order('checkin_date', { ascending: false });
+
+    if (historyError) throw historyError;
+
+    const priorDates = new Set(
+      (recent || []).map(r => String(r.checkin_date).slice(0, 10))
+    );
+
+    let streak = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(
+        yesterday.getTime() - i * 86400000
+      ).toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
+
+      if (priorDates.has(d)) streak++;
+      else break;
+    }
+
+    const rewardIndex = Math.min(streak, rewards.length - 1);
+    const reward = rewards[rewardIndex];
+
+    const { error: insertError } =
+      await supabaseClient.from('cuit_checkins').insert({
+        user_id: currentUser.id,
+        checkin_date: day
+      });
+
+    if (insertError) throw insertError;
+
+    const { data: profile, error: profileError } =
+      await supabaseClient.from('profiles')
+        .select('free_coins')
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+    if (profileError || !profile) {
+      throw new Error('Absen tercatat, tetapi saldo tidak bisa dibaca. Hubungi admin.');
+    }
+
+    const before = Math.max(
+      0, Number(profile.free_coins ?? freeCoins ?? 0)
+    );
+    const after = before + reward;
+
+    const { error: awardError } =
+      await supabaseClient.from('profiles')
+        .update({ free_coins: after })
+        .eq('id', currentUser.id);
+
+    if (awardError) {
+      throw new Error(
+        `Absen tercatat, tetapi bonus ${reward} Koin Gratis gagal disimpan. Hubungi admin.`
+      );
+    }
+
+    freeCoins = after;
+    localStorage.setItem('cuit_free_coins', String(freeCoins));
+    await updateCoinUI(true);
+
+    alert(
+      `Absen berhasil! Bonus hari ke-${rewardIndex + 1}: ${reward} Koin Gratis.\n` +
+      `Saldo Koin Gratis: ${freeCoins.toLocaleString('id-ID')}.`
+    );
+  } catch (error) {
+    console.error('Absen CUIT:', error);
+    alert(error?.message || 'Absen gagal. Silakan coba lagi.');
+  }
+}
 
     const CONFIG = {
       FREE_COINS_DAILY: 0,
