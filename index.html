@@ -1254,7 +1254,7 @@
       if (!offer) throw new Error('Biaya permainan tidak berhasil diperiksa.');
       const fee = Number(offer.entry_fee ?? offer.fee ?? 0);
       const isFree = offer.is_free === true || offer.is_free_play === true || fee === 0;
-      if (!isFree && !window.confirm(`Permainan ini membutuhkan ${fee} koin berbayar. Lanjutkan?`)) return;
+      if (!isFree && !await cuitConfirm(`Permainan ini membutuhkan ${fee} Koin Berbayar. Apakah Anda ingin melanjutkan permainan?`)) return;
 
       const { data, error } = await client.rpc('cuit_start_word_game', {
         p_confirmed_fee: isFree ? 0 : fee,
