@@ -3154,26 +3154,50 @@ try {
 }
 
         // --- 3. RAJA CURHAT ---
-        if (data && data.length > 0) {
-          const weeklyPosts = data.filter(p => new Date(p.created_at) >= startOfWeek);
-          if (weeklyPosts.length > 0) {
-            const topPost = [...weeklyPosts].sort((a,b) => ((b.likes_count||0)+(b.comments_count||0)) - ((a.likes_count||0)+(a.comments_count||0)))[0];
-            if (topPost && ((topPost.likes_count||0) + (topPost.comments_count||0)) > 0) {
-              const author = topPost.username || (topPost.user_email ? topPost.user_email.split('@')[0] : 'Pengguna');
-              document.getElementById('champCurhatName').innerText = author;
-              document.getElementById('champCurhatScore').innerText = `${topPost.likes_count||0} ♥ + ${topPost.comments_count||0} 💬`;
-            } else {
-              document.getElementById('champCurhatName').innerText = 'Belum Ada';
-              document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-            }
-          } else {
-            document.getElementById('champCurhatName').innerText = 'Belum Ada';
-            document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-          }
-        } else {
-          document.getElementById('champCurhatName').innerText = 'Belum Ada';
-          document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬';
-        }
+const giftCountByPost = {};
+
+(weeklyGifts || []).forEach(g => {
+  const postId = String(g.post_id || '');
+  if (postId) {
+    giftCountByPost[postId] = (giftCountByPost[postId] || 0) + 1;
+  }
+});
+
+const weeklyPosts = (data || []).filter(p =>
+  p.created_at && new Date(p.created_at) >= startOfWeek
+);
+
+let topPost = null;
+let topScore = -1;
+
+weeklyPosts.forEach(p => {
+  const score =
+    Number(p.likes_count || 0) +
+    Number(p.comments_count || 0) +
+    Number(giftCountByPost[String(p.id)] || 0);
+
+  if (score > topScore) {
+    topPost = p;
+    topScore = score;
+  }
+});
+
+if (topPost && topScore > 0) {
+  const author =
+    topPost.username ||
+    (topPost.user_email
+      ? topPost.user_email.split('@')[0]
+      : 'Pengguna');
+
+  document.getElementById('champCurhatName').innerText = author;
+  document.getElementById('champCurhatScore').innerText =
+    `${Number(topPost.likes_count || 0)} ♥ + ` +
+    `${Number(topPost.comments_count || 0)} 💬 + ` +
+    `${Number(giftCountByPost[String(topPost.id)] || 0)} 🎁`;
+} else {
+  document.getElementById('champCurhatName').innerText = 'Belum Ada';
+  document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬 + 0 🎁';
+}
 
         // --- 4. RAJA PUJANGGA ---
         if (data && data.length > 0) {
