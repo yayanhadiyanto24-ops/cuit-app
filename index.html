@@ -2953,8 +2953,38 @@ function gameWinnerResult(res) {
           if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
           // Data Raja Game dihitung dari sumber data yang tersedia; tidak menggunakan fitur siaran.
           results.game = null;
-          const postEngagement = {};
-          posts.forEach(p=>{const key=p.user_id||p.user_email||p.email||p.username;if(!key)return;const value=Number(p.likes_count||0)+Number(p.comments_count||0);postEngagement[key]=(postEngagement[key]||0)+value;});
+          // RAJA CURHAT: satu curhatan dengan like + komentar + gift terbanyak
+const giftCountByPost = {};
+
+(gifts || []).forEach(g => {
+  const postId = String(g.post_id || '');
+  if (postId) {
+    giftCountByPost[postId] = (giftCountByPost[postId] || 0) + 1;
+  }
+});
+
+let topCurhat = null;
+let topCurhatScore = -1;
+
+(posts || []).forEach(p => {
+  const score =
+    Number(p.likes_count || 0) +
+    Number(p.comments_count || 0) +
+    Number(giftCountByPost[String(p.id)] || 0);
+
+  if (score > topCurhatScore) {
+    topCurhat = p;
+    topCurhatScore = score;
+  }
+});
+
+if (topCurhat && topCurhatScore > 0) {
+  results.curhat = {
+    name: safeNameFromRow(topCurhat),
+    scoreLabel: `${topCurhatScore.toLocaleString('id-ID')} interaksi`,
+    note: 'like + komentar + gift pada satu curhatan'
+  };
+}
           w=winnerFromCounts(postEngagement); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.curhat={name:safeNameFromRow(p),scoreLabel:`${w.score.toLocaleString('id-ID')} interaksi`,note:'interaksi pada curhatan'};}
           w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
           w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
