@@ -2985,7 +2985,7 @@ if (topCurhat && topCurhatScore > 0) {
     note: 'like + komentar + gift pada satu curhatan'
   };
 }
-          w=winnerFromCounts(postEngagement); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.curhat={name:safeNameFromRow(p),scoreLabel:`${w.score.toLocaleString('id-ID')} interaksi`,note:'interaksi pada curhatan'};}
+      
           w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
           w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
           w=winnerFromCounts(countBy(follows,f=>f.following_email||f.following_id)); if(w){const p=(profiles||[]).find(p=>p.email===w.key||p.id===w.key);results.jaringan={name:p?.username||(p?.email? p.email.split('@')[0]:String(w.key).split('@')[0]),scoreLabel:`${w.score} pengikut`,note:'pengikut baru tercatat'};}
