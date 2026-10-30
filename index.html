@@ -6267,106 +6267,240 @@ document.addEventListener('DOMContentLoaded', function () {
 </style>
 
 <!-- =====================================================
-     CUIT - PERMATA KEJUTAN
-     Kode tambahan mandiri — tidak mengganti 3 Huruf Kilat
+     CUIT - RODA INSPIRASI
+     24 sektor tema, 10 koin gratis, hadiah tetap 1 permata
+     Tidak mengubah fitur 3 Huruf Kilat
 ===================================================== -->
+
 <style>
 #cuitGemShortcut {
-  width:38px;height:34px;flex:0 0 38px;
-  border:1px solid #d9a52c;border-radius:11px;
-  background:linear-gradient(145deg,#fff7d9,#fff);
-  color:#bd102d;font-size:23px;line-height:1;
-  box-shadow:0 2px 8px #b91c1c25;
+  flex:0 0 auto;
+  border:1px solid #d8a52d;
+  border-radius:12px;
+  padding:8px 13px;
+  color:#ffdf75;
+  background:linear-gradient(145deg,#ed3448,#a90025);
+  box-shadow:0 4px 0 #710018,0 6px 12px #78001935;
+  font-size:12px;
+  font-weight:950;
   cursor:pointer;
 }
-#cuitGemShortcut:active {transform:scale(.94)}
+#cuitGemShortcut:active {
+  transform:translateY(2px);
+  box-shadow:0 2px 0 #710018;
+}
 
 #cuitSurpriseBox {
-  max-width:520px;margin:8px auto 14px;padding:14px;
-  border:1px solid #e5c36b;border-radius:20px;
-  background:linear-gradient(155deg,#fff7f7,#fff 55%,#fff8df);
+  width:calc(100% - 16px);
+  max-width:520px;
+  margin:12px auto 18px;
+  padding:15px 10px 18px;
+  border:1px solid #e3c16d;
+  border-radius:22px;
+  background:linear-gradient(155deg,#fff8f8,#fff 55%,#fff8e5);
   box-shadow:0 8px 25px #9b14201c;
-  color:#48252a;text-align:center;
+  color:#48252a;
+  text-align:center;
+  box-sizing:border-box;
 }
+
 #cuitSurpriseBox .gem-title {
-  color:#ad102b;font-size:21px;font-weight:950;margin:2px 0;
+  color:#a90e2b;
+  font-size:21px;
+  font-weight:1000;
+  letter-spacing:.5px;
+  margin:3px 0 15px;
 }
-#cuitSurpriseBox .gem-subtitle {
-  font-size:12px;color:#80666a;margin:5px 0 12px;
-}
-#cuitSurpriseBox .gem-info {
-  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
-  margin:10px 0;
-}
-#cuitSurpriseBox .gem-info div {
-  padding:8px 3px;border:1px solid #f0dfb6;
-  background:#fff;border-radius:11px;
-}
-#cuitSurpriseBox .gem-info b {
-  display:block;color:#b51631;font-size:15px;
-}
-#cuitSurpriseBox .gem-info span {
-  font-size:9px;color:#80666a;
-}
+
 #cuitGemWheelWrap {
-  width:min(78vw,280px);aspect-ratio:1;
-  position:relative;margin:18px auto 12px;
+  width:min(82vw,320px);
+  aspect-ratio:1;
+  position:relative;
+  margin:20px auto 18px;
 }
+
 #cuitGemPointer {
-  position:absolute;z-index:3;top:-9px;left:50%;
+  position:absolute;
+  z-index:5;
+  top:-10px;
+  left:50%;
   transform:translateX(-50%);
-  width:0;height:0;
-  border-left:13px solid transparent;
-  border-right:13px solid transparent;
-  border-top:27px solid #b5102d;
+  width:0;
+  height:0;
+  border-left:14px solid transparent;
+  border-right:14px solid transparent;
+  border-top:29px solid #a90025;
   filter:drop-shadow(0 2px 2px #6b101c66);
 }
+
 #cuitGemWheel {
-  width:100%;height:100%;border-radius:50%;
-  border:7px solid #d9ad43;
-  background:conic-gradient(
-    #b5102d 0deg 126deg,
-    #f5d77b 126deg 234deg,
-    #d51d3a 234deg 306deg,
-    #f8e7b2 306deg 342deg,
-    #a90d28 342deg 360deg
-  );
-  box-shadow:0 0 0 4px #fff inset,0 5px 18px #72102035;
+  width:100%;
+  height:100%;
   position:relative;
+  border-radius:50%;
+  border:7px solid #d7a83d;
+  box-sizing:border-box;
+  background:conic-gradient(
+    from -7.5deg,
+    #b40d2d 0deg 15deg,
+    #f4d77e 15deg 30deg,
+    #e9a9ae 30deg 45deg,
+    #f6e8bd 45deg 60deg,
+    #a90d29 60deg 75deg,
+    #f4d77e 75deg 90deg,
+    #b40d2d 90deg 105deg,
+    #f6e8bd 105deg 120deg,
+    #e9a9ae 120deg 135deg,
+    #b40d2d 135deg 150deg,
+    #f4d77e 150deg 165deg,
+    #a90d29 165deg 180deg,
+    #f6e8bd 180deg 195deg,
+    #e9a9ae 195deg 210deg,
+    #b40d2d 210deg 225deg,
+    #f4d77e 225deg 240deg,
+    #a90d29 240deg 255deg,
+    #f6e8bd 255deg 270deg,
+    #b40d2d 270deg 285deg,
+    #e9a9ae 285deg 300deg,
+    #f4d77e 300deg 315deg,
+    #a90d29 315deg 330deg,
+    #f6e8bd 330deg 345deg,
+    #b40d2d 345deg 360deg
+  );
+  box-shadow:0 0 0 3px #fff inset,0 6px 18px #72102035;
   transform:rotate(0deg);
-  transition:transform 12s cubic-bezier(.08,.72,.08,1);
+  transition:transform 16.5s cubic-bezier(.10,.72,.08,1);
   overflow:hidden;
 }
-#cuitGemWheel::before {
-  content:"CUIT";position:absolute;left:50%;top:50%;
+
+#cuitGemWheel .gem-sector-number {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:25px;
+  height:25px;
+  margin:-12.5px 0 0 -12.5px;
+  display:grid;
+  place-items:center;
+  font-size:14px;
+  line-height:1;
+  font-weight:1000;
+  color:#fff;
+  text-shadow:0 1px 3px #540817;
+  pointer-events:none;
+}
+
+#cuitGemWheel .gem-center {
+  position:absolute;
+  z-index:3;
+  width:82px;
+  height:82px;
+  left:50%;
+  top:50%;
   transform:translate(-50%,-50%);
-  width:66px;height:66px;border-radius:50%;
-  display:grid;place-items:center;
-  background:linear-gradient(145deg,#fff4c9,#d8aa39);
-  border:4px solid white;color:#a30d27;
-  font-weight:1000;font-size:19px;
-  box-shadow:0 2px 10px #56101c66;
+  border:4px solid #fff;
+  border-radius:50%;
+  background:linear-gradient(145deg,#fff2bd,#d9a735);
+  box-shadow:0 3px 12px #56101c66;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
 }
-#cuitGemWheel.jackpot {
-  filter:drop-shadow(0 0 12px #f1bd36);
+
+#cuitGemWheel .gem-center img {
+  width:34px;
+  height:34px;
+  object-fit:contain;
 }
+
+#cuitGemWheel .gem-center strong {
+  color:#a30d27;
+  font-size:16px;
+  font-weight:1000;
+  line-height:1.1;
+}
+
+#cuitGemWheel .gem-center span {
+  color:#fff;
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:1px;
+  margin-top:2px;
+  text-shadow:0 1px 2px #7b1420;
+}
+
 #cuitGemResult {
-  min-height:45px;margin:10px 0;
-  color:#a70f29;font-size:19px;font-weight:950;
+  min-height:52px;
+  margin:12px 4px;
+  color:#a70f29;
+  font-size:17px;
+  font-weight:950;
+  line-height:1.45;
 }
+
+#cuitGemResult small {
+  display:block;
+  color:#795b28;
+  font-size:12px;
+  font-weight:700;
+  margin-top:3px;
+}
+
 #cuitGemSpinButton {
-  width:100%;padding:13px;border:0;border-radius:13px;
-  color:#fff;font-size:15px;font-weight:900;
-  background:linear-gradient(120deg,#e52a43,#a40d29);
-  box-shadow:0 5px 13px #a40d2935;
+  display:block;
+  width:100%;
+  padding:14px 10px;
+  border:1px solid #e0b64d;
+  border-radius:14px;
+  color:#fff3c4;
+  font-size:14px;
+  font-weight:1000;
+  letter-spacing:.3px;
+  background:linear-gradient(145deg,#ed3448,#a40025);
+  box-shadow:0 5px 0 #710018,0 7px 14px #a40d2935;
+  cursor:pointer;
 }
-#cuitGemSpinButton:disabled {opacity:.55}
+
+#cuitGemSpinButton:active:not(:disabled) {
+  transform:translateY(3px);
+  box-shadow:0 2px 0 #710018;
+}
+
+#cuitGemSpinButton:disabled {
+  opacity:.6;
+  cursor:wait;
+}
+
 #cuitGemMessage {
-  min-height:34px;font-size:12px;font-weight:700;
-  color:#815b20;margin-top:8px;
+  min-height:34px;
+  margin-top:12px;
+  color:#815b20;
+  font-size:12px;
+  font-weight:750;
+  line-height:1.5;
 }
-#cuitSurpriseBox .gem-thanks {
-  font-size:11px;color:#80666a;margin-top:9px;
+
+#cuitGemComposerNote {
+  display:none;
+  margin:12px 2px 0;
+  padding:10px;
+  border:1px solid #e8d49d;
+  border-radius:12px;
+  background:#fffaf0;
+  color:#76541c;
+  font-size:12px;
+  line-height:1.5;
+}
+
+@media(max-width:360px) {
+  #cuitSurpriseBox .gem-title {
+    font-size:18px;
+  }
+  #cuitGemWheel .gem-center {
+    width:72px;
+    height:72px;
+  }
 }
 </style>
 
@@ -6374,110 +6508,80 @@ document.addEventListener('DOMContentLoaded', function () {
 (function () {
   "use strict";
 
-  if (window.cuitSurpriseGemInstalled) return;
-  window.cuitSurpriseGemInstalled = true;
+  if (window.cuitInspirationWheelInstalled) return;
+  window.cuitInspirationWheelInstalled = true;
 
-  const rewards = [
-    { gems: 1, label: "MANTAP!", percent: "35%" },
-    { gems: 2, label: "HEBAT!", percent: "30%" },
-    { gems: 3, label: "SUPER!", percent: "20%" },
-    { gems: 4, label: "LUAR BIASA!", percent: "10%" },
-    { gems: 5, label: "JACKPOT!!!", percent: "5%" }
+  const sectors = [
+    4,1,2,3,1,2,4,1,
+    2,3,1,5,0,1,3,2,
+    1,4,2,1,3,2,1,5
   ];
 
-  function addGemFeature() {
-    const pageGame = document.getElementById("pageGame");
-    const pills = document.querySelector(".pills-group");
+  const themes = {
+    0: {
+      name:"HUMOR",
+      texts:[
+        "Kadang hidup memang penuh kejutan. Yang penting jangan sampai kejutan itu berupa tagihan yang lupa dibayar.",
+        "Tersenyumlah. Tidak semua masalah harus diselesaikan dengan wajah serius.",
+        "Hari ini boleh saja berantakan, tetapi semoga rambut dan semangat tetap tertata."
+      ]
+    },
+    1: {
+      name:"MENGHIBUR DIRI",
+      texts:[
+        "Tidak apa-apa jika hari ini belum sempurna. Kita masih punya kesempatan untuk mencoba lagi esok hari.",
+        "Belajarlah menerima hal yang belum bisa diubah. Tenangkan hati dan hargai perjalananmu.",
+        "Kamu tidak harus selalu kuat setiap waktu. Beristirahat sejenak juga bagian dari perjalanan."
+      ]
+    },
+    2: {
+      name:"MOTIVASI",
+      texts:[
+        "Langkah kecil yang dilakukan dengan tekun dapat membawa kita menuju perubahan besar.",
+        "Jangan takut memulai kembali. Pengalaman kemarin bisa menjadi bekal untuk hari ini.",
+        "Teruslah berusaha. Hasil yang baik sering tumbuh dari kesabaran dan ketekunan."
+      ]
+    },
+    3: {
+      name:"KEBAHAGIAAN",
+      texts:[
+        "Bahagia tidak selalu datang dari hal besar. Kadang cukup dengan hati yang bersyukur.",
+        "Semoga hari ini membawa kabar baik, pertemuan menyenangkan, dan alasan untuk tersenyum.",
+        "Nikmati hal sederhana yang hadir hari ini. Di sanalah sering tersembunyi kebahagiaan."
+      ]
+    },
+    4: {
+      name:"KEBAHAGIAAN DAHSYAT",
+      texts:[
+        "Hari ini adalah kesempatan untuk merayakan pencapaian, sekecil apa pun langkah yang telah berhasil ditempuh.",
+        "Ketika usaha bertemu kesempatan, jangan lupa bersyukur dan terus melangkah dengan rendah hati.",
+        "Semoga keberhasilan yang datang hari ini menjadi awal dari banyak kebaikan berikutnya."
+      ]
+    },
+    5: {
+      name:"DRAMATIS DAN SPEKTAKULER",
+      texts:[
+        "Di balik perjalanan panjang, selalu ada momen yang membuat kita sadar bahwa perjuangan tidak pernah sia-sia.",
+        "Satu keputusan baik hari ini mungkin menjadi awal dari cerita luar biasa di masa depan.",
+        "Ketika harapan kembali menyala, bahkan langkah paling sederhana bisa terasa sangat berarti."
+      ]
+    }
+  };
 
-    if (!pageGame || !pills) return false;
+  let spinning = false;
+  let pendingRequestId = null;
+  let currentRotation = 0;
 
-    // Ikon permata pada baris Beranda | Semua | Mengikuti
-    if (!document.getElementById("cuitGemShortcut")) {
-      const icon = document.createElement("button");
-      icon.id = "cuitGemShortcut";
-      icon.type = "button";
-      icon.title = "Permata Kejutan";
-      icon.setAttribute("aria-label", "Buka Permata Kejutan");
-      icon.innerHTML = "💎";
-      icon.onclick = function () {
-        switchTab(
-          "pageGame",
-          document.querySelectorAll(".nav-bar .nav-item")[1]
-        );
-        setTimeout(function () {
-          const box = document.getElementById("cuitSurpriseBox");
-          if (box) box.scrollIntoView({behavior:"smooth",block:"start"});
-        }, 150);
-      };
-      pills.parentElement.appendChild(icon);
+  function makeRequestId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+      return window.crypto.randomUUID();
     }
 
-    
-    // Panel Permata Kejutan di bawah 3 Huruf Kilat
-    let box = document.getElementById("cuitSurpriseBox");
-
-    if (!box) {
-      box = document.createElement("section");
-      box.id = "cuitSurpriseBox";
-
-      box.innerHTML = `
-        <div style="font-size:30px">💎</div>
-        <div class="gem-title">PERMATA KEJUTAN</div>
-        <div class="gem-subtitle">
-          Putar roda CUIT dan dapatkan permata!
-        </div>
-
-        <div class="gem-info">
-          <div><b>19.00–21.00</b><span>Waktu WIB</span></div>
-          <div><b>10 Koin</b><span>Biaya per putaran</span></div>
-          <div><b>1–5</b><span>Permata hadiah</span></div>
-        </div>
-
-        <div id="cuitGemWheelWrap">
-          <div id="cuitGemPointer"></div>
-          <div id="cuitGemWheel">
-            <div class="gem-number">1<span>💎</span></div>
-            <div class="gem-number">2<span>💎</span></div>
-            <div class="gem-number">3<span>💎</span></div>
-            <div class="gem-number">4<span>💎</span></div>
-            <div class="gem-number">5<span>💎</span></div>
-          </div>
-        </div>
-
-        <div id="cuitGemResult">SIAPKAN DIRI ANDA!</div>
-
-        <button id="cuitGemSpinButton" type="button">
-          💎 PUTAR SEKARANG — 10 KOIN GRATIS
-        </button>
-
-        <div id="cuitGemMessage">
-          Hanya Koin Gratis yang dapat digunakan.
-        </div>
-
-        <div class="gem-thanks">
-          Hadiah masuk ke saldo Permata jika transaksi berhasil.
-        </div>
-      `;
-    }
-
-    // Pastikan panel selalu berada di bawah game 3 Huruf Kilat.
-    const kilat = pageGame.querySelector(".kilat-shell");
-
-    if (kilat) {
-      kilat.insertAdjacentElement("afterend", box);
-    } else {
-      pageGame.appendChild(box);
-    }
-
-    // Pasang tombol hanya satu kali.
-    const button = document.getElementById("cuitGemSpinButton");
-
-    if (button && !button.dataset.ready) {
-      button.dataset.ready = "1";
-      button.addEventListener("click", spinGem);
-    }
-
-    return true;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 3 | 8)).toString(16);
+    });
+  }
 
   function showMessage(message, color) {
     const el = document.getElementById("cuitGemMessage");
@@ -6486,18 +6590,142 @@ document.addEventListener('DOMContentLoaded', function () {
     el.style.color = color || "#815b20";
   }
 
-  function makeRequestId() {
-    if (window.crypto && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      return (c === "x" ? r : (r & 3 | 8)).toString(16);
+  function createWheelNumbers(wheel) {
+    if (wheel.querySelector(".gem-sector-number")) return;
+
+    sectors.forEach(function(number, index) {
+      const label = document.createElement("span");
+      const angle = index * 15;
+
+      label.className = "gem-sector-number";
+      label.textContent = String(number);
+      label.style.transform =
+        "rotate(" + angle + "deg) translateY(-" +
+        (wheel.clientWidth * 0.365) +
+        "px) rotate(-" + angle + "deg)";
+
+      wheel.appendChild(label);
     });
+
+    const center = document.createElement("div");
+    center.className = "gem-center";
+
+    const logo = document.createElement("img");
+    logo.src = "assets/cuit-app-icon.svg";
+    logo.alt = "CUIT";
+
+    const title = document.createElement("strong");
+    title.textContent = "CUIT";
+
+    const subtitle = document.createElement("span");
+    subtitle.textContent = "PUTAR";
+
+    center.appendChild(logo);
+    center.appendChild(title);
+    center.appendChild(subtitle);
+    wheel.appendChild(center);
   }
 
-  let spinning = false;
-  let pendingRequestId = null;
+  function addGemFeature() {
+    const pageGame = document.getElementById("pageGame");
+    const pills = document.querySelector(".pills-group");
+
+    if (!pageGame) return false;
+
+    if (pills && !document.getElementById("cuitGemShortcut")) {
+      const shortcut = document.createElement("button");
+      shortcut.id = "cuitGemShortcut";
+      shortcut.type = "button";
+      shortcut.textContent = "💎 Roda Inspirasi";
+      shortcut.onclick = function() {
+        if (typeof switchTab === "function") {
+          switchTab(
+            "pageGame",
+            document.querySelectorAll(".nav-bar .nav-item")[1]
+          );
+        }
+
+        setTimeout(function() {
+          const box = document.getElementById("cuitSurpriseBox");
+          if (box) {
+            box.scrollIntoView({
+              behavior:"smooth",
+              block:"start"
+            });
+          }
+        }, 180);
+      };
+
+      pills.parentElement.appendChild(shortcut);
+    }
+
+    let box = document.getElementById("cuitSurpriseBox");
+
+    if (!box) {
+      box = document.createElement("section");
+      box.id = "cuitSurpriseBox";
+
+      box.innerHTML = `
+        <div class="gem-title">RODA INSPIRASI CUIT</div>
+
+        <div id="cuitGemWheelWrap">
+          <div id="cuitGemPointer"></div>
+          <div id="cuitGemWheel"></div>
+        </div>
+
+        <div id="cuitGemResult">
+          SIAPKAN DIRI ANDA!
+        </div>
+
+        <button id="cuitGemSpinButton" type="button">
+          💎 PUTAR SEKARANG — 10 KOIN GRATIS
+        </button>
+
+        <div id="cuitGemMessage">
+          Setiap putaran berhasil memberikan 1 permata.
+        </div>
+
+        <div id="cuitGemComposerNote">
+          Tema inspirasi sudah disiapkan di kolom curhatan.
+          Silakan edit sesuai pengalaman Anda, lalu tekan Curhatkan jika ingin membagikannya.
+        </div>
+      `;
+    }
+
+    const kilat = pageGame.querySelector(".kilat-shell");
+
+    if (kilat) {
+      kilat.insertAdjacentElement("afterend", box);
+    } else if (box.parentElement !== pageGame) {
+      pageGame.appendChild(box);
+    }
+
+    const wheel = document.getElementById("cuitGemWheel");
+    if (wheel) createWheelNumbers(wheel);
+
+    const button = document.getElementById("cuitGemSpinButton");
+
+    if (button && !button.dataset.ready) {
+      button.dataset.ready = "1";
+      button.addEventListener("click", spinGem);
+    }
+
+    return true;
+  }
+
+  function chooseTheme() {
+    const sectorIndex = Math.floor(Math.random() * sectors.length);
+    const themeNumber = sectors[sectorIndex];
+    const theme = themes[themeNumber];
+    const textIndex = Math.floor(Math.random() * theme.texts.length);
+
+    return {
+      index:sectorIndex,
+      number:themeNumber,
+      name:theme.name,
+      text:theme.texts[textIndex]
+    };
+  }
 
   async function spinGem() {
     if (spinning) return;
@@ -6505,100 +6733,123 @@ document.addEventListener('DOMContentLoaded', function () {
     const button = document.getElementById("cuitGemSpinButton");
     const wheel = document.getElementById("cuitGemWheel");
     const result = document.getElementById("cuitGemResult");
+    const note = document.getElementById("cuitGemComposerNote");
+
+    if (!button || !wheel || !result) return;
 
     if (!window.supabaseClient) {
-      showMessage("Koneksi CUIT belum siap. Muat ulang aplikasi.", "#b5102d");
+      showMessage(
+        "Koneksi CUIT belum siap. Silakan muat ulang aplikasi.",
+        "#b5102d"
+      );
       return;
     }
 
-    if (!pendingRequestId) pendingRequestId = makeRequestId();
+    if (!pendingRequestId) {
+      pendingRequestId = makeRequestId();
+    }
 
     spinning = true;
     button.disabled = true;
-    button.textContent = "⏳ SEDANG MEMPROSES...";
-    result.textContent = "RODA MULAI BERPUTAR...";
+    button.textContent = "⏳ MEMPROSES PUTARAN...";
+    result.textContent = "MENYIAPKAN INSPIRASI...";
+
+    if (note) note.style.display = "none";
 
     try {
-      const { data, error } = await supabaseClient.rpc(
+      const { data, error } = await window.supabaseClient.rpc(
         "cuit_spin_surprise_gems",
-        { p_request_id: pendingRequestId }
+        { p_request_id:pendingRequestId }
       );
 
       if (error) throw error;
+
       if (!data || data.ok !== true) {
-        throw new Error(data && data.message
-          ? data.message : "Spin belum berhasil.");
+        throw new Error(
+          data && data.message
+            ? data.message
+            : "Putaran belum berhasil."
+        );
       }
 
-      const reward = Number(data.reward);
-      if (!Number.isInteger(reward) || reward < 1 || reward > 5) {
-        throw new Error("Hasil transaksi tidak dikenali. Jangan ulangi dengan ID baru.");
+      if (Number(data.reward) !== 1) {
+        throw new Error(
+          "Respons hadiah tidak sesuai. Silakan hubungi pengelola CUIT."
+        );
       }
 
-      // Sudut hadiah mengikuti pembagian peluang yang ditentukan server.
-      const ranges = [
-        { gems:1, start:0,   size:126 },
-        { gems:2, start:126, size:108 },
-        { gems:3, start:234, size:72 },
-        { gems:4, start:306, size:36 },
-        { gems:5, start:342, size:18 }
-      ];
-      const chosen = ranges.find(x => x.gems === reward);
-      const angleInSector = chosen.start + Math.random() * chosen.size;
-      const targetAngle = (360 - angleInSector) % 360;
-      const current = Number(wheel.dataset.rotation || 0);
-      const finalRotation = current + 360 * 8 +
-        ((targetAngle - (current % 360) + 360) % 360);
+      const theme = chooseTheme();
+
+      const extraTurns = 8 * 360;
+      const targetAngle = (360 - theme.index * 15) % 360;
+
+      const finalRotation =
+        currentRotation +
+        extraTurns +
+        ((targetAngle - (currentRotation % 360) + 360) % 360);
 
       wheel.style.transition = "none";
-      wheel.style.transform = "rotate(" + current + "deg)";
+      wheel.style.transform = "rotate(" + currentRotation + "deg)";
       void wheel.offsetWidth;
-      wheel.style.transition = "transform 12s cubic-bezier(.08,.72,.08,1)";
+
+      wheel.style.transition =
+        "transform 16.5s cubic-bezier(.10,.72,.08,1)";
+
       wheel.style.transform = "rotate(" + finalRotation + "deg)";
-      wheel.dataset.rotation = String(finalRotation);
+      currentRotation = finalRotation;
 
-      showMessage("Menentukan hasil hadiah dari server...", "#815b20");
+      showMessage(
+        "Roda sedang berputar. Tunggu sampai berhenti...",
+        "#815b20"
+      );
 
-      await new Promise(resolve => setTimeout(resolve, 12050));
+      await new Promise(function(resolve) {
+        setTimeout(resolve, 16700);
+      });
 
-      const prize = rewards.find(x => x.gems === reward);
-      result.innerHTML = "🎉 " + prize.label +
-        "<br><span style='font-size:15px'>+" + reward +
-        " PERMATA!</span>";
+      result.textContent = "✨ " + theme.name;
 
-      if (reward === 5) {
-        wheel.classList.add("jackpot");
-        result.innerHTML += "<br>✨ JACKPOT PERMATA CUIT ✨";
-      } else {
-        wheel.classList.remove("jackpot");
-      }
+      const detail = document.createElement("small");
+      detail.textContent = "Anda mendapatkan inspirasi nomor " + theme.number + ".";
+      result.appendChild(detail);
 
       showMessage(
         "Berhasil! 10 Koin Gratis digunakan. Saldo Koin Gratis: " +
-        data.free_coins + " | Permata: " + data.gems,
+        data.free_coins +
+        " | Permata: " + data.gems,
         "#168044"
       );
 
-      // Isi composer, tetapi tidak menerbitkan curhatan otomatis.
       const postText = document.getElementById("postContent");
-      const thankText =
-        "Terima kasih ADMINCUIT atas hadiah " + reward +
-        " Permata Kejutan dari CUIT! 💎";
 
       if (postText) {
-        postText.value = thankText;
+        postText.value = theme.text;
+
+        postText.dispatchEvent(new Event("input", {bubbles:true}));
+
         if (typeof updateCharCount === "function") {
           updateCharCount(postText);
         }
-        const navCreate = document.querySelectorAll(".nav-bar .nav-item")[2];
-        switchTab("pageCreate", navCreate);
+
+        if (note) note.style.display = "block";
+
+        const navCreate =
+          document.querySelectorAll(".nav-bar .nav-item")[2];
+
+        if (typeof switchTab === "function") {
+          switchTab("pageCreate", navCreate);
+        }
+
         setTimeout(function() {
           postText.focus();
-          postText.scrollIntoView({behavior:"smooth",block:"center"});
-        }, 250);
+          postText.scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+          });
+        }, 300);
       } else {
         showMessage(
-          "Hadiah berhasil masuk. Composer belum ditemukan; saldo permata Anda tetap bertambah.",
+          "Permata berhasil ditambahkan. Kolom curhatan belum ditemukan.",
           "#168044"
         );
       }
@@ -6606,76 +6857,38 @@ document.addEventListener('DOMContentLoaded', function () {
       pendingRequestId = null;
 
     } catch (err) {
-      console.error("Permata Kejutan:", err);
+      console.error("Roda Inspirasi CUIT:", err);
+
       showMessage(
-        err && err.message ? err.message : "Terjadi kesalahan koneksi.",
+        err && err.message
+          ? err.message
+          : "Terjadi kesalahan koneksi. Silakan periksa kembali.",
         "#b5102d"
       );
 
-      // ID permintaan dipertahankan agar percobaan ulang tidak
-      // memotong saldo dua kali jika transaksi pertama sebenarnya sukses.
-      button.textContent = "COBA PERIKSA / ULANGI";
+      button.textContent = "PERIKSA / COBA LAGI";
     } finally {
       spinning = false;
       button.disabled = false;
-      if (button.textContent === "⏳ SEDANG MEMPROSES...") {
+
+      if (
+        button.textContent === "⏳ MEMPROSES PUTARAN..."
+      ) {
         button.textContent = "💎 PUTAR SEKARANG — 10 KOIN GRATIS";
       }
     }
   }
 
-  // Menunggu struktur halaman siap.
   if (!addGemFeature()) {
-    document.addEventListener("DOMContentLoaded", addGemFeature);
+    document.addEventListener(
+      "DOMContentLoaded",
+      addGemFeature
+    );
   }
+
 })();
-  
-#cuitGemWheel .gem-number {
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:52px;
-  height:52px;
-  margin:-26px 0 0 -26px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-size:22px;
-  font-weight:1000;
-  line-height:1;
-  text-shadow:0 2px 4px #650b1c;
-  pointer-events:none;
-}
-
-#cuitGemWheel .gem-number span {
-  font-size:13px;
-  margin-top:3px;
-}
-
-#cuitGemWheel .gem-number:nth-child(1) {
-  transform:rotate(63deg) translateY(-91px) rotate(-63deg);
-}
-#cuitGemWheel .gem-number:nth-child(2) {
-  transform:rotate(180deg) translateY(-91px) rotate(-180deg);
-  color:#8d1025;
-  text-shadow:none;
-}
-#cuitGemWheel .gem-number:nth-child(3) {
-  transform:rotate(270deg) translateY(-91px) rotate(-270deg);
-}
-#cuitGemWheel .gem-number:nth-child(4) {
-  transform:rotate(324deg) translateY(-91px) rotate(-324deg);
-  color:#8d1025;
-  text-shadow:none;
-}
-#cuitGemWheel .gem-number:nth-child(5) {
-  transform:rotate(351deg) translateY(-91px) rotate(-351deg);
-}
-
 </script>
-<!-- AKHIR PERMATA KEJUTAN -->
 
+<!-- AKHIR RODA INSPIRASI CUIT -->
 </body>
   </html>
