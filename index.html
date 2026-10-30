@@ -2001,7 +2001,20 @@ poolStatus=feePaid>0
       if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
       values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
       values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
-      values.watch=reels===null?'Belum terhubung':reels.length;
+      // Total koin berbayar keluar hari ini
+if (paidLedger === null || paidGames === null) {
+  values.paidSpent = 'Belum terhubung';
+} else {
+  const fromActions = paidLedger.reduce(
+    (total, row) => total + Number(row.points || 0), 0
+  );
+
+  const fromGames = paidGames.reduce(
+    (total, row) => total + Number(row.entry_fee || 0), 0
+  );
+
+  values.paidSpent = (fromActions + fromGames).toLocaleString('id-ID');
+}
       // Permata yang diterima dari gift hari ini (50% untuk kreator)
 if (giftRows === null) {
   values.gemsReceived = 'Belum terhubung';
