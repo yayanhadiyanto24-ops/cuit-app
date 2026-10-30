@@ -4896,14 +4896,29 @@ async function submitCommentAction() {
       document.getElementById('adminPanelSection').style.display = isAdmin ? 'block' : 'none';
       const platformCard = document.getElementById('adminPlatformGemCard');
       if (platformCard) platformCard.style.display = isAdmin ? 'block' : 'none';
-      // Balance widgets are intentionally not fabricated: read values from a future dedicated Supabase ledger/table.
-      const memberGemEl = document.getElementById('memberGemBalance');
-      const platformGemEl = document.getElementById('platformGemBalance');
-      if (memberGemEl && !memberGemEl.dataset.loaded) memberGemEl.textContent = '0';
-      if (platformGemEl && !platformGemEl.dataset.loaded) platformGemEl.textContent = '0';
-      const withdrawalHint = document.getElementById('memberGemWithdrawalHint');
-      if (withdrawalHint) withdrawalHint.textContent = 'Saldo belum tersambung ke buku besar permata. Minimal penarikan 20.000 permata.';
+      // Tampilkan saldo permata anggota dari profiles.gems
+const memberGemEl = document.getElementById('memberGemBalance');
+const platformGemEl = document.getElementById('platformGemBalance');
+const withdrawalHint = document.getElementById('memberGemWithdrawalHint');
 
+const memberGems = Math.max(0, Number(gems || 0));
+
+if (memberGemEl) {
+  memberGemEl.textContent = memberGems.toLocaleString('id-ID');
+}
+
+if (withdrawalHint) {
+  const remaining = Math.max(0, 20000 - memberGems);
+
+  withdrawalHint.textContent = remaining > 0
+    ? `Kurang ${remaining.toLocaleString('id-ID')} permata lagi untuk bisa melakukan penarikan.`
+    : 'Saldo memenuhi batas minimal penarikan 20.000 permata.';
+}
+
+// Saldo platform tetap tidak ditampilkan sebagai angka palsu.
+if (platformGemEl && !platformGemEl.dataset.loaded) {
+  platformGemEl.textContent = '0';
+}
       let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
       if (currentUser) {
         postQuery = postQuery.eq('user_id', currentUser.id);
