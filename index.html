@@ -6266,5 +6266,355 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 </style>
 
+<!-- =====================================================
+     CUIT - PERMATA KEJUTAN
+     Kode tambahan mandiri — tidak mengganti 3 Huruf Kilat
+===================================================== -->
+<style>
+#cuitGemShortcut {
+  width:38px;height:34px;flex:0 0 38px;
+  border:1px solid #d9a52c;border-radius:11px;
+  background:linear-gradient(145deg,#fff7d9,#fff);
+  color:#bd102d;font-size:23px;line-height:1;
+  box-shadow:0 2px 8px #b91c1c25;
+  cursor:pointer;
+}
+#cuitGemShortcut:active {transform:scale(.94)}
+
+#cuitSurpriseBox {
+  max-width:520px;margin:8px auto 14px;padding:14px;
+  border:1px solid #e5c36b;border-radius:20px;
+  background:linear-gradient(155deg,#fff7f7,#fff 55%,#fff8df);
+  box-shadow:0 8px 25px #9b14201c;
+  color:#48252a;text-align:center;
+}
+#cuitSurpriseBox .gem-title {
+  color:#ad102b;font-size:21px;font-weight:950;margin:2px 0;
+}
+#cuitSurpriseBox .gem-subtitle {
+  font-size:12px;color:#80666a;margin:5px 0 12px;
+}
+#cuitSurpriseBox .gem-info {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  margin:10px 0;
+}
+#cuitSurpriseBox .gem-info div {
+  padding:8px 3px;border:1px solid #f0dfb6;
+  background:#fff;border-radius:11px;
+}
+#cuitSurpriseBox .gem-info b {
+  display:block;color:#b51631;font-size:15px;
+}
+#cuitSurpriseBox .gem-info span {
+  font-size:9px;color:#80666a;
+}
+#cuitGemWheelWrap {
+  width:min(78vw,280px);aspect-ratio:1;
+  position:relative;margin:18px auto 12px;
+}
+#cuitGemPointer {
+  position:absolute;z-index:3;top:-9px;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:13px solid transparent;
+  border-right:13px solid transparent;
+  border-top:27px solid #b5102d;
+  filter:drop-shadow(0 2px 2px #6b101c66);
+}
+#cuitGemWheel {
+  width:100%;height:100%;border-radius:50%;
+  border:7px solid #d9ad43;
+  background:conic-gradient(
+    #b5102d 0deg 126deg,
+    #f5d77b 126deg 234deg,
+    #d51d3a 234deg 306deg,
+    #f8e7b2 306deg 342deg,
+    #a90d28 342deg 360deg
+  );
+  box-shadow:0 0 0 4px #fff inset,0 5px 18px #72102035;
+  position:relative;
+  transform:rotate(0deg);
+  transition:transform 12s cubic-bezier(.08,.72,.08,1);
+  overflow:hidden;
+}
+#cuitGemWheel::before {
+  content:"CUIT";position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:66px;height:66px;border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#fff4c9,#d8aa39);
+  border:4px solid white;color:#a30d27;
+  font-weight:1000;font-size:19px;
+  box-shadow:0 2px 10px #56101c66;
+}
+#cuitGemWheel.jackpot {
+  filter:drop-shadow(0 0 12px #f1bd36);
+}
+#cuitGemResult {
+  min-height:45px;margin:10px 0;
+  color:#a70f29;font-size:19px;font-weight:950;
+}
+#cuitGemSpinButton {
+  width:100%;padding:13px;border:0;border-radius:13px;
+  color:#fff;font-size:15px;font-weight:900;
+  background:linear-gradient(120deg,#e52a43,#a40d29);
+  box-shadow:0 5px 13px #a40d2935;
+}
+#cuitGemSpinButton:disabled {opacity:.55}
+#cuitGemMessage {
+  min-height:34px;font-size:12px;font-weight:700;
+  color:#815b20;margin-top:8px;
+}
+#cuitSurpriseBox .gem-thanks {
+  font-size:11px;color:#80666a;margin-top:9px;
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  if (window.cuitSurpriseGemInstalled) return;
+  window.cuitSurpriseGemInstalled = true;
+
+  const rewards = [
+    { gems: 1, label: "MANTAP!", percent: "35%" },
+    { gems: 2, label: "HEBAT!", percent: "30%" },
+    { gems: 3, label: "SUPER!", percent: "20%" },
+    { gems: 4, label: "LUAR BIASA!", percent: "10%" },
+    { gems: 5, label: "JACKPOT!!!", percent: "5%" }
+  ];
+
+  function addGemFeature() {
+    const pageGame = document.getElementById("pageGame");
+    const pills = document.querySelector(".pills-group");
+
+    if (!pageGame || !pills) return false;
+
+    // Ikon permata pada baris Beranda | Semua | Mengikuti
+    if (!document.getElementById("cuitGemShortcut")) {
+      const icon = document.createElement("button");
+      icon.id = "cuitGemShortcut";
+      icon.type = "button";
+      icon.title = "Permata Kejutan";
+      icon.setAttribute("aria-label", "Buka Permata Kejutan");
+      icon.innerHTML = "💎";
+      icon.onclick = function () {
+        switchTab(
+          "pageGame",
+          document.querySelectorAll(".nav-bar .nav-item")[1]
+        );
+        setTimeout(function () {
+          const box = document.getElementById("cuitSurpriseBox");
+          if (box) box.scrollIntoView({behavior:"smooth",block:"start"});
+        }, 150);
+      };
+      pills.parentElement.appendChild(icon);
+    }
+
+    // Panel Permata Kejutan di atas 3 Huruf Kilat
+    if (!document.getElementById("cuitSurpriseBox")) {
+      const box = document.createElement("section");
+      box.id = "cuitSurpriseBox";
+      box.innerHTML = `
+        <div style="font-size:30px">💎</div>
+        <div class="gem-title">PERMATA KEJUTAN</div>
+        <div class="gem-subtitle">
+          Putar roda keberuntungan CUIT dan dapatkan permata!
+        </div>
+
+        <div class="gem-info">
+          <div><b>19.00–21.00</b><span>Waktu WIB</span></div>
+          <div><b>10 Koin</b><span>Biaya per putaran</span></div>
+          <div><b>1–5</b><span>Permata hadiah</span></div>
+        </div>
+
+        <div id="cuitGemWheelWrap">
+          <div id="cuitGemPointer"></div>
+          <div id="cuitGemWheel"></div>
+        </div>
+
+        <div id="cuitGemResult">SIAPKAN DIRI ANDA!</div>
+
+        <button id="cuitGemSpinButton" type="button">
+          💎 PUTAR SEKARANG — 10 KOIN GRATIS
+        </button>
+
+        <div id="cuitGemMessage">
+          Hanya Koin Gratis yang dapat digunakan.
+        </div>
+
+        <div class="gem-thanks">
+          Hadiah langsung masuk ke saldo Permata Anda jika spin berhasil.
+        </div>
+      `;
+
+      const kilat = pageGame.querySelector(".kilat-shell");
+      if (kilat) pageGame.insertBefore(box, kilat);
+      else pageGame.appendChild(box);
+    }
+
+    const button = document.getElementById("cuitGemSpinButton");
+    if (button && !button.dataset.ready) {
+      button.dataset.ready = "1";
+      button.addEventListener("click", spinGem);
+    }
+
+    return true;
+  }
+
+  function showMessage(message, color) {
+    const el = document.getElementById("cuitGemMessage");
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = color || "#815b20";
+  }
+
+  function makeRequestId() {
+    if (window.crypto && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      return (c === "x" ? r : (r & 3 | 8)).toString(16);
+    });
+  }
+
+  let spinning = false;
+  let pendingRequestId = null;
+
+  async function spinGem() {
+    if (spinning) return;
+
+    const button = document.getElementById("cuitGemSpinButton");
+    const wheel = document.getElementById("cuitGemWheel");
+    const result = document.getElementById("cuitGemResult");
+
+    if (!window.supabaseClient) {
+      showMessage("Koneksi CUIT belum siap. Muat ulang aplikasi.", "#b5102d");
+      return;
+    }
+
+    if (!pendingRequestId) pendingRequestId = makeRequestId();
+
+    spinning = true;
+    button.disabled = true;
+    button.textContent = "⏳ SEDANG MEMPROSES...";
+    result.textContent = "RODA MULAI BERPUTAR...";
+
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        "cuit_spin_surprise_gems",
+        { p_request_id: pendingRequestId }
+      );
+
+      if (error) throw error;
+      if (!data || data.ok !== true) {
+        throw new Error(data && data.message
+          ? data.message : "Spin belum berhasil.");
+      }
+
+      const reward = Number(data.reward);
+      if (!Number.isInteger(reward) || reward < 1 || reward > 5) {
+        throw new Error("Hasil transaksi tidak dikenali. Jangan ulangi dengan ID baru.");
+      }
+
+      // Sudut hadiah mengikuti pembagian peluang yang ditentukan server.
+      const ranges = [
+        { gems:1, start:0,   size:126 },
+        { gems:2, start:126, size:108 },
+        { gems:3, start:234, size:72 },
+        { gems:4, start:306, size:36 },
+        { gems:5, start:342, size:18 }
+      ];
+      const chosen = ranges.find(x => x.gems === reward);
+      const angleInSector = chosen.start + Math.random() * chosen.size;
+      const targetAngle = (360 - angleInSector) % 360;
+      const current = Number(wheel.dataset.rotation || 0);
+      const finalRotation = current + 360 * 8 +
+        ((targetAngle - (current % 360) + 360) % 360);
+
+      wheel.style.transition = "none";
+      wheel.style.transform = "rotate(" + current + "deg)";
+      void wheel.offsetWidth;
+      wheel.style.transition = "transform 12s cubic-bezier(.08,.72,.08,1)";
+      wheel.style.transform = "rotate(" + finalRotation + "deg)";
+      wheel.dataset.rotation = String(finalRotation);
+
+      showMessage("Menentukan hasil hadiah dari server...", "#815b20");
+
+      await new Promise(resolve => setTimeout(resolve, 12050));
+
+      const prize = rewards.find(x => x.gems === reward);
+      result.innerHTML = "🎉 " + prize.label +
+        "<br><span style='font-size:15px'>+" + reward +
+        " PERMATA!</span>";
+
+      if (reward === 5) {
+        wheel.classList.add("jackpot");
+        result.innerHTML += "<br>✨ JACKPOT PERMATA CUIT ✨";
+      } else {
+        wheel.classList.remove("jackpot");
+      }
+
+      showMessage(
+        "Berhasil! 10 Koin Gratis digunakan. Saldo Koin Gratis: " +
+        data.free_coins + " | Permata: " + data.gems,
+        "#168044"
+      );
+
+      // Isi composer, tetapi tidak menerbitkan curhatan otomatis.
+      const postText = document.getElementById("postContent");
+      const thankText =
+        "Terima kasih ADMINCUIT atas hadiah " + reward +
+        " Permata Kejutan dari CUIT! 💎";
+
+      if (postText) {
+        postText.value = thankText;
+        if (typeof updateCharCount === "function") {
+          updateCharCount(postText);
+        }
+        const navCreate = document.querySelectorAll(".nav-bar .nav-item")[2];
+        switchTab("pageCreate", navCreate);
+        setTimeout(function() {
+          postText.focus();
+          postText.scrollIntoView({behavior:"smooth",block:"center"});
+        }, 250);
+      } else {
+        showMessage(
+          "Hadiah berhasil masuk. Composer belum ditemukan; saldo permata Anda tetap bertambah.",
+          "#168044"
+        );
+      }
+
+      pendingRequestId = null;
+
+    } catch (err) {
+      console.error("Permata Kejutan:", err);
+      showMessage(
+        err && err.message ? err.message : "Terjadi kesalahan koneksi.",
+        "#b5102d"
+      );
+
+      // ID permintaan dipertahankan agar percobaan ulang tidak
+      // memotong saldo dua kali jika transaksi pertama sebenarnya sukses.
+      button.textContent = "COBA PERIKSA / ULANGI";
+    } finally {
+      spinning = false;
+      button.disabled = false;
+      if (button.textContent === "⏳ SEDANG MEMPROSES...") {
+        button.textContent = "💎 PUTAR SEKARANG — 10 KOIN GRATIS";
+      }
+    }
+  }
+
+  // Menunggu struktur halaman siap.
+  if (!addGemFeature()) {
+    document.addEventListener("DOMContentLoaded", addGemFeature);
+  }
+})();
+</script>
+<!-- AKHIR PERMATA KEJUTAN -->
+
 </body>
   </html>
