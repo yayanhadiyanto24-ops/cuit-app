@@ -2023,19 +2023,7 @@ if (paidLedger === null || paidGames === null || myProfile === null) {
     fromActions + fromGames + fromGifts
   ).toLocaleString('id-ID');
 }
-if (paidLedger === null || paidGames === null) {
-  values.paidSpent = 'Belum terhubung';
-} else {
-  const fromActions = paidLedger.reduce(
-    (total, row) => total + Number(row.points || 0), 0
-  );
 
-  const fromGames = paidGames.reduce(
-    (total, row) => total + Number(row.entry_fee || 0), 0
-  );
-
-  values.paidSpent = (fromActions + fromGames).toLocaleString('id-ID');
-}
       // Permata yang diterima dari gift hari ini (50% untuk kreator)
 if (giftRows === null) {
   values.gemsReceived = 'Belum terhubung';
