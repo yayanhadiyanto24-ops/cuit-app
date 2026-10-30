@@ -1996,6 +1996,33 @@ rows('profiles','username',q=>q.eq('id',currentUser.id))
       values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
       values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
       // Total koin berbayar keluar hari ini
+if (paidLedger === null || paidGames === null || myProfile === null) {
+  values.paidSpent = 'Belum terhubung';
+} else {
+  const fromActions = paidLedger.reduce(
+    (total, row) => total + Number(row.points || 0), 0
+  );
+
+  const fromGames = paidGames.reduce(
+    (total, row) => total + Number(row.entry_fee || 0), 0
+  );
+
+  const myUsername = String(
+    myProfile[0]?.username || ''
+  ).trim().toLowerCase();
+
+  const fromGifts = giftRows === null ? 0 : giftRows
+    .filter(g =>
+      String(g.sender_name || '').trim().toLowerCase() === myUsername
+    )
+    .reduce(
+      (total, g) => total + Number(g.coins_amount || 0), 0
+    );
+
+  values.paidSpent = (
+    fromActions + fromGames + fromGifts
+  ).toLocaleString('id-ID');
+}
 if (paidLedger === null || paidGames === null) {
   values.paidSpent = 'Belum terhubung';
 } else {
