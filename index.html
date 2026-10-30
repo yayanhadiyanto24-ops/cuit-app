@@ -6533,10 +6533,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const kilat = pageGame.querySelector(".kilat-shell");
 
-if (kilat && kilat.parentNode) {
+const kilat = pageGame.querySelector(".kilat-shell");
+if (kilat) {
   kilat.insertAdjacentElement("afterend", box);
-} else {
-  pageGame.appendChild(box);
 }
 
     const button = document.getElementById("cuitGemSpinButton");
