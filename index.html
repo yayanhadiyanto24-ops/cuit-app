@@ -1978,7 +1978,17 @@ poolStatus=feePaid>0
       if(!currentUser){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:14px;">Silakan masuk untuk melihat progres akun.</div>';return;}
       const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
       async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
-      const [checkins,posts,likes,comments,reels,games,giftRows]=await Promise.all([
+      const [checkins,posts,likes,comments,reels,games,giftRows,paidLedger,paidGames]=await Promise.all([
+  rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
+  rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
+  rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
+  rows('comments','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
+  rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
+  rows('cuit_kilat_results','id,created_at,user_id',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
+  rows('gift_transactions','id,created_at,sender_name,coins_amount,recipient_email',q=>q.gte('created_at',start).lt('created_at',end)),
+  rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','koin').gte('occurred_at',start).lt('occurred_at',end)),
+  rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end))
+]);
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
         rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
