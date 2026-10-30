@@ -4922,9 +4922,34 @@ if (withdrawalHint) {
     : 'Saldo memenuhi batas minimal penarikan 20.000 permata.';
 }
 
-// Saldo platform tetap tidak ditampilkan sebagai angka palsu.
-if (platformGemEl && !platformGemEl.dataset.loaded) {
-  platformGemEl.textContent = '0';
+// Ambil saldo Permata Platform dan Permata Kejutan khusus ADMINCUIT.
+const surpriseCard = document.getElementById('adminSurpriseGemCard');
+
+if (isAdmin) {
+  if (surpriseCard) surpriseCard.style.display = 'block';
+
+  const { data: gemTotals, error: gemError } =
+    await supabaseClient.rpc('cuit_admin_get_gem_totals');
+
+  if (gemError) {
+    console.error('Gagal memuat saldo permata admin:', gemError);
+  } else if (gemTotals) {
+    if (platformGemEl) {
+      platformGemEl.textContent =
+        Number(gemTotals.platform_gems || 0).toLocaleString('id-ID');
+      platformGemEl.dataset.loaded = 'true';
+    }
+
+    const surpriseGemEl =
+      document.getElementById('adminSurpriseGemBalance');
+
+    if (surpriseGemEl) {
+      surpriseGemEl.textContent =
+        Number(gemTotals.surprise_gems || 0).toLocaleString('id-ID');
+    }
+  }
+} else {
+  if (surpriseCard) surpriseCard.style.display = 'none';
 }
       let postQuery = supabaseClient.from('curhat').select('*', { count: 'exact', head: true });
       if (currentUser) {
