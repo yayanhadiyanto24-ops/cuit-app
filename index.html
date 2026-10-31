@@ -1647,14 +1647,15 @@ poolStatus=feePaid>0
   }
 
   function drawObstacles() {
-    // Pola paku zig-zag
-    for(let row=0;row<11;row++) {
-      for(let col=0;col<9;col++) {
-        const x=48+col*48+(row%2?24:0);
-        const y=65+row*55;
-        if(x<430) peg(x,y,6.5);
-      }
+  // Rintangan hanya berupa paku, sesuai simulasi server.
+  for (let row = 0; row < 11; row++) {
+    for (let col = 0; col < 9; col++) {
+      const x = 48 + col * 48 + (row % 2 ? 24 : 0);
+      const y = 65 + row * 55;
+      if (x < 430) peg(x, y, 6.5);
     }
+  }
+}
 
     // Sekat miring dengan bayangan 3D
     const bars=[
