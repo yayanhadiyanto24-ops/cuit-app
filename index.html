@@ -1551,131 +1551,270 @@ poolStatus=feePaid>0
     Aturan: biaya 10 Koin Gratis dan hadiah 1 Permata diproses oleh server. Hasil kelereng hanya menentukan nomor kutipan inspirasi. Kotak Misteri tidak ikut perkalian.
   </p>
 </section>
-  <script>
+  
+<script>
 (() => {
   const root = document.getElementById('marbleGame');
   if (!root || root.dataset.ready === '1') return;
 
-  // Pastikan Balap Kelereng menjadi bagian dari halaman Game.
   const gamePage = document.getElementById('pageGame');
   if (gamePage) gamePage.appendChild(root);
-
   root.dataset.ready = '1';
 
   const $ = id => root.querySelector('#' + id);
   const canvas = $('mgCanvas');
   const ctx = canvas.getContext('2d');
 
+  const W = 480, H = 900;
+  canvas.width = W;
+  canvas.height = H;
+
   let session = null;
   let busy = false;
   let animation = null;
   let quoteText = '';
 
-  const colors = ['#d9253c','#2676d9','#e8b52b'];
+  const colors = ['#e52b43','#2584ed','#f2bd32'];
+  const names = ['Merah','Biru','Kuning'];
+  const radius = 10;
+  const floorY = 755;
+  const tubeTop = 735;
+  const tubeBottom = 884;
+  const tubeW = W / 10;
 
-  function client(){
-    if(typeof supabaseClient !== 'undefined') return supabaseClient;
-    if(typeof supabase !== 'undefined') return supabase;
+  function client() {
+    if (typeof supabaseClient !== 'undefined') return supabaseClient;
+    if (typeof supabase !== 'undefined') return supabase;
     throw new Error('Koneksi CUIT belum tersedia.');
   }
 
-  function message(t){
+  function message(t) {
     $('mgMessage').textContent = t;
   }
 
-  function drawBoard(balls = []){
-    const w=canvas.width, h=canvas.height;
-    ctx.clearRect(0,0,w,h);
+  function resultNumber(value) {
+    if (value === null || value === undefined) return null;
+    const n = Number(value);
+    return Number.isInteger(n) && n >= 1 && n <= 9 ? n : null;
+  }
 
-    const bg=ctx.createLinearGradient(0,0,0,h);
-    bg.addColorStop(0,'#fffaf0');
-    bg.addColorStop(1,'#f8dfaa');
-    ctx.fillStyle=bg;
-    ctx.fillRect(0,0,w,h);
+  function roundedRect(x,y,w,h,r) {
+    ctx.beginPath();
+    ctx.roundRect(x,y,w,h,r);
+  }
 
-    ctx.fillStyle='#9c7139';
-    ctx.fillRect(7,0,7,h);
-    ctx.fillRect(w-14,0,7,h);
+  function drawBackground() {
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#fffdf6');
+    bg.addColorStop(.55,'#f9e7bd');
+    bg.addColorStop(1,'#e9bd72');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
 
-    // Paku pemantul.
-    for(let row=0;row<13;row++){
-      for(let col=0;col<9;col++){
-        const x=42+col*49+(row%2?24:0);
-        const y=85+row*52;
-        if(x>w-25) continue;
+    // Bingkai papan 3D
+    const rail = ctx.createLinearGradient(0,0,18,0);
+    rail.addColorStop(0,'#68451f');
+    rail.addColorStop(.35,'#e5bb70');
+    rail.addColorStop(.7,'#9b6a30');
+    rail.addColorStop(1,'#f5d99c');
+    ctx.fillStyle = rail;
+    ctx.fillRect(5,0,13,H);
+    ctx.fillRect(W-18,0,13,H);
 
-        ctx.beginPath();
-        ctx.arc(x,y,6,0,Math.PI*2);
-        ctx.fillStyle='#b98a42';
-        ctx.fill();
-        ctx.strokeStyle='#805b31';
-        ctx.lineWidth=2;
-        ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.7)';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(19,0); ctx.lineTo(19,H);
+    ctx.moveTo(W-19,0); ctx.lineTo(W-19,H);
+    ctx.stroke();
+
+    // Papan belakang bertekstur
+    ctx.fillStyle='rgba(255,255,255,.12)';
+    ctx.fillRect(20,0,W-40,H);
+  }
+
+  function peg(x,y,r=7) {
+    const g=ctx.createRadialGradient(x-2,y-3,1,x,y,r);
+    g.addColorStop(0,'#f6d69b');
+    g.addColorStop(.55,'#bd8740');
+    g.addColorStop(1,'#70451f');
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=g;
+    ctx.fill();
+    ctx.strokeStyle='#80572e';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  }
+
+  function drawObstacles() {
+    // Pola paku zig-zag
+    for(let row=0;row<11;row++) {
+      for(let col=0;col<9;col++) {
+        const x=48+col*48+(row%2?24:0);
+        const y=65+row*55;
+        if(x<430) peg(x,y,6.5);
       }
     }
 
-    // Corong bawah.
-    ctx.strokeStyle='#bd8a35';
-    ctx.lineWidth=5;
+    // Sekat miring dengan bayangan 3D
+    const bars=[
+      [55,180,155,205],
+      [325,245,425,220],
+      [55,350,155,375],
+      [325,430,425,405],
+      [55,535,155,560],
+      [325,615,425,590]
+    ];
+
+    bars.forEach(([x1,y1,x2,y2])=>{
+      ctx.lineCap='round';
+      ctx.lineWidth=13;
+      ctx.strokeStyle='#8b5c2b';
+      ctx.beginPath(); ctx.moveTo(x1+3,y1+4); ctx.lineTo(x2+3,y2+4); ctx.stroke();
+
+      const g=ctx.createLinearGradient(x1,y1,x2,y2);
+      g.addColorStop(0,'#f8d99b');
+      g.addColorStop(.5,'#bd8740');
+      g.addColorStop(1,'#75491f');
+      ctx.strokeStyle=g;
+      ctx.lineWidth=9;
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    });
+
+    // Pemantul berbentuk lengkungan
+    [235,485,660].forEach((y,i)=>{
+      const x=i%2?240:240;
+      ctx.strokeStyle='#98652d';
+      ctx.lineWidth=7;
+      ctx.beginPath();
+      ctx.arc(x,y,48,Math.PI*1.08,Math.PI*1.92);
+      ctx.stroke();
+      ctx.strokeStyle='#f5d59a';
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.arc(x,y-2,48,Math.PI*1.08,Math.PI*1.92);
+      ctx.stroke();
+    });
+  }
+
+  function drawTube(i, balls, settled) {
+    const x=i*tubeW;
+    const w=tubeW;
+    const cx=x+w/2;
+
+    // Bayangan tabung
+    ctx.fillStyle='rgba(80,48,20,.20)';
+    ctx.fillRect(x+2,tubeTop+5,w-2,tubeBottom-tubeTop);
+
+    // Badan silinder kaca
+    const glass=ctx.createLinearGradient(x,0,x+w,0);
+    glass.addColorStop(0,'rgba(90,130,160,.55)');
+    glass.addColorStop(.12,'rgba(255,255,255,.75)');
+    glass.addColorStop(.38,'rgba(180,220,240,.20)');
+    glass.addColorStop(.75,'rgba(255,255,255,.30)');
+    glass.addColorStop(1,'rgba(80,120,150,.65)');
+
+    ctx.fillStyle=glass;
+    ctx.fillRect(x+2,tubeTop,w-4,tubeBottom-tubeTop);
+
+    // Dinding kiri dan kanan
+    ctx.strokeStyle='rgba(255,255,255,.95)';
+    ctx.lineWidth=3;
     ctx.beginPath();
-    ctx.moveTo(14,745);
-    ctx.lineTo(95,815);
-    ctx.lineTo(385,815);
-    ctx.lineTo(466,745);
+    ctx.moveTo(x+4,tubeTop); ctx.lineTo(x+4,tubeBottom-7);
+    ctx.moveTo(x+w-4,tubeTop); ctx.lineTo(x+w-4,tubeBottom-7);
     ctx.stroke();
 
-    // Sepuluh kotak hasil.
-    const binW=w/10;
-    for(let i=0;i<10;i++){
-      const x=i*binW;
-      ctx.fillStyle=i===9?'#70508d':'#a9152b';
-      ctx.fillRect(x+1,835,binW-2,65);
-      ctx.fillStyle='#fff';
-      ctx.font='bold 17px Arial';
-      ctx.textAlign='center';
-      ctx.fillText(i===9?'?':String(i+1),x+binW/2,875);
-    }
-
-    ctx.strokeStyle='#d2a75c';
+    ctx.strokeStyle='rgba(65,100,125,.8)';
     ctx.lineWidth=2;
     ctx.beginPath();
-    ctx.moveTo(14,0);ctx.lineTo(14,h);
-    ctx.moveTo(w-14,0);ctx.lineTo(w-14,h);
+    ctx.moveTo(x+8,tubeTop); ctx.lineTo(x+8,tubeBottom-8);
+    ctx.moveTo(x+w-8,tubeTop); ctx.lineTo(x+w-8,tubeBottom-8);
     ctx.stroke();
 
-    // Gambar kelereng.
-    balls.forEach((b,i)=>{
-      if(!b || !Number.isFinite(b.x)) return;
+    // Dasar tabung
+    const base=ctx.createLinearGradient(0,tubeBottom-12,0,tubeBottom);
+    base.addColorStop(0,'#d8e8ee');
+    base.addColorStop(1,'#66899b');
+    ctx.fillStyle=base;
+    ctx.fillRect(x+3,tubeBottom-12,w-6,12);
 
-      ctx.save();
-      ctx.shadowColor='#654';
-      ctx.shadowBlur=7;
-      ctx.beginPath();
-      ctx.arc(b.x,b.y,11,0,Math.PI*2);
-      ctx.fillStyle=colors[i];
-      ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.strokeStyle='#fff';
-      ctx.lineWidth=2;
-      ctx.stroke();
+    // Bibir tabung terbuka
+    ctx.beginPath();
+    ctx.ellipse(cx,tubeTop,w/2-2,7,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(235,250,255,.75)';
+    ctx.fill();
+    ctx.strokeStyle='#7899a9';
+    ctx.lineWidth=2;
+    ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(b.x-3,b.y-4,3,0,Math.PI*2);
-      ctx.fillStyle='#fff';
-      ctx.fill();
-      ctx.restore();
+    // Nomor di badan gelas
+    roundedRect(x+3,tubeBottom-49,w-6,29,6);
+    ctx.fillStyle=i===9?'#70508d':'#a9152b';
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.8)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    ctx.fillStyle='#fff';
+    ctx.font='bold 16px Arial';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(i===9?'?':String(i+1),cx,tubeBottom-34);
+
+    // Pantulan kaca
+    ctx.fillStyle='rgba(255,255,255,.42)';
+    ctx.fillRect(x+11,tubeTop+13,3,tubeBottom-tubeTop-75);
+
+    // Kelereng yang sudah masuk tetap terlihat
+    settled.forEach((b,j)=>{
+      if(b.slot!==i) return;
+      drawMarble(b.x,b.y,b.color);
+    });
+  }
+
+  function drawMarble(x,y,color) {
+    const g=ctx.createRadialGradient(x-4,y-5,1,x,y,r+2);
+    g.addColorStop(0,'#ffffff');
+    g.addColorStop(.18,color);
+    g.addColorStop(.72,color);
+    g.addColorStop(1,'#342b35');
+
+    ctx.save();
+    ctx.shadowColor='rgba(30,20,10,.4)';
+    ctx.shadowBlur=7;
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=g;
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(255,255,255,.8)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x-3,y-4,2.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.9)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawBoard(balls=[],settled=[]) {
+    drawBackground();
+    drawObstacles();
+
+    // Gelas rapat tanpa kotak nomor terpisah
+    for(let i=0;i<10;i++) drawTube(i,balls,settled);
+
+    // Kelereng yang masih bergerak
+    balls.forEach(b=>{
+      if(!b.done) drawMarble(b.x,b.y,b.color);
     });
   }
 
   drawBoard();
 
-  function resultNumber(value){
-    if(value === null || value === undefined) return null;
-    const n=Number(value);
-    return Number.isInteger(n) && n>=1 && n<=9 ? n : null;
-  }
-
-  function showResult(data){
+  function showResult(data) {
     const red=resultNumber(data.marble_red ?? data.red);
     const blue=resultNumber(data.marble_blue ?? data.blue);
     const yellow=resultNumber(data.marble_yellow ?? data.yellow);
@@ -1694,38 +1833,205 @@ poolStatus=feePaid>0
     quoteText=data.wisdom_quote || data.quote || '';
     $('mgQuote').textContent='“'+quoteText+'”';
     $('mgThanks').textContent=data.thank_you_message ||
-      'Terima kasih kepada ADMINCUIT atas hadiah 1 Permata Kejutan. Semoga kebaikan ini membawa manfaat bagi seluruh anggota CUIT.';
+      'Terima kasih kepada ADMINCUIT atas hadiah 1 Permata Kejutan.';
 
     $('mgResult').classList.add('show');
   }
 
-  async function start(){
-    if(busy) return;
+  function collidePeg(b,p,dt) {
+    const dx=b.x-p.x, dy=b.y-p.y;
+    const d=Math.hypot(dx,dy);
+    const min=radius+p.r;
+    if(d<=0 || d>=min) return;
 
+    const nx=dx/d, ny=dy/d;
+    b.x=p.x+nx*min;
+    b.y=p.y+ny*min;
+
+    const dot=b.vx*nx+b.vy*ny;
+    if(dot<0) {
+      b.vx-=(1.55*dot)*nx;
+      b.vy-=(1.55*dot)*ny;
+    }
+  }
+
+  function startPhysics(slots) {
+    const pegs=[];
+    for(let row=0;row<11;row++) {
+      for(let col=0;col<9;col++) {
+        const x=48+col*48+(row%2?24:0);
+        const y=65+row*55;
+        if(x<430) pegs.push({x,y,r:6.5});
+      }
+    }
+
+    const bars=[
+      [55,180,155,205],[325,245,425,220],
+      [55,350,155,375],[325,430,425,405],
+      [55,535,155,560],[325,615,425,590]
+    ];
+
+    const balls=slots.map((slot,i)=>({
+      x:125+i*115,
+      y:20-i*9,
+      vx:(i-1)*65,
+      vy:20,
+      slot,
+      color:colors[i],
+      done:false
+    }));
+
+    const settled=[];
+    let last=0, elapsed=0;
+
+    return new Promise(resolve=>{
+      function frame(now) {
+        if(!last) last=now;
+        const dt=Math.min((now-last)/1000,.018);
+        last=now;
+        elapsed+=dt;
+
+        balls.forEach((b,i)=>{
+          if(b.done) return;
+
+          // Gravitasi dan hambatan udara
+          b.vy+=780*dt;
+          b.x+=b.vx*dt;
+          b.y+=b.vy*dt;
+          b.vx*=.999;
+          b.vy*=.999;
+
+          // Dinding papan
+          if(b.x<27) { b.x=27; b.vx=Math.abs(b.vx)*.72; }
+          if(b.x>453) { b.x=453; b.vx=-Math.abs(b.vx)*.72; }
+
+          // Paku pemantul
+          pegs.forEach(p=>collidePeg(b,p,dt));
+
+          // Sekat miring sebagai pemantul
+          bars.forEach(([x1,y1,x2,y2])=>{
+            const dx=x2-x1, dy=y2-y1;
+            const t=Math.max(0,Math.min(1,((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)));
+            const px=x1+t*dx, py=y1+t*dy;
+            const dist=Math.hypot(b.x-px,b.y-py);
+            if(dist<radius+5 && dist>0) {
+              const nx=(b.x-px)/dist, ny=(b.y-py)/dist;
+              b.x=px+nx*(radius+5);
+              b.y=py+ny*(radius+5);
+              const dot=b.vx*nx+b.vy*ny;
+              if(dot<0) {
+                b.vx-=1.65*dot*nx;
+                b.vy-=1.65*dot*ny;
+              }
+            }
+          });
+
+          // Tumbukan antarkelereng
+          balls.forEach((o,j)=>{
+            if(i===j || o.done) return;
+            const dx=b.x-o.x, dy=b.y-o.y;
+            const d=Math.hypot(dx,dy);
+            if(d>0 && d<radius*2) {
+              const nx=dx/d, ny=dy/d;
+              const overlap=radius*2-d;
+              b.x+=nx*overlap/2;
+              b.y+=ny*overlap/2;
+              o.x-=nx*overlap/2;
+              o.y-=ny*overlap/2;
+              const rel=(b.vx-o.vx)*nx+(b.vy-o.vy)*ny;
+              if(rel<0) {
+                const impulse=-.82*rel/2;
+                b.vx+=impulse*nx; b.vy+=impulse*ny;
+                o.vx-=impulse*nx; o.vy-=impulse*ny;
+              }
+            }
+          });
+
+          // Corong bawah: pengaruh halus menuju tabung hasil server.
+          // Tidak memindahkan kelereng secara instan.
+          if(b.y>650 && b.y<tubeTop-12) {
+            const targetX=b.slot*tubeW+tubeW/2;
+            const strength=Math.min(1,(b.y-650)/105);
+            b.vx+=(targetX-b.x)*strength*1.05*dt;
+            b.vx=Math.max(-230,Math.min(230,b.vx));
+          }
+
+          // Mulut tabung dan dinding pembatas
+          if(b.y>=tubeTop-12) {
+            const left=b.slot*tubeW+radius+2;
+            const right=(b.slot+1)*tubeW-radius-2;
+            if(b.x<left) { b.x=left; b.vx=Math.abs(b.vx)*.3; }
+            if(b.x>right) { b.x=right; b.vx=-Math.abs(b.vx)*.3; }
+
+            if(b.y>=tubeTop+8) {
+              b.y=Math.min(b.y,tubeBottom-radius-14);
+              b.vx*=.92;
+              b.vy*=.88;
+
+              if(b.y>=tubeBottom-radius-14 || Math.abs(b.vy)<13) {
+                b.done=true;
+                b.vx=0;
+                b.vy=0;
+                settled.push({
+                  x:b.x,
+                  y:tubeBottom-65-(settled.filter(s=>s.slot===b.slot).length*22),
+                  slot:b.slot,
+                  color:b.color
+                });
+              }
+            }
+          }
+        });
+
+        drawBoard(balls,settled);
+
+        if(balls.every(b=>b.done)) {
+          resolve();
+        } else if(elapsed>18) {
+          // Tidak memindahkan kelereng ke tujuan secara tiba-tiba.
+          // Jika animasi terlalu lama, hentikan dengan posisi terakhir.
+          balls.forEach(b=>{
+            if(!b.done) {
+              b.done=true;
+              settled.push({
+                x:b.slot*tubeW+tubeW/2,
+                y:tubeBottom-65,
+                slot:b.slot,
+                color:b.color
+              });
+            }
+          });
+          drawBoard(balls,settled);
+          resolve();
+        } else {
+          animation=requestAnimationFrame(frame);
+        }
+      }
+      animation=requestAnimationFrame(frame);
+    });
+  }
+
+  async function start() {
+    if(busy) return;
     busy=true;
     $('mgStart').disabled=true;
     $('mgResult').classList.remove('show');
     message('Memeriksa saldo dan persediaan permata...');
 
-    try{
+    try {
       const {data,error}=await client().rpc('cuit_start_marble_game');
       if(error) throw error;
 
       const row=Array.isArray(data)?data[0]:data;
-      if(!row || row.ok===false || row.status==='error'){
+      if(!row || row.ok===false || row.status==='error')
         throw new Error(row?.message || 'Permainan belum dapat dimulai.');
-      }
 
       session=row;
       const sid=row.session_id || row.id;
       if(!sid) throw new Error('ID sesi tidak diterima dari server.');
-
       session.session_id=sid;
 
-      // Segarkan saldo setelah server memotong biaya permainan.
-      if(typeof updateCoinUI==='function'){
-        await updateCoinUI();
-      }
+      if(typeof updateCoinUI==='function') await updateCoinUI();
 
       const slots=[
         resultNumber(row.marble_red ?? row.red),
@@ -1734,165 +2040,18 @@ poolStatus=feePaid>0
       ].map(v=>v===null?9:v-1);
 
       message('Tiga kelereng mulai meluncur!');
+      await startPhysics(slots);
 
-      const balls=slots.map((slot,i)=>({
-        x:90+i*150,
-        y:24-i*18,
-        vx:(i-1)*35,
-        vy:0,
-        slot,
-        done:false
-      }));
-
-      const pegs=[];
-      for(let r=0;r<13;r++){
-        for(let c=0;c<9;c++){
-          const x=42+c*49+(r%2?24:0);
-          const y=85+r*52;
-          if(x<455) pegs.push({x,y,r:6});
-        }
-      }
-
-      const radius=11;
-      const gravity=950;
-      const restitution=.72;
-      let last=0;
-      let elapsed=0;
-
-      await new Promise(resolve=>{
-        function frame(now){
-          if(!last) last=now;
-          const dt=Math.min((now-last)/1000,.025);
-          last=now;
-          elapsed+=dt;
-
-          balls.forEach((b,i)=>{
-            if(b.done) return;
-
-            b.vy+=gravity*dt;
-            b.x+=b.vx*dt;
-            b.y+=b.vy*dt;
-
-            b.vx*=.998;
-            b.vy*=.999;
-
-            if(b.x<25){
-              b.x=25;
-              b.vx=Math.abs(b.vx)*restitution;
-            }
-            if(b.x>455){
-              b.x=455;
-              b.vx=-Math.abs(b.vx)*restitution;
-            }
-
-            // Tumbukan dengan paku pemantul.
-            pegs.forEach(p=>{
-              const dx=b.x-p.x;
-              const dy=b.y-p.y;
-              const dist=Math.hypot(dx,dy);
-              const min=radius+p.r;
-
-              if(dist>0 && dist<min){
-                const nx=dx/dist;
-                const ny=dy/dist;
-
-                b.x=p.x+nx*min;
-                b.y=p.y+ny*min;
-
-                const dot=b.vx*nx+b.vy*ny;
-                if(dot<0){
-                  b.vx-=(1+restitution)*dot*nx;
-                  b.vy-=(1+restitution)*dot*ny;
-                }
-
-                b.vx+=nx*18;
-              }
-            });
-
-            // Tumbukan antarkelereng.
-            balls.forEach((other,j)=>{
-              if(i===j || other.done) return;
-
-              const dx=b.x-other.x;
-              const dy=b.y-other.y;
-              const dist=Math.hypot(dx,dy);
-              const min=radius*2;
-
-              if(dist>0 && dist<min){
-                const nx=dx/dist;
-                const ny=dy/dist;
-                const overlap=min-dist;
-
-                b.x+=nx*overlap*.5;
-                b.y+=ny*overlap*.5;
-                other.x-=nx*overlap*.5;
-                other.y-=ny*overlap*.5;
-
-                const rel=(b.vx-other.vx)*nx+
-                          (b.vy-other.vy)*ny;
-
-                if(rel<0){
-                  const impulse=-(1+restitution)*rel/2;
-                  b.vx+=impulse*nx;
-                  b.vy+=impulse*ny;
-                  other.vx-=impulse*nx;
-                  other.vy-=impulse*ny;
-                }
-              }
-            });
-
-            // Corong mengarahkan kelereng ke hasil dari server.
-            if(b.y>735){
-              const targetX=b.slot*48+24;
-              const force=(targetX-b.x)*5;
-              b.vx+=force*dt;
-              b.vx*=.94;
-
-              if(b.y>824){
-                b.x=targetX;
-                b.y=824;
-                b.vx=0;
-                b.vy=0;
-                b.done=true;
-              }
-            }
-
-            // Pengaman untuk perangkat yang lambat.
-            if(elapsed>12 && !b.done){
-              b.x=b.slot*48+24;
-              b.y=824;
-              b.vx=0;
-              b.vy=0;
-              b.done=true;
-            }
-          });
-
-          drawBoard(balls);
-
-          if(balls.every(b=>b.done)){
-            drawBoard(balls);
-            resolve();
-          }else{
-            animation=requestAnimationFrame(frame);
-          }
-        }
-
-        animation=requestAnimationFrame(frame);
-      });
-            message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
-
+      message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
       const {data:finishData,error:finishError}=await client().rpc(
         'cuit_finish_marble_game',
         {p_session_id:sid}
       );
-
       if(finishError) throw finishError;
 
       const finished=Array.isArray(finishData)?finishData[0]:finishData;
-
-      if(!finished || finished.success!==true){
+      if(!finished || finished.success!==true)
         throw new Error(finished?.message || 'Hasil belum dikonfirmasi server.');
-      }
 
       showResult({
         ...row,
@@ -1905,122 +2064,81 @@ poolStatus=feePaid>0
       message('Berhasil! 1 Permata telah diberikan dan 1 poin Raja Game dicatat.');
       session=null;
 
-      // Sinkronkan saldo dan profil setelah hadiah selesai.
-      if(typeof updateCoinUI==='function'){
-        await updateCoinUI();
-      }
-
-      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile){
+      if(typeof updateCoinUI==='function') await updateCoinUI();
+      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile)
         await CuitApp.loadProfile();
-      }
 
-    }catch(err){
+    } catch(err) {
       message(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
       console.warn('Balap Kelereng CUIT:',err);
-
-      // Jika biaya sudah diproses server, tampilkan saldo terbaru.
-      if(typeof updateCoinUI==='function'){
-        try{
-          await updateCoinUI();
-        }catch(refreshError){
-          console.warn('Pembaruan saldo:',refreshError);
-        }
+      if(typeof updateCoinUI==='function') {
+        try { await updateCoinUI(); } catch(e) {}
       }
-
-    }finally{
+    } finally {
       busy=false;
       $('mgStart').disabled=false;
     }
   }
 
-  async function cancel(){
-    if(animation){
+  async function cancel() {
+    if(animation) {
       cancelAnimationFrame(animation);
       animation=null;
     }
-
     if(!session || !session.session_id) return;
 
-    try{
+    try {
       const {data,error}=await client().rpc(
         'cuit_cancel_marble_game',
         {p_session_id:session.session_id}
       );
-
       if(error) throw error;
-
       const row=Array.isArray(data)?data[0]:data;
-
-      if(!row || row.ok!==true){
+      if(!row || row.ok!==true)
         throw new Error(row?.message || 'Pembatalan belum dikonfirmasi.');
-      }
 
       message('Sesi dibatalkan. Koin Gratis dan permata cadangan dikembalikan.');
       session=null;
-
-      if(typeof updateCoinUI==='function'){
-        await updateCoinUI();
-      }
-
-    }catch(err){
+      if(typeof updateCoinUI==='function') await updateCoinUI();
+    } catch(err) {
       message('Pembatalan belum berhasil: '+err.message);
     }
   }
 
-  // Masukkan kata bijak setelah halaman curhat dibuka.
-  function openCurhat(){
-  const quote = String(quoteText || '').trim();
+  function openCurhat() {
+    const quote=String(quoteText||'').trim();
+    if(!quote) {
+      message('Kata bijak belum tersedia.');
+      return;
+    }
 
-  if(!quote){
-    message('Kata bijak belum tersedia.');
-    return;
+    const thanks=$('mgThanks')?.textContent?.trim()||'';
+    const textarea=document.getElementById('postContent');
+    const createPage=document.getElementById('pageCreate');
+    if(!textarea || !createPage) {
+      message('Kolom curhatan tidak ditemukan.');
+      return;
+    }
+
+    document.querySelectorAll('.page-section').forEach(sec=>sec.classList.remove('active'));
+    document.querySelectorAll('.nav-bar .nav-item').forEach(nav=>nav.classList.remove('active'));
+    createPage.classList.add('active');
+
+    const nav=document.querySelectorAll('.nav-bar .nav-item')[2];
+    if(nav) nav.classList.add('active');
+
+    textarea.value='“'+quote+'”'+(thanks?'\n\n'+thanks:'');
+    textarea.dispatchEvent(new Event('input',{bubbles:true}));
+    if(typeof updateCharCount==='function') updateCharCount(textarea);
+    textarea.focus({preventScroll:true});
+    textarea.scrollIntoView({behavior:'smooth',block:'center'});
+    message('Kata bijak sudah dimasukkan ke kolom curhatan.');
   }
 
-  const thanks = $('mgThanks')?.textContent?.trim() || '';
-  const textarea = document.getElementById('postContent');
-  const createPage = document.getElementById('pageCreate');
-
-  if(!textarea || !createPage){
-    message('Kolom curhatan tidak ditemukan.');
-    return;
-  }
-
-  // Buka halaman curhatan tanpa memanggil loadDraftLocally()
-  document.querySelectorAll('.page-section').forEach(sec => {
-    sec.classList.remove('active');
-  });
-
-  document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
-    nav.classList.remove('active');
-  });
-
-  createPage.classList.add('active');
-
-  const createNavBtn = document.querySelectorAll('.nav-bar .nav-item')[2];
-  if(createNavBtn) createNavBtn.classList.add('active');
-
-  // Masukkan kata bijak dan ucapan terima kasih
-  textarea.value = '“' + quote + '”' + (thanks ? '\n\n' + thanks : '');
-
-  textarea.dispatchEvent(new Event('input', {bubbles:true}));
-
-  if(typeof updateCharCount === 'function'){
-    updateCharCount(textarea);
-  }
-
-  textarea.focus({preventScroll:true});
-  textarea.scrollIntoView({
-    behavior:'smooth',
-    block:'center'
-  });
-
-  message('Kata bijak sudah dimasukkan ke kolom curhatan.');
-}
   $('mgStart').addEventListener('click',start);
 
   $('mgReset').addEventListener('click',async()=>{
     if(busy) return;
-
     await cancel();
     drawBoard();
     $('mgResult').classList.remove('show');
@@ -2029,9 +2147,9 @@ poolStatus=feePaid>0
   });
 
   $('mgCurhat').addEventListener('click',openCurhat);
-
 })();
 </script>
+
 <!-- ===== AKHIR BALAP KELERENG INSPIRASI CUIT ===== -->
   
   <!-- 5. HALAMAN PROFIL -->
