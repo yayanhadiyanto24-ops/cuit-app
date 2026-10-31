@@ -752,6 +752,7 @@
         <div class="pills-group">
           <button class="pill-btn active" id="btnFilterAll" onclick="filterPosts('semua', this)">Semua</button>
           <button class="pill-btn" id="btnFilterFollow" onclick="filterPosts('mengikuti', this)">Mengikuti</button>
+          <button class="pill-btn" type="button" onclick="switchTab('pageGame',document.querySelectorAll('.nav-bar .nav-item')[1]);setTimeout(()=>document.getElementById('marbleGame')?.scrollIntoView({behavior:'smooth',block:'start'}),250)">🏁 Balap Kelereng</button>
         </div>
       </div>
 
