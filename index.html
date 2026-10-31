@@ -1889,7 +1889,7 @@ poolStatus=feePaid>0
 
       const finished=Array.isArray(finishData)?finishData[0]:finishData;
 
-      if(!finished || finished.ok!==true){
+      if(!finished || finished.success!==true){
         throw new Error(finished?.message || 'Hasil belum dikonfirmasi server.');
       }
 
