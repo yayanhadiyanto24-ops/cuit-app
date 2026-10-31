@@ -1481,7 +1481,328 @@ poolStatus=feePaid>0
     })();
     </script>
   </div>
+<!-- ===== BALAP KELERENG INSPIRASI CUIT ===== -->
+<style>
+#marbleGame{max-width:520px;margin:14px auto;padding:12px;background:linear-gradient(145deg,#fff8ed,#fff);border:1px solid #e7c978;border-radius:18px;box-shadow:0 6px 20px #8d202012;color:#54252a}
+#marbleGame .mg-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#marbleGame h2{font-size:19px;color:#a9152b;margin:0}
+#marbleGame .mg-sub{font-size:11px;color:#806767;margin:5px 0 10px}
+#marbleGame .mg-info{display:flex;gap:6px;margin-bottom:8px}
+#marbleGame .mg-info div{flex:1;text-align:center;padding:7px 3px;background:#fff;border:1px solid #eedcae;border-radius:10px;font-size:10px}
+#marbleGame .mg-info strong{display:block;font-size:15px;color:#a9152b;margin-top:3px}
+#marbleGame canvas{display:block;width:100%;height:330px;background:linear-gradient(#fffaf0,#fff1d5);border:1px solid #e8d5a3;border-radius:13px;touch-action:manipulation}
+#marbleGame .mg-btn{border:0;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:900;cursor:pointer}
+#marbleGame .mg-primary{background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;flex:1}
+#marbleGame .mg-secondary{background:#fff2cf;color:#805b08;border:1px solid #e8cf83}
+#marbleGame .mg-actions{display:flex;gap:8px;margin-top:9px}
+#marbleGame .mg-message{text-align:center;font-size:11px;line-height:1.4;padding:9px 3px;color:#795d5d;min-height:30px}
+#marbleGame .mg-result{display:none;margin-top:10px;padding:12px;background:#fff;border:1px solid #e5c66d;border-radius:14px}
+#marbleGame .mg-result.show{display:block}
+#marbleGame .mg-result h3{font-size:16px;color:#a9152b;margin:0 0 8px}
+#marbleGame .mg-slots{display:flex;gap:6px;margin:8px 0}
+#marbleGame .mg-slot{flex:1;text-align:center;background:#fff4d9;border:1px solid #e7c978;border-radius:9px;padding:8px 2px;font-size:18px;font-weight:900;color:#a9152b}
+#marbleGame .mg-quote{padding:11px;background:#fff8e7;border:1px solid #e8d39b;border-radius:10px;font-size:13px;line-height:1.5;color:#67202a}
+#marbleGame .mg-thanks{font-size:11px;line-height:1.5;margin:9px 0;color:#755b5b}
+#marbleGame .mg-curhat{width:100%;padding:12px;border:0;border-radius:11px;background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;font-weight:900}
+#marbleGame button:disabled{opacity:.55;cursor:not-allowed}
+</style>
 
+<section id="marbleGame">
+  <div class="mg-head">
+    <div>
+      <div style="font-size:9px;font-weight:900;letter-spacing:1px;color:#a87508">PERMAINAN CUIT</div>
+      <h2>🏁 Balap Kelereng Inspirasi</h2>
+    </div>
+    <span style="font-size:10px;background:#fff0c9;padding:6px 9px;border-radius:20px">🎁 1 Permata</span>
+  </div>
+
+  <p class="mg-sub">Tiga kelereng meluncur melewati rintangan. Perhatikan tempat ketiganya berhenti dan temukan pesan inspirasi hari ini!</p>
+
+  <div class="mg-info">
+    <div>BIAYA<strong>10 Koin Gratis</strong></div>
+    <div>HADIAH<strong>1 Permata</strong></div>
+    <div>KELERENG<strong>3 Buah</strong></div>
+  </div>
+
+  <canvas id="mgCanvas" width="480" height="330"></canvas>
+
+  <div class="mg-message" id="mgMessage">Tekan Mulai Balapan untuk memulai permainan.</div>
+
+  <div class="mg-actions">
+    <button class="mg-btn mg-primary" id="mgStart">🏁 Mulai Balapan</button>
+    <button class="mg-btn mg-secondary" id="mgReset">Ulangi</button>
+  </div>
+
+  <div class="mg-result" id="mgResult">
+    <h3>✨ Hasil Balap Kelereng</h3>
+    <div class="mg-slots">
+      <div class="mg-slot" id="mgRed">🔴 —</div>
+      <div class="mg-slot" id="mgBlue">🔵 —</div>
+      <div class="mg-slot" id="mgYellow">🟡 —</div>
+    </div>
+    <div style="font-size:11px;margin:5px 0 8px" id="mgCalculation"></div>
+    <div class="mg-quote" id="mgQuote">Memuat inspirasi...</div>
+    <div class="mg-thanks" id="mgThanks"></div>
+    <button class="mg-curhat" id="mgCurhat">✍️ CURHATKAN</button>
+  </div>
+
+  <p style="font-size:9px;color:#987d7d;line-height:1.4;margin:9px 2px 0">
+    Aturan: biaya 10 Koin Gratis dan hadiah 1 Permata diproses oleh server. Hasil kelereng hanya menentukan nomor kutipan inspirasi. Kotak Misteri tidak ikut perkalian.
+  </p>
+</section>
+
+<script>
+(() => {
+  const root = document.getElementById('marbleGame');
+  if (!root || root.dataset.ready === '1') return;
+  root.dataset.ready = '1';
+
+  const $ = id => root.querySelector('#' + id);
+  const canvas = $('mgCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let session = null;
+  let busy = false;
+  let animation = null;
+  let quoteText = '';
+
+  const colors = ['#d9253c','#2676d9','#e8b52b'];
+  const labels = ['MERAH','BIRU','KUNING'];
+
+  function client(){
+    if(typeof supabaseClient !== 'undefined') return supabaseClient;
+    if(typeof supabase !== 'undefined') return supabase;
+    throw new Error('Koneksi CUIT belum tersedia.');
+  }
+
+  function message(t){ $('mgMessage').textContent = t; }
+
+  function drawBoard(balls = [], progress = 1){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    ctx.fillStyle = '#fff8e9';
+    ctx.fillRect(0,0,w,h);
+
+    // Jalur dan tiang pembatas
+    ctx.strokeStyle = '#d9bd7c';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(12,10); ctx.lineTo(12,278);
+    ctx.moveTo(w-12,10); ctx.lineTo(w-12,278);
+    ctx.stroke();
+
+    // Papan rintangan
+    for(let row=0;row<7;row++){
+      for(let col=0;col<9;col++){
+        const x=38+col*50+(row%2?24:0);
+        const y=48+row*31;
+        if(x>w-25) continue;
+        ctx.beginPath();
+        ctx.arc(x,y,5,0,Math.PI*2);
+        ctx.fillStyle='#c69b4c';
+        ctx.fill();
+        ctx.strokeStyle='#9c7330';
+        ctx.lineWidth=1;
+        ctx.stroke();
+      }
+    }
+
+    // Wadah 1 sampai 9 dan Misteri
+    const binW=w/10;
+    for(let i=0;i<10;i++){
+      const x=i*binW;
+      ctx.fillStyle=i===9?'#6e4b8b':'#a9152b';
+      ctx.fillRect(x+1,282,binW-2,46);
+      ctx.fillStyle='#fff';
+      ctx.font='bold 13px Arial';
+      ctx.textAlign='center';
+      ctx.fillText(i===9?'?':String(i+1),x+binW/2,310);
+    }
+
+    balls.forEach((b,i)=>{
+      const targetX=(b.slot*binW)+(binW/2);
+      const startX=80+i*150;
+      const t=Math.min(1,progress);
+      const eased=1-Math.pow(1-t,2);
+      const sway=Math.sin(t*35+i*2.5)*(1-t)*24;
+      const x=startX+(targetX-startX)*eased+sway;
+      const y=18+(260*eased);
+
+      ctx.beginPath();
+      ctx.arc(x,y,10,0,Math.PI*2);
+      ctx.fillStyle=colors[i];
+      ctx.shadowColor='#654';
+      ctx.shadowBlur=5;
+      ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='#fff';
+      ctx.lineWidth=2;
+      ctx.stroke();
+    });
+  }
+
+  drawBoard();
+
+  function resultNumber(value){
+    if(value === null || value === undefined) return null;
+    const n=Number(value);
+    return Number.isInteger(n) && n>=1 && n<=9 ? n : null;
+  }
+
+  function showResult(data){
+    const red=resultNumber(data.marble_red ?? data.red);
+    const blue=resultNumber(data.marble_blue ?? data.blue);
+    const yellow=resultNumber(data.marble_yellow ?? data.yellow);
+
+    $('mgRed').textContent='🔴 '+(red ?? 'Misteri');
+    $('mgBlue').textContent='🔵 '+(blue ?? 'Misteri');
+    $('mgYellow').textContent='🟡 '+(yellow ?? 'Misteri');
+
+    const values=[red,blue,yellow].filter(v=>v!==null);
+    const product=values.length ? values.reduce((a,b)=>a*b,1) : null;
+
+    $('mgCalculation').textContent=product===null
+      ? 'Semua kelereng masuk Misteri. Tidak ada perkalian.'
+      : 'Perkalian angka: '+values.join(' × ')+' = '+product;
+
+    quoteText=data.wisdom_quote || data.quote || '';
+    $('mgQuote').textContent='“'+quoteText+'”';
+    $('mgThanks').textContent=data.thank_you_message ||
+      'Terima kasih kepada ADMINCUIT atas hadiah 1 Permata Kejutan. Semoga kebaikan ini membawa manfaat bagi seluruh anggota CUIT.';
+
+    $('mgResult').classList.add('show');
+  }
+
+  async function start(){
+    if(busy) return;
+    busy=true;
+    $('mgStart').disabled=true;
+    $('mgResult').classList.remove('show');
+    message('Memeriksa saldo dan persediaan permata...');
+
+    try{
+      const {data,error}=await client().rpc('cuit_start_marble_game');
+      if(error) throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row || row.ok===false || row.status==='error')
+        throw new Error(row?.message || 'Permainan belum dapat dimulai.');
+
+      session=row;
+      const sid=row.session_id || row.id;
+      if(!sid) throw new Error('ID sesi tidak diterima dari server.');
+
+      session.session_id=sid;
+
+      const slots=[
+        resultNumber(row.marble_red ?? row.red),
+        resultNumber(row.marble_blue ?? row.blue),
+        resultNumber(row.marble_yellow ?? row.yellow)
+      ].map(v=>v===null?9:v-1);
+
+      message('Kelereng sedang meluncur melewati rintangan...');
+      const balls=slots.map((slot)=>({slot}));
+
+      let startTime=null;
+      const duration=4200;
+
+      await new Promise(resolve=>{
+        function frame(timestamp){
+          if(!startTime) startTime=timestamp;
+          const p=Math.min(1,(timestamp-startTime)/duration);
+          drawBoard(balls,p);
+          if(p<1) animation=requestAnimationFrame(frame);
+          else resolve();
+        }
+        animation=requestAnimationFrame(frame);
+      });
+
+      message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
+      const {data:finishData,error:finishError}=await client().rpc(
+        'cuit_finish_marble_game',
+        {p_session_id:sid}
+      );
+
+      if(finishError) throw finishError;
+      const finished=Array.isArray(finishData)?finishData[0]:finishData;
+      if(!finished || finished.ok!==true)
+        throw new Error(finished?.message || 'Hasil belum dikonfirmasi server.');
+
+      showResult({
+        ...row,
+        ...finished,
+        marble_red:row.marble_red ?? row.red,
+        marble_blue:row.marble_blue ?? row.blue,
+        marble_yellow:row.marble_yellow ?? row.yellow
+      });
+
+      message('Berhasil! 1 Permata telah diberikan dan 1 poin Raja Game dicatat.');
+      session=null;
+
+      if(typeof updateCoinUI==='function') await updateCoinUI();
+      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile)
+        await CuitApp.loadProfile();
+
+    }catch(err){
+      message(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
+      console.warn('Balap Kelereng CUIT:',err);
+    }finally{
+      busy=false;
+      $('mgStart').disabled=false;
+    }
+  }
+
+  async function cancel(){
+    if(animation) cancelAnimationFrame(animation);
+    if(!session || !session.session_id) return;
+    try{
+      const {data,error}=await client().rpc(
+        'cuit_cancel_marble_game',
+        {p_session_id:session.session_id}
+      );
+      if(error) throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row || row.ok!==true)
+        throw new Error(row?.message || 'Pembatalan belum dikonfirmasi.');
+      message('Sesi dibatalkan. Koin Gratis dan permata cadangan dikembalikan.');
+      session=null;
+    }catch(err){
+      message('Pembatalan belum berhasil: '+err.message);
+    }
+  }
+
+  function openCurhat(){
+    if(!quoteText) return;
+    const thanks=$('mgThanks').textContent;
+    const textarea=document.getElementById('postContent');
+    if(textarea){
+      textarea.value='“'+quoteText+'”\n\n'+thanks;
+      if(typeof updateCharCount==='function') updateCharCount(textarea);
+    }
+    const navItems=document.querySelectorAll('.nav-bar .nav-item');
+    if(typeof switchTab==='function')
+      switchTab('pageCreate',navItems[2]||null);
+    if(textarea){
+      setTimeout(()=>{
+        textarea.focus({preventScroll:true});
+        textarea.scrollIntoView({behavior:'smooth',block:'center'});
+      },120);
+    }
+  }
+
+  $('mgStart').addEventListener('click',start);
+  $('mgReset').addEventListener('click',async()=>{
+    if(busy) return;
+    await cancel();
+    drawBoard();
+    $('mgResult').classList.remove('show');
+    quoteText='';
+    message('Tekan Mulai Balapan untuk memulai permainan.');
+  });
+  $('mgCurhat').addEventListener('click',openCurhat);
+})();
+</script>
+<!-- ===== AKHIR BALAP KELERENG INSPIRASI CUIT ===== -->
   <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
