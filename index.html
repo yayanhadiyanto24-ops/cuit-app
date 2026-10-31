@@ -1723,26 +1723,158 @@ poolStatus=feePaid>0
 
       session.session_id=sid;
 
-      const slots=[
+            const slots=[
         resultNumber(row.marble_red ?? row.red),
         resultNumber(row.marble_blue ?? row.blue),
         resultNumber(row.marble_yellow ?? row.yellow)
       ].map(v=>v===null?9:v-1);
 
-      message('Kelereng sedang meluncur melewati rintangan...');
-      const balls=slots.map((slot)=>({slot}));
+      message('Tiga kelereng mulai meluncur!');
 
-      let startTime=null;
-      const duration=4200;
+      const balls=slots.map((slot,i)=>({
+        x:90+i*150,
+        y:24-i*18,
+        vx:(i-1)*35,
+        vy:0,
+        slot,
+        done:false
+      }));
+
+      const pegs=[];
+      for(let r=0;r<13;r++){
+        for(let c=0;c<9;c++){
+          const x=42+c*49+(r%2?24:0);
+          const y=85+r*52;
+          if(x<455) pegs.push({x,y,r:6});
+        }
+      }
+
+      const radius=11;
+      const gravity=950;
+      const restitution=.72;
+      let last=0;
+      let elapsed=0;
 
       await new Promise(resolve=>{
-        function frame(timestamp){
-          if(!startTime) startTime=timestamp;
-          const p=Math.min(1,(timestamp-startTime)/duration);
-          drawBoard(balls,p);
-          if(p<1) animation=requestAnimationFrame(frame);
-          else resolve();
+        function frame(now){
+          if(!last) last=now;
+          const dt=Math.min((now-last)/1000,.025);
+          last=now;
+          elapsed+=dt;
+
+          balls.forEach((b,i)=>{
+            if(b.done) return;
+
+            // Gravitasi dan momentum
+            b.vy+=gravity*dt;
+            b.x+=b.vx*dt;
+            b.y+=b.vy*dt;
+
+            // Gesekan udara ringan
+            b.vx*=.998;
+            b.vy*=.999;
+
+            // Tabrakan dengan dinding
+            if(b.x<25){
+              b.x=25;
+              b.vx=Math.abs(b.vx)*restitution;
+            }
+            if(b.x>455){
+              b.x=455;
+              b.vx=-Math.abs(b.vx)*restitution;
+            }
+
+            // Tabrakan dengan paku pemantul
+            pegs.forEach(p=>{
+              const dx=b.x-p.x;
+              const dy=b.y-p.y;
+              const dist=Math.hypot(dx,dy);
+              const min=radius+p.r;
+
+              if(dist>0 && dist<min){
+                const nx=dx/dist;
+                const ny=dy/dist;
+
+                b.x=p.x+nx*min;
+                b.y=p.y+ny*min;
+
+                const dot=b.vx*nx+b.vy*ny;
+                if(dot<0){
+                  b.vx-=(1+restitution)*dot*nx;
+                  b.vy-=(1+restitution)*dot*ny;
+                }
+
+                // Sedikit putaran saat terkena paku
+                b.vx+=nx*18;
+              }
+            });
+
+            // Tumbukan antarkelereng
+            balls.forEach((other,j)=>{
+              if(i===j || other.done) return;
+              const dx=b.x-other.x;
+              const dy=b.y-other.y;
+              const dist=Math.hypot(dx,dy);
+              const min=radius*2;
+
+              if(dist>0 && dist<min){
+                const nx=dx/dist;
+                const ny=dy/dist;
+                const overlap=min-dist;
+                b.x+=nx*overlap*.5;
+                b.y+=ny*overlap*.5;
+                other.x-=nx*overlap*.5;
+                other.y-=ny*overlap*.5;
+
+                const rel=(b.vx-other.vx)*nx+
+                          (b.vy-other.vy)*ny;
+                if(rel<0){
+                  const impulse=-(1+restitution)*rel/2;
+                  b.vx+=impulse*nx;
+                  b.vy+=impulse*ny;
+                  other.vx-=impulse*nx;
+                  other.vy-=impulse*ny;
+                }
+              }
+            });
+
+            // Corong akhir mengarahkan kelereng ke kotak
+            // hasil yang sudah ditentukan server.
+            if(b.y>735){
+              const targetX=b.slot*48+24;
+              const force=(targetX-b.x)*5;
+              b.vx+=force*dt;
+              b.vx*=.94;
+
+              if(b.y>824){
+                b.x=targetX;
+                b.y=824;
+                b.vx=0;
+                b.vy=0;
+                b.done=true;
+              }
+            }
+
+            // Pengaman jika perangkat lambat
+            if(elapsed>12 && !b.done){
+              b.x=b.slot*48+24;
+              b.y=824;
+              b.vx=0;
+              b.vy=0;
+              b.done=true;
+            }
+          });
+
+          drawBoard(balls);
+
+          if(balls.every(b=>b.done)){
+            drawBoard(balls);
+            resolve();
+          }else{
+            animation=requestAnimationFrame(frame);
+          }
         }
+
         animation=requestAnimationFrame(frame);
       });
 
