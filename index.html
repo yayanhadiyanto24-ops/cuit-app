@@ -6737,7 +6737,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!button || !wheel || !result) return;
 
-    if (!window.supabaseClient) {
+        const cuitSupabase =
+      typeof supabaseClient !== "undefined"
+        ? supabaseClient
+        : null;
+
+    if (!cuitSupabase) {
       showMessage(
         "Koneksi CUIT belum siap. Silakan muat ulang aplikasi.",
         "#b5102d"
@@ -6757,9 +6762,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (note) note.style.display = "none";
 
     try {
-      const { data, error } = await window.supabaseClient.rpc(
+      const { data, error } = await cuitSupabase.rpc(
         "cuit_spin_surprise_gems",
-        { p_request_id:pendingRequestId }
+        { p_request_id: pendingRequestId }
       );
 
       if (error) throw error;
