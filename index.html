@@ -1863,7 +1863,7 @@ poolStatus=feePaid>0
         const sampleDuration = 24 / 120;
 
         while (
-          frameIndex < trace.length - 2 &&
+          frameIndex < trace.length - 1 &&
           animationTime >= (frameIndex + 1) * sampleDuration
         ) {
           frameIndex++;
@@ -1897,13 +1897,16 @@ poolStatus=feePaid>0
         });
 
         const settled = balls
-          .filter(ball => ball.done && Number.isInteger(Number(ball.tube)))
-          .map(ball => ({
-            x: ball.x,
-            y: ball.y,
-            slot: Number(ball.tube),
-            color: ball.color
-          }));
+  .filter(ball =>
+    ball.done &&
+    (ball.tube === null || Number.isInteger(Number(ball.tube)))
+  )
+  .map(ball => ({
+    x: ball.x,
+    y: ball.y,
+    slot: ball.tube === null ? 9 : Number(ball.tube) - 1,
+    color: ball.color
+  }));
 
         drawBoard(balls, settled);
 
