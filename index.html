@@ -1854,8 +1854,9 @@ poolStatus=feePaid>0
     }
   }
 
-    function startPhysics(slots) {
+      function startPhysics(slots) {
     const pegs=[];
+
     for(let row=0;row<11;row++) {
       for(let col=0;col<9;col++) {
         const x=48+col*48+(row%2?24:0);
@@ -1881,143 +1882,203 @@ poolStatus=feePaid>0
     }));
 
     const settled=[];
-    let last=0, elapsed=0;
+    let last=0;
+    let elapsed=0;
+    let settledPromise=false;
+    let timer=null;
 
     return new Promise((resolve,reject)=>{
+      function fail(err) {
+        if(settledPromise) return;
+        settledPromise=true;
+
+        if(animation) {
+          cancelAnimationFrame(animation);
+          animation=null;
+        }
+
+        if(timer) clearTimeout(timer);
+
+        reject(err instanceof Error ? err : new Error(String(err)));
+      }
+
+      function finish() {
+        if(settledPromise) return;
+        settledPromise=true;
+
+        if(animation) {
+          cancelAnimationFrame(animation);
+          animation=null;
+        }
+
+        if(timer) clearTimeout(timer);
+        resolve();
+      }
+
+      // Batas waktu nyata, tidak bergantung pada requestAnimationFrame.
+      timer=setTimeout(()=>{
+        fail(new Error(
+          'Animasi melewati batas waktu. Sesi akan dibatalkan.'
+        ));
+      },30000);
+
       function frame(now) {
-        if(!last) last=now;
-        const dt=Math.min((now-last)/1000,.018);
-        last=now;
-        elapsed+=dt;
+        try {
+          if(settledPromise) return;
 
-        balls.forEach((b,i)=>{
-          if(b.done) return;
+          if(!last) last=now;
 
-          b.vy+=780*dt;
-          b.x+=b.vx*dt;
-          b.y+=b.vy*dt;
-          b.vx*=.999;
-          b.vy*=.999;
+          const dt=Math.min((now-last)/1000,.018);
+          last=now;
+          elapsed+=dt;
 
-          if(b.x<27) {
-            b.x=27;
-            b.vx=Math.abs(b.vx)*.72;
+          balls.forEach((b,i)=>{
+            if(b.done) return;
+
+            b.vy+=780*dt;
+            b.x+=b.vx*dt;
+            b.y+=b.vy*dt;
+            b.vx*=.999;
+            b.vy*=.999;
+
+            if(b.x<27) {
+              b.x=27;
+              b.vx=Math.abs(b.vx)*.72;
+            }
+
+            if(b.x>453) {
+              b.x=453;
+              b.vx=-Math.abs(b.vx)*.72;
+            }
+
+            pegs.forEach(p=>collidePeg(b,p,dt));
+
+            bars.forEach(([x1,y1,x2,y2])=>{
+              const dx=x2-x1;
+              const dy=y2-y1;
+
+              const t=Math.max(0,Math.min(1,
+                ((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)
+              ));
+
+              const px=x1+t*dx;
+              const py=y1+t*dy;
+              const dist=Math.hypot(b.x-px,b.y-py);
+
+              if(dist<radius+5 && dist>0) {
+                const nx=(b.x-px)/dist;
+                const ny=(b.y-py)/dist;
+
+                b.x=px+nx*(radius+5);
+                b.y=py+ny*(radius+5);
+
+                const dot=b.vx*nx+b.vy*ny;
+
+                if(dot<0) {
+                  b.vx-=1.65*dot*nx;
+                  b.vy-=1.65*dot*ny;
+                }
+              }
+            });
+
+            balls.forEach((o,j)=>{
+              if(i===j || o.done) return;
+
+              const dx=b.x-o.x;
+              const dy=b.y-o.y;
+              const d=Math.hypot(dx,dy);
+
+              if(d>0 && d<radius*2) {
+                const nx=dx/d;
+                const ny=dy/d;
+                const overlap=radius*2-d;
+
+                b.x+=nx*overlap/2;
+                b.y+=ny*overlap/2;
+                o.x-=nx*overlap/2;
+                o.y-=ny*overlap/2;
+
+                const rel=(b.vx-o.vx)*nx+(b.vy-o.vy)*ny;
+
+                if(rel<0) {
+                  const impulse=-.82*rel/2;
+
+                  b.vx+=impulse*nx;
+                  b.vy+=impulse*ny;
+                  o.vx-=impulse*nx;
+                  o.vy-=impulse*ny;
+                }
+              }
+            });
+
+            if(b.y>650 && b.y<tubeTop-12) {
+              const targetX=b.slot*tubeW+tubeW/2;
+              const strength=Math.min(1,(b.y-650)/105);
+
+              b.vx+=(targetX-b.x)*strength*1.05*dt;
+              b.vx=Math.max(-230,Math.min(230,b.vx));
+            }
+
+            if(b.y>=tubeTop-12) {
+              const left=b.slot*tubeW+radius+2;
+              const right=(b.slot+1)*tubeW-radius-2;
+
+              if(b.x<left) {
+                b.x=left;
+                b.vx=Math.abs(b.vx)*.3;
+              }
+
+              if(b.x>right) {
+                b.x=right;
+                b.vx=-Math.abs(b.vx)*.3;
+              }
+
+              if(b.y>=tubeTop+8) {
+                b.y=Math.min(b.y,tubeBottom-radius-14);
+                b.vx*=.92;
+                b.vy*=.88;
+
+                if(b.y>=tubeBottom-radius-14 || Math.abs(b.vy)<13) {
+                  b.done=true;
+                  b.vx=0;
+                  b.vy=0;
+
+                  settled.push({
+                    x:b.x,
+                    y:tubeBottom-65-
+                      (settled.filter(s=>s.slot===b.slot).length*22),
+                    slot:b.slot,
+                    color:b.color
+                  });
+                }
+              }
+            }
+          });
+
+          drawBoard(balls,settled);
+
+          if(balls.every(b=>b.done)) {
+            finish();
+            return;
           }
-          if(b.x>453) {
-            b.x=453;
-            b.vx=-Math.abs(b.vx)*.72;
-          }
 
-          pegs.forEach(p=>collidePeg(b,p,dt));
-
-          bars.forEach(([x1,y1,x2,y2])=>{
-            const dx=x2-x1, dy=y2-y1;
-            const t=Math.max(0,Math.min(1,
-              ((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)
+          if(elapsed>25) {
+            fail(new Error(
+              'Pergerakan kelereng tidak selesai. Sesi akan dibatalkan.'
             ));
-            const px=x1+t*dx, py=y1+t*dy;
-            const dist=Math.hypot(b.x-px,b.y-py);
-
-            if(dist<radius+5 && dist>0) {
-              const nx=(b.x-px)/dist;
-              const ny=(b.y-py)/dist;
-              b.x=px+nx*(radius+5);
-              b.y=py+ny*(radius+5);
-
-              const dot=b.vx*nx+b.vy*ny;
-              if(dot<0) {
-                b.vx-=1.65*dot*nx;
-                b.vy-=1.65*dot*ny;
-              }
-            }
-          });
-
-          balls.forEach((o,j)=>{
-            if(i===j || o.done) return;
-            const dx=b.x-o.x, dy=b.y-o.y;
-            const d=Math.hypot(dx,dy);
-
-            if(d>0 && d<radius*2) {
-              const nx=dx/d, ny=dy/d;
-              const overlap=radius*2-d;
-              b.x+=nx*overlap/2;
-              b.y+=ny*overlap/2;
-              o.x-=nx*overlap/2;
-              o.y-=ny*overlap/2;
-
-              const rel=(b.vx-o.vx)*nx+(b.vy-o.vy)*ny;
-              if(rel<0) {
-                const impulse=-.82*rel/2;
-                b.vx+=impulse*nx;
-                b.vy+=impulse*ny;
-                o.vx-=impulse*nx;
-                o.vy-=impulse*ny;
-              }
-            }
-          });
-
-          if(b.y>650 && b.y<tubeTop-12) {
-            const targetX=b.slot*tubeW+tubeW/2;
-            const strength=Math.min(1,(b.y-650)/105);
-            b.vx+=(targetX-b.x)*strength*1.05*dt;
-            b.vx=Math.max(-230,Math.min(230,b.vx));
+            return;
           }
 
-          if(b.y>=tubeTop-12) {
-            const left=b.slot*tubeW+radius+2;
-            const right=(b.slot+1)*tubeW-radius-2;
-
-            if(b.x<left) {
-              b.x=left;
-              b.vx=Math.abs(b.vx)*.3;
-            }
-            if(b.x>right) {
-              b.x=right;
-              b.vx=-Math.abs(b.vx)*.3;
-            }
-
-            if(b.y>=tubeTop+8) {
-              b.y=Math.min(b.y,tubeBottom-radius-14);
-              b.vx*=.92;
-              b.vy*=.88;
-
-              if(b.y>=tubeBottom-radius-14 || Math.abs(b.vy)<13) {
-                b.done=true;
-                b.vx=0;
-                b.vy=0;
-
-                settled.push({
-                  x:b.x,
-                  y:tubeBottom-65-
-                    (settled.filter(s=>s.slot===b.slot).length*22),
-                  slot:b.slot,
-                  color:b.color
-                });
-              }
-            }
-          }
-        });
-
-        drawBoard(balls,settled);
-
-        if(balls.every(b=>b.done)) {
-          animation=null;
-          resolve();
-        } else if(elapsed>25) {
-          if(animation) cancelAnimationFrame(animation);
-          animation=null;
-          reject(new Error(
-            'Animasi belum selesai. Sesi akan dibatalkan dan saldo dikembalikan.'
-          ));
-        } else {
           animation=requestAnimationFrame(frame);
+
+        } catch(err) {
+          fail(err);
         }
       }
 
       animation=requestAnimationFrame(frame);
     });
   }
-
   async function start() {
     if(busy || session) return;
 
