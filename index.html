@@ -1968,35 +1968,39 @@ poolStatus=feePaid>0
 
   // Masukkan kata bijak setelah halaman curhat dibuka.
   function openCurhat(){
-    if(!quoteText) return;
+  if(!quoteText) return;
 
-    const thanks=$('mgThanks').textContent;
-    const textarea=document.getElementById('postContent');
-    const navItems=document.querySelectorAll('.nav-bar .nav-item');
+  const textToInsert =
+    '“'+quoteText+'”\n\n'+$('mgThanks').textContent;
 
-    if(typeof switchTab==='function'){
-      switchTab('pageCreate',navItems[2]||null);
-    }
+  const navItems=document.querySelectorAll('.nav-bar .nav-item');
 
-    if(textarea){
-      textarea.value='“'+quoteText+'”\n\n'+thanks;
-
-      if(typeof updateCharCount==='function'){
-        updateCharCount(textarea);
-      }
-
-      textarea.dispatchEvent(new Event('input',{bubbles:true}));
-
-      setTimeout(()=>{
-        textarea.focus({preventScroll:true});
-        textarea.scrollIntoView({
-          behavior:'smooth',
-          block:'center'
-        });
-      },150);
-    }
+  if(typeof switchTab==='function'){
+    switchTab('pageCreate',navItems[2]||null);
   }
 
+  setTimeout(()=>{
+    const textarea=document.getElementById('postContent');
+
+    if(!textarea){
+      message('Kolom curhatan tidak ditemukan.');
+      return;
+    }
+
+    textarea.value=textToInsert;
+    textarea.dispatchEvent(new Event('input',{bubbles:true}));
+
+    if(typeof updateCharCount==='function'){
+      updateCharCount(textarea);
+    }
+
+    textarea.focus();
+    textarea.scrollIntoView({
+      behavior:'smooth',
+      block:'center'
+    });
+  },300);
+}
   $('mgStart').addEventListener('click',start);
 
   $('mgReset').addEventListener('click',async()=>{
