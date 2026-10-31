@@ -5225,14 +5225,19 @@ if (isAdmin) {
             throw new Error('Slot video ini sudah diklaim hari ini.');
           }
 
-          const { error: insertError } = await supabaseClient
-            .from('reels_claims')
-            .insert([{ user_id: currentUser.id, user_email: currentUser.email, slot_key: slot }]);
-          if (insertError) throw insertError;
+          const { data: rewardData, error: rewardError } =
+  await supabaseClient.rpc(
+    "cuit_claim_reel_reward",
+    { p_slot_key: slot }
+  );
 
-          freeCoins += 10;
-          await updateCoinUI(true);
-        }
+if (rewardError) throw rewardError;
+
+freeCoins = Number(
+  rewardData?.free_coins ?? freeCoins + 10
+);
+
+await updateCoinUI(true);
       } catch (err) {
         console.error('Pencatatan tontonan/klaim video gagal:', err);
         alert(err?.message || 'Pencatatan gagal. Koin tidak ditambahkan.');
