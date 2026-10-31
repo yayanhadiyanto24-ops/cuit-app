@@ -1855,316 +1855,251 @@ poolStatus=feePaid>0
     }
   }
 
-      function startPhysics(slots) {
-    const pegs=[];
+      function animateServerTrace(trace) {
+  if (!Array.isArray(trace) || trace.length < 2) {
+    return Promise.reject(
+      new Error('Jejak simulasi dari server tidak lengkap.')
+    );
+  }
 
-    for(let row=0;row<11;row++) {
-      for(let col=0;col<9;col++) {
-        const x=48+col*48+(row%2?24:0);
-        const y=65+row*55;
-        if(x<430) pegs.push({x,y,r:6.5});
+  const colors = ['#e52b43', '#2584ed', '#f2bd32'];
+  let frameIndex = 0;
+  let lastTime = 0;
+  let animationTime = 0;
+  let settledPromise = false;
+
+  return new Promise((resolve, reject) => {
+    function stop() {
+      if (animation) {
+        cancelAnimationFrame(animation);
+        animation = null;
       }
     }
 
-    const bars=[
-      [55,180,155,205],[325,245,425,220],
-      [55,350,155,375],[325,430,425,405],
-      [55,535,155,560],[325,615,425,590]
-    ];
+    function fail(error) {
+      if (settledPromise) return;
+      settledPromise = true;
+      stop();
+      reject(error);
+    }
 
-    const balls=slots.map((slot,i)=>({
-      x:125+i*115,
-      y:20-i*9,
-      vx:(i-1)*65,
-      vy:20,
-      slot,
-      color:colors[i],
-      done:false
-    }));
+    function finish() {
+      if (settledPromise) return;
+      settledPromise = true;
+      stop();
+      resolve();
+    }
 
-    const settled=[];
-    let last=0;
-    let elapsed=0;
-    let settledPromise=false;
-    let timer=null;
+    function frame(now) {
+      try {
+        if (settledPromise) return;
 
-    return new Promise((resolve,reject)=>{
-      function fail(err) {
-        if(settledPromise) return;
-        settledPromise=true;
+        if (!lastTime) lastTime = now;
 
-        if(animation) {
-          cancelAnimationFrame(animation);
-          animation=null;
+        const delta = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+        animationTime += delta;
+
+        // Setiap sampel server mewakili 24 langkah fisika
+        // dengan kecepatan simulasi 120 langkah per detik.
+        const sampleDuration = 24 / 120;
+
+        while (
+          frameIndex < trace.length - 2 &&
+          animationTime >= (frameIndex + 1) * sampleDuration
+        ) {
+          frameIndex++;
         }
 
-        if(timer) clearTimeout(timer);
+        const progress = Math.min(
+          1,
+          (animationTime - frameIndex * sampleDuration) /
+            sampleDuration
+        );
 
-        reject(err instanceof Error ? err : new Error(String(err)));
-      }
+        const current = trace[frameIndex];
+        const next = trace[Math.min(frameIndex + 1, trace.length - 1)];
 
-      function finish() {
-        if(settledPromise) return;
-        settledPromise=true;
-
-        if(animation) {
-          cancelAnimationFrame(animation);
-          animation=null;
+        if (!current || !current.balls || !next || !next.balls) {
+          throw new Error('Format jejak simulasi server tidak sesuai.');
         }
 
-        if(timer) clearTimeout(timer);
-        resolve();
-      }
+        const balls = current.balls.map((ball, i) => {
+          const target = next.balls[i] || ball;
 
-      // Batas waktu nyata, tidak bergantung pada requestAnimationFrame.
-      timer=setTimeout(()=>{
-        fail(new Error(
-          'Animasi melewati batas waktu. Sesi akan dibatalkan.'
-        ));
-      },30000);
+          return {
+            x: Number(ball.x) +
+              (Number(target.x) - Number(ball.x)) * progress,
+            y: Number(ball.y) +
+              (Number(target.y) - Number(ball.y)) * progress,
+            tube: ball.tube,
+            done: Boolean(ball.done),
+            color: colors[i]
+          };
+        });
 
-      function frame(now) {
-        try {
-          if(settledPromise) return;
+        const settled = balls
+          .filter(ball => ball.done && Number.isInteger(Number(ball.tube)))
+          .map(ball => ({
+            x: ball.x,
+            y: ball.y,
+            slot: Number(ball.tube),
+            color: ball.color
+          }));
 
-          if(!last) last=now;
+        drawBoard(balls, settled);
 
-          const dt=Math.min((now-last)/1000,.018);
-          last=now;
-          elapsed+=dt;
+        if (frameIndex >= trace.length - 1) {
+          const lastFrame = trace[trace.length - 1];
+          const allDone = lastFrame.balls.every(ball => ball.done);
 
-          balls.forEach((b,i)=>{
-            if(b.done) return;
-
-            b.vy+=780*dt;
-            b.x+=b.vx*dt;
-            b.y+=b.vy*dt;
-            b.vx*=.999;
-            b.vy*=.999;
-
-            if(b.x<27) {
-              b.x=27;
-              b.vx=Math.abs(b.vx)*.72;
-            }
-
-            if(b.x>453) {
-              b.x=453;
-              b.vx=-Math.abs(b.vx)*.72;
-            }
-
-            pegs.forEach(p=>collidePeg(b,p,dt));
-
-            bars.forEach(([x1,y1,x2,y2])=>{
-              const dx=x2-x1;
-              const dy=y2-y1;
-
-              const t=Math.max(0,Math.min(1,
-                ((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)
-              ));
-
-              const px=x1+t*dx;
-              const py=y1+t*dy;
-              const dist=Math.hypot(b.x-px,b.y-py);
-
-              if(dist<radius+5 && dist>0) {
-                const nx=(b.x-px)/dist;
-                const ny=(b.y-py)/dist;
-
-                b.x=px+nx*(radius+5);
-                b.y=py+ny*(radius+5);
-
-                const dot=b.vx*nx+b.vy*ny;
-
-                if(dot<0) {
-                  b.vx-=1.65*dot*nx;
-                  b.vy-=1.65*dot*ny;
-                }
-              }
-            });
-
-            balls.forEach((o,j)=>{
-              if(i===j || o.done) return;
-
-              const dx=b.x-o.x;
-              const dy=b.y-o.y;
-              const d=Math.hypot(dx,dy);
-
-              if(d>0 && d<radius*2) {
-                const nx=dx/d;
-                const ny=dy/d;
-                const overlap=radius*2-d;
-
-                b.x+=nx*overlap/2;
-                b.y+=ny*overlap/2;
-                o.x-=nx*overlap/2;
-                o.y-=ny*overlap/2;
-
-                const rel=(b.vx-o.vx)*nx+(b.vy-o.vy)*ny;
-
-                if(rel<0) {
-                  const impulse=-.82*rel/2;
-
-                  b.vx+=impulse*nx;
-                  b.vy+=impulse*ny;
-                  o.vx-=impulse*nx;
-                  o.vy-=impulse*ny;
-                }
-              }
-            });
-
-            if(b.y>650 && b.y<tubeTop-12) {
-              const targetX=b.slot*tubeW+tubeW/2;
-              const strength=Math.min(1,(b.y-650)/105);
-
-              b.vx+=(targetX-b.x)*strength*1.05*dt;
-              b.vx=Math.max(-230,Math.min(230,b.vx));
-            }
-
-            if(b.y>=tubeTop-12) {
-              const left=b.slot*tubeW+radius+2;
-              const right=(b.slot+1)*tubeW-radius-2;
-
-              if(b.x<left) {
-                b.x=left;
-                b.vx=Math.abs(b.vx)*.3;
-              }
-
-              if(b.x>right) {
-                b.x=right;
-                b.vx=-Math.abs(b.vx)*.3;
-              }
-
-              if(b.y>=tubeTop+8) {
-                b.y=Math.min(b.y,tubeBottom-radius-14);
-                b.vx*=.92;
-                b.vy*=.88;
-
-                if(b.y>=tubeBottom-radius-14 || Math.abs(b.vy)<13) {
-                  b.done=true;
-                  b.vx=0;
-                  b.vy=0;
-
-                  settled.push({
-                    x:b.x,
-                    y:tubeBottom-65-
-                      (settled.filter(s=>s.slot===b.slot).length*22),
-                    slot:b.slot,
-                    color:b.color
-                  });
-                }
-              }
-            }
-          });
-
-          drawBoard(balls,settled);
-
-          if(balls.every(b=>b.done)) {
+          if (allDone) {
             finish();
             return;
           }
-
-          if(elapsed>25) {
-            fail(new Error(
-              'Pergerakan kelereng tidak selesai. Sesi akan dibatalkan.'
-            ));
-            return;
-          }
-
-          animation=requestAnimationFrame(frame);
-
-        } catch(err) {
-          fail(err);
         }
+
+        animation = requestAnimationFrame(frame);
+      } catch (error) {
+        fail(error);
       }
+    }
 
-      animation=requestAnimationFrame(frame);
-    });
-  }
+    animation = requestAnimationFrame(frame);
+  });
+}
   async function start() {
-    if(busy || session) return;
+  if (busy || session) return;
 
-    busy=true;
-    $('mgStart').disabled=true;
-    $('mgResult').classList.remove('show');
-    message('Memeriksa saldo dan persediaan permata...');
+  busy = true;
+  $('mgStart').disabled = true;
+  $('mgResult').classList.remove('show');
+  message('Memeriksa saldo dan persediaan permata...');
 
-    try {
-      const {data,error}=await client().rpc('cuit_start_marble_game');
-      if(error) throw error;
+  try {
+    // Membuat sesi dan memotong biaya melalui RPC.
+    const { data, error } = await client().rpc(
+      'cuit_start_marble_game'
+    );
 
-      const row=Array.isArray(data)?data[0]:data;
-      if(!row || row.ok===false || row.status==='error')
-        throw new Error(row?.message || 'Permainan belum dapat dimulai.');
+    if (error) throw error;
 
-      const sid=row.session_id || row.id;
-      if(!sid)
-        throw new Error('ID sesi tidak diterima dari server.');
+    const row = Array.isArray(data) ? data[0] : data;
 
-      session={...row,session_id:sid};
-
-      if(typeof updateCoinUI==='function')
-        await updateCoinUI();
-
-      const slots=[
-        resultNumber(row.marble_red ?? row.red),
-        resultNumber(row.marble_blue ?? row.blue),
-        resultNumber(row.marble_yellow ?? row.yellow)
-      ].map(v=>v===null?9:v-1);
-
-      message('Tiga kelereng mulai meluncur!');
-      await startPhysics(slots);
-
-      message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
-
-      const {data:finishData,error:finishError}=await client().rpc(
-        'cuit_finish_marble_game',
-        {p_session_id:sid}
+    if (!row || row.ok === false || row.status === 'error') {
+      throw new Error(
+        row?.message || 'Permainan belum dapat dimulai.'
       );
+    }
 
-      if(finishError) throw finishError;
+    const sid = row.session_id || row.id;
 
-      const finished=Array.isArray(finishData)?finishData[0]:finishData;
-      if(!finished || finished.success!==true)
-        throw new Error(
-          finished?.message || 'Hasil belum dikonfirmasi server.'
-        );
+    if (!sid) {
+      throw new Error('ID sesi tidak diterima dari server.');
+    }
 
-      showResult({
-        ...row,
-        ...finished,
-        marble_red:row.marble_red ?? row.red,
-        marble_blue:row.marble_blue ?? row.blue,
-        marble_yellow:row.marble_yellow ?? row.yellow
+    session = { ...row, session_id: sid };
+
+    if (typeof updateCoinUI === 'function') {
+      await updateCoinUI();
+    }
+
+    message('Server sedang menjalankan simulasi fisika...');
+
+    // Meminta simulasi dan hasil fisika dari Edge Function.
+    const { data: physicsData, error: physicsError } =
+      await client().functions.invoke('cuit-marble-game', {
+        body: { session_id: sid }
       });
 
-      message('Berhasil! 1 Permata telah diberikan dan 1 poin Raja Game dicatat.');
+    if (physicsError) throw physicsError;
 
-      session=null;
+    if (
+      !physicsData ||
+      physicsData.success !== true ||
+      !Array.isArray(physicsData.trace)
+    ) {
+      throw new Error(
+        physicsData?.message ||
+        'Server tidak mengirim jejak simulasi yang valid.'
+      );
+    }
 
-      if(typeof updateCoinUI==='function')
+    message('Tiga kelereng sedang meluncur...');
+
+    // Browser hanya memutar jejak yang sudah dibuat server.
+    await animateServerTrace(physicsData.trace);
+
+    message('Balapan selesai. Meminta konfirmasi hasil dari server...');
+
+    // Hadiah hanya diberikan setelah server mengonfirmasi sesi.
+    const { data: finishData, error: finishError } =
+      await client().rpc(
+        'cuit_finish_marble_game',
+        { p_session_id: sid }
+      );
+
+    if (finishError) throw finishError;
+
+    const finished = Array.isArray(finishData)
+      ? finishData[0]
+      : finishData;
+
+    if (!finished || finished.success !== true) {
+      throw new Error(
+        finished?.message ||
+        'Hasil belum dikonfirmasi server.'
+      );
+    }
+
+    // Hasil akhir dibaca dari RPC server, bukan dari animasi.
+    showResult(finished);
+
+    message(
+      'Berhasil! Server mengonfirmasi hadiah 1 Permata.'
+    );
+
+    session = null;
+
+    if (typeof updateCoinUI === 'function') {
+      await updateCoinUI();
+    }
+
+    if (
+      typeof CuitApp !== 'undefined' &&
+      CuitApp.loadProfile
+    ) {
+      await CuitApp.loadProfile();
+    }
+
+  } catch (err) {
+    console.warn('Balap Kelereng CUIT:', err);
+
+    if (session && session.session_id) {
+      const refunded = await cancel();
+
+      if (!refunded) {
+        message(
+          'Permainan gagal. Pembatalan belum terkonfirmasi; jangan mulai sesi baru.'
+        );
+      }
+    } else {
+      message(
+        err?.message || 'Permainan belum dapat dimulai.'
+      );
+    }
+
+    if (typeof updateCoinUI === 'function') {
+      try {
         await updateCoinUI();
+      } catch (e) {}
+    }
 
-      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile)
-        await CuitApp.loadProfile();
-
-    } catch(err) {
-      console.warn('Balap Kelereng CUIT:',err);
-
-      if(session && session.session_id) {
-        await cancel();
-      } else {
-        message(err.message || 'Permainan belum dapat dimulai.');
-      }
-
-      if(typeof updateCoinUI==='function') {
-        try {
-          await updateCoinUI();
-        } catch(e) {}
-      }
-
-    } finally {
-      busy=false;
-
+  } finally {
+    busy = false;
+    $('mgStart').disabled = !!session;
+  }
+}
       // Tombol tetap terkunci jika sesi belum berhasil dibatalkan.
       $('mgStart').disabled=!!session;
     }
