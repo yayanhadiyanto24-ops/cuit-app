@@ -1490,15 +1490,7 @@ poolStatus=feePaid>0
 #marbleGame .mg-info{display:flex;gap:6px;margin-bottom:8px}
 #marbleGame .mg-info div{flex:1;text-align:center;padding:7px 3px;background:#fff;border:1px solid #eedcae;border-radius:10px;font-size:10px}
 #marbleGame .mg-info strong{display:block;font-size:15px;color:#a9152b;margin-top:3px}
-#marbleGame canvas{
-  display:block;
-  width:100%;
-  height:560px;
-  background:linear-gradient(#fffaf0,#fff1d5);
-  border:1px solid #e8d5a3;
-  border-radius:13px;
-  touch-action:manipulation;
-}background:linear-gradient(#fffaf0,#fff1d5);border:1px solid #e8d5a3;border-radius:13px;touch-action:manipulation}
+#marbleGame canvas{display:block;width:100%;height:560px;background:linear-gradient(#fffaf0,#fff1d5);border:1px solid #e8d5a3;border-radius:13px;touch-action:manipulation}
 #marbleGame .mg-btn{border:0;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:900;cursor:pointer}
 #marbleGame .mg-primary{background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;flex:1}
 #marbleGame .mg-secondary{background:#fff2cf;color:#805b08;border:1px solid #e8cf83}
@@ -1532,7 +1524,7 @@ poolStatus=feePaid>0
     <div>KELERENG<strong>3 Buah</strong></div>
   </div>
 
-  <canvas id="mgCanvas" width="480" height="330"></canvas>
+  <canvas id="mgCanvas" width="480" height="900"></canvas>
 
   <div class="mg-message" id="mgMessage">Tekan Mulai Balapan untuk memulai permainan.</div>
 
@@ -1558,11 +1550,15 @@ poolStatus=feePaid>0
     Aturan: biaya 10 Koin Gratis dan hadiah 1 Permata diproses oleh server. Hasil kelereng hanya menentukan nomor kutipan inspirasi. Kotak Misteri tidak ikut perkalian.
   </p>
 </section>
-
-<script>
+  <script>
 (() => {
   const root = document.getElementById('marbleGame');
   if (!root || root.dataset.ready === '1') return;
+
+  // Pastikan Balap Kelereng menjadi bagian dari halaman Game.
+  const gamePage = document.getElementById('pageGame');
+  if (gamePage) gamePage.appendChild(root);
+
   root.dataset.ready = '1';
 
   const $ = id => root.querySelector('#' + id);
@@ -1575,7 +1571,6 @@ poolStatus=feePaid>0
   let quoteText = '';
 
   const colors = ['#d9253c','#2676d9','#e8b52b'];
-  const labels = ['MERAH','BIRU','KUNING'];
 
   function client(){
     if(typeof supabaseClient !== 'undefined') return supabaseClient;
@@ -1583,9 +1578,11 @@ poolStatus=feePaid>0
     throw new Error('Koneksi CUIT belum tersedia.');
   }
 
-  function message(t){ $('mgMessage').textContent = t; }
+  function message(t){
+    $('mgMessage').textContent = t;
+  }
 
-    function drawBoard(balls = []){
+  function drawBoard(balls = []){
     const w=canvas.width, h=canvas.height;
     ctx.clearRect(0,0,w,h);
 
@@ -1595,12 +1592,11 @@ poolStatus=feePaid>0
     ctx.fillStyle=bg;
     ctx.fillRect(0,0,w,h);
 
-    // Dinding lintasan
     ctx.fillStyle='#9c7139';
     ctx.fillRect(7,0,7,h);
     ctx.fillRect(w-14,0,7,h);
 
-    // Paku pemantul zig-zag
+    // Paku pemantul.
     for(let row=0;row<13;row++){
       for(let col=0;col<9;col++){
         const x=42+col*49+(row%2?24:0);
@@ -1617,7 +1613,7 @@ poolStatus=feePaid>0
       }
     }
 
-    // Gerbang pembatas dan corong bawah
+    // Corong bawah.
     ctx.strokeStyle='#bd8a35';
     ctx.lineWidth=5;
     ctx.beginPath();
@@ -1627,7 +1623,7 @@ poolStatus=feePaid>0
     ctx.lineTo(466,745);
     ctx.stroke();
 
-    // Jalur tujuan
+    // Sepuluh kotak hasil.
     const binW=w/10;
     for(let i=0;i<10;i++){
       const x=i*binW;
@@ -1639,7 +1635,6 @@ poolStatus=feePaid>0
       ctx.fillText(i===9?'?':String(i+1),x+binW/2,875);
     }
 
-    // Garis lintasan
     ctx.strokeStyle='#d2a75c';
     ctx.lineWidth=2;
     ctx.beginPath();
@@ -1647,9 +1642,10 @@ poolStatus=feePaid>0
     ctx.moveTo(w-14,0);ctx.lineTo(w-14,h);
     ctx.stroke();
 
-    // Gambar kelereng
+    // Gambar kelereng.
     balls.forEach((b,i)=>{
       if(!b || !Number.isFinite(b.x)) return;
+
       ctx.save();
       ctx.shadowColor='#654';
       ctx.shadowBlur=7;
@@ -1664,13 +1660,12 @@ poolStatus=feePaid>0
 
       ctx.beginPath();
       ctx.arc(b.x-3,b.y-4,3,0,Math.PI*2);
-      ctx.fillStyle='#ffffff';
+      ctx.fillStyle='#fff';
       ctx.fill();
       ctx.restore();
     });
   }
 
-  canvas.height=900;
   drawBoard();
 
   function resultNumber(value){
@@ -1705,6 +1700,7 @@ poolStatus=feePaid>0
 
   async function start(){
     if(busy) return;
+
     busy=true;
     $('mgStart').disabled=true;
     $('mgResult').classList.remove('show');
@@ -1713,9 +1709,11 @@ poolStatus=feePaid>0
     try{
       const {data,error}=await client().rpc('cuit_start_marble_game');
       if(error) throw error;
+
       const row=Array.isArray(data)?data[0]:data;
-      if(!row || row.ok===false || row.status==='error')
+      if(!row || row.ok===false || row.status==='error'){
         throw new Error(row?.message || 'Permainan belum dapat dimulai.');
+      }
 
       session=row;
       const sid=row.session_id || row.id;
@@ -1723,7 +1721,12 @@ poolStatus=feePaid>0
 
       session.session_id=sid;
 
-            const slots=[
+      // Segarkan saldo setelah server memotong biaya permainan.
+      if(typeof updateCoinUI==='function'){
+        await updateCoinUI();
+      }
+
+      const slots=[
         resultNumber(row.marble_red ?? row.red),
         resultNumber(row.marble_blue ?? row.blue),
         resultNumber(row.marble_yellow ?? row.yellow)
@@ -1765,16 +1768,13 @@ poolStatus=feePaid>0
           balls.forEach((b,i)=>{
             if(b.done) return;
 
-            // Gravitasi dan momentum
             b.vy+=gravity*dt;
             b.x+=b.vx*dt;
             b.y+=b.vy*dt;
 
-            // Gesekan udara ringan
             b.vx*=.998;
             b.vy*=.999;
 
-            // Tabrakan dengan dinding
             if(b.x<25){
               b.x=25;
               b.vx=Math.abs(b.vx)*restitution;
@@ -1784,7 +1784,7 @@ poolStatus=feePaid>0
               b.vx=-Math.abs(b.vx)*restitution;
             }
 
-            // Tabrakan dengan paku pemantul
+            // Tumbukan dengan paku pemantul.
             pegs.forEach(p=>{
               const dx=b.x-p.x;
               const dy=b.y-p.y;
@@ -1804,14 +1804,14 @@ poolStatus=feePaid>0
                   b.vy-=(1+restitution)*dot*ny;
                 }
 
-                // Sedikit putaran saat terkena paku
                 b.vx+=nx*18;
               }
             });
 
-            // Tumbukan antarkelereng
+            // Tumbukan antarkelereng.
             balls.forEach((other,j)=>{
               if(i===j || other.done) return;
+
               const dx=b.x-other.x;
               const dy=b.y-other.y;
               const dist=Math.hypot(dx,dy);
@@ -1821,6 +1821,7 @@ poolStatus=feePaid>0
                 const nx=dx/dist;
                 const ny=dy/dist;
                 const overlap=min-dist;
+
                 b.x+=nx*overlap*.5;
                 b.y+=ny*overlap*.5;
                 other.x-=nx*overlap*.5;
@@ -1828,6 +1829,7 @@ poolStatus=feePaid>0
 
                 const rel=(b.vx-other.vx)*nx+
                           (b.vy-other.vy)*ny;
+
                 if(rel<0){
                   const impulse=-(1+restitution)*rel/2;
                   b.vx+=impulse*nx;
@@ -1838,8 +1840,7 @@ poolStatus=feePaid>0
               }
             });
 
-            // Corong akhir mengarahkan kelereng ke kotak
-            // hasil yang sudah ditentukan server.
+            // Corong mengarahkan kelereng ke hasil dari server.
             if(b.y>735){
               const targetX=b.slot*48+24;
               const force=(targetX-b.x)*5;
@@ -1855,7 +1856,7 @@ poolStatus=feePaid>0
               }
             }
 
-            // Pengaman jika perangkat lambat
+            // Pengaman untuk perangkat yang lambat.
             if(elapsed>12 && !b.done){
               b.x=b.slot*48+24;
               b.y=824;
@@ -1877,17 +1878,20 @@ poolStatus=feePaid>0
 
         animation=requestAnimationFrame(frame);
       });
+            message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
 
-      message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
       const {data:finishData,error:finishError}=await client().rpc(
         'cuit_finish_marble_game',
         {p_session_id:sid}
       );
 
       if(finishError) throw finishError;
+
       const finished=Array.isArray(finishData)?finishData[0]:finishData;
-      if(!finished || finished.ok!==true)
+
+      if(!finished || finished.ok!==true){
         throw new Error(finished?.message || 'Hasil belum dikonfirmasi server.');
+      }
 
       showResult({
         ...row,
@@ -1900,13 +1904,28 @@ poolStatus=feePaid>0
       message('Berhasil! 1 Permata telah diberikan dan 1 poin Raja Game dicatat.');
       session=null;
 
-      if(typeof updateCoinUI==='function') await updateCoinUI();
-      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile)
+      // Sinkronkan saldo dan profil setelah hadiah selesai.
+      if(typeof updateCoinUI==='function'){
+        await updateCoinUI();
+      }
+
+      if(typeof CuitApp!=='undefined' && CuitApp.loadProfile){
         await CuitApp.loadProfile();
+      }
 
     }catch(err){
       message(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
       console.warn('Balap Kelereng CUIT:',err);
+
+      // Jika biaya sudah diproses server, tampilkan saldo terbaru.
+      if(typeof updateCoinUI==='function'){
+        try{
+          await updateCoinUI();
+        }catch(refreshError){
+          console.warn('Pembaruan saldo:',refreshError);
+        }
+      }
+
     }finally{
       busy=false;
       $('mgStart').disabled=false;
@@ -1914,56 +1933,88 @@ poolStatus=feePaid>0
   }
 
   async function cancel(){
-    if(animation) cancelAnimationFrame(animation);
+    if(animation){
+      cancelAnimationFrame(animation);
+      animation=null;
+    }
+
     if(!session || !session.session_id) return;
+
     try{
       const {data,error}=await client().rpc(
         'cuit_cancel_marble_game',
         {p_session_id:session.session_id}
       );
+
       if(error) throw error;
+
       const row=Array.isArray(data)?data[0]:data;
-      if(!row || row.ok!==true)
+
+      if(!row || row.ok!==true){
         throw new Error(row?.message || 'Pembatalan belum dikonfirmasi.');
+      }
+
       message('Sesi dibatalkan. Koin Gratis dan permata cadangan dikembalikan.');
       session=null;
+
+      if(typeof updateCoinUI==='function'){
+        await updateCoinUI();
+      }
+
     }catch(err){
       message('Pembatalan belum berhasil: '+err.message);
     }
   }
 
+  // Masukkan kata bijak setelah halaman curhat dibuka.
   function openCurhat(){
     if(!quoteText) return;
+
     const thanks=$('mgThanks').textContent;
     const textarea=document.getElementById('postContent');
+    const navItems=document.querySelectorAll('.nav-bar .nav-item');
+
+    if(typeof switchTab==='function'){
+      switchTab('pageCreate',navItems[2]||null);
+    }
+
     if(textarea){
       textarea.value='“'+quoteText+'”\n\n'+thanks;
-      if(typeof updateCharCount==='function') updateCharCount(textarea);
-    }
-    const navItems=document.querySelectorAll('.nav-bar .nav-item');
-    if(typeof switchTab==='function')
-      switchTab('pageCreate',navItems[2]||null);
-    if(textarea){
+
+      if(typeof updateCharCount==='function'){
+        updateCharCount(textarea);
+      }
+
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
+
       setTimeout(()=>{
         textarea.focus({preventScroll:true});
-        textarea.scrollIntoView({behavior:'smooth',block:'center'});
-      },120);
+        textarea.scrollIntoView({
+          behavior:'smooth',
+          block:'center'
+        });
+      },150);
     }
   }
 
   $('mgStart').addEventListener('click',start);
+
   $('mgReset').addEventListener('click',async()=>{
     if(busy) return;
+
     await cancel();
     drawBoard();
     $('mgResult').classList.remove('show');
     quoteText='';
     message('Tekan Mulai Balapan untuk memulai permainan.');
   });
+
   $('mgCurhat').addEventListener('click',openCurhat);
+
 })();
 </script>
 <!-- ===== AKHIR BALAP KELERENG INSPIRASI CUIT ===== -->
+  
   <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
