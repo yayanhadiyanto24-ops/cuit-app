@@ -1854,7 +1854,7 @@ poolStatus=feePaid>0
     }
   }
 
-  function startPhysics(slots) {
+    function startPhysics(slots) {
     const pegs=[];
     for(let row=0;row<11;row++) {
       for(let col=0;col<9;col++) {
@@ -1883,7 +1883,7 @@ poolStatus=feePaid>0
     const settled=[];
     let last=0, elapsed=0;
 
-    return new Promise(resolve=>{
+    return new Promise((resolve,reject)=>{
       function frame(now) {
         if(!last) last=now;
         const dt=Math.min((now-last)/1000,.018);
@@ -1893,30 +1893,37 @@ poolStatus=feePaid>0
         balls.forEach((b,i)=>{
           if(b.done) return;
 
-          // Gravitasi dan hambatan udara
           b.vy+=780*dt;
           b.x+=b.vx*dt;
           b.y+=b.vy*dt;
           b.vx*=.999;
           b.vy*=.999;
 
-          // Dinding papan
-          if(b.x<27) { b.x=27; b.vx=Math.abs(b.vx)*.72; }
-          if(b.x>453) { b.x=453; b.vx=-Math.abs(b.vx)*.72; }
+          if(b.x<27) {
+            b.x=27;
+            b.vx=Math.abs(b.vx)*.72;
+          }
+          if(b.x>453) {
+            b.x=453;
+            b.vx=-Math.abs(b.vx)*.72;
+          }
 
-          // Paku pemantul
           pegs.forEach(p=>collidePeg(b,p,dt));
 
-          // Sekat miring sebagai pemantul
           bars.forEach(([x1,y1,x2,y2])=>{
             const dx=x2-x1, dy=y2-y1;
-            const t=Math.max(0,Math.min(1,((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)));
+            const t=Math.max(0,Math.min(1,
+              ((b.x-x1)*dx+(b.y-y1)*dy)/(dx*dx+dy*dy)
+            ));
             const px=x1+t*dx, py=y1+t*dy;
             const dist=Math.hypot(b.x-px,b.y-py);
+
             if(dist<radius+5 && dist>0) {
-              const nx=(b.x-px)/dist, ny=(b.y-py)/dist;
+              const nx=(b.x-px)/dist;
+              const ny=(b.y-py)/dist;
               b.x=px+nx*(radius+5);
               b.y=py+ny*(radius+5);
+
               const dot=b.vx*nx+b.vy*ny;
               if(dot<0) {
                 b.vx-=1.65*dot*nx;
@@ -1925,11 +1932,11 @@ poolStatus=feePaid>0
             }
           });
 
-          // Tumbukan antarkelereng
           balls.forEach((o,j)=>{
             if(i===j || o.done) return;
             const dx=b.x-o.x, dy=b.y-o.y;
             const d=Math.hypot(dx,dy);
+
             if(d>0 && d<radius*2) {
               const nx=dx/d, ny=dy/d;
               const overlap=radius*2-d;
@@ -1937,17 +1944,18 @@ poolStatus=feePaid>0
               b.y+=ny*overlap/2;
               o.x-=nx*overlap/2;
               o.y-=ny*overlap/2;
+
               const rel=(b.vx-o.vx)*nx+(b.vy-o.vy)*ny;
               if(rel<0) {
                 const impulse=-.82*rel/2;
-                b.vx+=impulse*nx; b.vy+=impulse*ny;
-                o.vx-=impulse*nx; o.vy-=impulse*ny;
+                b.vx+=impulse*nx;
+                b.vy+=impulse*ny;
+                o.vx-=impulse*nx;
+                o.vy-=impulse*ny;
               }
             }
           });
 
-          // Corong bawah: pengaruh halus menuju tabung hasil server.
-          // Tidak memindahkan kelereng secara instan.
           if(b.y>650 && b.y<tubeTop-12) {
             const targetX=b.slot*tubeW+tubeW/2;
             const strength=Math.min(1,(b.y-650)/105);
@@ -1955,12 +1963,18 @@ poolStatus=feePaid>0
             b.vx=Math.max(-230,Math.min(230,b.vx));
           }
 
-          // Mulut tabung dan dinding pembatas
           if(b.y>=tubeTop-12) {
             const left=b.slot*tubeW+radius+2;
             const right=(b.slot+1)*tubeW-radius-2;
-            if(b.x<left) { b.x=left; b.vx=Math.abs(b.vx)*.3; }
-            if(b.x>right) { b.x=right; b.vx=-Math.abs(b.vx)*.3; }
+
+            if(b.x<left) {
+              b.x=left;
+              b.vx=Math.abs(b.vx)*.3;
+            }
+            if(b.x>right) {
+              b.x=right;
+              b.vx=-Math.abs(b.vx)*.3;
+            }
 
             if(b.y>=tubeTop+8) {
               b.y=Math.min(b.y,tubeBottom-radius-14);
@@ -1971,9 +1985,11 @@ poolStatus=feePaid>0
                 b.done=true;
                 b.vx=0;
                 b.vy=0;
+
                 settled.push({
                   x:b.x,
-                  y:tubeBottom-65-(settled.filter(s=>s.slot===b.slot).length*22),
+                  y:tubeBottom-65-
+                    (settled.filter(s=>s.slot===b.slot).length*22),
                   slot:b.slot,
                   color:b.color
                 });
@@ -1985,33 +2001,26 @@ poolStatus=feePaid>0
         drawBoard(balls,settled);
 
         if(balls.every(b=>b.done)) {
+          animation=null;
           resolve();
-        } else if(elapsed>18) {
-          // Tidak memindahkan kelereng ke tujuan secara tiba-tiba.
-          // Jika animasi terlalu lama, hentikan dengan posisi terakhir.
-          balls.forEach(b=>{
-            if(!b.done) {
-              b.done=true;
-              settled.push({
-                x:b.slot*tubeW+tubeW/2,
-                y:tubeBottom-65,
-                slot:b.slot,
-                color:b.color
-              });
-            }
-          });
-          drawBoard(balls,settled);
-          resolve();
+        } else if(elapsed>25) {
+          if(animation) cancelAnimationFrame(animation);
+          animation=null;
+          reject(new Error(
+            'Animasi belum selesai. Sesi akan dibatalkan dan saldo dikembalikan.'
+          ));
         } else {
           animation=requestAnimationFrame(frame);
         }
       }
+
       animation=requestAnimationFrame(frame);
     });
   }
 
   async function start() {
-    if(busy) return;
+    if(busy || session) return;
+
     busy=true;
     $('mgStart').disabled=true;
     $('mgResult').classList.remove('show');
@@ -2025,12 +2034,14 @@ poolStatus=feePaid>0
       if(!row || row.ok===false || row.status==='error')
         throw new Error(row?.message || 'Permainan belum dapat dimulai.');
 
-      session=row;
       const sid=row.session_id || row.id;
-      if(!sid) throw new Error('ID sesi tidak diterima dari server.');
-      session.session_id=sid;
+      if(!sid)
+        throw new Error('ID sesi tidak diterima dari server.');
 
-      if(typeof updateCoinUI==='function') await updateCoinUI();
+      session={...row,session_id:sid};
+
+      if(typeof updateCoinUI==='function')
+        await updateCoinUI();
 
       const slots=[
         resultNumber(row.marble_red ?? row.red),
@@ -2042,15 +2053,19 @@ poolStatus=feePaid>0
       await startPhysics(slots);
 
       message('Balapan selesai. Mengonfirmasi hasil dan hadiah...');
+
       const {data:finishData,error:finishError}=await client().rpc(
         'cuit_finish_marble_game',
         {p_session_id:sid}
       );
+
       if(finishError) throw finishError;
 
       const finished=Array.isArray(finishData)?finishData[0]:finishData;
       if(!finished || finished.success!==true)
-        throw new Error(finished?.message || 'Hasil belum dikonfirmasi server.');
+        throw new Error(
+          finished?.message || 'Hasil belum dikonfirmasi server.'
+        );
 
       showResult({
         ...row,
@@ -2061,21 +2076,35 @@ poolStatus=feePaid>0
       });
 
       message('Berhasil! 1 Permata telah diberikan dan 1 poin Raja Game dicatat.');
+
       session=null;
 
-      if(typeof updateCoinUI==='function') await updateCoinUI();
+      if(typeof updateCoinUI==='function')
+        await updateCoinUI();
+
       if(typeof CuitApp!=='undefined' && CuitApp.loadProfile)
         await CuitApp.loadProfile();
 
     } catch(err) {
-      message(err.message || 'Terjadi kesalahan. Silakan coba lagi.');
       console.warn('Balap Kelereng CUIT:',err);
-      if(typeof updateCoinUI==='function') {
-        try { await updateCoinUI(); } catch(e) {}
+
+      if(session && session.session_id) {
+        await cancel();
+      } else {
+        message(err.message || 'Permainan belum dapat dimulai.');
       }
+
+      if(typeof updateCoinUI==='function') {
+        try {
+          await updateCoinUI();
+        } catch(e) {}
+      }
+
     } finally {
       busy=false;
-      $('mgStart').disabled=false;
+
+      // Tombol tetap terkunci jika sesi belum berhasil dibatalkan.
+      $('mgStart').disabled=!!session;
     }
   }
 
@@ -2084,26 +2113,39 @@ poolStatus=feePaid>0
       cancelAnimationFrame(animation);
       animation=null;
     }
-    if(!session || !session.session_id) return;
+
+    if(!session || !session.session_id) return false;
 
     try {
       const {data,error}=await client().rpc(
         'cuit_cancel_marble_game',
         {p_session_id:session.session_id}
       );
-      if(error) throw error;
-      const row=Array.isArray(data)?data[0]:data;
-      if(!row || row.ok!==true)
-        throw new Error(row?.message || 'Pembatalan belum dikonfirmasi.');
 
-      message('Sesi dibatalkan. Koin Gratis dan permata cadangan dikembalikan.');
+      if(error) throw error;
+
+      const row=Array.isArray(data)?data[0]:data;
+
+      // RPC mengembalikan success, bukan ok.
+      if(!row || row.success!==true)
+        throw new Error(
+          row?.message || 'Pembatalan belum dikonfirmasi server.'
+        );
+
       session=null;
-      if(typeof updateCoinUI==='function') await updateCoinUI();
+      message('Sesi dibatalkan. Koin Gratis dan permata cadangan dikembalikan.');
+
+      if(typeof updateCoinUI==='function')
+        await updateCoinUI();
+
+      return true;
+
     } catch(err) {
       message('Pembatalan belum berhasil: '+err.message);
+      console.warn('Pembatalan Balap Kelereng:',err);
+      return false;
     }
   }
-
   function openCurhat() {
     const quote=String(quoteText||'').trim();
     if(!quote) {
