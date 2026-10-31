@@ -2033,21 +2033,30 @@ poolStatus=feePaid>0
       await CuitApp.loadProfile();
     }
 
-  } catch (err) {
+    } catch (err) {
     console.warn('Balap Kelereng CUIT:', err);
+
+    const alasan =
+      err?.message ||
+      err?.details ||
+      'Penyebab kegagalan belum diketahui.';
 
     if (session && session.session_id) {
       const refunded = await cancel();
 
-      if (!refunded) {
+      if (refunded) {
         message(
-          'Permainan gagal. Pembatalan belum terkonfirmasi; jangan mulai sesi baru.'
+          'Permainan dibatalkan. Saldo dikembalikan. Penyebab: ' +
+          alasan
+        );
+      } else {
+        message(
+          'Permainan gagal dan pengembalian belum terkonfirmasi. Penyebab: ' +
+          alasan
         );
       }
     } else {
-      message(
-        err?.message || 'Permainan belum dapat dimulai.'
-      );
+      message(alasan);
     }
 
     if (typeof updateCoinUI === 'function') {
