@@ -1647,7 +1647,7 @@ poolStatus=feePaid>0
   }
 
   function drawObstacles() {
-  // Rintangan hanya berupa paku, sesuai simulasi server.
+  // Hanya paku yang menjadi rintangan fisika.
   for (let row = 0; row < 11; row++) {
     for (let col = 0; col < 9; col++) {
       const x = 48 + col * 48 + (row % 2 ? 24 : 0);
@@ -1656,48 +1656,6 @@ poolStatus=feePaid>0
     }
   }
 }
-
-    // Sekat miring dengan bayangan 3D
-    const bars=[
-      [55,180,155,205],
-      [325,245,425,220],
-      [55,350,155,375],
-      [325,430,425,405],
-      [55,535,155,560],
-      [325,615,425,590]
-    ];
-
-    bars.forEach(([x1,y1,x2,y2])=>{
-      ctx.lineCap='round';
-      ctx.lineWidth=13;
-      ctx.strokeStyle='#8b5c2b';
-      ctx.beginPath(); ctx.moveTo(x1+3,y1+4); ctx.lineTo(x2+3,y2+4); ctx.stroke();
-
-      const g=ctx.createLinearGradient(x1,y1,x2,y2);
-      g.addColorStop(0,'#f8d99b');
-      g.addColorStop(.5,'#bd8740');
-      g.addColorStop(1,'#75491f');
-      ctx.strokeStyle=g;
-      ctx.lineWidth=9;
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-    });
-
-    // Pemantul berbentuk lengkungan
-    [235,485,660].forEach((y,i)=>{
-      const x=i%2?240:240;
-      ctx.strokeStyle='#98652d';
-      ctx.lineWidth=7;
-      ctx.beginPath();
-      ctx.arc(x,y,48,Math.PI*1.08,Math.PI*1.92);
-      ctx.stroke();
-      ctx.strokeStyle='#f5d59a';
-      ctx.lineWidth=3;
-      ctx.beginPath();
-      ctx.arc(x,y-2,48,Math.PI*1.08,Math.PI*1.92);
-      ctx.stroke();
-    });
-  }
-
   function drawTube(i, balls, settled) {
     const x=i*tubeW;
     const w=tubeW;
