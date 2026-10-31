@@ -1968,38 +1968,52 @@ poolStatus=feePaid>0
 
   // Masukkan kata bijak setelah halaman curhat dibuka.
   function openCurhat(){
-  if(!quoteText) return;
+  const quote = String(quoteText || '').trim();
 
-  const textToInsert =
-    '“'+quoteText+'”\n\n'+$('mgThanks').textContent;
-
-  const navItems=document.querySelectorAll('.nav-bar .nav-item');
-
-  if(typeof switchTab==='function'){
-    switchTab('pageCreate',navItems[2]||null);
+  if(!quote){
+    message('Kata bijak belum tersedia.');
+    return;
   }
 
-  setTimeout(()=>{
-    const textarea=document.getElementById('postContent');
+  const thanks = $('mgThanks')?.textContent?.trim() || '';
+  const textarea = document.getElementById('postContent');
+  const createPage = document.getElementById('pageCreate');
 
-    if(!textarea){
-      message('Kolom curhatan tidak ditemukan.');
-      return;
-    }
+  if(!textarea || !createPage){
+    message('Kolom curhatan tidak ditemukan.');
+    return;
+  }
 
-    textarea.value=textToInsert;
-    textarea.dispatchEvent(new Event('input',{bubbles:true}));
+  // Buka halaman curhatan tanpa memanggil loadDraftLocally()
+  document.querySelectorAll('.page-section').forEach(sec => {
+    sec.classList.remove('active');
+  });
 
-    if(typeof updateCharCount==='function'){
-      updateCharCount(textarea);
-    }
+  document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
+    nav.classList.remove('active');
+  });
 
-    textarea.focus();
-    textarea.scrollIntoView({
-      behavior:'smooth',
-      block:'center'
-    });
-  },300);
+  createPage.classList.add('active');
+
+  const createNavBtn = document.querySelectorAll('.nav-bar .nav-item')[2];
+  if(createNavBtn) createNavBtn.classList.add('active');
+
+  // Masukkan kata bijak dan ucapan terima kasih
+  textarea.value = '“' + quote + '”' + (thanks ? '\n\n' + thanks : '');
+
+  textarea.dispatchEvent(new Event('input', {bubbles:true}));
+
+  if(typeof updateCharCount === 'function'){
+    updateCharCount(textarea);
+  }
+
+  textarea.focus({preventScroll:true});
+  textarea.scrollIntoView({
+    behavior:'smooth',
+    block:'center'
+  });
+
+  message('Kata bijak sudah dimasukkan ke kolom curhatan.');
 }
   $('mgStart').addEventListener('click',start);
 
