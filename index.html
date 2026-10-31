@@ -1585,71 +1585,92 @@ poolStatus=feePaid>0
 
   function message(t){ $('mgMessage').textContent = t; }
 
-  function drawBoard(balls = [], progress = 1){
-    const w = canvas.width, h = canvas.height;
+    function drawBoard(balls = []){
+    const w=canvas.width, h=canvas.height;
     ctx.clearRect(0,0,w,h);
 
-    ctx.fillStyle = '#fff8e9';
+    const bg=ctx.createLinearGradient(0,0,0,h);
+    bg.addColorStop(0,'#fffaf0');
+    bg.addColorStop(1,'#f8dfaa');
+    ctx.fillStyle=bg;
     ctx.fillRect(0,0,w,h);
 
-    // Jalur dan tiang pembatas
-    ctx.strokeStyle = '#d9bd7c';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(12,10); ctx.lineTo(12,278);
-    ctx.moveTo(w-12,10); ctx.lineTo(w-12,278);
-    ctx.stroke();
+    // Dinding lintasan
+    ctx.fillStyle='#9c7139';
+    ctx.fillRect(7,0,7,h);
+    ctx.fillRect(w-14,0,7,h);
 
-    // Papan rintangan
-    for(let row=0;row<7;row++){
+    // Paku pemantul zig-zag
+    for(let row=0;row<13;row++){
       for(let col=0;col<9;col++){
-        const x=38+col*50+(row%2?24:0);
-        const y=48+row*31;
+        const x=42+col*49+(row%2?24:0);
+        const y=85+row*52;
         if(x>w-25) continue;
+
         ctx.beginPath();
-        ctx.arc(x,y,5,0,Math.PI*2);
-        ctx.fillStyle='#c69b4c';
+        ctx.arc(x,y,6,0,Math.PI*2);
+        ctx.fillStyle='#b98a42';
         ctx.fill();
-        ctx.strokeStyle='#9c7330';
-        ctx.lineWidth=1;
+        ctx.strokeStyle='#805b31';
+        ctx.lineWidth=2;
         ctx.stroke();
       }
     }
 
-    // Wadah 1 sampai 9 dan Misteri
+    // Gerbang pembatas dan corong bawah
+    ctx.strokeStyle='#bd8a35';
+    ctx.lineWidth=5;
+    ctx.beginPath();
+    ctx.moveTo(14,745);
+    ctx.lineTo(95,815);
+    ctx.lineTo(385,815);
+    ctx.lineTo(466,745);
+    ctx.stroke();
+
+    // Jalur tujuan
     const binW=w/10;
     for(let i=0;i<10;i++){
       const x=i*binW;
-      ctx.fillStyle=i===9?'#6e4b8b':'#a9152b';
-      ctx.fillRect(x+1,282,binW-2,46);
+      ctx.fillStyle=i===9?'#70508d':'#a9152b';
+      ctx.fillRect(x+1,835,binW-2,65);
       ctx.fillStyle='#fff';
-      ctx.font='bold 13px Arial';
+      ctx.font='bold 17px Arial';
       ctx.textAlign='center';
-      ctx.fillText(i===9?'?':String(i+1),x+binW/2,310);
+      ctx.fillText(i===9?'?':String(i+1),x+binW/2,875);
     }
 
-    balls.forEach((b,i)=>{
-      const targetX=(b.slot*binW)+(binW/2);
-      const startX=80+i*150;
-      const t=Math.min(1,progress);
-      const eased=1-Math.pow(1-t,2);
-      const sway=Math.sin(t*35+i*2.5)*(1-t)*24;
-      const x=startX+(targetX-startX)*eased+sway;
-      const y=18+(260*eased);
+    // Garis lintasan
+    ctx.strokeStyle='#d2a75c';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(14,0);ctx.lineTo(14,h);
+    ctx.moveTo(w-14,0);ctx.lineTo(w-14,h);
+    ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(x,y,10,0,Math.PI*2);
-      ctx.fillStyle=colors[i];
+    // Gambar kelereng
+    balls.forEach((b,i)=>{
+      if(!b || !Number.isFinite(b.x)) return;
+      ctx.save();
       ctx.shadowColor='#654';
-      ctx.shadowBlur=5;
+      ctx.shadowBlur=7;
+      ctx.beginPath();
+      ctx.arc(b.x,b.y,11,0,Math.PI*2);
+      ctx.fillStyle=colors[i];
       ctx.fill();
       ctx.shadowBlur=0;
       ctx.strokeStyle='#fff';
       ctx.lineWidth=2;
       ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(b.x-3,b.y-4,3,0,Math.PI*2);
+      ctx.fillStyle='#ffffff';
+      ctx.fill();
+      ctx.restore();
     });
   }
 
+  canvas.height=900;
   drawBoard();
 
   function resultNumber(value){
