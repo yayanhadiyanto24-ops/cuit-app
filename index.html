@@ -2058,11 +2058,7 @@ poolStatus=feePaid>0
     $('mgStart').disabled = !!session;
   }
 }
-      // Tombol tetap terkunci jika sesi belum berhasil dibatalkan.
-      $('mgStart').disabled=!!session;
-    }
-  }
-
+      
   async function cancel() {
     if(animation) {
       cancelAnimationFrame(animation);
