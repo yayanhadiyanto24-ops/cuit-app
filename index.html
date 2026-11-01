@@ -3640,19 +3640,20 @@ async function openDailyCheckin() {
 
         const dayStart = localStartOfDayWIB();
         const weekStart = localStartOfWeekWIB();
-        const [allPostsRes, allGiftsRes, allCommentsRes, allFollowsRes, allLikesRes, allReelsRes, allProfilesRes] = await Promise.all([
-          supabaseClient.from('curhat').select('*').gte('created_at', weekStart.toISOString()).order('created_at',{ascending:false}),
-          supabaseClient.from('gift_transactions').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('comments').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('reels_claims').select('*').gte('created_at', weekStart.toISOString()),
-          supabaseClient.from('profiles').select('id,email,username,sponsor,created_at')
-        ]);
-        const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allProfilesRes].filter(r=>r.error);
-        if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));
-        const byPeriod = (rows,start) => (rows||[]).filter(r => r.created_at && new Date(r.created_at) >= start);
-        
+        const [allPostsRes, allGiftsRes, allCommentsRes, allFollowsRes, allLikesRes, allReelsRes, allExtraViewsRes, allProfilesRes] = await Promise.all([
+  supabaseClient.from('curhat').select('*').gte('created_at', weekStart.toISOString()).order('created_at',{ascending:false}),
+  supabaseClient.from('gift_transactions').select('*').gte('created_at', weekStart.toISOString()),
+  supabaseClient.from('comments').select('*').gte('created_at', weekStart.toISOString()),
+  supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
+  supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
+  supabaseClient.from('reels_claims').select('user_id,user_email,created_at').gte('created_at', weekStart.toISOString()),
+  supabaseClient.from('reels_extra_views').select('user_id,slot_key,watched_at').gte('watched_at', weekStart.toISOString()),
+  supabaseClient.from('profiles').select('id,email,username,sponsor,created_at')
+]);
+
+const tableErrors = [allPostsRes,allGiftsRes,allCommentsRes,allFollowsRes,allLikesRes,allReelsRes,allExtraViewsRes,allProfilesRes].filter(r=>r.error);
+
+if (tableErrors.length) console.warn('Sebagian sumber data Raja belum dapat dibaca; kategori terkait akan menampilkan status belum tersedia.', tableErrors.map(e=>e.error.message));        
 const [dailyGameRes, weeklyGameRes] = await Promise.all([
   supabaseClient.rpc('cuit_get_king_game_ranking', {
     p_period: 'daily'
