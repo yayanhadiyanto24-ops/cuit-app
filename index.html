@@ -5654,7 +5654,10 @@ async function submitCommentAction() {
       const preview=document.getElementById('postStylePreview');if(preview){const st=cuitPostStyleRead();preview.style.cssText=cuitPostStyleCss(st)+';padding:12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;margin-top:10px;';preview.textContent=document.getElementById('postContent')?.value.trim()||'Pratinjau tampilan curhatanmu akan terlihat di sini.';}
     }
     function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?5:6;if(level<need)return alert(`Fasilitas ini terbuka mulai Level ${need}.`);const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
-    function cuitSavePostStyle(postId,style){try{const key='cuit_post_styles_v1';const all=JSON.parse(localStorage.getItem(key)||'{}');all[String(postId)]=style;localStorage.setItem(key,JSON.stringify(all));}catch(e){console.warn('Gaya curhatan tidak dapat disimpan lokal',e);}}
+    function cuitStyleInlineForPost(style){
+  if (!style || typeof style !== 'object') return '';
+  return ` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`;
+}
     function cuitGetPostStyle(postId){try{return JSON.parse(localStorage.getItem('cuit_post_styles_v1')||'{}')[String(postId)]||null;}catch(e){return null;}}
     function cuitStyleInlineForPost(postId){const style=cuitGetPostStyle(postId);return style?` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`:'';}
     function cuitResetPostStyle(){Object.entries({postBorderStyle:'solid',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
