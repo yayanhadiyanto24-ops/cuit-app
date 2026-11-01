@@ -3706,7 +3706,12 @@ function gameWinnerResult(res) {
     note: 'jumlah permainan'
   };
 }
-
+function byPeriod(rows, start) {
+  return (rows || []).filter(row =>
+    row.created_at &&
+    new Date(row.created_at) >= start
+  );
+    }
         function makeResults(start, nontonRanking) {
           const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
           const results = {};
