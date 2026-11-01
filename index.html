@@ -4704,8 +4704,7 @@ function renderCardHTML(p) {
       </div>
 
       <!-- ISI CURHATAN -->
-      <div class="post-body"${cuitStyleInlineForPost(p.id)}>${escapeHtml(p.content || '')}</div>
-      
+      <div class="post-body"${cuitStyleInlineForPost(p.post_style)}>${escapeHtml(p.content || '')}</div>      
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
         <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 800; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);">
           🎁 Sisa ${p.remaining_reward_coins} Koin Berbayar untuk Komentator Tercepat!
