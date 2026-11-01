@@ -5658,7 +5658,6 @@ async function submitCommentAction() {
   return ` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`;
 }
     function cuitGetPostStyle(postId){try{return JSON.parse(localStorage.getItem('cuit_post_styles_v1')||'{}')[String(postId)]||null;}catch(e){return null;}}
-    function cuitStyleInlineForPost(postId){const style=cuitGetPostStyle(postId);return style?` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`:'';}
     function cuitResetPostStyle(){Object.entries({postBorderStyle:'solid',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
     document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();if(currentUser)cuitRefreshMyLevel();});
 
