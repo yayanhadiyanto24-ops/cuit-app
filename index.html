@@ -1733,7 +1733,9 @@ poolStatus=feePaid>0
   }
 
   function drawMarble(x,y,color) {
-    const g=ctx.createRadialGradient(x-4,y-5,1,x,y,r+2);
+    const g=ctx.createRadialGradient(
+      x-4,y-5,1,x,y,radius+2
+    );
     g.addColorStop(0,'#ffffff');
     g.addColorStop(.18,color);
     g.addColorStop(.72,color);
@@ -1743,7 +1745,7 @@ poolStatus=feePaid>0
     ctx.shadowColor='rgba(30,20,10,.4)';
     ctx.shadowBlur=7;
     ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.arc(x,y,radius,0,Math.PI*2);
     ctx.fillStyle=g;
     ctx.fill();
     ctx.shadowBlur=0;
@@ -1755,7 +1757,7 @@ poolStatus=feePaid>0
     ctx.fillStyle='rgba(255,255,255,.9)';
     ctx.fill();
     ctx.restore();
-  }
+}
 
   function drawBoard(balls=[],settled=[]) {
     drawBackground();
