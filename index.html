@@ -6307,7 +6307,21 @@ async function submitNewPost() {
     await updateCoinUI(false);
 
     if (data.post_id) {
-      cuitSavePostStyle(data.post_id, postStyle);
+  const { data: styleResult, error: styleError } =
+    await supabaseClient.rpc('cuit_save_post_style', {
+      p_post_id: data.post_id,
+      p_post_style: postStyle
+    });
+
+  if (styleError || !styleResult?.ok) {
+    console.error(
+      'Gaya curhatan gagal disimpan:',
+      styleError || styleResult
+    );
+    await alert(
+      'Curhatan berhasil diterbitkan, tetapi gaya tampilannya belum tersimpan.'
+    );
+  }
     }
 
     document.getElementById('postContent').value = '';
