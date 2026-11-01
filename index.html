@@ -3773,14 +3773,21 @@ if(w){
   };
 }
           w=winnerFromCounts(countBy(newProfiles,p=>p.sponsor)); if(w){const p=(profiles||[]).find(p=>p.username===w.key||p.email===w.key);results.sponsor={name:p?.username||(p?.email?p.email.split('@')[0]:String(w.key)),scoreLabel:`${w.score} member`,note:'member terdaftar melalui sponsor'};}
-          // RAJA NONTON: klaim utama, tontonan tambahan pemecah seri,
-// lalu waktu tercepat mencapai kombinasi skor yang sama.
-if (allExtraViewsRes.error) {
+          
+// RAJA NONTON: menggunakan RPC harian/mingguan.
+const topNonton = Array.isArray(nontonRanking)
+  ? nontonRanking[0]
+  : null;
+
+if (topNonton) {
   results.nonton = {
-    name: 'Data belum tersedia',
-    scoreLabel: 'Gagal memuat data',
-    note: 'periksa izin reels_extra_views'
+    name: topNonton.nama_anggota || 'Anggota CUIT',
+    scoreLabel:
+      `${topNonton.klaim_berhadiah} klaim · +${topNonton.tontonan_tambahan} tontonan`,
+    note: 'klaim utama; tontonan tambahan pemecah seri; satu pemenang'
   };
+}
+
 } else {
   const extraViews = (allExtraViewsRes.data || []).filter(r =>
     r.watched_at && new Date(r.watched_at) >= start
