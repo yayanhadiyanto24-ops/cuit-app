@@ -4340,7 +4340,31 @@ promotedCarousel.innerHTML = cardsHTML;
         </div>`;
       }
     }
+window.openAllPromoted = function() {
+  const items = window.cuitAllPromotedItems || [];
+  const modal = document.getElementById('promotedDetailModal');
+  const content = document.getElementById('promotedDetailContent');
 
+  if (!items.length || !modal || !content) {
+    alert('Daftar promosi belum tersedia.');
+    return;
+  }
+
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <strong style="font-size:13px;color:#a30f27;">
+        SEMUA PROMOSI BIASA (${items.length})
+      </strong>
+      <button onclick="document.getElementById('promotedDetailModal').style.display='none'"
+        style="border:0;background:none;font-size:20px;padding:4px 8px;">✕</button>
+    </div>
+    <div style="max-height:72vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+      ${items.map(item => renderCardHTML(item.rawPost)).join('')}
+    </div>
+  `;
+
+  modal.style.display = 'flex';
+};
     function openPromotedDetail(postId) {
       const post = allPostsCache.find(p => String(p.id) === String(postId));
       if (!post) return;
