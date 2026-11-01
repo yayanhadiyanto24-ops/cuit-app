@@ -3002,7 +3002,7 @@ async function openDailyCheckin() {
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
-    let customDisplayName = localStorage.getItem('cuit_user_name') || 'Penilik Bageur';
+    let customDisplayName = localStorage.getItem('cuit_user_name') || 'TamuCuit';
     let mySponsorCode = localStorage.getItem('cuit_my_sponsor') || CONFIG.DEFAULT_SPONSOR;
     
     let allPostsCache = [];
