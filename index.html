@@ -3707,7 +3707,7 @@ function gameWinnerResult(res) {
   };
 }
 
-        function makeResults(start) {
+        function makeResults(start, nontonRanking) {
           const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
           const results = {};
           let w;
