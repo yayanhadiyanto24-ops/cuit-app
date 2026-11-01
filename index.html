@@ -3330,6 +3330,8 @@ async function openDailyCheckin() {
           if (profile.sponsor) mySponsorCode = profile.sponsor;
         }
       } else {
+        customDisplayName = 'TamuCuit';
+
         const guestId = localStorage.getItem('cuit_guest_identifier');
         if (!guestId) {
           const newGuestId = 'guest_' + Math.random().toString(36).substring(2, 10) + '@cuit.app';
