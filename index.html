@@ -3869,8 +3869,10 @@ if (topNonton) {
           w=winnerFromCounts(countBy(likes,l=>l.user_id||l.user_email||l.guest_token)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.like={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} like`,note:'like diberikan'};}
           return results;
         }
-        const dailyResults = makeResults(dayStart);
-        const weeklyResults = makeResults(weekStart);
+        
+const dailyResults = makeResults(dayStart, dailyNontonRes.data);
+const weeklyResults = makeResults(weekStart, weeklyNontonRes.data);
+
         dailyResults.game = gameWinnerResult(dailyGameRes);
 weeklyResults.game = gameWinnerResult(weeklyGameRes);
         // Kategori tanpa hasil tetap ditampilkan; jangan menyamarkan data kosong sebagai pemenang.
