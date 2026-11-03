@@ -7840,53 +7840,50 @@ wheel.style.transform = 'rotate(345deg)';
     btn.style.cssText =
       'width:100%;background:#a51026;color:white;margin-top:8px';
 
-    btn.addEventListener('click',async()=>{
-      
-btn.addEventListener('click', async () => {
-  btn.disabled = true;
-  btn.textContent = 'MEMVERIFIKASI MISI...';
+    
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'MEMVERIFIKASI MISI...';
 
-  try {
-    const { data, error } = await supabaseClient.rpc(
-      'cuit_roulette_claim_mission',
-      {
-        p_spin_id: row.id,
-        p_action_id: null
+      try {
+        const { data, error } = await supabaseClient.rpc(
+          'cuit_roulette_claim_mission',
+          {
+            p_spin_id: row.id,
+            p_action_id: null
+          }
+        );
+
+        if (error) throw error;
+
+        if (!data || data.ok !== true) {
+          throw new Error(
+            data?.message || 'Misi belum berhasil diverifikasi.'
+          );
+        }
+
+        currentSpin = null;
+        result.style.display = 'none';
+        $('cuit-roulette-spin').disabled = false;
+
+        await updateCoinUI(false);
+
+        message(
+          '🎉 Misi berhasil! 3 Koin Gratis telah diberikan.'
+        );
+
+        await loadPending();
+
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'KLAIM HADIAH 3 KOIN';
+
+        alert(
+          err?.message ||
+          'Koneksi bermasalah. Silakan coba klaim kembali.'
+        );
       }
-    );
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data || data.ok !== true) {
-      throw new Error(
-        data?.message || 'Misi belum berhasil diverifikasi.'
-      );
-    }
-
-    currentSpin = null;
-    result.style.display = 'none';
-    $('cuit-roulette-spin').disabled = false;
-
-    await updateCoinUI(false);
-
-    message(
-      '🎉 Misi berhasil! 3 Koin Gratis telah diberikan.'
-    );
-
-    await loadPending();
-
-  } catch (err) {
-    btn.disabled = false;
-    btn.textContent = 'KLAIM HADIAH 3 KOIN';
-
-    alert(
-      err?.message ||
-      'Koneksi bermasalah. Silakan coba klaim kembali.'
-    );
-  }
-});
+    });
 
     result.appendChild(btn);
   }
