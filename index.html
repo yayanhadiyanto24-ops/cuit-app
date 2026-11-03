@@ -7386,7 +7386,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const $ = id => document.getElementById(id);
   let spinning = false;
   let currentSpin = null;
-  let wheelRotation = 0;
+  let wheelRotation = 345;
 
   function message(text) {
     const el = $('cuit-roulette-status');
@@ -7408,7 +7408,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!wheel || wheel.dataset.ready) return;
 
     wheel.dataset.ready = '1';
-
+wheel.style.transform = 'rotate(345deg)';
     sectors.forEach((sector,i)=>{
       const label = document.createElement('div');
       label.className = 'cr-sector-label' +
