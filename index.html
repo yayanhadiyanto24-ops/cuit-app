@@ -7841,42 +7841,52 @@ wheel.style.transform = 'rotate(345deg)';
       'width:100%;background:#a51026;color:white;margin-top:8px';
 
     btn.addEventListener('click',async()=>{
-      const actionId = prompt(
-        'Masukkan ID aktivitas Like/Komentar yang tersimpan di Supabase:'
-      );
+      
+btn.addEventListener('click', async () => {
+  btn.disabled = true;
+  btn.textContent = 'MEMVERIFIKASI MISI...';
 
-      if (!actionId) return;
-
-      btn.disabled = true;
-
-      const {data,error} = await supabaseClient.rpc(
-        'cuit_roulette_claim_mission',
-        {
-          p_spin_id:row.id,
-          p_action_id:actionId.trim()
-        }
-      );
-
-      if (error || !data || data.ok !== true) {
-        btn.disabled = false;
-        alert(
-          error?.message ||
-          data?.message ||
-          'Misi belum dapat diverifikasi server.'
-        );
-        return;
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      'cuit_roulette_claim_mission',
+      {
+        p_spin_id: row.id,
+        p_action_id: null
       }
+    );
 
-      currentSpin = null;
-      result.style.display = 'none';
-      $('cuit-roulette-spin').disabled = false;
+    if (error) {
+      throw error;
+    }
 
-      await updateCoinUI(false);
-
-      message(
-        '🎉 Misi berhasil diverifikasi. 3 Koin Gratis telah diberikan.'
+    if (!data || data.ok !== true) {
+      throw new Error(
+        data?.message || 'Misi belum berhasil diverifikasi.'
       );
-    });
+    }
+
+    currentSpin = null;
+    result.style.display = 'none';
+    $('cuit-roulette-spin').disabled = false;
+
+    await updateCoinUI(false);
+
+    message(
+      '🎉 Misi berhasil! 3 Koin Gratis telah diberikan.'
+    );
+
+    await loadPending();
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'KLAIM HADIAH 3 KOIN';
+
+    alert(
+      err?.message ||
+      'Koneksi bermasalah. Silakan coba klaim kembali.'
+    );
+  }
+});
 
     result.appendChild(btn);
   }
