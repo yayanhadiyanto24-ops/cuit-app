@@ -7417,7 +7417,7 @@ wheel.style.transform = 'rotate(345deg)';
     sectors.forEach((sector,i)=>{
       const label = document.createElement('div');
       label.className = 'cr-sector-label' +
-        ([3,5,7,11].includes(i) ? ' light' : '');
+        ([3,7,11].includes(i) ? ' light' : '');
       label.textContent = sector.label;
 
       // Posisi tulisan diselaraskan dengan pusat setiap sektor.
