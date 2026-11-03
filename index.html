@@ -7093,6 +7093,680 @@ document.addEventListener('DOMContentLoaded', function () {
   transform: scale(.97);
 }
 </style>
+<!-- =====================================================
+     CUIT ROULETTE — TAMBAHAN TERPISAH
+     Tempel tepat sebelum </body>
+===================================================== -->
 
+<style>
+#cuit-roulette-launch {
+  flex: 0 0 auto;
+  border: 1px solid #d8ad48;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg,#a80e27,#e22c40);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px #a80e2730;
+}
+#cuit-roulette-panel {
+  max-width:520px;
+  margin:14px auto;
+  padding:14px;
+  border:1px solid #d9b65b;
+  border-radius:18px;
+  background:linear-gradient(160deg,#fff9ed,#fff,#fff4f4);
+  box-shadow:0 8px 24px #8d202018;
+  color:#54202a;
+  display:none;
+}
+#cuit-roulette-panel h3 {
+  margin:0 0 5px;
+  text-align:center;
+  color:#a51026;
+  font-size:20px;
+  font-weight:950;
+}
+#cuit-roulette-panel .cr-subtitle {
+  text-align:center;
+  font-size:11px;
+  color:#806a6a;
+  margin-bottom:12px;
+}
+#cuit-roulette-wheel-wrap {
+  width:min(84vw,330px);
+  aspect-ratio:1;
+  margin:12px auto;
+  position:relative;
+  border-radius:50%;
+  padding:8px;
+  background:linear-gradient(135deg,#f9df8a,#8d6417,#f9df8a);
+  box-shadow:0 8px 22px #6c142b35;
+}
+#cuit-roulette-wheel {
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  position:relative;
+  overflow:hidden;
+  border:4px solid #7c1525;
+  background:conic-gradient(
+    #bd172d 0deg 30deg,
+    #171717 30deg 60deg,
+    #e8b83e 60deg 90deg,
+    #fff8e9 90deg 120deg,
+    #bd172d 120deg 150deg,
+    #171717 150deg 180deg,
+    #e8b83e 180deg 210deg,
+    #fff8e9 210deg 240deg,
+    #bd172d 240deg 270deg,
+    #171717 270deg 300deg,
+    #e8b83e 300deg 330deg,
+    #fff8e9 330deg 360deg
+  );
+  transition:transform 8s cubic-bezier(.12,.72,.08,1);
+}
+#cuit-roulette-wheel:after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:repeating-conic-gradient(
+    transparent 0deg 29.4deg,
+    #fff8d8 29.4deg 30deg
+  );
+  pointer-events:none;
+}
+.cr-sector-label {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:45%;
+  height:22px;
+  margin-top:-11px;
+  transform-origin:0 50%;
+  text-align:right;
+  padding-right:10px;
+  box-sizing:border-box;
+  font-size:10px;
+  font-weight:950;
+  color:#fff;
+  text-shadow:0 1px 3px #000;
+  z-index:2;
+  white-space:nowrap;
+}
+.cr-sector-label.light {
+  color:#54101b;
+  text-shadow:none;
+}
+#cuit-roulette-center {
+  position:absolute;
+  z-index:5;
+  width:24%;
+  height:24%;
+  left:38%;
+  top:38%;
+  border-radius:50%;
+  background:linear-gradient(145deg,#fff7d9,#e9bd50);
+  border:4px solid #8c1427;
+  display:grid;
+  place-items:center;
+  box-shadow:0 2px 9px #0005;
+}
+#cuit-roulette-center img {
+  width:75%;
+  height:75%;
+  object-fit:contain;
+}
+#cuit-roulette-pointer {
+  position:absolute;
+  z-index:8;
+  top:-2px;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:15px solid transparent;
+  border-right:15px solid transparent;
+  border-top:29px solid #a20e27;
+  filter:drop-shadow(0 2px 2px #0005);
+}
+#cuit-roulette-spin {
+  display:block;
+  width:100%;
+  max-width:260px;
+  margin:12px auto;
+  padding:13px;
+  border:1px solid #e1bd58;
+  border-radius:13px;
+  color:#fff;
+  background:linear-gradient(135deg,#a80e27,#e42c3f);
+  font-weight:950;
+  font-size:14px;
+}
+#cuit-roulette-spin:disabled {
+  opacity:.55;
+}
+#cuit-roulette-status {
+  min-height:28px;
+  text-align:center;
+  font-size:12px;
+  font-weight:800;
+  color:#9c172a;
+  margin:8px 0;
+}
+#cuit-roulette-result {
+  display:none;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  background:#fff5d9;
+  border:1px solid #e4c36c;
+  text-align:center;
+  font-weight:850;
+}
+#cuit-roulette-result textarea {
+  width:100%;
+  min-height:130px;
+  margin-top:9px;
+  padding:10px;
+  border:1px solid #d9bd75;
+  border-radius:10px;
+  box-sizing:border-box;
+  font:13px/1.5 sans-serif;
+}
+#cuit-roulette-result button,
+#cuit-roulette-close {
+  border:0;
+  border-radius:10px;
+  padding:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+#cuit-roulette-publish {
+  width:100%;
+  margin-top:8px;
+  background:#a51026;
+  color:white;
+}
+#cuit-roulette-close {
+  display:block;
+  width:100%;
+  margin-top:10px;
+  background:#f4e8e8;
+  color:#8c1728;
+}
+#cuit-roulette-popup {
+  display:none;
+  position:fixed;
+  z-index:100010;
+  inset:0;
+  background:#16060bd9;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+#cuit-roulette-popup-card {
+  width:min(100%,360px);
+  padding:22px 18px;
+  border-radius:20px;
+  border:2px solid #e1bd58;
+  background:linear-gradient(150deg,#fff8e8,#fff,#fff0f1);
+  text-align:center;
+  position:relative;
+  box-shadow:0 15px 50px #0007;
+}
+#cuit-roulette-popup-card img {
+  width:76px;height:76px;object-fit:contain;
+}
+#cuit-roulette-popup-card h2 {
+  color:#a51026;
+  margin:8px 0;
+  font-size:24px;
+}
+#cuit-roulette-popup-card p {
+  color:#70565a;
+  font-size:13px;
+  line-height:1.5;
+}
+#cuit-roulette-popup-card button {
+  width:100%;
+  border:0;
+  border-radius:11px;
+  padding:12px;
+  margin-top:8px;
+  font-weight:950;
+}
+#cuit-roulette-popup-go {
+  color:white;
+  background:linear-gradient(135deg,#a51026,#e42c3f);
+}
+#cuit-roulette-popup-close {
+  color:#8b2634;
+  background:#f3e6e6;
+}
+#cuit-roulette-popup-x {
+  position:absolute;
+  right:10px;
+  top:8px;
+  width:auto!important;
+  padding:5px 10px!important;
+  background:transparent;
+  color:#8b2634;
+  font-size:22px;
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  if (window.cuitRouletteInstalled) return;
+  window.cuitRouletteInstalled = true;
+
+  const sectors = [
+    {code:'coin_1',label:'+1 KOIN'},
+    {code:'zonk',label:'ZONK'},
+    {code:'coin_3',label:'+3 KOIN'},
+    {code:'extra_spin',label:'EXTRA SPIN'},
+    {code:'coin_2',label:'+2 KOIN'},
+    {code:'mission_comment',label:'MISI KOMEN'},
+    {code:'coin_5',label:'+5 KOIN'},
+    {code:'mission_like',label:'MISI LIKE'},
+    {code:'coin_1',label:'+1 KOIN'},
+    {code:'coin_10',label:'+10 KOIN'},
+    {code:'coin_2',label:'+2 KOIN'},
+    {code:'jackpot_50',label:'JACKPOT +50'}
+  ];
+
+  const $ = id => document.getElementById(id);
+  let spinning = false;
+  let currentSpin = null;
+  let wheelRotation = 0;
+
+  function message(text) {
+    const el = $('cuit-roulette-status');
+    if (el) el.textContent = text;
+  }
+
+  function makeUUID() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+      const r=Math.random()*16|0;
+      return (c==='x'?r:(r&3|8)).toString(16);
+    });
+  }
+
+  function buildWheel() {
+    const wheel = $('cuit-roulette-wheel');
+    if (!wheel || wheel.dataset.ready) return;
+    wheel.dataset.ready = '1';
+
+    sectors.forEach((sector,i)=>{
+      const label=document.createElement('div');
+      label.className='cr-sector-label'+([3,5,7,11].includes(i)?' light':'');
+      label.textContent=sector.label;
+      label.style.transform=`rotate(${i*30+15}deg) translateX(0)`;
+      wheel.appendChild(label);
+    });
+
+    const center=document.createElement('div');
+    center.id='cuit-roulette-center';
+    center.innerHTML='<img src="assets/cuit-app-icon.svg" alt="CUIT">';
+    wheel.parentElement.appendChild(center);
+  }
+
+  function addInterface() {
+    const game = $('pageGame');
+    if (!game) return false;
+
+    const head = game.querySelector('.kilat-head');
+    if (head && !$('cuit-roulette-launch')) {
+      const button=document.createElement('button');
+      button.id='cuit-roulette-launch';
+      button.type='button';
+      button.textContent='🎡 ROULETTE';
+      button.addEventListener('click',openRoulette);
+      head.appendChild(button);
+    }
+
+    if (!$('cuit-roulette-panel')) {
+      const panel=document.createElement('section');
+      panel.id='cuit-roulette-panel';
+      panel.innerHTML=`
+        <h3>🎡 ROULETTE CUIT</h3>
+        <div class="cr-subtitle">Putar roda, dapatkan hadiah, dan ramaikan komunitas CUIT.</div>
+        <div id="cuit-roulette-wheel-wrap">
+          <div id="cuit-roulette-pointer"></div>
+          <div id="cuit-roulette-wheel"></div>
+        </div>
+        <div id="cuit-roulette-status">Menyiapkan permainan...</div>
+        <button id="cuit-roulette-spin" type="button">PUTAR RODA</button>
+        <div id="cuit-roulette-result"></div>
+        <button id="cuit-roulette-close" type="button">TUTUP PERMAINAN</button>
+      `;
+      const shell=game.querySelector('.kilat-shell');
+      if (shell) shell.insertAdjacentElement('afterend',panel);
+      else game.appendChild(panel);
+
+      $('cuit-roulette-spin').addEventListener('click',spin);
+      $('cuit-roulette-close').addEventListener('click',()=>{
+        panel.style.display='none';
+      });
+    }
+
+    buildWheel();
+    return true;
+  }
+
+  function addPopup() {
+    if ($('cuit-roulette-popup')) return;
+    const popup=document.createElement('div');
+    popup.id='cuit-roulette-popup';
+    popup.innerHTML=`
+      <div id="cuit-roulette-popup-card">
+        <button id="cuit-roulette-popup-x" type="button" aria-label="Tutup">×</button>
+        <img src="assets/cuit-app-icon.svg" alt="CUIT">
+        <h2>ROULETTE CUIT</h2>
+        <p>Kesempatan bermain dan mendapatkan hadiah Koin Gratis. Yuk, ramaikan komunitas CUIT!</p>
+        <button id="cuit-roulette-popup-go" type="button">PUTAR RODA</button>
+        <button id="cuit-roulette-popup-close" type="button">TUTUP</button>
+      </div>
+    `;
+    document.body.appendChild(popup);
+
+    const close=()=>popup.style.display='none';
+    $('cuit-roulette-popup-x').addEventListener('click',close);
+    $('cuit-roulette-popup-close').addEventListener('click',close);
+    $('cuit-roulette-popup-go').addEventListener('click',()=>{
+      close();
+      openRoulette();
+    });
+  }
+
+  function openRoulette() {
+    if (!currentUser || !currentUser.id) {
+      alert('Silakan masuk ke akun CUIT terlebih dahulu.');
+      return;
+    }
+    addInterface();
+    const panel=$('cuit-roulette-panel');
+    if (panel) {
+      panel.style.display='block';
+      panel.scrollIntoView({behavior:'smooth',block:'center'});
+      loadPending();
+    }
+  }
+
+  async function loadPending() {
+    if (!currentUser || !supabaseClient) return;
+
+    const {data,error}=await supabaseClient
+      .from('cuit_roulette_spins')
+      .select('*')
+      .eq('user_id',currentUser.id)
+      .eq('reward_status','pending')
+      .order('completed_at',{ascending:false})
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Roulette pending:',error);
+      return;
+    }
+    if (data) {
+      currentSpin=data;
+      showReward(data);
+      message('Selesaikan posting hadiah sebelum putaran berikutnya.');
+      $('cuit-roulette-spin').disabled=true;
+      return;
+    }
+
+    const {data:mission,error:missionError}=await supabaseClient
+      .from('cuit_roulette_spins')
+      .select('*')
+      .eq('user_id',currentUser.id)
+      .eq('reward_status','mission_pending')
+      .order('completed_at',{ascending:false})
+      .limit(1)
+      .maybeSingle();
+
+    if (!missionError && mission) {
+      currentSpin=mission;
+      showMission(mission);
+      $('cuit-roulette-spin').disabled=true;
+    } else {
+      $('cuit-roulette-spin').disabled=false;
+    }
+  }
+
+  async function spin() {
+    if (spinning) return;
+    if (!currentUser || !currentUser.id) {
+      alert('Silakan masuk terlebih dahulu.');
+      return;
+    }
+
+    spinning=true;
+    const button=$('cuit-roulette-spin');
+    button.disabled=true;
+    message('Meminta hasil putaran dari server CUIT...');
+
+    const requestId=makeUUID();
+    const {data,error}=await supabaseClient.rpc(
+      'cuit_roulette_spin',
+      {p_request_id:requestId}
+    );
+
+    if (error) {
+      spinning=false;
+      button.disabled=false;
+      message(error.message || 'Putaran belum berhasil. Silakan coba lagi.');
+      return;
+    }
+
+    // Hasil dibaca kembali dari tabel server berdasarkan request_id.
+    // Tidak menggunakan angka acak dari perangkat untuk menentukan hadiah.
+    const {data:row,error:readError}=await supabaseClient
+      .from('cuit_roulette_spins')
+      .select('*')
+      .eq('request_id',requestId)
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+
+    if (readError || !row) {
+      spinning=false;
+      button.disabled=false;
+      message('Transaksi diterima, tetapi hasil belum dapat dibaca. Muat ulang halaman dan periksa status permainan.');
+      console.error('Roulette result read:',readError,data);
+      return;
+    }
+
+    currentSpin=row;
+    await updateCoinUI(false);
+
+    const index=sectors.findIndex(x=>x.code===row.result_code);
+    if (index<0) {
+      spinning=false;
+      button.disabled=false;
+      message('Kode hasil dari server tidak dikenali: '+row.result_code);
+      return;
+    }
+
+    message('Roda sedang berputar...');
+    const target=(360-(index*30+15))%360;
+    const current=wheelRotation%360;
+    const delta=(target-current+360)%360;
+    wheelRotation+=360*7+delta;
+
+    $('cuit-roulette-wheel').style.transform=`rotate(${wheelRotation}deg)`;
+
+    setTimeout(async()=>{
+      spinning=false;
+      showResult(row);
+      await loadPending();
+    },8200);
+  }
+
+  function showResult(row) {
+    const result=$('cuit-roulette-result');
+    result.style.display='block';
+
+    const names={
+      coin_1:'SELAMAT! HADIAH 1 KOIN',
+      coin_2:'SELAMAT! HADIAH 2 KOIN',
+      coin_3:'SELAMAT! HADIAH 3 KOIN',
+      coin_5:'SELAMAT! HADIAH 5 KOIN',
+      coin_10:'LUAR BIASA! HADIAH 10 KOIN',
+      jackpot_50:'JACKPOT! HADIAH 50 KOIN',
+      zonk:'ZONK! Jangan menyerah, kesempatan berikutnya menanti.',
+      extra_spin:'EXTRA SPIN! Kamu mendapat satu putaran tambahan.',
+      mission_like:'MISI LIKE! Selesaikan misi Like untuk mendapat 3 Koin.',
+      mission_comment:'MISI KOMEN! Selesaikan misi Komentar untuk mendapat 3 Koin.'
+    };
+
+    result.innerHTML='';
+    const title=document.createElement('div');
+    title.textContent=names[row.result_code] || 'Hasil putaran diterima.';
+    result.appendChild(title);
+
+    if (row.reward_status==='pending') {
+      showReward(row);
+    } else if (row.reward_status==='mission_pending') {
+      showMission(row);
+    } else {
+      $('cuit-roulette-spin').disabled=false;
+      if (row.result_code==='jackpot_50') {
+        message('JACKPOT! Tunggu 50 menit sebelum putaran berikutnya.');
+      } else {
+        message('Putaran selesai. Biaya putaran berikutnya mengikuti aturan server.');
+      }
+    }
+  }
+
+  function showReward(row) {
+    const result=$('cuit-roulette-result');
+    result.style.display='block';
+    result.innerHTML=`
+      <div>🎉 Hadiah ${Number(row.reward_coins)||0} Koin Gratis!</div>
+      <div style="font-size:11px;margin-top:6px">
+        Edit teks berikut bila diperlukan, lalu terbitkan sebagai curhatan.
+        Hadiah dikreditkan setelah posting berhasil.
+      </div>
+      <textarea id="cuit-roulette-content"></textarea>
+      <button id="cuit-roulette-publish" type="button">TERBITKAN & AMBIL HADIAH</button>
+    `;
+    $('cuit-roulette-content').value=row.content_text || '';
+    $('cuit-roulette-publish').addEventListener('click',publishReward);
+  }
+
+  async function publishReward() {
+    if (!currentSpin || !currentSpin.id) return;
+    const content=$('cuit-roulette-content').value.trim();
+    const button=$('cuit-roulette-publish');
+
+    if (!content) return alert('Teks curhatan belum diisi.');
+    button.disabled=true;
+    message('Menerbitkan curhatan dan memproses hadiah...');
+
+    const {data,error}=await supabaseClient.rpc(
+      'cuit_roulette_publish_reward',
+      {
+        p_spin_id:currentSpin.id,
+        p_content:content,
+        p_feeling:'',
+        p_username:customDisplayName || 'Penilik Bageur'
+      }
+    );
+
+    if (error || !data || data.ok!==true) {
+      button.disabled=false;
+      message(error?.message || data?.message || 'Posting hadiah belum berhasil.');
+      return;
+    }
+
+    currentSpin=null;
+    $('cuit-roulette-result').style.display='none';
+    $('cuit-roulette-spin').disabled=false;
+    await updateCoinUI(false);
+    message('🎉 Curhatan berhasil diterbitkan dan hadiah Koin Gratis sudah diproses.');
+    alert('Selamat! Hadiah Koin Gratis sudah berhasil diproses.');
+  }
+
+  function showMission(row) {
+    const result=$('cuit-roulette-result');
+    result.style.display='block';
+    result.innerHTML='';
+    const title=document.createElement('div');
+    title.textContent=row.result_code==='mission_like'
+      ? '👍 MISI LIKE: Like satu curhatan anggota lain.'
+      : '💬 MISI KOMEN: Berikan komentar pada curhatan anggota lain.';
+    result.appendChild(title);
+
+    const note=document.createElement('p');
+    note.style.fontSize='11px';
+    note.textContent='Setelah aktivitas berhasil tersimpan, hadiah 3 Koin Gratis dapat diklaim melalui verifikasi server.';
+    result.appendChild(note);
+
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.textContent='SAYA SUDAH MENYELESAIKAN MISI';
+    btn.style.cssText='width:100%;background:#a51026;color:white;margin-top:8px';
+    btn.addEventListener('click',async()=>{
+      const actionId=prompt('Masukkan ID aktivitas Like/Komentar yang tersimpan di Supabase:');
+      if (!actionId) return;
+      btn.disabled=true;
+      const {data,error}=await supabaseClient.rpc(
+        'cuit_roulette_claim_mission',
+        {p_spin_id:row.id,p_action_id:actionId.trim()}
+      );
+      if (error || !data || data.ok!==true) {
+        btn.disabled=false;
+        alert(error?.message || data?.message || 'Misi belum dapat diverifikasi server.');
+        return;
+      }
+      currentSpin=null;
+      result.style.display='none';
+      $('cuit-roulette-spin').disabled=false;
+      await updateCoinUI(false);
+      message('🎉 Misi berhasil diverifikasi. 3 Koin Gratis telah diberikan.');
+    });
+    result.appendChild(btn);
+  }
+
+  async function initialize() {
+    addInterface();
+    addPopup();
+
+    // Pastikan sesi login sudah diperiksa sebelum menampilkan popup.
+    try {
+      const {data,error}=await supabaseClient.auth.getUser();
+      if (error || !data?.user) return;
+
+      // Tunggu sampai aplikasi menetapkan currentUser.
+      let attempts=0;
+      const waitForUser=()=>{
+        if (currentUser && currentUser.id===data.user.id) {
+          addInterface();
+          $('cuit-roulette-popup').style.display='flex';
+          return;
+        }
+        if (++attempts<60) setTimeout(waitForUser,250);
+      };
+      waitForUser();
+    } catch(err) {
+      console.error('Roulette initialization:',err);
+    }
+  }
+
+  if (document.readyState==='loading') {
+    document.addEventListener('DOMContentLoaded',initialize,{once:true});
+  } else {
+    initialize();
+  }
+})();
+</script>
+<!-- =============== AKHIR TAMBAHAN ROULETTE CUIT =============== -->
 </body>
   </html>
