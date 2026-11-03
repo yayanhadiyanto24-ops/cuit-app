@@ -7392,7 +7392,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let spinning = false;
   let currentSpin = null;
   let wheelRotation = 345;
-
+let jackpotCooldownTimer = null;
   function message(text) {
     const el = $('cuit-roulette-status');
     if (el) el.textContent = text;
