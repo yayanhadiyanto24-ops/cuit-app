@@ -7252,7 +7252,11 @@ document.addEventListener('DOMContentLoaded', function () {
   font-size:14px;
 }
 #cuit-roulette-spin:disabled {
-  opacity:.55;
+  opacity:1;
+  background:#999!important;
+  color:#fff!important;
+  border-color:#888!important;
+  cursor:not-allowed;
 }
 #cuit-roulette-status {
   min-height:28px;
@@ -7627,7 +7631,7 @@ wheel.style.transform = 'rotate(345deg)';
     }
   }
 
-  async function loadPending() {
+      stopJackpotCooldown();
     if (!currentUser || !supabaseClient) return;
 
     const {data,error} = await supabaseClient
