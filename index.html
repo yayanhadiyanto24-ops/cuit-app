@@ -1491,7 +1491,16 @@ poolStatus=feePaid>0
 #marbleGame .mg-info{display:flex;gap:6px;margin-bottom:8px}
 #marbleGame .mg-info div{flex:1;text-align:center;padding:7px 3px;background:#fff;border:1px solid #eedcae;border-radius:10px;font-size:10px}
 #marbleGame .mg-info strong{display:block;font-size:15px;color:#a9152b;margin-top:3px}
-#marbleGame canvas{display:block;width:min(100%,340px);height:auto;aspect-ratio:480 / 900;background:linear-gradient(#fffaf0,#fff1d5);border:1px solid #e8d5a3;border-radius:13px;touch-action:manipulation}
+#marbleGame canvas{
+  display:block;
+  width:min(100%,340px);
+  height:420px;
+  margin:0 auto;
+  background:linear-gradient(#fffaf0,#fff1d5);
+  border:1px solid #e8d5a3;
+  border-radius:13px;
+  touch-action:manipulation;
+}
 #marbleGame .mg-btn{border:0;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:900;cursor:pointer}
 #marbleGame .mg-primary{background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;flex:1}
 #marbleGame .mg-secondary{background:#fff2cf;color:#805b08;border:1px solid #e8cf83}
@@ -1506,11 +1515,11 @@ poolStatus=feePaid>0
 #marbleGame .mg-thanks{font-size:11px;line-height:1.5;margin:9px 0;color:#755b5b}
 #marbleGame .mg-curhat{width:100%;padding:12px;border:0;border-radius:11px;background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;font-weight:900}
 #marbleGame button:disabled{opacity:.55;cursor:not-allowed}
-#mgCanvas {
-  display: block;
-  width: min(100%, 340px);
-  height: auto;
-  margin: 0 auto;
+#mgCanvas{
+  display:block;
+  width:min(100%,340px);
+  height:420px;
+  margin:0 auto;
   }
 </style>
 
@@ -1644,7 +1653,9 @@ poolStatus=feePaid>0
     g.addColorStop(.55,'#bd8740');
     g.addColorStop(1,'#70451f');
     ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2);
+    const rect=canvas.getBoundingClientRect();
+const sx=(rect.height/H)/(rect.width/W);
+ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
     ctx.fillStyle=g;
     ctx.fill();
     ctx.strokeStyle='#80572e';
@@ -1751,7 +1762,9 @@ poolStatus=feePaid>0
     ctx.shadowColor='rgba(30,20,10,.4)';
     ctx.shadowBlur=7;
     ctx.beginPath();
-    ctx.arc(x,y,radius,0,Math.PI*2);
+    const rect=canvas.getBoundingClientRect();
+const sx=(rect.height/H)/(rect.width/W);
+ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     ctx.fillStyle=g;
     ctx.fill();
     ctx.shadowBlur=0;
