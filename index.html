@@ -2667,7 +2667,7 @@ poolStatus=feePaid>0
       if(!currentUser){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:14px;">Silakan masuk untuk melihat progres akun.</div>';return;}
       const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
       async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
-      const [checkins,posts,likes,comments,reels,games,giftRows,paidLedger,paidGames,myProfile,marbleSessions]=await Promise.all([  
+      const [checkins,posts,likes,comments,reels,games,giftRows,paidLedger,paidGames,myProfile,marbleSessions,rouletteSpins]=await Promise.all([
   rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
   rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
   rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
@@ -2677,8 +2677,9 @@ poolStatus=feePaid>0
   rows('gift_transactions','id,created_at,sender_name,coins_amount,recipient_email',q=>q.gte('created_at',day+' 00:00:00').lt('created_at',day+' 24:00:00')),
   rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','koin').gte('occurred_at',start).lt('occurred_at',end)),
   rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end)),
-rows('profiles','username',q=>q.eq('id',currentUser.id)),
-rows('cuit_marble_sessions','id,game_date,status',q=>q.eq('user_id',currentUser.id).eq('game_date',day).eq('status','completed'))
+  rows('profiles','username',q=>q.eq('id',currentUser.id)),
+  rows('cuit_marble_sessions','id,game_date,status',q=>q.eq('user_id',currentUser.id).eq('game_date',day).eq('status','completed')),
+  rows('cuit_roulette_spins','id,completed_at,user_id',q=>q.eq('user_id',currentUser.id).gte('completed_at',start).lt('completed_at',end))
 ]);
         
       values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
@@ -2687,10 +2688,18 @@ values.watch = reels === null
   ? 'Belum terhubung'
   : reels.length.toLocaleString('id-ID');
 
-// Main Game: 3 Huruf Kilat + Balap Kelereng
-values.game = (games === null || marbleSessions === null)
+// Main Game: 3 Huruf Kilat + Balap Kelereng + Roulette
+values.game = (
+  games === null ||
+  marbleSessions === null ||
+  rouletteSpins === null
+)
   ? 'Belum terhubung'
-  : (games.length + marbleSessions.length).toLocaleString('id-ID');
+  : (
+      games.length +
+      marbleSessions.length +
+      rouletteSpins.length
+    ).toLocaleString('id-ID');
       if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
       values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
       values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
