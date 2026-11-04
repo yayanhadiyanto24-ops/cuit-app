@@ -7397,7 +7397,67 @@ let jackpotCooldownTimer = null;
     const el = $('cuit-roulette-status');
     if (el) el.textContent = text;
   }
+function stopJackpotCooldown() {
+  if (jackpotCooldownTimer) {
+    clearInterval(jackpotCooldownTimer);
+    jackpotCooldownTimer = null;
+  }
+}
 
+async function loadJackpotCooldown() {
+  stopJackpotCooldown();
+
+  const button = $('cuit-roulette-spin');
+
+  const {data,error} = await supabaseClient
+    .from('cuit_roulette_player_state')
+    .select('jackpot_cooldown_until')
+    .eq('user_id',currentUser.id)
+    .maybeSingle();
+
+  if (error) {
+    button.disabled = true;
+    message('Status jeda belum dapat diperiksa. Silakan muat ulang.');
+    console.error('Jackpot cooldown:',error);
+    return;
+  }
+
+  const until = data?.jackpot_cooldown_until
+    ? new Date(data.jackpot_cooldown_until).getTime()
+    : 0;
+
+  if (!until || !Number.isFinite(until)) {
+    button.disabled = false;
+    return;
+  }
+
+  function updateTimer() {
+    const remaining = Math.max(0,until-Date.now());
+
+    if (remaining <= 0) {
+      stopJackpotCooldown();
+      button.disabled = false;
+      message('Masa jeda selesai. Kamu sudah bisa memutar roda kembali.');
+      return;
+    }
+
+    button.disabled = true;
+
+    const total = Math.ceil(remaining/1000);
+    const minutes = String(Math.floor(total/60)).padStart(2,'0');
+    const seconds = String(total%60).padStart(2,'0');
+
+    message(
+      `🎉 JACKPOT 50 KOIN! Sisa waktu jeda: ${minutes}:${seconds}`
+    );
+  }
+
+  updateTimer();
+
+  if (until > Date.now()) {
+    jackpotCooldownTimer = setInterval(updateTimer,1000);
+  }
+}
   function makeUUID() {
     if (window.crypto && crypto.randomUUID) {
       return crypto.randomUUID();
