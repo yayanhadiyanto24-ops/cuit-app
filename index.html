@@ -7396,72 +7396,75 @@ document.addEventListener('DOMContentLoaded', function () {
   let spinning = false;
   let currentSpin = null;
   let wheelRotation = 345;
-let jackpotCooldownTimer = null;
+  let jackpotCooldownTimer = null;
+
   function message(text) {
     const el = $('cuit-roulette-status');
     if (el) el.textContent = text;
   }
-function stopJackpotCooldown() {
-  if (jackpotCooldownTimer) {
-    clearInterval(jackpotCooldownTimer);
-    jackpotCooldownTimer = null;
-  }
-}
 
-async function loadJackpotCooldown() {
-  stopJackpotCooldown();
-
-  const button = $('cuit-roulette-spin');
-
-  const {data,error} = await supabaseClient
-    .from('cuit_roulette_player_state')
-    .select('jackpot_cooldown_until')
-    .eq('user_id',currentUser.id)
-    .maybeSingle();
-
-  if (error) {
-    button.disabled = true;
-    message('Status jeda belum dapat diperiksa. Silakan muat ulang.');
-    console.error('Jackpot cooldown:',error);
-    return;
+  function stopJackpotCooldown() {
+    if (jackpotCooldownTimer) {
+      clearInterval(jackpotCooldownTimer);
+      jackpotCooldownTimer = null;
+    }
   }
 
-  const until = data?.jackpot_cooldown_until
-    ? new Date(data.jackpot_cooldown_until).getTime()
-    : 0;
+  async function loadJackpotCooldown() {
+    stopJackpotCooldown();
 
-  if (!until || !Number.isFinite(until)) {
-    button.disabled = false;
-    return;
-  }
+    const button = $('cuit-roulette-spin');
 
-  function updateTimer() {
-    const remaining = Math.max(0,until-Date.now());
+    const {data,error} = await supabaseClient
+      .from('cuit_roulette_player_state')
+      .select('jackpot_cooldown_until')
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
 
-    if (remaining <= 0) {
-      stopJackpotCooldown();
-      button.disabled = false;
-      message('Masa jeda selesai. Kamu sudah bisa memutar roda kembali.');
+    if (error) {
+      button.disabled = true;
+      message('Status jeda belum dapat diperiksa. Silakan muat ulang.');
+      console.error('Jackpot cooldown:',error);
       return;
     }
 
-    button.disabled = true;
+    const until = data?.jackpot_cooldown_until
+      ? new Date(data.jackpot_cooldown_until).getTime()
+      : 0;
 
-    const total = Math.ceil(remaining/1000);
-    const minutes = String(Math.floor(total/60)).padStart(2,'0');
-    const seconds = String(total%60).padStart(2,'0');
+    if (!until || !Number.isFinite(until)) {
+      button.disabled = false;
+      return;
+    }
 
-    message(
-      `🎉 JACKPOT 50 KOIN! Sisa waktu jeda: ${minutes}:${seconds}`
-    );
+    function updateTimer() {
+      const remaining = Math.max(0,until-Date.now());
+
+      if (remaining <= 0) {
+        stopJackpotCooldown();
+        button.disabled = false;
+        message('Masa jeda selesai. Kamu sudah bisa memutar roda kembali.');
+        return;
+      }
+
+      button.disabled = true;
+
+      const total = Math.ceil(remaining/1000);
+      const minutes = String(Math.floor(total/60)).padStart(2,'0');
+      const seconds = String(total%60).padStart(2,'0');
+
+      message(
+        `🎉 JACKPOT 50 KOIN! Sisa waktu jeda: ${minutes}:${seconds}`
+      );
+    }
+
+    updateTimer();
+
+    if (until > Date.now()) {
+      jackpotCooldownTimer = setInterval(updateTimer,1000);
+    }
   }
 
-  updateTimer();
-
-  if (until > Date.now()) {
-    jackpotCooldownTimer = setInterval(updateTimer,1000);
-  }
-}
   function makeUUID() {
     if (window.crypto && crypto.randomUUID) {
       return crypto.randomUUID();
@@ -7477,16 +7480,14 @@ async function loadJackpotCooldown() {
     if (!wheel || wheel.dataset.ready) return;
 
     wheel.dataset.ready = '1';
-wheel.style.transform = 'rotate(345deg)';
+    wheel.style.transform = 'rotate(345deg)';
+
     sectors.forEach((sector,i)=>{
       const label = document.createElement('div');
       label.className = 'cr-sector-label' +
         ([3,7,11].includes(i) ? ' light' : '');
       label.textContent = sector.label;
 
-      // Posisi tulisan diselaraskan dengan pusat setiap sektor.
-      // Sektor pertama berpusat 15 derajat searah jarum jam
-      // dari penunjuk atas.
       label.style.transform =
         `rotate(${i*30-75}deg) translateX(0)`;
 
@@ -7605,7 +7606,6 @@ wheel.style.transform = 'rotate(345deg)';
       return;
     }
 
-    // Pastikan berpindah ke halaman Game terlebih dahulu.
     if (typeof window.switchTab === 'function') {
       window.switchTab('pageGame',null);
     } else {
@@ -7631,7 +7631,7 @@ wheel.style.transform = 'rotate(345deg)';
     }
   }
 
-        async function loadPending() {
+  async function loadPending() {
     stopJackpotCooldown();
 
     if (!currentUser || !supabaseClient) return;
@@ -7647,6 +7647,7 @@ wheel.style.transform = 'rotate(345deg)';
 
     if (error) {
       console.error('Roulette pending:',error);
+      await loadJackpotCooldown();
       return;
     }
 
@@ -7659,7 +7660,7 @@ wheel.style.transform = 'rotate(345deg)';
     }
 
     const {data:mission,error:missionError} = await supabaseClient
-      .from('cuit_roulette_spins')
+      .from('cuit-roulette_spins')
       .select('*')
       .eq('user_id',currentUser.id)
       .eq('reward_status','mission_pending')
@@ -7671,7 +7672,7 @@ wheel.style.transform = 'rotate(345deg)';
       currentSpin = mission;
       showMission(mission);
       $('cuit-roulette-spin').disabled = true;
-        } else {
+    } else {
       await loadJackpotCooldown();
     }
   }
@@ -7705,7 +7706,6 @@ wheel.style.transform = 'rotate(345deg)';
       return;
     }
 
-    // Hasil selalu dibaca dari transaksi server.
     const {data:row,error:readError} = await supabaseClient
       .from('cuit_roulette_spins')
       .select('*')
@@ -7727,7 +7727,6 @@ wheel.style.transform = 'rotate(345deg)';
     currentSpin = row;
     await updateCoinUI(false);
 
-    // Validasi kode hasil dari server.
     const matchingIndexes = [];
 
     sectors.forEach((sector,i)=>{
@@ -7743,13 +7742,10 @@ wheel.style.transform = 'rotate(345deg)';
       return;
     }
 
-    // Jika ada dua sektor dengan hadiah sama,
-    // pilih sektor pertama yang mewakili hadiah tersebut.
     const index = matchingIndexes[0];
 
     message('Roda sedang berputar...');
 
-    // Pusat sektor dihitung dari arah atas.
     const sectorCenter = index*30+15;
     const target = (360-sectorCenter)%360;
 
@@ -7796,14 +7792,12 @@ wheel.style.transform = 'rotate(345deg)';
       showReward(row);
     } else if (row.reward_status === 'mission_pending') {
       showMission(row);
+    } else if (row.result_code === 'jackpot_50') {
+      $('cuit-roulette-spin').disabled = true;
+      message('JACKPOT! Memeriksa sisa waktu jeda 50 menit...');
     } else {
       $('cuit-roulette-spin').disabled = false;
-
-      if (row.result_code === 'jackpot_50') {
-        message('JACKPOT! Tunggu 50 menit sebelum putaran berikutnya.');
-      } else {
-        message('Putaran selesai. Biaya putaran berikutnya mengikuti aturan server.');
-      }
+      message('Putaran selesai. Biaya putaran berikutnya mengikuti aturan server.');
     }
   }
 
@@ -7906,7 +7900,6 @@ wheel.style.transform = 'rotate(345deg)';
     btn.style.cssText =
       'width:100%;background:#a51026;color:white;margin-top:8px';
 
-    
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       btn.textContent = 'MEMVERIFIKASI MISI...';
@@ -7963,7 +7956,6 @@ wheel.style.transform = 'rotate(345deg)';
 
       if (error || !data?.user) return;
 
-      // Tunggu sampai aplikasi menetapkan currentUser.
       let attempts = 0;
 
       const waitForUser = ()=>{
