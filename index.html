@@ -7687,92 +7687,134 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function spin() {
-    if (spinning) return;
+  if (spinning) return;
 
-    if (!currentUser || !currentUser.id) {
-      alert('Silakan masuk terlebih dahulu.');
-      return;
-    }
-
-    spinning = true;
-
-    const button = $('cuit-roulette-spin');
-    button.disabled = true;
-
-    message('Meminta hasil putaran dari server CUIT...');
-
-    const requestId = makeUUID();
-
-    const {data,error} = await supabaseClient.rpc(
-      'cuit_roulette_spin',
-      {p_request_id:requestId}
-    );
-
-    if (error) {
-      spinning = false;
-      button.disabled = false;
-      message(error.message || 'Putaran belum berhasil. Silakan coba lagi.');
-      return;
-    }
-
-    const {data:row,error:readError} = await supabaseClient
-      .from('cuit_roulette_spins')
-      .select('*')
-      .eq('request_id',requestId)
-      .eq('user_id',currentUser.id)
-      .maybeSingle();
-
-    if (readError || !row) {
-      spinning = false;
-      button.disabled = false;
-      message(
-        'Transaksi diterima, tetapi hasil belum dapat dibaca. ' +
-        'Muat ulang halaman dan periksa status permainan.'
-      );
-      console.error('Roulette result read:',readError,data);
-      return;
-    }
-
-    currentSpin = row;
-    await updateCoinUI(false);
-
-    const matchingIndexes = [];
-
-    sectors.forEach((sector,i)=>{
-      if (sector.code === row.result_code) {
-        matchingIndexes.push(i);
-      }
-    });
-
-    if (!matchingIndexes.length) {
-      spinning = false;
-      button.disabled = false;
-      message('Kode hasil server tidak dikenali: '+row.result_code);
-      return;
-    }
-
-    const index = matchingIndexes[0];
-
-    message('Roda sedang berputar...');
-
-    const sectorCenter = index*30+15;
-    const target = (360-sectorCenter)%360;
-
-    const current = wheelRotation%360;
-    const delta = (target-current+360)%360;
-
-    wheelRotation += 360*7+delta;
-
-    $('cuit-roulette-wheel').style.transform =
-      `rotate(${wheelRotation}deg)`;
-
-    setTimeout(async()=>{
-      spinning = false;
-      showResult(row);
-      await loadPending();
-    },8200);
+  if (!currentUser || !currentUser.id) {
+    alert('Silakan masuk terlebih dahulu.');
+    return;
   }
 
+  const button = $('cuit-roulette-spin');
+  button.disabled = true;
+
+  // Baca status biaya dan EXTRA SPIN dari server
+  const {data:state,error:stateError} = await supabaseClient
+    .from('cuit_roulette_player_state')
+    .select('spins_since_reset,extra_spins,jackpot_cooldown_until')
+    .eq('user_id',currentUser.id)
+    .maybeSingle();
+
+  if (stateError || !state) {
+    button.disabled = false;
+    message('Biaya putaran belum dapat diperiksa. Silakan coba lagi.');
+    console.error('Roulette fee state:',stateError);
+    return;
+  }
+
+  const extraSpins = Number(state.extra_spins || 0);
+  const isExtraSpin = extraSpins > 0;
+  const fee = isExtraSpin
+    ? 0
+    : Number(state.spins_since_reset || 0);
+
+  let confirmationText;
+
+  if (isExtraSpin) {
+    confirmationText =
+      '🎁 PUTARAN EXTRA SPIN\n\n' +
+      'Biaya: GRATIS (0 koin gratis).\n' +
+      'Urutan biaya putaran normal tidak berubah.\n\n' +
+      'Lanjutkan putaran?';
+  } else {
+    confirmationText =
+      '🎯 KONFIRMASI PUTARAN ROULETTE\n\n' +
+      'Putaran ini akan memotong ' + fee +
+      ' koin gratis dari saldo Anda.\n\n' +
+      (fee === 0
+        ? 'Putaran ini GRATIS.\n\n'
+        : '') +
+      'Lanjutkan putaran?';
+  }
+
+  if (!confirm(confirmationText)) {
+    button.disabled = false;
+    return;
+  }
+
+  spinning = true;
+  message('Memproses putaran Roulette...');
+
+  const requestId = makeUUID();
+
+  const {data,error} = await supabaseClient.rpc(
+    'cuit_roulette_spin',
+    {p_request_id:requestId}
+  );
+
+  if (error) {
+    spinning = false;
+    button.disabled = false;
+    message(error.message || 'Putaran belum berhasil. Silakan coba lagi.');
+    return;
+  }
+
+  const {data:row,error:readError} = await supabaseClient
+    .from('cuit_roulette_spins')
+    .select('*')
+    .eq('request_id',requestId)
+    .eq('user_id',currentUser.id)
+    .maybeSingle();
+
+  if (readError || !row) {
+    spinning = false;
+    button.disabled = false;
+    message(
+      'Transaksi diterima, tetapi hasil belum dapat dibaca. ' +
+      'Muat ulang halaman dan periksa status permainan.'
+    );
+    console.error('Roulette result read:',readError,data);
+    return;
+  }
+
+  currentSpin = row;
+  await updateCoinUI(false);
+
+  const matchingIndexes = [];
+
+  sectors.forEach((sector,i)=>{
+    if (sector.code === row.result_code) {
+      matchingIndexes.push(i);
+    }
+  });
+
+  if (!matchingIndexes.length) {
+    spinning = false;
+    button.disabled = false;
+    message('Kode hasil server tidak dikenali: '+row.result_code);
+    return;
+  }
+
+  const index = matchingIndexes[0];
+
+  message('Roda sedang berputar...');
+
+  const sectorCenter = index*30+15;
+  const target = (360-sectorCenter)%360;
+
+  const current = wheelRotation%360;
+  const delta = (target-current+360)%360;
+
+  wheelRotation += 360*7+delta;
+
+  $('cuit-roulette-wheel').style.transform =
+    `rotate(${wheelRotation}deg)`;
+
+  setTimeout(async()=>{
+    spinning = false;
+    showResult(row);
+    await loadPending();
+  },8200);
+}
   function showResult(row) {
     const result = $('cuit-roulette-result');
     result.style.display = 'block';
