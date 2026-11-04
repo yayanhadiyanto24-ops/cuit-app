@@ -8233,5 +8233,94 @@ if (!confirmed) {
 })();
 </script>
 <!-- =============== AKHIR TAMBAHAN ROULETTE CUIT =============== -->
+<script>
+/* ===== CUIT REALTIME LOAD CONTROLLER ===== */
+(function () {
+  if (window.__cuitLoadControllerInstalled) return;
+
+  const originalLoadPosts = window.loadPosts;
+  const originalInitRealtime = window.initGlobalRealtime;
+
+  if (typeof originalLoadPosts !== 'function') {
+    console.warn('CUIT: loadPosts belum ditemukan.');
+    return;
+  }
+
+  window.__cuitLoadControllerInstalled = true;
+
+  let loadTimer = null;
+  let isLoading = false;
+  let loadAgain = false;
+  let pendingCalls = [];
+  let latestArgs = [];
+
+  function scheduleLoad() {
+    clearTimeout(loadTimer);
+
+    loadTimer = setTimeout(async function () {
+      loadTimer = null;
+
+      if (isLoading) {
+        loadAgain = true;
+        return;
+      }
+
+      isLoading = true;
+
+      const calls = pendingCalls;
+      pendingCalls = [];
+
+      try {
+        const result = await originalLoadPosts.apply(
+          window,
+          latestArgs
+        );
+
+        calls.forEach(call => call.resolve(result));
+
+      } catch (error) {
+        calls.forEach(call => call.reject(error));
+
+        console.error('CUIT realtime load:', error);
+
+      } finally {
+        isLoading = false;
+
+        if (loadAgain || pendingCalls.length > 0) {
+          loadAgain = false;
+          scheduleLoad();
+        }
+      }
+    }, 900);
+  }
+
+  window.loadPosts = function (...args) {
+    latestArgs = args;
+
+    return new Promise(function (resolve, reject) {
+      pendingCalls.push({ resolve, reject });
+
+      if (isLoading) {
+        loadAgain = true;
+      } else {
+        scheduleLoad();
+      }
+    });
+  };
+
+  /* Cegah langganan realtime dibuat berulang */
+  if (typeof originalInitRealtime === 'function') {
+    window.initGlobalRealtime = function () {
+      if (window.__cuitRealtimeStarted) return;
+
+      window.__cuitRealtimeStarted = true;
+
+      return originalInitRealtime.apply(this, arguments);
+    };
+  }
+
+  console.log('CUIT: pengatur pemuatan realtime aktif.');
+})();
+</script>
 </body>
   </html>
