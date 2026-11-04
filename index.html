@@ -7665,8 +7665,8 @@ wheel.style.transform = 'rotate(345deg)';
       currentSpin = mission;
       showMission(mission);
       $('cuit-roulette-spin').disabled = true;
-    } else {
-      $('cuit-roulette-spin').disabled = false;
+        } else {
+      await loadJackpotCooldown();
     }
   }
 
