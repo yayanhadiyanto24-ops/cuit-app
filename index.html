@@ -7631,7 +7631,9 @@ wheel.style.transform = 'rotate(345deg)';
     }
   }
 
-      stopJackpotCooldown();
+        async function loadPending() {
+    stopJackpotCooldown();
+
     if (!currentUser || !supabaseClient) return;
 
     const {data,error} = await supabaseClient
