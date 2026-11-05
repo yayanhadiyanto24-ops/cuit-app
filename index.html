@@ -948,6 +948,10 @@
       Tonton video minimal <b>10 detik</b> mengambang di aplikasi untuk klaim koin gratisan!
     </p>
 
+<div id="reelsStatusNotice"
+     style="width:100%;box-sizing:border-box;font-size:12px;line-height:1.4;color:#0f766e;text-align:center;margin:0 0 9px;padding:0 4px;">
+</div>
+
     <div id="reelsListContainer"
          style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0 0 9px;overflow:visible;flex:1 1 auto;min-height:0;">
     </div>
@@ -5924,12 +5928,15 @@ html += `
 
       }
 
-      if (claimsComplete) {
-        html = '<p style="font-size:11px;color:#0f766e;margin:0 0 8px;">🎉 Batas 10 klaim berhadiah hari ini tercapai. Tontonan tambahan dicatat untuk pemecah seri Raja Nonton, tanpa tambahan koin.</p>' + html;
-      } else {
-        html = `<p style="font-size:11px;color:#555;margin:0 0 8px;">Klaim berhadiah hari ini: ${(claims || []).length}/10. Setiap video yang memenuhi misi memberi 10 koin gratis.</p>` + html;
-      }
-      container.innerHTML = html;
+      const notice = document.getElementById('reelsStatusNotice');
+
+if (notice) {
+  notice.innerHTML = claimsComplete
+    ? '🎉 Batas 10 klaim berhadiah hari ini tercapai. Tontonan tambahan dicatat untuk pemecah seri Raja Nonton, tanpa tambahan koin.'
+    : `Klaim berhadiah hari ini: ${(claims || []).length}/10. Setiap video yang memenuhi misi memberi 10 koin gratis.`;
+}
+
+container.innerHTML = html;
     }
 
     function playEmbeddedVideo(targetUrl, slot, extraMode = false) {
