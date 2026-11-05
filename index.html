@@ -5847,6 +5847,8 @@ function cuitPostStyleCss(style) {
     ocean: 'linear-gradient(135deg,#dff6ff,#b7d9ef 55%,#eaf7ff)',
     sunset: 'linear-gradient(135deg,#ffe0bd,#ffb4a2 55%,#f8d5e5)',
     emerald: 'linear-gradient(135deg,#dff5e7,#9dc9ae 55%,#e8f3d8)'
+    'damask-royal': 'radial-gradient(ellipse at 50% 0%,rgba(236,195,91,.28) 0 10%,transparent 11%),radial-gradient(ellipse at 0% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),radial-gradient(ellipse at 100% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),repeating-linear-gradient(45deg,rgba(255,220,130,.07) 0 2px,transparent 2px 12px),linear-gradient(135deg,#351522,#70263c 58%,#24101b)',
+'art-deco-gold': 'repeating-linear-gradient(45deg,transparent 0 10px,rgba(177,126,28,.20) 10px 12px,transparent 12px 22px),repeating-linear-gradient(-45deg,transparent 0 10px,rgba(177,126,28,.14) 10px 12px,transparent 12px 22px),linear-gradient(135deg,#fff9e9,#f4e4bd 55%,#fffdf6)'
   };
 
   if (backgrounds[s.decorBackground]) {
@@ -5878,6 +5880,20 @@ function cuitPostStyleCss(style) {
       borderCss = 'border:5px double #9f2440;outline:1px solid #d4a72c;outline-offset:-9px;';
       ornament = 'box-shadow:inset 0 0 0 8px rgba(212,167,44,.13),inset 0 0 18px rgba(159,36,64,.16);';
       break;
+      case 'royal-filigree':
+  borderCss = 'border:8px double #c69a35;outline:2px solid #f4dfa0;outline-offset:-7px;';
+  ornament = 'box-shadow:inset 0 0 0 3px rgba(255,239,184,.9),inset 0 0 0 8px rgba(166,112,24,.28),inset 0 0 22px rgba(75,18,34,.22);';
+  break;
+
+case 'floral-prestige':
+  borderCss = 'border:7px double #bd7187;outline:2px solid #e8c47a;outline-offset:-6px;';
+  ornament = 'box-shadow:inset 0 0 0 3px rgba(255,244,246,.95),inset 0 0 18px rgba(177,72,105,.16);';
+  break;
+
+case 'batik-nusantara':
+  borderCss = 'border:8px double #9d273d;outline:2px solid #d4a72c;outline-offset:-7px;';
+  ornament = 'box-shadow:inset 0 0 0 4px rgba(212,167,44,.35),inset 0 0 20px rgba(91,25,37,.18);';
+  break;
   }
 
   return `${borderCss}
