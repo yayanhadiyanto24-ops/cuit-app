@@ -5915,11 +5915,13 @@ if (isAdmin) {
               ? '▶ Tonton tambahan · tanpa koin'
               : (isClaimed ? '🔒 Sudah diklaim' : 'Tonton & Klaim +10 🪙'));
         const safeUrl = String(url).replace(/&/g, '&amp;').replace(/'/g, '\\\'').replace(/"/g, '&quot;');
-        html += `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed ? '#b8d9c2' : '#e0e0e0'};border-radius:12px;background:${isClaimed ? '#eef8f0' : '#f9f9f9'};">
-            <span style="font-weight:800;font-size:12px;color:#333;">🎬 Video ${i}</span>
-            <button ${canPlay ? `onclick="playEmbeddedVideo('${safeUrl}', '${slotKey}', ${claimsComplete})"` : 'disabled'} style="background:${canPlay ? (claimsComplete ? '#0f766e' : '#1877f2') : '#aaa'};color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:10.5px;font-weight:800;cursor:${canPlay ? 'pointer' : 'not-allowed'};">${buttonText}</button>
-          </div>`;
+        
+html += `
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed ? '#b8d9c2' : '#e0e0e0'};border-radius:12px;background:${isClaimed ? '#eef8f0' : '#f9f9f9'};">
+    <span style="font-weight:800;font-size:12px;color:#333;">🎬 Video ${i}</span>
+    <button ${canPlay ? `onclick="playEmbeddedVideo('${safeUrl}', '${slotKey}', ${claimsComplete})"` : 'disabled'} style="background:${canPlay ? (claimsComplete ? '#0f766e' : '#1877f2') : '#aaa'};color:#fff;border:0;padding:5px 10px;border-radius:8px;font-size:10.5px;font-weight:800;cursor:${canPlay ? 'pointer' : 'not-allowed'};">${buttonText}</button>
+  </div>`;
+
       }
 
       if (claimsComplete) {
