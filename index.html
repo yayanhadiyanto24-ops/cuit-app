@@ -3212,8 +3212,7 @@ async function openDailyCheckin() {
 
     async function deletePostByAdmin(postId) {
       closeAllPostMenus();
-      if (!confirm("⚠️ Khusus Admin: Apakah Anda yakin ingin menghapus postingan ini secara permanen?")) return;
-
+      if (!(await cuitConfirm("⚠️ KHUSUS ADMIN\n\nApakah Anda yakin ingin menghapus postingan ini secara permanen?"))) return;
       const { error } = await supabaseClient.from('curhat').delete().eq('id', postId);
       if (!error) {
         alert("🗑️ Postingan berhasil dihapus oleh Admin!");
@@ -4560,10 +4559,10 @@ async function confirmPostPromotion() {
       `Jika dimulai ulang atau dipindahkan ke ${namaBaru}, ` +
       `promosi sebelumnya dianggap selesai dan durasi dimulai dari awal.`;
 
-    if (!window.confirm(
-      'PERINGATAN: PROMOSI MASIH AKTIF\n\n' +
-      pesan + '\n\nApakah kamu setuju?'
-    )) return;
+    if (!(await cuitConfirm(
+  '⚠️ PROMOSI MASIH AKTIF\n\n' +
+  pesan + '\n\nApakah kamu setuju untuk melanjutkan?'
+))) return;
   }
 
   promotionSubmitting = true;
