@@ -4497,7 +4497,9 @@ promotedCarousel.innerHTML = cardsHTML;
               <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="font-size:8px;font-weight:850;color:#fff;background:${userLvl.color || '#a50d27'};padding:2px 5px;border-radius:5px;">${escapeHtml(userLvl.title || 'Anggota')}</span><span style="font-size:9px;font-weight:700;color:#8b7b82;">${feeling}</span></div>
             </div>
           </div>
-          <div style="width:100%;box-sizing:border-box;font-size:11px;line-height:1.35;color:#40353a;overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left;">${content}</div>
+          
+<div style="width:100%;box-sizing:border-box;font-size:11px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left;padding:4px;border-radius:5px;${cuitPostStyleCss(post.post_style)}">${content}</div>
+
           <div style="margin-top:3px;font-size:9px;font-weight:850;color:#b5122b;text-align:right;">Ketuk untuk membaca ›</div>
         </div>`;
       }
