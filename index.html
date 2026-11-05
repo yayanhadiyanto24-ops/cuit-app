@@ -5839,17 +5839,19 @@ function cuitPostStyleCss(style) {
 
   let bg = color;
 
-  const backgrounds = {
-    sunrise: 'linear-gradient(135deg,#fff3dc,#ffe5e8)',
-    garden: 'linear-gradient(135deg,#effbea,#e1f5e9)',
-    night: 'linear-gradient(135deg,#f0eaff,#e8edff)',
-    royal: 'linear-gradient(135deg,#351522,#70263c 55%,#d4a72c)',
-    ocean: 'linear-gradient(135deg,#dff6ff,#b7d9ef 55%,#eaf7ff)',
-    sunset: 'linear-gradient(135deg,#ffe0bd,#ffb4a2 55%,#f8d5e5)',
-    emerald: 'linear-gradient(135deg,#dff5e7,#9dc9ae 55%,#e8f3d8)'
-    'damask-royal': 'radial-gradient(ellipse at 50% 0%,rgba(236,195,91,.28) 0 10%,transparent 11%),radial-gradient(ellipse at 0% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),radial-gradient(ellipse at 100% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),repeating-linear-gradient(45deg,rgba(255,220,130,.07) 0 2px,transparent 2px 12px),linear-gradient(135deg,#351522,#70263c 58%,#24101b)',
-'art-deco-gold': 'repeating-linear-gradient(45deg,transparent 0 10px,rgba(177,126,28,.20) 10px 12px,transparent 12px 22px),repeating-linear-gradient(-45deg,transparent 0 10px,rgba(177,126,28,.14) 10px 12px,transparent 12px 22px),linear-gradient(135deg,#fff9e9,#f4e4bd 55%,#fffdf6)'
-  };
+const backgrounds = {
+  sunrise: 'linear-gradient(135deg,#fff3dc,#ffe5e8)',
+  garden: 'linear-gradient(135deg,#effbea,#e1f5e9)',
+  night: 'linear-gradient(135deg,#f0eaff,#e8edff)',
+  royal: 'linear-gradient(135deg,#351522,#70263c 55%,#d4a72c)',
+  ocean: 'linear-gradient(135deg,#dff6ff,#b7d9ef 55%,#eaf7ff)',
+  sunset: 'linear-gradient(135deg,#ffe0bd,#ffb4a2 55%,#f8d5e5)',
+  emerald: 'linear-gradient(135deg,#dff5e7,#9dc9ae 55%,#e8f3d8)',
+
+  'damask-royal': 'radial-gradient(ellipse at 50% 0%,rgba(236,195,91,.28) 0 10%,transparent 11%),radial-gradient(ellipse at 0% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),radial-gradient(ellipse at 100% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),repeating-linear-gradient(45deg,rgba(255,220,130,.07) 0 2px,transparent 2px 12px),linear-gradient(135deg,#351522,#70263c 58%,#24101b)',
+
+  'art-deco-gold': 'repeating-linear-gradient(45deg,transparent 0 10px,rgba(177,126,28,.20) 10px 12px,transparent 12px 22px),repeating-linear-gradient(-45deg,transparent 0 10px,rgba(177,126,28,.14) 10px 12px,transparent 12px 22px),linear-gradient(135deg,#fff9e9,#f4e4bd 55%,#fffdf6)'
+};
 
   if (backgrounds[s.decorBackground]) {
     bg = backgrounds[s.decorBackground];
