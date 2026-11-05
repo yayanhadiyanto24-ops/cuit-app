@@ -2763,18 +2763,27 @@ if (paidLedger === null || paidGames === null || myProfile === null) {
   ).toLocaleString('id-ID');
 }
 
-      // Permata yang diterima dari gift hari ini (50% untuk kreator)
-if (giftRows === null) {
-  values.gemsReceived = 'Belum terhubung';
-} else {
-  const myEmail = String(currentUser.email || '').toLowerCase();
-
-  values.gemsReceived = giftRows
-    .filter(g => String(g.recipient_email || '').toLowerCase() === myEmail)
-    .reduce((total, g) => total + (Number(g.coins_amount || 0) * 0.5), 0)
-    .toLocaleString('id-ID');
-}
       
+      // Total permata yang diterima hari ini dari seluruh sumber CUIT
+      try {
+        const { data: gemsReceived, error: gemsError } =
+          await supabaseClient.rpc('cuit_get_today_gems_received');
+
+        values.gemsReceived = gemsError
+          ? 'Belum terhubung'
+          : Number(gemsReceived || 0).toLocaleString('id-ID', {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 2
+            });
+
+        if (gemsError) {
+          console.error('Gagal memuat permata diterima:', gemsError);
+        }
+      } catch (gemsError) {
+        values.gemsReceived = 'Belum terhubung';
+        console.error('Gagal memuat permata diterima:', gemsError);
+      }
+    
       grid.innerHTML=labels.map(([key,label,icon])=>`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:#fff8fa;border:1px solid #f0dce2;border-radius:12px;min-width:0;"><span style="font-size:19px;">${icon}</span><div style="min-width:0;flex:1;"><div style="font-size:10px;color:#6b7280;line-height:1.25;">${label}</div><div style="font-size:13px;font-weight:900;color:#8b1e3f;overflow-wrap:anywhere;">${values[key]}</div></div></div>`).join('');
     }
    
