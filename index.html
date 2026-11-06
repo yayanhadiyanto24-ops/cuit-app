@@ -3789,193 +3789,133 @@ async function openDailyCheckin() {
       }).join('');
     }
 
-    async function loadAchievements() {
-      renderLevelDirectory();
-      const myCallout = document.getElementById('myLevelAchievement');
-      try {
-        const { data: profiles, error: profileError } = await supabaseClient.from('profiles').select('id,email,username,used_paid_coins,sponsor,created_at,followers_count');
-        if (profileError) throw profileError;
-        const members = (profiles || []).map(p => ({ id:p.id, email:p.email, name:p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'), xp:Number(p.used_paid_coins || 0), levelInfo:getUserLevel(Number(p.used_paid_coins || 0)) }));
-        const mine = currentUser ? members.find(m => m.id === currentUser.id) : null;
-        const myXP = mine ? mine.xp : Number(usedPaidCoins || 0);
-        const myLevel = getUserLevel(myXP);
-        if (myCallout) myCallout.innerHTML = `✨ Ini levelmu: Level ${myLevel.level} — ${myLevel.title} · ${myXP.toLocaleString('id-ID')} / ${myLevel.next ? myLevel.target.toLocaleString('id-ID') : 'maksimal'} koin berbayar terpakai${currentUser && members.length && [...members].sort((a,b)=>b.xp-a.xp).slice(0,10).some(m=>m.id===currentUser.id) ? ' · Kamu juga masuk 10 besar!' : ''}`;
-        const levelRows = [...members].sort((a,b) => b.xp-a.xp).slice(0,10).map(m => ({...m,score:m.xp}));
-        renderAchievementRows('topLevelMembers', levelRows, 'koin terpakai');
+    
+async function loadAchievements() {
+  renderLevelDirectory();
 
-        const dayStart = localStartOfDayWIB();
-        const weekStart = localStartOfWeekWIB();
-        
-const [allPostsRes, allGiftsRes, allCommentsRes, allFollowsRes, allLikesRes, allReelsRes, dailyNontonRes, weeklyNontonRes, allProfilesRes] = await Promise.all([
-  supabaseClient.from('curhat').select('*').gte('created_at', weekStart.toISOString()).order('created_at',{ascending:false}),
-  supabaseClient.from('gift_transactions').select('*').gte('created_at', weekStart.toISOString()),
-  supabaseClient.from('comments').select('*').gte('created_at', weekStart.toISOString()),
-  supabaseClient.from('follows').select('*').gte('created_at', weekStart.toISOString()),
-  supabaseClient.from('post_likes').select('*').gte('created_at', weekStart.toISOString()),
-  supabaseClient.from('reels_claims').select('user_id,user_email,created_at').gte('created_at', weekStart.toISOString()),
-  supabaseClient.rpc('cuit_get_daily_nonton_ranking'),
-  supabaseClient.rpc('cuit_get_weekly_nonton_ranking'),
-  supabaseClient.from('profiles').select('id,email,username,sponsor,created_at')
-]);
+  const myCallout = document.getElementById('myLevelAchievement');
 
-const tableErrors = [
-  allPostsRes,
-  allGiftsRes,
-  allCommentsRes,
-  allFollowsRes,
-  allLikesRes,
-  allReelsRes,
-  dailyNontonRes,
-  weeklyNontonRes,
-  allProfilesRes
-].filter(r => r.error);
+  const categories = [
+    { key: 'sawer', unit: 'koin', note: 'total koin gift dikirim' },
+    { key: 'game', unit: 'permainan', note: 'jumlah permainan' },
+    { key: 'curhat', unit: 'interaksi', note: 'interaksi diterima pada curhatan' },
+    { key: 'pujangga', unit: 'curhatan', note: 'jumlah curhatan dibuat' },
+    { key: 'komentar', unit: 'komentar', note: 'komentar ditulis' },
+    { key: 'jaringan', unit: 'aktivitas', note: 'pengikut dan akun diikuti' },
+    { key: 'koin', unit: 'koin', note: 'total koin gift diterima' },
+    { key: 'sponsor', unit: 'anggota', note: 'anggota melalui sponsor' },
+    { key: 'nonton', unit: 'klaim', note: 'klaim video berhadiah' },
+    { key: 'like', unit: 'like', note: 'like diberikan' }
+  ];
 
-if (tableErrors.length) {
-  console.warn(
-    'Sebagian sumber data Raja belum dapat dibaca:',
-    tableErrors.map(e => e.error.message)
-  );
-}
-        
-const [dailyGameRes, weeklyGameRes] = await Promise.all([
-  supabaseClient.rpc('cuit_get_king_game_ranking', {
-    p_period: 'daily'
-  }),
-  supabaseClient.rpc('cuit_get_king_game_ranking', {
-    p_period: 'weekly'
-  })
-]);
+  try {
+    const { data: profiles, error: profileError } = await supabaseClient
+      .from('profiles')
+      .select('id,email,username,used_paid_coins,sponsor,created_at');
 
-function gameWinnerResult(res) {
-  if (res.error) {
-    console.error('Raja Game gagal dimuat:', res.error);
-    return {
-      name: 'Data belum tersedia',
-      scoreLabel: 'Gagal memuat data',
-      note: 'periksa koneksi game'
-    };
-  }
+    if (profileError) throw profileError;
 
-  const winner = res.data?.[0];
-  if (!winner) {
-    return {
-      name: 'Belum Ada',
-      scoreLabel: '0 permainan',
-      note: 'jumlah permainan'
-    };
-  }
+    const members = (profiles || []).map(p => ({
+      id: p.id,
+      email: p.email,
+      name: p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'),
+      xp: Number(p.used_paid_coins || 0)
+    }));
 
-  return {
-    name: winner.username || 'Anggota CUIT',
-    scoreLabel: `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`,
-    note: 'jumlah permainan'
-  };
-}
-function byPeriod(rows, start) {
-  return (rows || []).filter(row =>
-    row.created_at &&
-    new Date(row.created_at) >= start
-  );
+    const mine = currentUser
+      ? members.find(m => m.id === currentUser.id)
+      : null;
+
+    const myXP = mine ? mine.xp : Number(usedPaidCoins || 0);
+    const myLevel = getUserLevel(myXP);
+
+    if (myCallout) {
+      const inTopTen = currentUser &&
+        [...members].sort((a, b) => b.xp - a.xp)
+          .slice(0, 10).some(m => m.id === currentUser.id);
+
+      myCallout.innerHTML =
+        `✨ Ini levelmu: Level ${myLevel.level} — ${myLevel.title} · ` +
+        `${myXP.toLocaleString('id-ID')} / ` +
+        `${myLevel.next ? myLevel.target.toLocaleString('id-ID') : 'maksimal'} ` +
+        `koin berbayar terpakai${inTopTen ? ' · Kamu juga masuk 10 besar!' : ''}`;
     }
-        function makeResults(start, nontonRanking) {
-          const posts = byPeriod(allPostsRes.data,start), gifts=byPeriod(allGiftsRes.data,start), comments=byPeriod(allCommentsRes.data,start), follows=byPeriod(allFollowsRes.data,start), likes=byPeriod(allLikesRes.data,start), reels=byPeriod(allReelsRes.data,start), newProfiles=byPeriod(allProfilesRes.data,start);
-          const results = {};
-          let w;
-          w=winnerFromCounts(countBy(gifts,g=>g.sender_id||g.sender_email||g.sender_name,g=>g.coins_amount||g.amount||0));
-          if(w){const row=gifts.find(g=>(g.sender_id||g.sender_email||g.sender_name)===w.key);results.sawer={name:safeNameFromRow(row),scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,note:'total gift dikirim'};}
-          // Data Raja Game dihitung dari sumber data yang tersedia; tidak menggunakan fitur siaran.
-          results.game = null;
-          // RAJA CURHAT: satu curhatan dengan like + komentar + gift terbanyak
-const giftCountByPost = {};
 
-(gifts || []).forEach(g => {
-  const postId = String(g.post_id || '');
-  if (postId) {
-    giftCountByPost[postId] = (giftCountByPost[postId] || 0) + 1;
-  }
-});
+    const levelRows = [...members]
+      .sort((a, b) => b.xp - a.xp)
+      .slice(0, 10)
+      .map(m => ({ ...m, score: m.xp }));
 
-let topCurhat = null;
-let topCurhatScore = -1;
+    renderAchievementRows('topLevelMembers', levelRows, 'koin terpakai');
 
-(posts || []).forEach(p => {
-  const score =
-    Number(p.likes_count || 0) +
-    Number(p.comments_count || 0) +
-    Number(giftCountByPost[String(p.id)] || 0);
+    const dayStart = localStartOfDayWIB();
+    const weekStart = localStartOfWeekWIB();
 
-  if (score > topCurhatScore) {
-    topCurhat = p;
-    topCurhatScore = score;
-  }
-});
-
-if (topCurhat && topCurhatScore > 0) {
-  results.curhat = {
-    name: safeNameFromRow(topCurhat),
-    scoreLabel: `${topCurhatScore.toLocaleString('id-ID')} interaksi`,
-    note: 'like + komentar + gift pada satu curhatan'
-  };
-}
-      
-          w=winnerFromCounts(countBy(posts,p=>p.user_id||p.user_email||p.email||p.username)); if(w){const p=posts.find(p=>(p.user_id||p.user_email||p.email||p.username)===w.key);results.pujangga={name:safeNameFromRow(p),scoreLabel:`${w.score} curhatan`,note:'jumlah curhatan dibuat'};}
-          w=winnerFromCounts(countBy(comments,c=>c.user_id||c.user_email||c.email||c.username)); if(w){const c=comments.find(c=>(c.user_id||c.user_email||c.email||c.username)===w.key);results.komentar={name:safeNameFromRow(c),scoreLabel:`${w.score} komentar`,note:'komentar ditulis'};}
-          w=winnerFromCounts(countBy(follows,f=>f.following_email||f.following_id)); if(w){const p=(profiles||[]).find(p=>p.email===w.key||p.id===w.key);results.jaringan={name:p?.username||(p?.email? p.email.split('@')[0]:String(w.key).split('@')[0]),scoreLabel:`${w.score} pengikut`,note:'pengikut baru tercatat'};}
-          
-w=winnerFromCounts(countBy(gifts,g=>g.recipient_id||g.recipient_email||g.recipient_name,g=>g.coins_amount||g.amount||0));
-if(w){
-  const row=gifts.find(g=>(g.recipient_id||g.recipient_email||g.recipient_name)===w.key);
-  const recipientKey=String(w.key).trim().toLowerCase();
-  const recipientProfile=(allProfilesRes.data||[]).find(p=>
-    String(p.id||'').trim().toLowerCase()===recipientKey ||
-    String(p.email||'').trim().toLowerCase()===recipientKey ||
-    String(p.username||'').trim().toLowerCase()===recipientKey
-  );
-  const recipientName=recipientProfile?.username ||
-    (recipientProfile?.email ? recipientProfile.email.split('@')[0] : '') ||
-    row?.recipient_name ||
-    (row?.recipient_email ? String(row.recipient_email).split('@')[0] : '') ||
-    'Member CUIT';
-  results.koin={
-    name:recipientName,
-    scoreLabel:`${w.score.toLocaleString('id-ID')} koin`,
-    note:'koin gift diterima'
-  };
-}
-          w=winnerFromCounts(countBy(newProfiles,p=>p.sponsor)); if(w){const p=(profiles||[]).find(p=>p.username===w.key||p.email===w.key);results.sponsor={name:p?.username||(p?.email?p.email.split('@')[0]:String(w.key)),scoreLabel:`${w.score} member`,note:'member terdaftar melalui sponsor'};}
-          
-// RAJA NONTON: menggunakan RPC harian/mingguan.
-const topNonton = Array.isArray(nontonRanking)
-  ? nontonRanking[0]
-  : null;
-
-if (topNonton) {
-  results.nonton = {
-    name: topNonton.nama_anggota || 'Anggota CUIT',
-    scoreLabel:
-      `${topNonton.klaim_berhadiah} klaim · +${topNonton.tontonan_tambahan} tontonan`,
-    note: 'klaim utama; tontonan tambahan pemecah seri; satu pemenang'
-  };
-}
-
-          w=winnerFromCounts(countBy(likes,l=>l.user_id||l.user_email||l.guest_token)); if(w){const p=(profiles||[]).find(p=>p.id===w.key||p.email===w.key);results.like={name:p?.username||(p?.email?p.email.split('@')[0]:'Member CUIT'),scoreLabel:`${w.score} like`,note:'like diberikan'};}
-          return results;
+    async function getRanking(category, start) {
+      const { data, error } = await supabaseClient.rpc(
+        'cuit_central_get_activity_ranking',
+        {
+          p_category: category,
+          p_start: start.toISOString(),
+          p_end: null,
+          p_limit: 100
         }
-        
-const dailyResults = makeResults(dayStart, dailyNontonRes.data);
-const weeklyResults = makeResults(weekStart, weeklyNontonRes.data);
+      );
 
-        dailyResults.game = gameWinnerResult(dailyGameRes);
-weeklyResults.game = gameWinnerResult(weeklyGameRes);
-        // Kategori tanpa hasil tetap ditampilkan; jangan menyamarkan data kosong sebagai pemenang.
-        renderKingCategories('dailyKings',dailyResults);
-        renderKingCategories('weeklyKings',weeklyResults);
-      } catch (err) {
-        console.warn('Prestasi member belum dapat dimuat:', err);
-        ['dailyKings','weeklyKings','topLevelMembers'].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML='<div class="achievement-empty">Data belum dapat dimuat. Periksa koneksi, izin RLS, dan konfigurasi database.</div>'; });
-        if (myCallout) myCallout.textContent = `Ini levelmu: Level ${getUserLevel().level} — ${getUserLevel().title}`;
-      }
+      if (error) throw error;
+      return data || [];
     }
+
+    const [dailyData, weeklyData] = await Promise.all([
+      Promise.all(categories.map(c => getRanking(c.key, dayStart))),
+      Promise.all(categories.map(c => getRanking(c.key, weekStart)))
+    ]);
+
+    function makeResults(data) {
+      const results = {};
+
+      categories.forEach((category, index) => {
+        const rows = data[index] || [];
+        const winner = rows[0];
+
+        if (!winner) {
+          results[category.key] = null;
+          return;
+        }
+
+        const profile = members.find(m => m.id === winner.user_id);
+        const score = Number(winner.total_points || 0);
+
+        results[category.key] = {
+          name: profile?.name || 'Anggota CUIT',
+          scoreLabel:
+            `${score.toLocaleString('id-ID')} ${category.unit}`,
+          note: category.note
+        };
+      });
+
+      return results;
+    }
+
+    renderKingCategories('dailyKings', makeResults(dailyData));
+    renderKingCategories('weeklyKings', makeResults(weeklyData));
+
+  } catch (err) {
+    console.error('Gagal memuat ranking pusat CUIT:', err);
+
+    ['dailyKings', 'weeklyKings', 'topLevelMembers'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.innerHTML =
+          '<div class="achievement-empty">Data belum dapat dimuat. Periksa koneksi dan fungsi pusat data.</div>';
+      }
+    });
+
+    if (myCallout) {
+      myCallout.textContent = 'Data level belum dapat dimuat.';
+    }
+  }
+}
 
     async function loadPosts() {
       const container = document.getElementById('postsList');
