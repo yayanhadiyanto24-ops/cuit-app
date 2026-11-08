@@ -628,15 +628,15 @@
     .btn-primary,.btn-secondary,.pill-btn,.nav-item,.special-window{-webkit-tap-highlight-color:transparent}
     button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #d4a72c;outline-offset:2px}
     #promotedSection{overflow:hidden;border-color:#e7c77a!important;background:linear-gradient(145deg,#fff 0%,#fff8f0 100%)!important;box-shadow:0 3px 12px rgba(110,20,35,.07)!important}
-    #promotedSection .home-feature-heading{min-height:34px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0!important;padding:6px 10px;color:#fff!important;font-size:11px!important;font-weight:950;letter-spacing:.65px;text-align:center;background:radial-gradient(circle at 50% -20%,rgba(255,230,160,.38),transparent 55%),linear-gradient(105deg,#650817 0%,#c8102e 52%,#9c6411 100%);border-bottom:1px solid #e6c36b;text-shadow:0 1px 2px rgba(0,0,0,.22)}
-    #promotedSection .feature-mark{width:21px!important;height:21px!important;display:grid;place-items:center;border-radius:7px!important;background:linear-gradient(145deg,#fff5d8,#e8bd55)!important;color:#9a1028;box-shadow:0 1px 5px rgba(0,0,0,.16)!important}
+    #promotedSection .home-feature-heading{min-height:29px;display:flex;align-items:center;justify-content:center;gap:6px;margin:0!important;padding:4px 8px;color:#fff!important;font-size:11px!important;font-weight:950;letter-spacing:.65px;text-align:center;background:radial-gradient(circle at 50% -20%,rgba(255,230,160,.38),transparent 55%),linear-gradient(105deg,#650817 0%,#c8102e 52%,#9c6411 100%);border-bottom:1px solid #e6c36b;text-shadow:0 1px 2px rgba(0,0,0,.22)}
+    #promotedSection .feature-mark{width:18px!important;height:18px!important;display:grid;place-items:center;border-radius:7px!important;background:linear-gradient(145deg,#fff5d8,#e8bd55)!important;color:#9a1028;box-shadow:0 1px 5px rgba(0,0,0,.16)!important}
     #pageHome .pills-group .pill-btn:last-child{font-size:11px;padding:7px 10px;letter-spacing:-.1px}
     #specialPostsSection{padding-top:2px!important;box-shadow:0 2px 9px rgba(130,15,35,.07)!important}
     #specialPostsSection>.home-feature-heading{padding:6px 10px!important;min-height:36px;gap:8px}
     #specialPostsSection>.home-feature-heading .feature-mark{width:24px!important;height:24px!important}
     #specialPostsSection>.home-feature-heading .feature-mark img{width:18px!important;height:18px!important}
     .special-windows-grid{border-top-color:#e5c16a}
-    .special-window{min-height:86px!important}
+    .special-window{min-height:104px!important}
     .special-window:nth-child(odd){border-right-color:#e5c16a}
     .special-window:nth-child(n+3){border-top-color:#e5c16a}
     .special-window:after{height:2px}
@@ -644,7 +644,7 @@
     .nav-profile-avatar{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:#fff5d6;border:1px solid #e5c16a;box-shadow:0 1px 4px rgba(110,20,35,.12)}
     .nav-profile-avatar svg{width:100%;height:100%;display:block}
     .nav-bar{background:rgba(255,255,255,.97)!important;backdrop-filter:blur(12px);border-top-color:#ead8dc!important}
-    @media(max-width:380px){#pageHome .pills-group .pill-btn:last-child{font-size:10.5px;padding:7px 8px}.special-window{min-height:84px!important}}
+    @media(max-width:380px){#pageHome .pills-group .pill-btn:last-child{font-size:10.5px;padding:7px 8px}.special-window{min-height:102px!important}}
 
 </style>
 
@@ -4068,7 +4068,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
 
   cardsHTML += `
     <div onclick="openPromotedDetail('${item.id}')"
-      style="flex:0 0 76px;width:76px;min-width:76px;max-width:76px;height:139px;min-height:139px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #c8102e;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+      style="flex:0 0 76px;width:76px;min-width:76px;max-width:76px;height:120px;min-height:120px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #c8102e;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
 
       <div style="height:25px;min-height:25px;box-sizing:border-box;display:flex;align-items:center;gap:3px;text-align:left;min-width:0;padding:0 2px;">
         <div style="width:18px;height:18px;flex:0 0 18px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">
@@ -4088,7 +4088,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
 if (sorotanItems.length > 10) {
   cardsHTML += `
     <button onclick="openAllPromoted()"
-      style="flex:0 0 76px;width:76px;height:139px;border:0;border-radius:0;border-right:1px solid #c8102e;background:#fff5f6;color:#a30f27;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;">
+      style="flex:0 0 76px;width:76px;height:120px;border:0;border-radius:0;border-right:1px solid #c8102e;background:#fff5f6;color:#a30f27;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;">
       <span style="font-size:24px;">＋</span>
       <span>Buka Selengkapnya</span>
       <span style="font-size:9px;">${sorotanItems.length} promosi</span>
@@ -4163,7 +4163,7 @@ promotedCarousel.innerHTML = cardsHTML;
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
         const userLvl = getUserLevel(authorPoin);
         const badge = cuitBadgeSvg(userLvl.title);
-        slot.innerHTML = `<div style="min-height:86px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
+        slot.innerHTML = `<div style="min-height:104px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
 
   <div style="display:flex;align-items:center;gap:5px;min-width:0;margin:0 6px 5px;">
     <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
@@ -4175,7 +4175,7 @@ promotedCarousel.innerHTML = cardsHTML;
     </div>
   </div>
 
-  <div style="position:relative;width:100%;box-sizing:border-box;min-height:44px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:block;overflow:hidden;text-align:left;padding:7px 8px 17px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="position:absolute;right:7px;bottom:3px;font-size:9px;font-weight:900;color:#c8102e;background:rgba(255,255,255,.92);padding:1px 3px;border-radius:3px;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
+  <div style="position:relative;width:100%;box-sizing:border-box;min-height:58px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:block;overflow:hidden;text-align:left;padding:6px 8px 7px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="position:absolute;right:5px;bottom:3px;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;background:linear-gradient(90deg,rgba(255,255,255,.72),rgba(255,255,255,.97) 24%);padding:2px 3px;border-radius:3px;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
 </div>`;
       }
     }
