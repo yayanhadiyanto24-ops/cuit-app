@@ -636,7 +636,7 @@
     #specialPostsSection>.home-feature-heading .feature-mark{width:24px!important;height:24px!important}
     #specialPostsSection>.home-feature-heading .feature-mark img{width:18px!important;height:18px!important}
     .special-windows-grid{border-top-color:#e5c16a}
-    .special-window{min-height:104px!important}
+    .special-window{min-height:112px!important}
     .special-window:nth-child(odd){border-right-color:#e5c16a}
     .special-window:nth-child(n+3){border-top-color:#e5c16a}
     .special-window:after{height:2px}
@@ -645,6 +645,21 @@
     .nav-profile-avatar svg{width:100%;height:100%;display:block}
     .nav-bar{background:rgba(255,255,255,.97)!important;backdrop-filter:blur(12px);border-top-color:#ead8dc!important}
     @media(max-width:380px){#pageHome .pills-group .pill-btn:last-child{font-size:10.5px;padding:7px 8px}.special-window{min-height:102px!important}}
+
+
+/* ===== CUIT HOME CARDS: SPACING & READ-MORE FIX ===== */
+#promotedCarousel{width:100%;align-items:stretch!important;overflow-x:auto!important;scroll-snap-type:x proximity}
+#promotedCarousel>div,#promotedCarousel>button{scroll-snap-align:start}
+#promotedCarousel>div{flex-basis:25%!important;width:25%!important;min-width:0!important;max-width:25%!important}
+#promotedCarousel>div>div:first-child{padding-left:5px!important;padding-right:5px!important}
+#specialPostsSection .special-window{min-height:112px!important}
+#specialPostsSection .special-window>div{min-height:112px!important}
+#specialPostsSection .special-window>div>div:last-child{border-top:1px solid #f0dce0}
+@media(max-width:380px){
+ #promotedCarousel>div{flex-basis:25%!important;width:25%!important;max-width:25%!important}
+ #promotedCarousel>div>div:first-child{gap:2px!important}
+ #promotedCarousel>div>div:first-child>div:nth-child(2)>div:first-child{font-size:7.5px!important}
+}
 
 </style>
 
@@ -4061,14 +4076,14 @@ window.cuitAllPromotedItems = sorotanItems;
 sorotanItems.slice(0, 10).forEach((item, index) => {
   const rawName = item.username || 'Pengguna';
   const fullText = item.title || '';
-  const needsReadMore = fullText.length > 50;
+  const needsReadMore = fullText.length > 38;
   const snippet = needsReadMore
-    ? fullText.substring(0, 50).trimEnd() + '…'
+    ? fullText.substring(0, 38).trimEnd() + '…'
     : fullText;
 
   cardsHTML += `
     <div onclick="openPromotedDetail('${item.id}')"
-      style="flex:0 0 76px;width:76px;min-width:76px;max-width:76px;height:120px;min-height:120px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #c8102e;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+      style="flex:0 0 25%;width:25%;min-width:0;max-width:25%;height:120px;min-height:120px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #e8c6cb;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
 
       <div style="height:25px;min-height:25px;box-sizing:border-box;display:flex;align-items:center;gap:3px;text-align:left;min-width:0;padding:0 2px;">
         <div style="width:18px;height:18px;flex:0 0 18px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">
@@ -4080,7 +4095,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
         </div>
       </div>
 
-      <div style="flex:1;min-height:0;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 5px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}${needsReadMore ? ' <span style="color:#c8102e;font-weight:900;white-space:nowrap;">Baca selengkapnya</span>' : ''}</div>
+      <div style="height:67px;min-height:67px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}</div>${needsReadMore ? '<div style="height:14px;min-height:14px;padding:0 5px 2px;text-align:right;font-size:8px;line-height:12px;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</div>' : ''}
     </div>
   `;
 });
@@ -4088,7 +4103,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
 if (sorotanItems.length > 10) {
   cardsHTML += `
     <button onclick="openAllPromoted()"
-      style="flex:0 0 76px;width:76px;height:120px;border:0;border-radius:0;border-right:1px solid #c8102e;background:#fff5f6;color:#a30f27;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;">
+      style="flex:0 0 25%;width:25%;min-width:0;height:120px;border:0;border-radius:0;border-right:1px solid #e8c6cb;background:#fff5f6;color:#a30f27;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800;">
       <span style="font-size:24px;">＋</span>
       <span>Buka Selengkapnya</span>
       <span style="font-size:9px;">${sorotanItems.length} promosi</span>
@@ -4163,7 +4178,7 @@ promotedCarousel.innerHTML = cardsHTML;
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
         const userLvl = getUserLevel(authorPoin);
         const badge = cuitBadgeSvg(userLvl.title);
-        slot.innerHTML = `<div style="min-height:104px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
+        slot.innerHTML = `<div style="min-height:112px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
 
   <div style="display:flex;align-items:center;gap:5px;min-width:0;margin:0 6px 5px;">
     <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
@@ -4175,7 +4190,7 @@ promotedCarousel.innerHTML = cardsHTML;
     </div>
   </div>
 
-  <div style="position:relative;width:100%;box-sizing:border-box;min-height:58px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:block;overflow:hidden;text-align:left;padding:6px 8px 7px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="position:absolute;right:5px;bottom:3px;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;background:linear-gradient(90deg,rgba(255,255,255,.72),rgba(255,255,255,.97) 24%);padding:2px 3px;border-radius:3px;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
+  <div style="width:100%;box-sizing:border-box;min-height:78px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:flex;flex-direction:column;overflow:hidden;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="display:block;margin-top:auto;padding-top:3px;text-align:right;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
 </div>`;
       }
     }
