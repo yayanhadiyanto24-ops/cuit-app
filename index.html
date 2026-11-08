@@ -650,13 +650,13 @@
 /* ===== CUIT HOME CARDS: SPACING & READ-MORE FIX ===== */
 #promotedCarousel{width:100%;align-items:stretch!important;overflow-x:auto!important;scroll-snap-type:x proximity}
 #promotedCarousel>div,#promotedCarousel>button{scroll-snap-align:start}
-#promotedCarousel>div{flex-basis:25%!important;width:25%!important;min-width:0!important;max-width:25%!important}
+#promotedCarousel>div{flex:0 0 92px!important;width:92px!important;min-width:92px!important;max-width:92px!important}
 #promotedCarousel>div>div:first-child{padding-left:5px!important;padding-right:5px!important}
 #specialPostsSection .special-window{min-height:112px!important}
 #specialPostsSection .special-window>div{min-height:112px!important}
 #specialPostsSection .special-window>div>div:last-child{border-top:1px solid #f0dce0}
 @media(max-width:380px){
- #promotedCarousel>div{flex-basis:25%!important;width:25%!important;max-width:25%!important}
+ #promotedCarousel>div{flex:0 0 92px!important;width:92px!important;min-width:92px!important;max-width:92px!important}
  #promotedCarousel>div>div:first-child{gap:2px!important}
  #promotedCarousel>div>div:first-child>div:nth-child(2)>div:first-child{font-size:7.5px!important}
 }
@@ -4076,14 +4076,14 @@ window.cuitAllPromotedItems = sorotanItems;
 sorotanItems.slice(0, 10).forEach((item, index) => {
   const rawName = item.username || 'Pengguna';
   const fullText = item.title || '';
-  const needsReadMore = fullText.length > 38;
+  const needsReadMore = fullText.length > 50;
   const snippet = needsReadMore
-    ? fullText.substring(0, 38).trimEnd() + '…'
+    ? fullText.substring(0, 50).trimEnd() + '…'
     : fullText;
 
   cardsHTML += `
     <div onclick="openPromotedDetail('${item.id}')"
-      style="flex:0 0 25%;width:25%;min-width:0;max-width:25%;height:120px;min-height:120px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #e8c6cb;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
+      style="flex:0 0 92px;width:92px;min-width:92px;max-width:92px;height:120px;min-height:120px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #e8c6cb;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
 
       <div style="height:25px;min-height:25px;box-sizing:border-box;display:flex;align-items:center;gap:3px;text-align:left;min-width:0;padding:0 2px;">
         <div style="width:18px;height:18px;flex:0 0 18px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">
@@ -4095,7 +4095,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
         </div>
       </div>
 
-      <div style="height:67px;min-height:67px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}</div>${needsReadMore ? '<div style="height:14px;min-height:14px;padding:0 5px 2px;text-align:right;font-size:8px;line-height:12px;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</div>' : ''}
+      <div style="height:78px;min-height:78px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}</div>${needsReadMore ? '<div style="height:14px;min-height:14px;padding:0 5px 2px;text-align:right;font-size:8px;line-height:12px;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</div>' : ''}
     </div>
   `;
 });
@@ -4169,9 +4169,9 @@ promotedCarousel.innerHTML = cardsHTML;
         const name = escapeHtml(rawName);
         const feeling = escapeHtml(post.feeling || 'Curhat');
         const fullContent = escapeHtml(post.content || 'Curhatan istimewa').replace(/\n/g, '<br>');
-        const needsReadMore = String(post.content || '').length > 42;
+        const needsReadMore = String(post.content || '').length > 78;
         const content = needsReadMore
-          ? escapeHtml(String(post.content || '').replace(/\n/g, ' ').substring(0, 42).trimEnd()) + '…'
+          ? escapeHtml(String(post.content || '').replace(/\n/g, ' ').substring(0, 78).trimEnd()) + '…'
           : fullContent;
         let authorPoin = 0;
         if (post.user_id && profilesMap[post.user_id] !== undefined) authorPoin = profilesMap[post.user_id];
@@ -4190,7 +4190,7 @@ promotedCarousel.innerHTML = cardsHTML;
     </div>
   </div>
 
-  <div style="width:100%;box-sizing:border-box;min-height:78px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:flex;flex-direction:column;overflow:hidden;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="display:block;margin-top:auto;padding-top:3px;text-align:right;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
+  <div style="width:100%;box-sizing:border-box;min-height:78px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:flex;flex-direction:column;overflow:hidden;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="display:block;margin-top:auto;padding-top:3px;text-align:right;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
 </div>`;
       }
     }
