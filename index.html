@@ -2540,7 +2540,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
   <!-- Bottom Navigation Bar -->
   <div class="nav-bar">
     <div class="nav-item active" onclick="switchTab('pageHome', this)">
-      <div class="nav-icon-bg"><span class="nav-icon">🏠</span></div><span>Beranda</span>
+      <span class="nav-icon">🏠</span><span>Beranda</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageGame', this)">
       <span class="nav-icon">🎯</span><span>Game</span>
@@ -2552,7 +2552,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       <span class="nav-icon">👑</span><span>Raja</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon"><div class="nav-profile-avatar" id="navProfileAvatar">🌱</div></span><span>Profil</span>
+      <span class="nav-profile-avatar" id="navProfileAvatar">🌱</span><span>Profil</span>
     </div>
   </div>
 
@@ -3492,25 +3492,16 @@ async function openDailyCheckin() {
 
     function switchTab(pageId, navElement) {
       if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
-      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => {
-        nav.classList.remove('active');
-        const iconBg = nav.querySelector('.nav-icon-bg');
-        if (iconBg) nav.innerHTML = nav.innerHTML.replace('<div class="nav-icon-bg">', '').replace('</div>', '');
-      });
 
-      document.getElementById(pageId).classList.add('active');
-      if (navElement) {
-        navElement.classList.add('active');
-        if (!navElement.querySelector('.nav-icon-bg')) {
-          const iconSpan = navElement.querySelector('.nav-icon');
-          if (iconSpan) iconSpan.outerHTML = `<div class="nav-icon-bg">${iconSpan.outerHTML}</div>`;
-        }
-      }
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
+
+      const targetPage = document.getElementById(pageId);
+      if (targetPage) targetPage.classList.add('active');
+      if (navElement) navElement.classList.add('active');
 
       if (pageId === 'pageProfile') renderProfileData();
       if (pageId === 'pageCreate') loadDraftLocally();
-
     }
 
     // Tidak ada lagi jatah tetap 20 Koin Gratis harian.
