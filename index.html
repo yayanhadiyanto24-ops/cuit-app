@@ -4531,7 +4531,7 @@ function renderCardHTML(p) {
 
       <!-- AKSI FOOTER -->
       <div class="post-footer-actions">
-        <div class="action-chip" style="${isLiked ? 'background:#fff0f1; color:#c81e32; font-weight:800;' : ''}" onclick="toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+        <div class="action-chip" data-like-action="true" style="${isLiked ? 'background:#fff0f1; color:#c81e32; font-weight:800;' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
         <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
         <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
       </div>
@@ -4612,111 +4612,110 @@ function syncPromotedLikeUI(postId) {
   chip.style.fontWeight = isLiked ? '800' : '';
 }
 
+function syncPostLikeButtons(postId, post) {
+  const liked = userLikedPostsSet.has(String(postId));
+  const count = Number(post?.likes_count || 0);
+  document.querySelectorAll('.post-card').forEach(card => {
+    if (card.id !== `post-${postId}`) return;
+    const button = card.querySelector('[data-like-action="true"]');
+    if (!button) return;
+    button.textContent = `${liked ? '♥ Batal Suka' : '♡ Suka'} (${count})`;
+    button.style.background = liked ? '#fff0f1' : '';
+    button.style.color = liked ? '#c81e32' : '';
+    button.style.fontWeight = liked ? '800' : '';
+  });
+}
+
 async function toggleLike(postId) {
+  const strPostId = String(postId);
   let guestToken = localStorage.getItem('cuit_guest_token');
   if (!guestToken) {
     guestToken = 'guest_' + Math.random().toString(36).substring(2) + Date.now();
     localStorage.setItem('cuit_guest_token', guestToken);
   }
 
-  const strPostId = String(postId);
-  const currentPost = allPostsCache.find(
-    p => String(p.id) === strPostId
-  );
-  if (!currentPost) return;
+  let currentPost = allPostsCache.find(p => String(p.id) === strPostId);
+  if (!currentPost) {
+    const { data, error } = await supabaseClient
+      .from('curhat')
+      .select('id,likes_count')
+      .eq('id', postId)
+      .maybeSingle();
+    if (error || !data) {
+      console.warn('Postingan untuk Like tidak ditemukan:', error);
+      return;
+    }
+    currentPost = data;
+    allPostsCache.push(currentPost);
+  }
 
   const isAlreadyLiked = userLikedPostsSet.has(strPostId);
 
   if (isAlreadyLiked) {
+    const previousCount = Number(currentPost.likes_count || 0);
     userLikedPostsSet.delete(strPostId);
-    currentPost.likes_count = Math.max(
-      0, (currentPost.likes_count || 0) - 1
-    );
+    currentPost.likes_count = Math.max(0, previousCount - 1);
     renderFilteredFeed();
-    syncPromotedLikeUI(postId);
+    syncPostLikeButtons(postId, currentPost);
 
-    let query = supabaseClient
-      .from('post_likes')
-      .delete()
-      .eq('post_id', postId);
-
-    if (currentUser && currentUser.id) {
-      query = query.eq('user_id', currentUser.id);
-    } else {
-      query = query.eq('guest_token', guestToken);
-    }
+    let query = supabaseClient.from('post_likes').delete().eq('post_id', postId);
+    if (currentUser && currentUser.id) query = query.eq('user_id', currentUser.id);
+    else query = query.eq('guest_token', guestToken);
 
     const { error } = await query;
     if (error) {
+      userLikedPostsSet.add(strPostId);
+      currentPost.likes_count = previousCount;
+      renderFilteredFeed();
+      syncPostLikeButtons(postId, currentPost);
       alert('Gagal membatalkan Like: ' + error.message);
       return;
     }
 
-    await supabaseClient
-      .from('curhat')
-      .update({ likes_count: currentPost.likes_count })
-      .eq('id', postId);
-
+    await supabaseClient.from('curhat')
+      .update({ likes_count: currentPost.likes_count }).eq('id', postId);
+    syncPostLikeButtons(postId, currentPost);
     return;
   }
 
   if (currentUser && currentUser.id) {
-    // Saldo pengguna login dipotong dan disimpan oleh Supabase.
     const { data: result, error } = await supabaseClient.rpc(
-      'cuit_pay_like',
-      { p_post_id: Number(postId) }
+      'cuit_pay_like', { p_post_id: Number(postId) }
     );
-
     if (error) {
       alert('Like gagal: ' + error.message);
       return;
     }
-
     if (!result || result.ok !== true) {
       alert('Transaksi Like tidak berhasil.');
       return;
     }
-
-    freeCoins = Math.max(
-      0, freeCoins - Number(result.free_coins_used || 0)
-    );
-    paidCoins = Math.max(
-      0, paidCoins - Number(result.paid_coins_used || 0)
-    );
+    freeCoins = Math.max(0, freeCoins - Number(result.free_coins_used || 0));
+    paidCoins = Math.max(0, paidCoins - Number(result.paid_coins_used || 0));
     usedPaidCoins += Number(result.paid_coins_used || 0);
     updateCoinUI(true);
   } else {
-    // Tamu tetap memakai jalur tamu yang sudah tersedia.
     const success = await deductCoin(1);
     if (!success) {
       alert('Saldo koin gratis tidak mencukupi.');
       return;
     }
-
-    const { error } = await supabaseClient
-      .from('post_likes')
-      .insert([{
-        post_id: postId,
-        user_id: null,
-        guest_token: guestToken
-      }]);
-
+    const { error } = await supabaseClient.from('post_likes').insert([{
+      post_id: postId, user_id: null, guest_token: guestToken
+    }]);
     if (error) {
       alert('Gagal menyimpan Like: ' + error.message);
       return;
     }
-
-    await supabaseClient
-      .from('curhat')
-      .update({ likes_count: (currentPost.likes_count || 0) + 1 })
+    await supabaseClient.from('curhat')
+      .update({ likes_count: Number(currentPost.likes_count || 0) + 1 })
       .eq('id', postId);
   }
 
   userLikedPostsSet.add(strPostId);
-  currentPost.likes_count =
-    (currentPost.likes_count || 0) + 1;
+  currentPost.likes_count = Number(currentPost.likes_count || 0) + 1;
   renderFilteredFeed();
-  syncPromotedLikeUI(postId);
+  syncPostLikeButtons(postId, currentPost);
 }
 
     async function openCommentsModal(postId) {
