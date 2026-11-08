@@ -3769,7 +3769,7 @@ async function openDailyCheckin() {
         const badge = row.levelInfo || getUserLevel(row.xp || 0);
         return `<div class="achievement-row">
           <div class="achievement-rank">${index + 1}</div>
-          <div class="achievement-avatar" style="border-color:${badge.color || '#d4a72c'};color:${badge.color || '#d4a72c'}">${badge.icon || '🌱'}</div>
+          <div class="achievement-avatar" style="border-color:${badge.color || '#d4a72c'};color:${badge.color || '#d4a72c'};width:44px;height:44px;padding:0;background:transparent;display:flex;align-items:center;justify-content:center;flex:0 0 44px">${cuitBadgeSvg(badge.level)}</div>
           <div class="achievement-member"><div class="achievement-name">${escapeHtml(row.name || 'Member CUIT')}${isMe ? ' <span style="color:#9a6a00">• Ini levelmu</span>' : ''}</div><div class="achievement-meta">${escapeHtml(badge.title || '')}</div></div>
           <div class="achievement-score">${Number(row.score || 0).toLocaleString('id-ID')}<br><span style="font-weight:600;color:#77535a">${scoreLabel}</span></div>
         </div>`;
