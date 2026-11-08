@@ -2497,7 +2497,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="document.getElementById('dokuTopUpModal').style.display='flex'">🪙 Bank Koin / Top-up</div>
+      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
       <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
       <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
       <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
@@ -2773,7 +2773,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     </div>
   </div>
 
-  <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
+  <!-- MODAL DOMPET & PERSIAPAN TOP-UP -->
   <div id="walletModal" class="modal">
     <div class="modal-content">
       <h3>🪙 Bank Koin & Top-Up Koin</h3>
@@ -2782,7 +2782,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
         <div><b>Nilai Setara:</b> Rp <span id="wPaidValue">0</span></div>
       </div>
 
-      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 10px 0 6px 0;">Pilih Paket Top-Up (QRIS DOKU Otomatis):</div>
+      <div style="font-size: 11px; font-weight: 800; color: #321016; margin: 10px 0 6px 0;">Persiapan Top Up (integrasi pembayaran belum diaktifkan):</div>
       <div id="packageListContainer" style="display: flex; flex-direction: column; gap: 6px;">
         <p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat paket...</p>
       </div>
@@ -2796,21 +2796,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     </div>
   </div>
 
-  <!-- MODAL TAMPILKAN QRIS DOKU -->
-  <div id="qrisDisplayModal" class="modal" style="z-index: 150;">
-    <div class="modal-content" style="text-align: center; max-width: 360px;">
-      <h3 style="font-size: 16px; margin-bottom: 4px;">Pindai QRIS DOKU 📱</h3>
-      <p style="font-size: 11px; color: var(--text-sub); margin-bottom: 12px;">Gunakan aplikasi M-Banking atau e-Wallet favoritmu untuk membayar secara instan.</p>
-
-      <div id="qrisImageContainer" style="min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f3faff; border-radius: 14px; padding: 14px; border: 1px dashed #bfdefb;"></div>
-
-      <div style="font-size: 10.5px; color: #16a34a; font-weight: 700; margin-top: 10px;">
-        ✨ Koin akan otomatis bertambah saat pembayaran sukses!
-      </div>
-
-      <button class="btn-secondary" style="width: 100%; margin-top: 12px; background: #eee;" onclick="document.getElementById('qrisDisplayModal').style.display='none'">Selesai / Tutup</button>
-    </div>
-  </div>
+  <!-- Fitur QRIS akan dipasang kembali setelah integrasi resmi siap. -->
 
   <!-- MODAL PENARIKAN DANA -->
   <div id="cashoutModal" class="modal">
@@ -5344,74 +5330,15 @@ async function submitCommentAction() {
       document.getElementById('wPaidCoin').innerText = paidCoins;
       document.getElementById('wPaidValue').innerText = (paidCoins * CONFIG.COIN_RATE_RP).toLocaleString('id-ID');
       document.getElementById('walletModal').style.display = 'flex';
-
       loadGiftHistoryLedger();
 
       const container = document.getElementById('packageListContainer');
-      container.innerHTML = '<p style="text-align: center; font-size: 11px; color: var(--text-sub);">Memuat daftar paket koin...</p>';
-
-      const { data: packages, error } = await supabaseClient
-        .from('coin_packages')
-        .select('*')
-        .order('price_idr', { ascending: true });
-
-      if (error || !packages || packages.length === 0) {
-        container.innerHTML = '<p style="text-align: center; font-size: 11px; color: #ef4444;">Gagal memuat paket koin.</p>';
-        return;
-      }
-
-      container.innerHTML = packages.map(pkg => `
-        <button class="btn-secondary" style="width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;" onclick="generateDokuQRIS('${pkg.id}', ${pkg.price_idr})">
-          <span><b>${pkg.name}</b> (${pkg.coins.toLocaleString('id-ID')} Koin)</span>
-          <span style="color: var(--primary); font-weight: 800;">Rp ${pkg.price_idr.toLocaleString('id-ID')}</span>
-        </button>
-      `).join('');
-    }
-
-    async function generateDokuQRIS(packageId, priceIdr) {
-      if (!currentUser) {
-        alert('Silakan masuk atau daftar akun terlebih dahulu untuk melakukan top-up!');
-        handleAuthAction();
-        return;
-      }
-
-      document.getElementById('walletModal').style.display = 'none';
-      const qrisModal = document.getElementById('qrisDisplayModal');
-      const qrisContainer = document.getElementById('qrisImageContainer');
-
-      qrisModal.style.display = 'flex';
-      qrisContainer.innerHTML = `
-        <div style="font-size: 12px; font-weight: 700; color: #4338ca;">Menghubungkan ke DOKU QRIS...</div>
-        <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">Harap tunggu sebentar</div>
-      `;
-
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('doku-generate-qris', {
-          body: {
-            package_id: packageId,
-            user_id: currentUser.id,
-            user_email: currentUser.email
-          }
-        });
-
-        if (error || !data || !data.qr_content) {
-          throw new Error((error && error.message) || (data && data.error) || 'Gagal menghasilkan QRIS.');
-        }
-
-        const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.qr_content)}`;
-
-        qrisContainer.innerHTML = `
-          <div style="font-size: 12px; font-weight: 800; color: #321016; margin-bottom: 8px;">Total Tagihan: Rp ${priceIdr.toLocaleString('id-ID')}</div>
-          <img src="${qrImageUrl}" alt="DOKU QRIS Code" style="width: 180px; height: 180px; border-radius: 8px; border: 2px solid #c81e32;" />
-        `;
-
-      } catch (err) {
-        console.error('Error QRIS:', err);
-        qrisContainer.innerHTML = `
-          <div style="color: #dc2626; font-size: 11px; font-weight: 700;">Gagal Membuat QRIS DOKU</div>
-          <div style="font-size: 10px; color: #6b7280; margin-top: 4px;">${err.message}</div>
-        `;
-      }
+      container.innerHTML = `
+        <div style="padding:12px;text-align:center;background:#fff8e8;border:1px solid #ead29a;border-radius:12px;color:#684b12">
+          <b>Top Up sedang dipersiapkan</b>
+          <div style="font-size:11px;margin-top:5px">Integrasi DOKU belum diaktifkan karena sandbox masih dalam pemeliharaan. Saldo dan riwayat yang sudah ada tetap aman.</div>
+          <div style="font-size:11px;font-weight:800;margin-top:9px">Rencana nominal: Rp10.000 · Rp20.000 · Rp30.000 · Rp50.000 · Rp100.000 · Rp200.000 · Rp300.000 · Rp500.000</div>
+        </div>`;
     }
 
     function openAboutModal() {
@@ -6501,35 +6428,6 @@ function cuitConfirm(message) {
       await prompt("Salin link sponsor kamu di bawah ini:", fullSponsorLink);
     }
 
-    function topUpWithDoku(amount, koinAmount) {
-      const modal = document.getElementById('dokuTopUpModal');
-      if (modal) modal.style.display = 'none';
-
-      const dokuLinks = {
-        1000: 'https://pay.doku.com/p-link/p/5Lr8cjwDYy',
-        5000: 'https://pay.doku.com/p-link/p/q4afclsZ3r',
-        10000: 'https://pay.doku.com/p-link/p/aRzht7C0Ex',
-        20000: 'https://pay.doku.com/p-link/p/U7sCOZOH2n',
-        50000: 'https://pay.doku.com/p-link/p/NE9tiuqt2x',
-        100000: 'https://pay.doku.com/p-link/p/w4z9HUHsgx'
-      };
-
-      let checkoutUrl = dokuLinks[amount] || dokuLinks[1000];
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const userEmail = currentUser ? currentUser.email : guestId;
-      const userName = customDisplayName || 'Pengguna CUIT';
-
-      const params = new URLSearchParams({
-        name: userName,
-        email: userEmail,
-        customer_name: userName,
-        customer_email: userEmail
-      });
-
-      window.location.href = `${checkoutUrl}?${params.toString()}`;
-    }
-
     async function openUserProfileModal(userEmail, userName, userExp) {
       const modal = document.getElementById('userProfileModal');
       if (!modal) return;
@@ -6746,116 +6644,7 @@ function cuitConfirm(message) {
 }
 </style>
 
-  <!-- MODAL TOP-UP KOIN DOKU -->
-  <div id="dokuTopUpModal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
-    <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; text-align:center;">
-      <h3 style="margin-top:0;">Top-Up Paid Coins</h3>
-      <p style="font-size:13px; color:#666;">Pilih nominal koin yang ingin dibeli (1 Koin = Rp 1):</p>
-
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <button class="btn-primary" onclick="handleTopUp(1000)">1.000 Koin<br>Rp 1.000</button>
-        <button class="btn-primary" onclick="handleTopUp(5000)">5.000 Koin<br>Rp 5.000</button>
-        <button class="btn-primary" onclick="handleTopUp(10000)">10.000 Koin<br>Rp 10.000</button>
-        <button class="btn-primary" onclick="handleTopUp(20000)">20.000 Koin<br>Rp 20.000</button>
-        <button class="btn-primary" onclick="handleTopUp(50000)">50.000 Koin<br>Rp 50.000</button>
-        <button class="btn-primary" onclick="handleTopUp(100000)">100.000 Koin<br>Rp 100.000</button>
-      </div>
-
-      <button onclick="document.getElementById('dokuTopUpModal').style.display='none'" style="margin-top:15px; background:#eee; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; width:100%;">Tutup</button>
-    </div>
-  </div>
-
-  <!-- MODAL TAMPILAN QRIS DIRECT -->
-  <div id="qrisModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; max-width:320px; width:90%;">
-      <h3 style="margin-top:0;">Scan QRIS untuk Bayar</h3>
-      <p style="font-size:13px; color:#666;">Silakan scan QRIS di bawah menggunakan E-Wallet atau M-Banking kamu.</p>
-
-      <div id="qrisContainer" style="margin: 15px 0;"></div>
-
-      <p style="font-size:12px; color:#007bff; font-weight:bold;">Menunggu pembayaran... Koin akan otomatis masuk!</p>
-
-      <button onclick="closeQRISModal()" style="margin-top:10px; width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">Batal</button>
-    </div>
-  </div>
-
-  <script>
-
-async function handleTopUp(amount) {
-  const packageIds = {
-    1000: "cuit_1000",
-    5000: "cuit_5000",
-    10000: "cuit_10000",
-    20000: "cuit_20000",
-    50000: "cuit_50000",
-    100000: "cuit_100000"
-  };
-
-  const packageId = packageIds[Number(amount)];
-
-  if (!packageId) {
-    alert("Paket top up tidak valid.");
-    return;
-  }
-
-  try {
-    if (!supabaseClient) {
-      throw new Error("Koneksi CUIT belum tersedia.");
-    }
-
-    const { data: sessionData, error: sessionError } =
-      await supabaseClient.auth.getSession();
-
-    if (sessionError || !sessionData.session) {
-      throw new Error("Silakan login terlebih dahulu untuk top up.");
-    }
-
-    const { data, error } =
-      await supabaseClient.functions.invoke(
-        "cuit-create-topup",
-        {
-          body: {
-            package_id: packageId
-          }
-        }
-      );
-
-    if (error) {
-      let message = error.message;
-
-      try {
-        const detail = await error.context.json();
-        message = detail.error || message;
-      } catch (_) {}
-
-      throw new Error(message);
-    }
-
-    if (!data || !data.success || !data.payment_url) {
-      throw new Error(data?.error || "Tagihan DOKU gagal dibuat.");
-    }
-
-    document.getElementById("dokuTopUpModal").style.display = "none";
-
-    alert(
-      "Tagihan berhasil dibuat!\n" +
-      "Invoice: " + data.invoice_number + "\n" +
-      "Jumlah: " + Number(data.coins).toLocaleString("id-ID") +
-      " koin."
-    );
-
-    window.location.href = data.payment_url;
-
-  } catch (error) {
-    console.error("CUIT Top Up:", error);
-    alert("Top up gagal: " + error.message);
-  }
-}
-
-    function closeQRISModal() {
-      document.getElementById('qrisModal').style.display = 'none';
-    }
-  </script>
+  <!-- Integrasi top-up akan dipasang setelah sandbox DOKU normal. -->
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
