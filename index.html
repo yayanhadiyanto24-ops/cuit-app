@@ -7020,9 +7020,6 @@ document.addEventListener('DOMContentLoaded', function () {
     #fff8e9 330deg 360deg
   );
   transition:transform 8s cubic-bezier(.12,.72,.08,1);
-  will-change:transform;
-  backface-visibility:hidden;
-  transform:translate3d(0,0,0) rotate(345deg);
 }
 #cuit-roulette-wheel:after {
   content:"";
@@ -7360,7 +7357,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!wheel || wheel.dataset.ready) return;
 
     wheel.dataset.ready = '1';
-    wheel.style.transform = 'translate3d(0,0,0) rotate(345deg)';
+    wheel.style.transform = 'rotate(345deg)';
 
     sectors.forEach((sector,i)=>{
       const label = document.createElement('div');
@@ -7857,7 +7854,7 @@ if (!confirmed) {
   wheelRotation += 360*7+delta;
 
   $('cuit-roulette-wheel').style.transform =
-    `translate3d(0,0,0) rotate(${wheelRotation}deg)`;
+    `rotate(${wheelRotation}deg)`;
 
   setTimeout(async()=>{
     spinning = false;
