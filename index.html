@@ -4835,8 +4835,9 @@ async function toggleLike(postId) {
       if(!hiddenInput) return alert('Form komentar belum tersedia.');
       hiddenInput.value=text;
       await submitCommentAction();
-      input.value='';
-      await openCommentsModal(postId);
+      // submitCommentAction sudah memuat ulang daftar komentar jika berhasil.
+      // Jangan menjalankan query komentar kedua kali.
+      if (hiddenInput.value === '') input.value='';
     }
 
 async function submitCommentAction() {
@@ -4871,7 +4872,8 @@ async function submitCommentAction() {
       return alert(data?.message || 'Komentar gagal dikirim.');
     }
 
-    await updateCoinUI(false);
+    // Perbarui saldo di latar belakang agar tampilan komentar tidak menunggu query profil.
+    void updateCoinUI(false);
 
     const currentPost = allPostsCache.find(
       p => String(p.id) === String(postId)
@@ -4895,8 +4897,8 @@ async function submitCommentAction() {
       updateCommentCharCount(input);
     }
 
-    openCommentsModal(postId);
-    loadPosts();
+    renderFilteredFeed();
+    void openCommentsModal(postId);
     return;
   }
 
@@ -4934,8 +4936,8 @@ async function submitCommentAction() {
     updateCommentCharCount(input);
   }
 
-  openCommentsModal(postId);
-  loadPosts();
+  renderFilteredFeed();
+  void openCommentsModal(postId);
 }
 
     function openGiftModal(postId) {
@@ -5196,15 +5198,52 @@ async function submitCommentAction() {
     }
 
     async function deleteSingleNotif(notifId) {
-      await supabaseClient.from('user_notifications').delete().eq('id', notifId);
-      openNotificationsModal();
+      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
+      const myEmail = currentUser ? currentUser.email : guestId;
+      const { error } = await supabaseClient
+        .from('user_notifications')
+        .delete()
+        .eq('id', notifId)
+        .eq('recipient_email', myEmail);
+
+      if (error) {
+        alert('Notifikasi gagal dihapus: ' + error.message);
+        return;
+      }
+      await openNotificationsModal();
     }
 
     async function clearAllNotifications() {
       const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
       const myEmail = currentUser ? currentUser.email : guestId;
-      await supabaseClient.from('user_notifications').delete().eq('recipient_email', myEmail);
-      openNotificationsModal();
+      const button = document.querySelector('#notificationsModal button[onclick="clearAllNotifications()"]');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Menghapus...';
+      }
+
+      try {
+        const { error } = await supabaseClient
+          .from('user_notifications')
+          .delete()
+          .eq('recipient_email', myEmail);
+
+        if (error) throw error;
+
+        const container = document.getElementById('notificationsList');
+        if (container) {
+          container.innerHTML = '<p style="text-align:center; font-size:11px; color:var(--text-sub); margin-top:10px;">Semua notifikasi berhasil dihapus.</p>';
+        }
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+      } catch (error) {
+        alert('Notifikasi gagal dihapus: ' + (error.message || error));
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Hapus Semua';
+        }
+      }
     }
 
     async function loadGiftHistoryLedger() {
