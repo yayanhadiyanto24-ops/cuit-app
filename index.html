@@ -697,8 +697,8 @@
 
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload(true)" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
-      🔄 Refresh
+    <button onclick="location.reload()" title="Muat ulang aplikasi jika diperlukan" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+      🔄 Muat Ulang
     </button>
     <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔔 <span id="notifBadge" style="display:none; position:absolute; top:-2px; right:-2px; background:#e74c3c; width:8px; height:8px; border-radius:50%;"></span>
@@ -3950,7 +3950,8 @@ async function loadAchievements() {
   }
 }
 
-    async function loadPosts() {
+    async function loadPosts(options = {}) {
+      const feedOnly = options.feedOnly === true;
       const container = document.getElementById('postsList');
       const promotedCarousel = document.getElementById('promotedCarousel');
       const promotedSection = document.getElementById('promotedSection');
@@ -3970,6 +3971,7 @@ async function loadAchievements() {
 
         if (error) throw error;
 
+        if (!feedOnly) {
         let profilesData = [];
         const profilesById = new Map();
         profilesMap = {};
@@ -4051,6 +4053,8 @@ async function loadAchievements() {
             };
           }
         });
+
+        }
 
         // --- RENDER SOROTAN PROMOSI & BERANDA ---
         const nowMs = Date.now();
@@ -4650,19 +4654,33 @@ function renderCardHTML(p) {
       ]);
     }
 
+    let cuitCurhatRealtimeChannel = null;
+    let cuitRealtimeFeedTimer = null;
+
     function initGlobalRealtime() {
-      supabaseClient.channel('realtime_curhat')
+      // Hindari channel ganda ketika status akun berubah tanpa memuat ulang halaman.
+      if (cuitCurhatRealtimeChannel) {
+        supabaseClient.removeChannel(cuitCurhatRealtimeChannel);
+        cuitCurhatRealtimeChannel = null;
+      }
+      if (cuitRealtimeFeedTimer) {
+        clearTimeout(cuitRealtimeFeedTimer);
+        cuitRealtimeFeedTimer = null;
+      }
+
+      cuitCurhatRealtimeChannel = supabaseClient.channel('realtime_curhat')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'curhat' }, () => {
-          loadPosts();
+          // Satukan perubahan beruntun; pembaruan kecil tidak perlu memanggil
+          // 10 RPC ranking dan mengambil ulang seluruh profil.
+          if (cuitRealtimeFeedTimer) clearTimeout(cuitRealtimeFeedTimer);
+          cuitRealtimeFeedTimer = setTimeout(() => {
+            cuitRealtimeFeedTimer = null;
+            loadPosts({ feedOnly: true });
+          }, 250);
         }).subscribe();
 
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      supabaseClient.channel('realtime_notifs')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'user_notifications', filter: `recipient_email=eq.${myEmail}` }, () => {
-          checkUnreadNotifications();
-        }).subscribe();
+      // user_notifications belum masuk publication Realtime dan RLS-nya belum aman.
+      // Jangan membuat channel yang tidak bekerja atau membuka data notifikasi.
     }
 
 function syncPromotedLikeUI(postId) {
