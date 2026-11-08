@@ -2451,6 +2451,10 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
         </div>
       </div>
 
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button type="button" onclick="openWalletModal()" style="flex:1;min-width:0;padding:11px 6px;border:1px solid #d4a72c;border-radius:12px;background:linear-gradient(135deg,#e32636,#a80f24);color:#fff;font-size:12px;font-weight:900;box-shadow:0 2px 6px #8f102522">🪙 Top Up</button>
+        <button type="button" onclick="openCashoutModal()" style="flex:1;min-width:0;padding:11px 6px;border:1px solid #d4a72c;border-radius:12px;background:linear-gradient(135deg,#fff7d6,#f3df9a);color:#6b4210;font-size:12px;font-weight:900;box-shadow:0 2px 6px #8f102512">💸 Penarikan</button>
+      </div>
       <div id="memberActivityStatusCard" style="margin-top:10px;padding:10px 12px;border:1px solid #d9e6dc;border-radius:12px;background:#fff">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><strong style="font-size:12px">Status Keaktifan</strong><span id="memberActivityStatus" style="font-size:11px;font-weight:900;color:#16803c">● Aktif</span></div>
         <div id="memberActivityHint" style="font-size:10px;color:#665b5d;margin-top:4px">Aktivitas terakhir tercatat hari ini.</div>
@@ -2475,7 +2479,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     <div id="memberGemBalanceCard" style="margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #e8c4c8;border-left:4px solid #c81e32;border-radius:14px;box-shadow:0 3px 10px #5b1b2208">
       <div style="font-size:13px;font-weight:900;color:#b91c1c">💎 Permata Saya</div>
       <div style="font-size:22px;font-weight:950;color:#292929;margin:4px 0"><span id="memberGemBalance">0</span> permata</div>
-      <div id="memberGemWithdrawalHint" style="font-size:11px;color:#555">Kurang 20.000 permata lagi untuk bisa melakukan penarikan.</div>
+      <div id="memberGemWithdrawalHint" style="font-size:11px;color:#555">Kurang 50.000 permata lagi untuk bisa melakukan penarikan.</div>
     </div>
     <div id="adminPlatformGemCard" style="display:none;margin:0 0 12px;padding:12px;background:#fff;border:1px solid #d7b46a;border-left:4px solid #b91c1c;border-radius:14px">
       <div style="font-size:13px;font-weight:900;color:#b91c1c">💎 Permata Platform (ADMINCUIT)</div>
@@ -2497,8 +2501,6 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
-      <div class="menu-btn-item" onclick="openWalletModal()">🪙 Bank Koin / Top-up</div>
-      <div class="menu-btn-item" onclick="openCashoutModal()">💸 Penarikan Dana</div>
       <div class="menu-btn-item" onclick="openAboutModal()">ℹ️ Tentang CUIT</div>
       <div class="menu-btn-item" onclick="openConfigModal()">⚙️ Pengaturan Prototype</div>
     </div>
@@ -2827,13 +2829,13 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       </datalist>
 
       <label style="font-size: 11px; font-weight: 700; display: block; margin-top: 6px;">Jumlah Permata CUIT Dicairkan:</label>
-      <input type="number" id="cashoutCoins" value="20000" oninput="calcCashoutFee()">
+      <input type="number" id="cashoutCoins" value="50000" min="50000" oninput="calcCashoutFee()">
 
       <div style="background: #f5dfe2; padding: 10px; border-radius: 12px; font-size: 11px; margin-bottom: 8px;">
-        <div>Gross Tunai: Rp <span id="coGross">20.000</span></div>
+        <div>Gross Tunai: Rp <span id="coGross">50.000</span></div>
         <div>Total Biaya Admin: Rp <span id="coFee">5.000</span></div>
         <hr style="margin: 4px 0; border: none; border-top: 1px solid #ddd;">
-        <div><b>Bersih Diterima:</b> Rp <span id="coNet">15.000</span></div>
+        <div><b>Bersih Diterima:</b> Rp <span id="coNet">45.000</span></div>
       </div>
 
       <label style="font-size: 11px; font-weight: 700; display: block;">Nama Pemilik Akun Penerima:</label>
@@ -5369,7 +5371,7 @@ async function submitCommentAction() {
       const account = document.getElementById('cashoutAccount').value.trim();
 
       if (!type) return alert('Silakan pilih atau ketik nama Bank/E-Wallet tujuan!');
-      if (coins < 20000) return alert('Minimum penarikan adalah 20.000 Permata CUIT (Rp 20.000)!');
+      if (coins < 50000) return alert('Minimum penarikan adalah 50.000 Permata CUIT (Rp 50.000)!');
       if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
       if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
       if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
@@ -5667,11 +5669,11 @@ if (memberGemEl) {
 }
 
 if (withdrawalHint) {
-  const remaining = Math.max(0, 20000 - memberGems);
+  const remaining = Math.max(0, 50000 - memberGems);
 
   withdrawalHint.textContent = remaining > 0
     ? `Kurang ${remaining.toLocaleString('id-ID')} permata lagi untuk bisa melakukan penarikan.`
-    : 'Saldo memenuhi batas minimal penarikan 20.000 permata.';
+    : 'Saldo memenuhi batas minimal penarikan 50.000 permata.';
 }
 
 // Ambil saldo Permata Platform dan Permata Kejutan khusus ADMINCUIT.
