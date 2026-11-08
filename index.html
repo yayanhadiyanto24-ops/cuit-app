@@ -4076,10 +4076,6 @@ window.cuitAllPromotedItems = sorotanItems;
 sorotanItems.slice(0, 10).forEach((item, index) => {
   const rawName = item.username || 'Pengguna';
   const fullText = item.title || '';
-  const needsReadMore = fullText.length > 50;
-  const snippet = needsReadMore
-    ? fullText.substring(0, 50).trimEnd() + '…'
-    : fullText;
 
   cardsHTML += `
     <div onclick="openPromotedDetail('${item.id}')"
@@ -4095,7 +4091,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
         </div>
       </div>
 
-      <div style="height:78px;min-height:78px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}</div>${needsReadMore ? '<div style="height:14px;min-height:14px;padding:0 5px 2px;text-align:right;font-size:8px;line-height:12px;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</div>' : ''}
+      <div data-promoted-text="1" style="position:relative;height:78px;min-height:78px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}"><div class="promoted-text-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${escapeHtml(fullText)}</div></div>
     </div>
   `;
 });
@@ -4112,6 +4108,15 @@ if (sorotanItems.length > 10) {
 }
 promotedSection.style.display = 'block';
 promotedCarousel.innerHTML = cardsHTML;
+promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
+  const inner = box.querySelector('.promoted-text-inner');
+  if (!inner || inner.scrollHeight <= box.clientHeight + 2) return;
+  const readMore = document.createElement('span');
+  readMore.className = 'promoted-read-more';
+  readMore.textContent = 'Baca selengkapnya ›';
+  readMore.style.cssText = 'position:absolute;right:4px;bottom:2px;z-index:2;padding:2px 4px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,.72),rgba(255,255,255,.98) 30%);color:#c8102e;font-size:8px;line-height:12px;font-weight:900;white-space:nowrap;text-shadow:0 1px 0 #fff;pointer-events:none;';
+  box.appendChild(readMore);
+});
         } else {
           promotedSection.style.display = 'none';
         }
