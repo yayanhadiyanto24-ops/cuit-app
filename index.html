@@ -3983,11 +3983,11 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
     <div onclick="openPromotedDetail('${item.id}')"
       style="flex:0 0 76px;width:76px;min-width:76px;max-width:76px;height:139px;min-height:139px;box-sizing:border-box;padding:5px 0 4px;background:linear-gradient(135deg,#fff 0%,#fff1f3 100%);border:0;border-right:1px solid #c8102e;border-radius:0;cursor:pointer;display:flex;flex-direction:column;gap:3px;overflow:hidden;">
 
-      <div style="height:25px;min-height:25px;box-sizing:border-box;display:flex;align-items:center;gap:4px;text-align:left;min-width:0;padding:0 4px;">
-        <div style="width:22px;height:22px;flex:0 0 22px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">
+      <div style="height:25px;min-height:25px;box-sizing:border-box;display:flex;align-items:center;gap:3px;text-align:left;min-width:0;padding:0 2px;">
+        <div style="width:18px;height:18px;flex:0 0 18px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e7c0c6;">
           ${cuitBadgeSvg(getUserLevel((item.rawPost && item.rawPost.user_id && profilesMap[item.rawPost.user_id] !== undefined) ? profilesMap[item.rawPost.user_id] : 0).title)}
         </div>
-        <div style="min-width:0;flex:1;height:22px;display:flex;flex-direction:column;justify-content:center;line-height:1.15;overflow:hidden;">
+        <div style="min-width:0;flex:1;height:20px;display:flex;flex-direction:column;justify-content:center;line-height:1.15;overflow:hidden;">
           <div style="font-size:8px;color:#a30f27;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(rawName)}</div>
           <div style="font-size:7.5px;color:#78666b;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml((item.rawPost && item.rawPost.feeling) || 'Curhat')}</div>
         </div>
