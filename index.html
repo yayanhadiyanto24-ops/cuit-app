@@ -3206,11 +3206,10 @@ async function openDailyCheckin() {
 
     function togglePostMenu(postId, event) {
       if (event) event.stopPropagation();
+      const card = event?.currentTarget?.closest('.post-card');
+      const menu = card?.querySelector('.post-menu-dropdown');
       closeAllPostMenus();
-      const menu = document.getElementById(`post-dropdown-${postId}`);
-      if (menu) {
-        menu.classList.toggle('show');
-      }
+      if (menu) menu.classList.add('show');
     }
 
     function closeAllPostMenus(event) {
