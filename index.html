@@ -4593,6 +4593,25 @@ function renderCardHTML(p) {
         }).subscribe();
     }
 
+function syncPromotedLikeUI(postId) {
+  const modal = document.getElementById('promotedDetailModal');
+  if (!modal || window.getComputedStyle(modal).display === 'none') return;
+
+  const card = modal.querySelector('.post-card');
+  if (!card || card.id !== `post-${String(postId)}`) return;
+
+  const post = allPostsCache.find(p => String(p.id) === String(postId));
+  const chip = card.querySelector('.post-footer-actions .action-chip');
+  if (!post || !chip) return;
+
+  const isLiked = userLikedPostsSet.has(String(postId));
+  const count = Number(post.likes_count || 0);
+  chip.textContent = `${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${count})`;
+  chip.style.background = isLiked ? '#fff0f1' : '';
+  chip.style.color = isLiked ? '#c81e32' : '';
+  chip.style.fontWeight = isLiked ? '800' : '';
+}
+
 async function toggleLike(postId) {
   let guestToken = localStorage.getItem('cuit_guest_token');
   if (!guestToken) {
@@ -4614,6 +4633,7 @@ async function toggleLike(postId) {
       0, (currentPost.likes_count || 0) - 1
     );
     renderFilteredFeed();
+    syncPromotedLikeUI(postId);
 
     let query = supabaseClient
       .from('post_likes')
@@ -4686,12 +4706,9 @@ async function toggleLike(postId) {
       return;
     }
 
-    currentPost.likes_count =
-      (currentPost.likes_count || 0) + 1;
-
     await supabaseClient
       .from('curhat')
-      .update({ likes_count: currentPost.likes_count })
+      .update({ likes_count: (currentPost.likes_count || 0) + 1 })
       .eq('id', postId);
   }
 
@@ -4699,6 +4716,7 @@ async function toggleLike(postId) {
   currentPost.likes_count =
     (currentPost.likes_count || 0) + 1;
   renderFilteredFeed();
+  syncPromotedLikeUI(postId);
 }
 
     async function openCommentsModal(postId) {
