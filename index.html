@@ -4034,9 +4034,11 @@ window.cuitAllPromotedItems = sorotanItems;
 
 sorotanItems.slice(0, 10).forEach((item, index) => {
   const rawName = item.username || 'Pengguna';
-  const snippet = (item.title || '').length > 95
-    ? item.title.substring(0, 95) + '...'
-    : (item.title || '');
+  const fullText = item.title || '';
+  const needsReadMore = fullText.length > 64;
+  const snippet = needsReadMore
+    ? fullText.substring(0, 64).trimEnd() + '…'
+    : fullText;
 
   cardsHTML += `
     <div onclick="openPromotedDetail('${item.id}')"
@@ -4052,9 +4054,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
         </div>
       </div>
 
-      <div style="flex:1;min-height:0;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 5px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}</div>
-
-      <div style="flex:0 0 13px;font-size:8px;line-height:13px;font-weight:800;color:#c8102e;text-align:center;">Baca ›</div>
+      <div style="flex:1;min-height:0;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding:5px 5px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}">${escapeHtml(snippet)}${needsReadMore ? ' <span style="color:#c8102e;font-weight:900;white-space:nowrap;">Baca selengkapnya</span>' : ''}</div>
     </div>
   `;
 });
