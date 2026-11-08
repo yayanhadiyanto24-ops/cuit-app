@@ -944,7 +944,7 @@
         <h3 style="margin:0;font-size:17px;color:#b91c32;">🚀 Promosikan Curhatan</h3>
         <button type="button" aria-label="Tutup" onclick="closePromotionModal()" style="border:0;background:#f3f4f6;border-radius:50%;width:32px;height:32px;font-size:18px;">×</button>
       </div>
-      <p style="font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px;">Pilih jenis promosi dan tentukan durasinya. Biaya dihitung per jam menggunakan Koin Berbayar.</p>
+      <p style="font-size:12px;color:#667085;line-height:1.5;margin:0 0 12px;">Pilih jenis promosi dan tentukan durasinya. Promosi Istimewa: 1 Koin per 5 menit, maksimal 60 menit.</p>
       <div id="promotionOptionBiasa" class="promotion-option" style="border:1.5px solid #f2b8c0;border-radius:14px;padding:12px;margin-bottom:10px;background:#fffafb;">
         <div style="font-weight:850;font-size:14px;color:#9f1239;margin-bottom:4px;">⭐ Promosi Biasa</div>
         <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Terbaik</b> selama masa promosi aktif.</div>
@@ -958,9 +958,9 @@
         <div style="font-weight:850;font-size:14px;color:#946200;margin-bottom:4px;">✨ Promosi Istimewa</div>
         <div style="font-size:11.5px;line-height:1.45;color:#5b5560;margin-bottom:10px;">Curhatan masuk ke bagian <b>Curhatan Istimewa</b> selama masa promosi aktif.</div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button id="promotionIstimewaButton" type="button" onclick="selectPromotionType('istimewa')" style="flex:1;min-height:42px;border:1px solid #d7b65e;border-radius:10px;background:#fff;color:#946200;font-weight:850;padding:8px;">5 Koin / jam</button>
+          <button id="promotionIstimewaButton" type="button" onclick="selectPromotionType('istimewa')" style="flex:1;min-height:42px;border:1px solid #d7b65e;border-radius:10px;background:#fff;color:#946200;font-weight:850;padding:8px;">1 Koin / 5 menit</button>
           <label for="promotionIstimewaHours" style="font-size:11px;font-weight:750;white-space:nowrap;">Durasi</label>
-          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionIstimewaHours" type="number" min="1" step="1" value="1" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">jam</span></div>
+          <div style="display:flex;align-items:center;gap:5px;"><input id="promotionIstimewaHours" type="number" min="5" max="60" step="5" value="5" oninput="updatePromotionCost()" style="width:62px;padding:9px 5px;border:1px solid #d5d7da;border-radius:9px;text-align:center;font-weight:800;"><span style="font-size:11px;">menit</span></div>
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f8f8fa;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
@@ -4260,7 +4260,7 @@ window.openAllPromoted = function() {
       promotionSubmitting = false;
       const modal = document.getElementById('promotionChoiceModal');
       document.getElementById('promotionBiasaHours').value = '1';
-      document.getElementById('promotionIstimewaHours').value = '1';
+      document.getElementById('promotionIstimewaHours').value = '5';
       document.getElementById('promotionBalance').textContent = Number(paidCoins || 0).toLocaleString('id-ID');
       document.getElementById('promotionFeedback').textContent = '';
       document.getElementById('confirmPromotionButton').disabled = false;
@@ -4289,37 +4289,32 @@ window.openAllPromoted = function() {
     }
 
     function updatePromotionCost() {
-  const inputId = selectedPromotionType === 'istimewa'
-    ? 'promotionIstimewaHours'
-    : 'promotionBiasaHours';
-
+  const isIstimewa = selectedPromotionType === 'istimewa';
+  const inputId = isIstimewa ? 'promotionIstimewaHours' : 'promotionBiasaHours';
   const raw = document.getElementById(inputId).value;
-  const hours = Math.floor(Number(raw));
-  const rate = selectedPromotionType === 'istimewa' ? 5 : 1;
-  const valid = raw !== '' &&
-    Number.isFinite(hours) &&
-    hours >= 1 &&
-    hours <= 720 &&
-    String(hours) === String(Number(raw));
-
-  const cost = valid ? hours * rate : 0;
+  const amount = Number(raw);
+  const valid = raw !== '' && Number.isInteger(amount) &&
+    (isIstimewa
+      ? amount >= 5 && amount <= 60 && amount % 5 === 0
+      : amount >= 1 && amount <= 720);
+  const cost = valid ? (isIstimewa ? amount / 5 : amount) : 0;
   const saldoCukup = cost <= Number(paidCoins || 0);
-  const bisaAntre = selectedPromotionType === 'istimewa';
+  const bisaAntre = isIstimewa;
 
   document.getElementById('promotionTotalCost').textContent =
     `${cost.toLocaleString('id-ID')} Koin`;
 
   document.getElementById('promotionCostExplain').textContent =
     valid
-      ? bisaAntre
-        ? `(${hours} jam × ${rate} koin, dipotong saat mulai aktif)`
-        : `(${hours} jam × ${rate} koin)`
-      : '(masukkan durasi 1–720 jam)';
+      ? isIstimewa
+        ? `(${amount} menit × 1 koin / 5 menit, dipotong saat mulai aktif)`
+        : `(${amount} jam × 1 koin)`
+      : (isIstimewa ? '(masukkan durasi 5–60 menit, kelipatan 5)' : '(masukkan durasi 1–720 jam)');
 
   document.getElementById('promotionFeedback').textContent =
     valid && !saldoCukup
       ? bisaAntre
-        ? 'Jika 4 slot penuh, kamu bisa masuk antrean tanpa potongan koin.'
+        ? 'Jika slot penuh, kamu bisa masuk antrean tanpa potongan koin.'
         : 'Saldo Koin Berbayar tidak mencukupi.'
       : '';
 
@@ -4334,13 +4329,19 @@ async function confirmPostPromotion() {
     ? 'promotionIstimewaHours'
     : 'promotionBiasaHours';
 
-  const hours = Number(document.getElementById(inputId).value);
-  const cost = hours * (selectedPromotionType === 'istimewa' ? 5 : 1);
+  const durationValue = Number(document.getElementById(inputId).value);
   const isIstimewa = selectedPromotionType === 'istimewa';
+  const cost = isIstimewa ? durationValue / 5 : durationValue;
 
-  if (!Number.isInteger(hours) || hours < 1 || hours > 720) {
+  const validDuration = Number.isInteger(durationValue) &&
+    (isIstimewa
+      ? durationValue >= 5 && durationValue <= 60 && durationValue % 5 === 0
+      : durationValue >= 1 && durationValue <= 720);
+  if (!validDuration) {
     document.getElementById('promotionFeedback').textContent =
-      'Durasi harus antara 1 sampai 720 jam.';
+      isIstimewa
+        ? 'Durasi Promosi Istimewa harus 5–60 menit, kelipatan 5.'
+        : 'Durasi Promosi Biasa harus antara 1 sampai 720 jam.';
     return;
   }
 
@@ -4405,7 +4406,7 @@ async function confirmPostPromotion() {
       {
         p_post_id: Number(pendingPromotionPostId),
         p_promotion_type: selectedPromotionType,
-        p_hours: hours
+        p_hours: durationValue
       }
     );
 
@@ -4420,7 +4421,7 @@ async function confirmPostPromotion() {
     // Jika masuk antrean, saldo tidak dipotong.
     if (data.queued === true) {
       let posisi = Number(data.queue_position || 0);
-      let tunggu = data.estimated_wait_minutes;
+      let tunggu = data.estimated_wait_minutes;\n      let nomorSlot = Number(data.slot_number || 0);
 
       // Ambil estimasi terbaru jika queue_id tersedia.
       if (data.queue_id) {
@@ -4432,7 +4433,7 @@ async function confirmPostPromotion() {
 
         if (!statusError && statusData?.ok === true) {
           posisi = Number(statusData.queue_position || posisi);
-          tunggu = statusData.estimated_wait_minutes;
+          tunggu = statusData.estimated_wait_minutes;\n          nomorSlot = Number(statusData.slot_number || nomorSlot);
         }
       }
 
@@ -4441,7 +4442,7 @@ async function confirmPostPromotion() {
         : 'Perkiraan waktu tunggu belum tersedia.';
 
       alert(
-        `Curhatanmu masuk antrean #${posisi}.\n\n` +
+        `Curhatanmu masuk antrean Slot ${nomorSlot}, urutan #${posisi}.\n\n` +
         `${estimasi}\n` +
         'Koin belum dipotong. Koin baru dipotong saat promosi mulai aktif.'
       );
@@ -4462,8 +4463,9 @@ async function confirmPostPromotion() {
       `Promosi berhasil! ${biayaAktual} Koin Berbayar digunakan.`;
 
     alert(
-      `Promosi berhasil selama ${hours} jam.\n` +
-      `Koin Berbayar digunakan: ${biayaAktual}.`
+      isIstimewa
+        ? `Promosi Istimewa aktif di Slot ${Number(data.slot_number || 0)} selama ${durationValue} menit.\nKoin Berbayar digunakan: ${biayaAktual}.`
+        : `Promosi berhasil selama ${durationValue} jam.\nKoin Berbayar digunakan: ${biayaAktual}.`
     );
 
     document.getElementById('promotionChoiceModal').style.display = 'none';
