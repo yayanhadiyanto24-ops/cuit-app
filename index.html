@@ -708,7 +708,6 @@
     </button>
     <div class="stat-badge" title="Koin Gratisan">FREE <span id="freeCoinCount">0</span></div>
     <div class="stat-badge" title="Koin Berbayar">🪙 <span id="paidCoinCount">0</span></div>
-    <div class="stat-badge" title="Permata CUIT Hasil Kerja">💎 <span id="gemsCount">0</span></div>
   </div>
 
   <!-- PANGGUNG 10 RAJA MINGGU INI -->
@@ -3641,7 +3640,6 @@ async function openDailyCheckin() {
 
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
-      document.getElementById('gemsCount').innerText = gems;
 
       const myLvl = getUserLevel();
       const badgeElem = document.getElementById('homeQuickUserBadge');
