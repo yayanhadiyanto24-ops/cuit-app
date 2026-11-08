@@ -3656,6 +3656,11 @@ async function openDailyCheckin() {
       const badgeElem = document.getElementById('homeQuickUserBadge');
       if (badgeElem) badgeElem.innerHTML = cuitBadgeSvg(myLvl.title);
 
+      // Perbarui lencana profil di navigasi bawah setiap kali level/saldo dimuat,
+      // tanpa menunggu pengguna membuka halaman Profil.
+      const navProfileAvatar = document.getElementById('navProfileAvatar');
+      if (navProfileAvatar) navProfileAvatar.innerHTML = cuitBadgeSvg(myLvl.title);
+
       syncCoinsToSupabase();
 
       if (document.getElementById('pageProfile').classList.contains('active')) {
