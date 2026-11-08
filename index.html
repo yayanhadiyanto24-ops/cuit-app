@@ -136,8 +136,17 @@
     .btn-sm-badge { padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 3px; width: auto; }
 
     /* Post Card & Feed */
+    /* Scroll feed: cegah pull-to-refresh browser dan kurangi kerja layout kartu di luar layar */
+    html, body { overscroll-behavior-y: none; }
+    #postsList, .feed-container {
+      overscroll-behavior-y: contain;
+      touch-action: pan-y;
+    }
     .feed-container { display: flex; flex-direction: column; gap: 12px; }
-    .post-card { position: relative; background: #ffffff; border-radius: 16px; padding: 12px 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .post-card {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 230px;
+      position: relative; background: #ffffff; border-radius: 16px; padding: 12px 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
