@@ -4142,7 +4142,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
 
     function openSpecialPostSlot(slotIndex) {
       const specialPosts = (allPostsCache || []).filter(p => p && p.is_promoted && String(p.promotion_type || '').toLowerCase() === 'istimewa' && p.promoted_until && new Date(p.promoted_until).getTime() > Date.now());
-      specialPosts.sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+      specialPosts.sort((a,b) => new Date(a.promoted_until).getTime() - new Date(b.promoted_until).getTime());
       const post = specialPosts[slotIndex];
       if (!post) {
         alert('Jendela ini belum memiliki curhatan istimewa yang sedang aktif. Promosikan salah satu curhatan dengan pilihan Promosi Istimewa terlebih dahulu.');
@@ -4153,7 +4153,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
 
     function refreshSpecialPostSlots() {
       const specialPosts = (allPostsCache || []).filter(p => p && p.is_promoted && String(p.promotion_type || '').toLowerCase() === 'istimewa' && p.promoted_until && new Date(p.promoted_until).getTime() > Date.now());
-      specialPosts.sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0));
+      specialPosts.sort((a,b) => new Date(a.promoted_until).getTime() - new Date(b.promoted_until).getTime());
       for (let i=0;i<4;i++) {
         const slot = document.querySelectorAll('#specialPostsSection .special-window')[i];
         const post = specialPosts[i];
