@@ -620,6 +620,32 @@
   font-size: 11px;
 }
 
+/* ===== CUIT PREMIUM VISUAL BALANCE ===== */
+    body{background:linear-gradient(180deg,#fff8f8 0%,#fffafa 42%,#fff 100%)}
+    .page-section{padding-left:14px;padding-right:14px}
+    .section-title{letter-spacing:-.25px}
+    .post-card,.profile-card,.achievement-panel{box-shadow:0 3px 12px rgba(110,20,35,.055);border-color:#efdde0}
+    .btn-primary,.btn-secondary,.pill-btn,.nav-item,.special-window{-webkit-tap-highlight-color:transparent}
+    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #d4a72c;outline-offset:2px}
+    #promotedSection{overflow:hidden;border-color:#e7c77a!important;background:linear-gradient(145deg,#fff 0%,#fff8f0 100%)!important;box-shadow:0 3px 12px rgba(110,20,35,.07)!important}
+    #promotedSection .home-feature-heading{min-height:34px;display:flex;align-items:center;justify-content:center;gap:7px;margin:0!important;padding:6px 10px;color:#fff!important;font-size:11px!important;font-weight:950;letter-spacing:.65px;text-align:center;background:radial-gradient(circle at 50% -20%,rgba(255,230,160,.38),transparent 55%),linear-gradient(105deg,#650817 0%,#c8102e 52%,#9c6411 100%);border-bottom:1px solid #e6c36b;text-shadow:0 1px 2px rgba(0,0,0,.22)}
+    #promotedSection .feature-mark{width:21px!important;height:21px!important;display:grid;place-items:center;border-radius:7px!important;background:linear-gradient(145deg,#fff5d8,#e8bd55)!important;color:#9a1028;box-shadow:0 1px 5px rgba(0,0,0,.16)!important}
+    #pageHome .pills-group .pill-btn:last-child{font-size:11px;padding:7px 10px;letter-spacing:-.1px}
+    #specialPostsSection{padding-top:2px!important;box-shadow:0 2px 9px rgba(130,15,35,.07)!important}
+    #specialPostsSection>.home-feature-heading{padding:6px 10px!important;min-height:36px;gap:8px}
+    #specialPostsSection>.home-feature-heading .feature-mark{width:24px!important;height:24px!important}
+    #specialPostsSection>.home-feature-heading .feature-mark img{width:18px!important;height:18px!important}
+    .special-windows-grid{border-top-color:#e5c16a}
+    .special-window{min-height:86px!important}
+    .special-window:nth-child(odd){border-right-color:#e5c16a}
+    .special-window:nth-child(n+3){border-top-color:#e5c16a}
+    .special-window:after{height:2px}
+    .nav-add-button{width:38px;height:38px;font-size:21px;margin-top:-11px;border-width:3px;box-shadow:0 3px 9px rgba(200,30,50,.22)}
+    .nav-profile-avatar{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:#fff5d6;border:1px solid #e5c16a;box-shadow:0 1px 4px rgba(110,20,35,.12)}
+    .nav-profile-avatar svg{width:100%;height:100%;display:block}
+    .nav-bar{background:rgba(255,255,255,.97)!important;backdrop-filter:blur(12px);border-top-color:#ead8dc!important}
+    @media(max-width:380px){#pageHome .pills-group .pill-btn:last-child{font-size:10.5px;padding:7px 8px}.special-window{min-height:84px!important}}
+
 </style>
 
 </head>
@@ -2504,7 +2530,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       <span class="nav-icon">👑</span><span>Raja</span>
     </div>
     <div class="nav-item" onclick="switchTab('pageProfile', this)">
-      <span class="nav-icon"><div class="nav-profile-avatar">🌱</div></span><span>Profil</span>
+      <span class="nav-icon"><div class="nav-profile-avatar" id="navProfileAvatar">🌱</div></span><span>Profil</span>
     </div>
   </div>
 
@@ -4121,7 +4147,7 @@ promotedCarousel.innerHTML = cardsHTML;
         if (!slot) continue;
         slot.setAttribute('aria-label', post ? `Buka curhatan istimewa dari ${post.username || 'Pengguna CUIT'}` : `Jendela istimewa ${i+1}, belum terisi`);
         if (!post) {
-          slot.innerHTML = `<div style="min-height:82px;height:100%;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:9px;text-align:left;padding:8px 10px;background:linear-gradient(105deg,#fffafa,#fff1f3);"><div style="width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f8dfe5;color:#a50d27;font-size:19px;box-shadow:inset 0 0 0 1px #edc1ca;">👤</div><div style="min-width:0;flex:1;"><div style="font-size:11px;font-weight:850;color:#a50d27;">Belum ada promosi aktif</div><div style="font-size:10px;color:#7b6268;margin-top:2px;">Jendela promosi istimewa</div></div></div>`;
+          slot.innerHTML = `<div style="min-height:82px;height:100%;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:8px;text-align:left;padding:6px 9px;background:linear-gradient(105deg,#fffafa,#fff1f3);"><div style="width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;background:#f8dfe5;color:#a50d27;font-size:19px;box-shadow:inset 0 0 0 1px #edc1ca;">👤</div><div style="min-width:0;flex:1;"><div style="font-size:11px;font-weight:850;color:#a50d27;">Belum ada promosi aktif</div><div style="font-size:10px;color:#7b6268;margin-top:2px;">Jendela promosi istimewa</div></div></div>`;
           continue;
         }
         const rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna CUIT');
@@ -4133,7 +4159,7 @@ promotedCarousel.innerHTML = cardsHTML;
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
         const userLvl = getUserLevel(authorPoin);
         const badge = cuitBadgeSvg(userLvl.title);
-        slot.innerHTML = `<div style="min-height:100px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:5px 0 6px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
+        slot.innerHTML = `<div style="min-height:86px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
 
   <div style="display:flex;align-items:center;gap:5px;min-width:0;margin:0 6px 5px;">
     <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
@@ -5619,6 +5645,8 @@ case 'batik-nusantara':
 
       document.getElementById('profName').innerText = displayName;
       document.getElementById('profMainBadge').innerHTML = cuitBadgeSvg(userLvl.title);
+      const navProfileAvatar = document.getElementById('navProfileAvatar');
+      if (navProfileAvatar) navProfileAvatar.innerHTML = cuitBadgeSvg(userLvl.title);
       document.getElementById('profLevelTitle').innerText = userLvl.title;
       document.getElementById('profLevelTitle').style.background = userLvl.color;
       document.getElementById('profLevelTitle').style.color = '#fff';
