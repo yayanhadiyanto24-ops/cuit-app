@@ -323,6 +323,66 @@
     /* Modal Styling */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 16px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+    #promotedDetailContent {
+      padding: 0;
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #fffdf8 0%, #fff 34%);
+      border: 1px solid #e5c46b;
+      border-radius: 22px;
+      box-shadow: 0 14px 38px rgba(70, 5, 20, .28);
+    }
+    #promotedDetailContent .promoted-detail-header {
+      min-height: 64px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 14px;
+      color: #fff8e8;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(255,225,130,.3), transparent 27%),
+        linear-gradient(115deg, #650817 0%, #c8102e 58%, #8f1025 100%);
+      border-bottom: 2px solid #e2b94f;
+    }
+    #promotedDetailContent .promoted-detail-logo {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      object-fit: contain;
+      padding: 3px;
+      box-sizing: border-box;
+      border-radius: 13px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #f5d77c;
+      box-shadow: 0 2px 7px rgba(0,0,0,.2);
+    }
+    #promotedDetailContent .promoted-detail-title {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 950;
+      letter-spacing: .35px;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,.22);
+    }
+    #promotedDetailContent .promoted-detail-close {
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 50%;
+      background: rgba(255,255,255,.13);
+      color: #fff;
+      font-size: 21px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    #promotedDetailContent .promoted-detail-body {
+      padding: 13px;
+    }
 
 #giftOverlayContainer {
   position: fixed !important;
@@ -4122,16 +4182,19 @@ window.openAllPromoted = function() {
 
       const modalContent = document.getElementById('promotedDetailContent');
       modalContent.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <span style="font-size:11px; font-weight:800; color:#e67e22;">🚀 POSTINGAN SOROTAN</span>
-          <button onclick="document.getElementById('promotedDetailModal').style.display='none'" style="border:none; background:none; font-size:16px; cursor:pointer;">✕</button>
+        <div class="promoted-detail-header">
+          <img class="promoted-detail-logo" src="assets/cuit-app-icon.svg" alt="Logo CUIT">
+          <div class="promoted-detail-title">CURHATAN TERBAIK</div>
+          <button class="promoted-detail-close" aria-label="Tutup" onclick="document.getElementById('promotedDetailModal').style.display='none'">×</button>
         </div>
-        ${renderCardHTML(post)}
-        <section id="promotedInlineComments" style="margin-top:10px;padding-top:10px;border-top:1px solid #f0dce2;">
-          <div style="font-weight:900;font-size:13px;margin-bottom:7px;">💬 Komentar</div>
-          <div id="promotedInlineCommentsList" style="display:flex;flex-direction:column;gap:7px;max-height:32vh;overflow:auto;"><div style="font-size:11px;color:#777;">Ketuk Komentar untuk memuat diskusi.</div></div>
-          <div style="display:flex;gap:6px;margin-top:8px;"><input id="promotedInlineCommentInput" placeholder="Tulis komentar…" style="flex:1;min-width:0;margin:0;"><button class="btn-primary" onclick="submitPromotedInlineComment('${post.id}')" style="padding:8px 10px;">Kirim</button></div>
-        </section>
+        <div class="promoted-detail-body">
+          ${renderCardHTML(post)}
+          <section id="promotedInlineComments" style="margin-top:13px;padding-top:12px;border-top:1px solid #ead9dc;">
+            <div style="font-weight:900;font-size:13px;margin-bottom:7px;color:#7f1428;">💬 Komentar</div>
+            <div id="promotedInlineCommentsList" style="display:flex;flex-direction:column;gap:7px;max-height:32vh;overflow:auto;"><div style="font-size:11px;color:#777;">Ketuk Komentar untuk memuat diskusi.</div></div>
+            <div style="display:flex;gap:6px;margin-top:8px;"><input id="promotedInlineCommentInput" placeholder="Tulis komentar…" style="flex:1;min-width:0;margin:0;"><button class="btn-primary" onclick="submitPromotedInlineComment('${post.id}')" style="padding:8px 10px;">Kirim</button></div>
+          </section>
+        </div>
       `;
       document.getElementById('promotedDetailModal').style.display = 'flex';
     }
