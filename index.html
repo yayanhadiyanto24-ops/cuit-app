@@ -4181,19 +4181,26 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
         const badge = cuitBadgeSvg(userLvl.title);
         slot.innerHTML = `<div style="min-height:112px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
 
-  <div style="display:flex;align-items:flex-start;gap:6px;min-width:0;margin:0 6px 5px;padding:0 1px;">
+  <div style="display:flex;align-items:center;gap:5px;min-width:0;margin:0 6px 5px;padding:0 1px;">
     <div style="width:25px;height:25px;flex:0 0 25px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
-
-    <div style="min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.15;">
-      <span style="display:block;width:100%;font-size:11.5px;line-height:1.15;font-weight:950;color:#30242a;white-space:normal;overflow:visible;overflow-wrap:anywhere;">${name}</span>
+    <span data-special-account-name="1" style="display:block;flex:1 1 0;min-width:0;font-size:11px;line-height:1.1;font-weight:950;color:#30242a;white-space:nowrap;overflow:hidden;text-overflow:clip;">${name}</span>
+    <div style="flex:0 0 auto;max-width:39%;min-width:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;text-align:right;line-height:1.15;">
       <span style="display:inline-block;max-width:100%;font-size:7px;line-height:1.2;font-weight:850;color:#fff;background:${userLvl.color || '#a50d27'};padding:2px 4px;border-radius:4px;white-space:normal;overflow-wrap:anywhere;">${escapeHtml(userLvl.title || 'Anggota')}</span>
-      <span style="display:block;max-width:100%;font-size:8.5px;line-height:1.2;font-weight:750;color:#8b7b82;white-space:normal;overflow-wrap:anywhere;">${feeling}</span>
+      <span style="display:block;max-width:100%;font-size:8px;line-height:1.2;font-weight:750;color:#8b7b82;white-space:normal;overflow-wrap:anywhere;">${feeling}</span>
     </div>
   </div>
 
   <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:78px;min-height:78px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
  </div>`;
-         const specialBox = slot.querySelector('.special-content-box');
+         const accountName = slot.querySelector('[data-special-account-name="1"]');
+          if (accountName) {
+            let nameSize = 11;
+            while (accountName.scrollWidth > accountName.clientWidth + 1 && nameSize > 7) {
+              nameSize -= 0.5;
+              accountName.style.fontSize = nameSize + 'px';
+            }
+          }
+          const specialBox = slot.querySelector('.special-content-box');
          const specialInner = specialBox && specialBox.querySelector('.special-content-inner');
          if (specialBox && specialInner && specialInner.scrollHeight > specialBox.clientHeight + 2) {
            const readMore = document.createElement('span');
