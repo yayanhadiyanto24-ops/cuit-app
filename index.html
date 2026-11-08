@@ -4423,8 +4423,9 @@ async function confirmPostPromotion() {
       let posisi = Number(data.queue_position || 0);
       let tunggu = data.estimated_wait_minutes;
       let nomorSlot = Number(data.slot_number || 0);
+      let durasiAntrean = Number(data.duration_minutes || (isIstimewa ? durationValue : 0));
 
-      // Ambil estimasi terbaru jika queue_id tersedia.
+      // Ambil posisi, slot, durasi, dan estimasi terbaru dari server.
       if (data.queue_id) {
         const { data: statusData, error: statusError } =
           await supabaseClient.rpc(
@@ -4436,16 +4437,21 @@ async function confirmPostPromotion() {
           posisi = Number(statusData.queue_position || posisi);
           tunggu = statusData.estimated_wait_minutes;
           nomorSlot = Number(statusData.slot_number || nomorSlot);
+          durasiAntrean = Number(statusData.duration_minutes || durasiAntrean);
         }
       }
 
       const estimasi = Number.isFinite(Number(tunggu))
-        ? `Perkiraan menunggu: ${Number(tunggu)} menit.`
-        : 'Perkiraan waktu tunggu belum tersedia.';
+        ? `Perkiraan sampai giliranmu mulai: ${Number(tunggu)} menit.`
+        : 'Perkiraan waktu mulai belum tersedia.';
 
       alert(
-        `Curhatanmu masuk antrean Slot ${nomorSlot}, urutan #${posisi}.\n\n` +
-        `${estimasi}\n` +
+        `ANTREAN PROMOSI ISTIMEWA\n\n` +
+        `Slot: ${nomorSlot}\n` +
+        `Posisi antrean: ${posisi > 0 ? '#' + posisi : 'Belum tersedia'} (urutan menunggu, bukan nomor transaksi)\n` +
+        `Durasi promosi milikmu: ${durasiAntrean} menit\n` +
+        `${estimasi}\n\n` +
+        'Catatan: waktu menunggu hanya sampai promosi milikmu mulai tayang. Durasi promosi milikmu dihitung setelah mulai tayang dan tidak ditambahkan ke waktu menunggu.\n\n' +
         'Koin belum dipotong. Koin baru dipotong saat promosi mulai aktif.'
       );
 
