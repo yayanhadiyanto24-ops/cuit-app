@@ -5815,24 +5815,33 @@ if (isAdmin) {
         return;
       }
 
-      const { data: missions, error: missionError } = await supabaseClient
-        .from('reels_missions').select('*').order('id', { ascending: true });
+      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
+      const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
+      const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime() + 86400000).toISOString();
+
+      // Ambil daftar video dan status klaim secara paralel agar modal tidak
+      // menunggu dua perjalanan jaringan secara berurutan.
+      const [missionsResult, claimsResult] = await Promise.all([
+        supabaseClient
+          .from('reels_missions')
+          .select('id,facebook_url')
+          .order('id', { ascending: true }),
+        supabaseClient
+          .from('reels_claims')
+          .select('slot_key,created_at')
+          .eq('user_id', currentUser.id)
+          .gte('created_at', dayStart)
+          .lt('created_at', nextDay)
+      ]);
+
+      const { data: missions, error: missionError } = missionsResult;
       if (missionError) {
         console.error('Gagal memuat misi video:', missionError);
         container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Daftar video gagal dimuat. Silakan coba lagi.</p>';
         return;
       }
 
-      const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
-      const dayStart = new Date(today + 'T00:00:00+07:00').toISOString();
-      const nextDay = new Date(new Date(today + 'T00:00:00+07:00').getTime() + 86400000).toISOString();
-      const { data: claims, error: claimsError } = await supabaseClient
-        .from('reels_claims')
-        .select('slot_key,created_at')
-        .eq('user_id', currentUser.id)
-        .gte('created_at', dayStart)
-        .lt('created_at', nextDay);
-
+      const { data: claims, error: claimsError } = claimsResult;
       if (claimsError) {
         console.error('Gagal memverifikasi klaim video:', claimsError);
         container.innerHTML = '<p style="text-align:center;padding:12px;color:#a11;">Status klaim belum bisa diverifikasi. Video dikunci sementara agar koin tidak terduplikasi.</p>';
@@ -6057,7 +6066,7 @@ await updateCoinUI(true);
         const pm = document.getElementById('todayProgressModal');
         if (pm && pm.style.display === 'flex') await openTodayProgress();
       }
-      loadPosts();
+      // Tidak perlu memuat ulang seluruh feed dan 10 ranking setelah klaim video.
     }
 
     async function openAdminModal() {
