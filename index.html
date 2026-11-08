@@ -32,15 +32,15 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
-    body { 
-      background: var(--bg); 
-      color: var(--text-main); 
-      padding-bottom: calc(var(--bottom-nav-height) + 20px) !important; 
-      max-width: 480px; 
-      margin: 0 auto; 
-      min-height: 100vh; 
-      position: relative; 
-      overflow-x: hidden; 
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      padding-bottom: calc(var(--bottom-nav-height) + 20px) !important;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
 
     /* Top Stats Bar Compact */
@@ -48,12 +48,12 @@
     .stat-badge { background: #ffffff; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; color: #23233c; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
     /* Banner Container */
-    .cuit-banner-container { 
-      width: 100%; 
-      border-bottom: 1px solid #e2e8f5; 
-      line-height: 0; 
-      background: #fff; 
-      transition: all 0.5s ease; 
+    .cuit-banner-container {
+      width: 100%;
+      border-bottom: 1px solid #e2e8f5;
+      line-height: 0;
+      background: #fff;
+      transition: all 0.5s ease;
       overflow: hidden;
       max-height: 250px;
     }
@@ -140,7 +140,7 @@
     .post-card { position: relative; background: #ffffff; border-radius: 16px; padding: 12px 14px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
     .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
     .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    
+
     .avatar-container { position: relative; width: 42px; height: 42px; flex-shrink: 0; }
     .avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: var(--primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
@@ -149,7 +149,6 @@
     .user-name { font-weight: 800; font-size: 13px; color: var(--text-main); }
     .badge-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
     .post-time { font-size: 10px; color: var(--text-sub); }
-
 
     .post-style-editor{margin:12px 0;padding:11px;border:1px solid #f0d5da;border-radius:14px;background:linear-gradient(135deg,#fff,#fff8f8)}
     .post-style-title{font-size:13px;font-weight:900;color:#b91c32;margin-bottom:4px}
@@ -248,15 +247,15 @@
 }
 
     /* Form Controls */
-    input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select { 
-      width: 100%; 
-      padding: 10px 12px; 
-      border: 1px solid #fff0f1; 
-      border-radius: 12px; 
-      font-size: 12px; 
-      outline: none; 
-      background: #fff; 
-      margin-bottom: 8px; 
+    input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #fff0f1;
+      border-radius: 12px;
+      font-size: 12px;
+      outline: none;
+      background: #fff;
+      margin-bottom: 8px;
     }
 
     /* Grid Profil Permanen */
@@ -268,22 +267,22 @@
     .stat-card-item .lbl { font-size: 9px; color: var(--text-sub); margin-top: 1px; }
 
     /* Navigasi Bawah Permanen (Fixed Bottom Nav HP) */
-    .nav-bar { 
-      position: fixed !important; 
-      bottom: 0 !important; 
-      left: 50% !important; 
-      transform: translateX(-50%) !important; 
-      width: 100% !important; 
-      max-width: 480px !important; 
-      background: #ffffff !important; 
-      display: flex !important; 
-      justify-content: space-around !important; 
-      align-items: center !important; 
-      padding: 8px 0 !important; 
-      padding-bottom: max(10px, env(safe-area-inset-bottom)) !important; 
-      border-top: 1px solid var(--border-color) !important; 
-      z-index: 9999 !important; 
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08) !important; 
+    .nav-bar {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 100% !important;
+      max-width: 480px !important;
+      background: #ffffff !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      align-items: center !important;
+      padding: 8px 0 !important;
+      padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+      border-top: 1px solid var(--border-color) !important;
+      z-index: 9999 !important;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08) !important;
     }
     .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); cursor: pointer; font-weight: 600; flex: 1; text-align: center; }
     .nav-item.active { color: var(--primary); font-weight: 800; }
@@ -324,7 +323,7 @@
     /* Modal Styling */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
     .modal-content { background: #fff; padding: 16px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
- 
+
 #giftOverlayContainer {
   position: fixed !important;
   top: 0 !important;
@@ -382,7 +381,6 @@
   }
 }
 
-    
     .achievement-panel{background:#fff;border:1px solid #e6eaf2;border-radius:18px;padding:13px;margin:12px 0;box-shadow:0 5px 18px rgba(35,65,110,.06)}
     .achievement-heading{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;color:#173b70;font-weight:900;font-size:14px}
     .achievement-heading small{font-size:10px;font-weight:600;color:#7a8799}
@@ -438,7 +436,6 @@
   border-radius:9px;background:linear-gradient(135deg,#fff0d2,#ffe0a0);
   box-shadow:inset 0 0 0 1px rgba(198,132,20,.18);
 }
-
 
 .special-windows-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;width:100%;border-top:1px solid #c8102e;position:relative}
 .special-window{display:block;text-align:left;min-width:0;min-height:82px;height:100%;padding:0;border:0;border-radius:0;background:#fffdfd;color:#b5122b;cursor:pointer;box-sizing:border-box;position:relative;overflow:hidden}
@@ -623,7 +620,7 @@
 
     <!-- CONTAINER SCROLL MENYAMPING (10 KOTAK RAJA) -->
     <div id="leagueChampionsCarousel" style="display: flex; gap: 8px; width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 4px;">
-      
+
       <!-- 1. RAJA SAWER -->
       <div style="flex: 0 0 auto; min-width: 90px; background: rgba(255,255,255,0.1); border: 1px solid #fde047; border-radius: 12px; padding: 8px 6px; text-align: center; box-sizing: border-box;">
         <div style="font-size: 8.5px; font-weight: 800; color: #fde047; margin-bottom: 4px; white-space: nowrap;">👑 Raja Sawer</div>
@@ -744,7 +741,7 @@
       <div class="home-feature-heading" style="margin:0 0 2px;font-size:9px;gap:4px;">
         <span class="feature-mark" style="width:16px;height:16px;border-radius:5px;background:#fff0f0;box-shadow:none;font-size:10px;">✨</span> CURHATAN TERBAIK
       </div>
-      <div id="promotedCarousel" style="display:flex;flex-direction:row;gap:0;max-height:none;overflow-x:auto;overflow-y:hidden;padding:0;scrollbar-width:thin;align-items:stretch;"></div>    
+      <div id="promotedCarousel" style="display:flex;flex-direction:row;gap:0;max-height:none;overflow-x:auto;overflow-y:hidden;padding:0;scrollbar-width:thin;align-items:stretch;"></div>
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin:0 0 3px;">
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -762,10 +759,10 @@
       <div class="avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;" onclick="switchTab('pageProfile', document.querySelectorAll('.nav-item')[4])">
         <div class="avatar-circle cuit-main-badge" id="homeQuickUserBadge" style="width: 48px; height: 48px;"></div>
       </div>
-      <input 
-        type="text" 
-        placeholder="Apa yang ingin kamu curhatkan?" 
-        readonly 
+      <input
+        type="text"
+        placeholder="Apa yang ingin kamu curhatkan?"
+        readonly
         onclick="switchTab('pageCreate', document.querySelectorAll('.nav-item')[2])"
         style="margin-bottom: 0; background: #fff; border: 1px solid #e5e7eb; cursor: pointer; border-radius: 20px; padding: 6px 10px; font-size: 11px; color: var(--text-sub);"
       >
@@ -782,7 +779,7 @@
 
     <!-- CURHATAN ISTIMEWA: empat jendela kurasi -->
     <section id="specialPostsSection" style="width:100%;box-sizing:border-box;margin:3px 0 4px;padding:5px 0 0;background:#ffffff;border:1px solid #c8102e;border-radius:12px;box-shadow:0 0 0 2px #fff inset, 0 1px 5px rgba(130,15,35,.08);overflow:hidden;position:relative;">
-      
+
 <div class="home-feature-heading" style="
   margin:0;
   padding:9px 11px;
@@ -958,7 +955,6 @@
     </div>
   </div>
 
-  
 <!-- MODAL MISI REELS FB -->
 <div id="reelsModal" class="modal">
   <div class="modal-content" style="text-align:center;max-height:calc(100dvh - 110px);overflow:hidden;display:flex;flex-direction:column;padding:16px 14px 12px;">
@@ -1055,17 +1051,17 @@
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
     <h2 class="section-title">Buat curhatan</h2>
-    
+
 <div class="section-sub">Biaya posting: 1 koin per 100 karakter.</div>
 
     <div style="background: #fff; padding: 14px; border-radius: 18px; border: 1px solid var(--border-color);">
-      <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea> 
+      <textarea id="postContent" rows="5" placeholder="Tulis ceritamu di sini..." oninput="updateCharCount(this)"></textarea>
 <div id="charCount" style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">0 karakter · Biaya: 1 koin</div>
 
       <section id="postStyleEditor" class="post-style-editor" aria-label="Pengaturan tampilan curhatan">
         <div class="post-style-title">🎨 Tampilan Curhatan</div>
         <div id="styleLevelNotice" class="style-level-notice">Fasilitas mengikuti level tertinggi yang telah dicapai.</div>
-        
+
 <div class="style-control">
   <label for="postBorderStyle">Border sederhana <small>Level 3</small></label>
   <select id="postBorderStyle" data-unlock="3" onchange="updatePostStylePreview()">
@@ -1252,7 +1248,7 @@
       .cuit-kilat-page #kilatCurhatBtn{width:100%;background:linear-gradient(110deg,#b91c1c,#e3b43b);color:white;border:1px solid #d4a32c;border-radius:12px;padding:12px;font-size:12px;font-weight:950;cursor:pointer;box-shadow:0 3px 0 #8b171f}
       .cuit-kilat-page #kilatCurhatBtn:active{transform:translateY(1px)}
       @media(max-height:650px){.cuit-kilat-page .kilat-shell{padding:9px}.cuit-kilat-page .kilat-tile{height:min(16vw,5.5dvh,50px)}.cuit-kilat-page .kilat-panel{padding:7px}}
-    
+
     .home-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
     .home-shortcuts button{min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:1px 0;color:#45343a;font-size:9px;font-weight:850;cursor:pointer}
     .shortcut-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(30,35,60,.06)}
@@ -1261,7 +1257,7 @@
 
       .pool-shortcut{float:right;margin:-34px 0 8px 8px;border:1px solid #e5b8bd;border-radius:999px;padding:6px 10px;background:#fff;color:#b91c1c;font-size:11px;font-weight:850;box-shadow:0 2px 6px #b91c1c12}
       .page-section{position:relative}.page-section>.pool-shortcut{position:absolute;right:12px;top:12px;float:none;margin:0;z-index:2}
-    
+
 /* PERAPIAN KOTAK 3 HURUF KILAT */
 .cuit-kilat-page .kilat-grid {
   display: grid;
@@ -1294,7 +1290,7 @@
     <div class="kilat-shell">
       <div class="kilat-head">
         <div class="kilat-brand"><div class="kilat-logo" aria-hidden="true">✦</div><div><div class="kilat-eyebrow">PERMAINAN CUIT</div><h2 class="kilat-title">3 Huruf Kilat</h2></div></div>
-        
+
       </div>
       <p class="kilat-intro">Buka dua kotak, ingat hurufnya, lalu cari pasangannya. Temukan 3 pasangan untuk mendapatkan kombinasi tiga huruf!</p>
       <section class="kilat-stats" aria-label="Status permainan">
@@ -1420,7 +1416,7 @@
 
       function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},700);}}
       function makeFallbackWisdom(foundLetters){return 'Jangan berkecil hati karena belum berhasil. Setiap kesempatan adalah awal yang baru. Tarik napas, bangkitkan semangat, dan cobalah kembali. Siapa tahu, keberhasilanmu sudah menunggu di percobaan berikutnya.';}
-      
+
 async function makeWisdom(foundLetters) {
   const code = foundLetters.join('').toUpperCase();
 
@@ -1557,7 +1553,7 @@ async function makeWisdom(foundLetters) {
 
     const awarded=Number(row.coins_awarded||0);
     const feePaid=Number(row.entry_fee ?? gameSession.entry_fee ?? 0);
-    coinEl.textContent=String(awarded); 
+    coinEl.textContent=String(awarded);
 rewardEl.textContent=awarded>0
   ?`Hadiah ${awarded} koin gratis`
   :'Belum memperoleh hadiah koin';
@@ -1700,7 +1696,7 @@ poolStatus=feePaid>0
   <p style="font-size:9px;color:#987d7d;line-height:1.4;margin:9px 2px 0">
     Aturan: biaya 10 Koin Gratis dan hadiah 1 Permata diproses oleh server. Hasil kelereng hanya menentukan nomor kutipan inspirasi. Kotak Misteri tidak ikut perkalian.
   </p>
-</section>  
+</section>
 <script>
 (() => {
   const root = document.getElementById('marbleGame');
@@ -1950,23 +1946,6 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       'Terima kasih kepada ADMINCUIT atas hadiah 1 Permata Kejutan.';
 
     $('mgResult').classList.add('show');
-  }
-
-  function collidePeg(b,p,dt) {
-    const dx=b.x-p.x, dy=b.y-p.y;
-    const d=Math.hypot(dx,dy);
-    const min=radius+p.r;
-    if(d<=0 || d>=min) return;
-
-    const nx=dx/d, ny=dy/d;
-    b.x=p.x+nx*min;
-    b.y=p.y+ny*min;
-
-    const dot=b.vx*nx+b.vy*ny;
-    if(dot<0) {
-      b.vx-=(1.55*dot)*nx;
-      b.vy-=(1.55*dot)*ny;
-    }
   }
 
       function animateServerTrace(trace) {
@@ -2226,7 +2205,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     $('mgStart').disabled = !!session;
   }
 }
-      
+
   async function cancel() {
     if(animation) {
       cancelAnimationFrame(animation);
@@ -2311,7 +2290,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
 </script>
 
 <!-- ===== AKHIR BALAP KELERENG INSPIRASI CUIT ===== -->
-  
+
   <!-- 5. HALAMAN PROFIL -->
   <div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
@@ -2382,7 +2361,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       <div style="background: #f3faff; padding: 12px; border-radius: 14px; border: 1px solid #fff0f1; margin-top: 10px;">
         <div style="font-size: 11px; font-weight: 800; color: #321016; margin-bottom: 2px;">🔗 Link Sponsor Kamu</div>
         <div style="font-size: 10px; color: #77535a; margin-bottom: 8px; word-break: break-all;" id="displaySponsorLink">https://cuit.app/?ref=ADMINCUIT</div>
-        
+
         <div style="display: flex; gap: 6px;">
           <button class="btn-primary" style="flex: 1; padding: 7px 10px; font-size: 11px;" onclick="copyMySponsorLink()">📋 Salin Link Sponsor</button>
           <button class="btn-secondary" style="flex: 1; background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 7px 10px; font-size: 11px;" onclick="downloadAPK()">📱 Unduh APK</button>
@@ -2585,13 +2564,13 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
         <h3 style="font-size: 15px; font-weight: 800;">💬 Komentar</h3>
         <button onclick="document.getElementById('commentsModal').style.display='none'" style="border: none; background: none; font-size: 16px; cursor: pointer;">✕</button>
       </div>
-      
+
       <div id="commentsList" style="flex: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; max-height: 300px;">
         <p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>
       </div>
 
       <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-        
+
 <textarea id="commentInputText" rows="2" placeholder="Tulis komentar kamu..." style="margin-bottom:6px;" oninput="updateCommentCharCount(this)"></textarea>
 <div id="commentCharCount" style="font-size:12px;color:var(--text-sub);margin-bottom:8px;">0 karakter · Biaya: 1 koin</div>
 
@@ -2652,7 +2631,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
       <input type="email" id="email" placeholder="Alamat Email">
       <input type="password" id="password" placeholder="Kata Sandi">
-      
+
       <label style="font-size: 10.5px; font-weight: 800; color: var(--primary); display: block; margin-top: 2px;">Kode Sponsor Referral (Otomatis):</label>
       <input type="text" id="referralCodeInput" readonly style="background: #f5dfe2; font-weight: 800; color: #333;">
 
@@ -2669,7 +2648,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     <div class="modal-content">
       <h3 style="margin-bottom: 2px;">Pilih Gift Apresiasi 🎁</h3>
       <div style="font-size: 10.5px; color: var(--text-sub); margin-bottom: 8px;">Koin Berbayar: 50% untuk Kreator, 10% untuk Sponsor; 40% tidak dibagikan</div>
-      
+
       <div class="gift-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
         <div class="gift-card-item" onclick="sendGiftAction(5, 'Bunga Hati')">🌹 <b>Bunga Hati</b><br><small>5 Koin</small></div>
         <div class="gift-card-item" onclick="sendGiftAction(10, 'Bintang Ceria')">⭐ <b>Bintang Ceria</b><br><small>10 Koin</small></div>
@@ -2690,9 +2669,6 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
       <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('giftModal').style.display='none'">Tutup</button>
     </div>
   </div>
-
-  
-  
 
   <!-- MODAL DOMPET & TOP-UP DOKU QRIS -->
   <div id="walletModal" class="modal">
@@ -2824,7 +2800,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
         rows('cuit_marble_sessions','id,game_date,status',q=>q.eq('user_id',currentUser.id).eq('game_date',day).eq('status','completed')),
         rows('cuit_roulette_spins','id,completed_at,user_id',q=>q.eq('user_id',currentUser.id).gte('completed_at',start).lt('completed_at',end))
       ]);
-        
+
       values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
       // Nonton Misi: jumlah klaim hadiah hari ini
 values.watch = reels === null
@@ -2862,7 +2838,7 @@ if (paidLedger === null || paidGames === null) {
     fromActions + fromGames
   ).toLocaleString('id-ID');
 }
-      
+
       // Total permata yang diterima hari ini dari seluruh sumber CUIT
       try {
         const { data: gemsReceived, error: gemsError } =
@@ -2882,10 +2858,10 @@ if (paidLedger === null || paidGames === null) {
         values.gemsReceived = 'Belum terhubung';
         console.error('Gagal memuat permata diterima:', gemsError);
       }
-    
+
       grid.innerHTML=labels.map(([key,label,icon])=>`<div style="display:flex;align-items:center;gap:8px;padding:9px;background:#fff8fa;border:1px solid #f0dce2;border-radius:12px;min-width:0;"><span style="font-size:19px;">${icon}</span><div style="min-width:0;flex:1;"><div style="font-size:10px;color:#6b7280;line-height:1.25;">${label}</div><div style="font-size:13px;font-weight:900;color:#8b1e3f;overflow-wrap:anywhere;">${values[key]}</div></div></div>`).join('');
     }
-   
+
 function showCuitCheckinModal(day) {
   return new Promise(resolve => {
     const old = document.getElementById('cuitCheckinPremiumModal');
@@ -3162,7 +3138,7 @@ async function openDailyCheckin() {
     let currentUser = null;
     let customDisplayName = localStorage.getItem('cuit_user_name') || 'TamuCuit';
     let mySponsorCode = localStorage.getItem('cuit_my_sponsor') || CONFIG.DEFAULT_SPONSOR;
-    
+
     let allPostsCache = [];
     let profilesMap = {};
     let userLikedPostsSet = new Set();
@@ -3224,7 +3200,7 @@ async function openDailyCheckin() {
       localStorage.setItem('cuit_free_coins', freeCoins);
       localStorage.setItem('cuit_paid_coins', paidCoins);
 
-      updateCoinUI(true); 
+      updateCoinUI(true);
       return true;
     }
 
@@ -3508,7 +3484,7 @@ async function openDailyCheckin() {
         loadPosts(),
         checkUnreadNotifications()
       ]);
-      
+
       initGlobalRealtime();
     }
 
@@ -3520,7 +3496,7 @@ async function openDailyCheckin() {
       }
 
       let query = supabaseClient.from('post_likes').select('post_id');
-      
+
       if (currentUser && currentUser.id) {
         query = query.eq('user_id', currentUser.id);
       } else {
@@ -3528,7 +3504,7 @@ async function openDailyCheckin() {
       }
 
       const { data: likesData, error } = await query;
-      
+
       if (!error && likesData) {
         userLikedPostsSet = new Set(likesData.map(l => String(l.post_id)));
       } else {
@@ -3588,27 +3564,13 @@ async function openDailyCheckin() {
       if (badgeElem) badgeElem.innerHTML = cuitBadgeSvg(myLvl.title);
 
       syncCoinsToSupabase();
-      
+
       if (document.getElementById('pageProfile').classList.contains('active')) {
         renderProfileData();
       }
     }
 
     let cuitBadgeSerial = 0;
-
-    function cuitStarPoints(cx, cy, ro = 6.4, ri = 2.8) {
-      const points = [];
-      for (let i = 0; i < 10; i++) {
-        const angle = -Math.PI / 2 + i * Math.PI / 5;
-        const radius = i % 2 ? ri : ro;
-        points.push(
-          `${(cx + Math.cos(angle) * radius).toFixed(2)},${(
-            cy + Math.sin(angle) * radius
-          ).toFixed(2)}`
-        );
-      }
-      return points.join(' ');
-    }
 
     function cuitBadgeSvg(level) {
       const raw = typeof level === 'string' ? level : (typeof level === 'number' ? String(level) : (level?.title || ''));
@@ -3693,16 +3655,16 @@ async function openDailyCheckin() {
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch])); }
 
     const RAJA_CATEGORIES = [
-      { key:'sawer', name:'Raja Sawer', icon:'🎁', desc:'Koin gift yang dikirim', table:'gift_transactions' },
-      { key:'game', name:'Raja Game', icon:'🎯', desc:'Aktivitas permainan', table:null },
-      { key:'curhat', name:'Raja Curhat', icon:'💭', desc:'Curhatan dengan interaksi tertinggi', table:'curhat' },
-      { key:'pujangga', name:'Raja Pujangga', icon:'✍️', desc:'Jumlah curhatan dibuat', table:'curhat' },
-      { key:'komentar', name:'Raja Komentar', icon:'💬', desc:'Komentar yang ditulis', table:'comments' },
-      { key:'jaringan', name:'Raja Jaringan', icon:'👥', desc:'Pengikut yang diperoleh', table:'follows' },
-      { key:'koin', name:'Raja Koin', icon:'🪙', desc:'Koin gift yang diterima', table:'gift_transactions' },
-      { key:'sponsor', name:'Raja Sponsor', icon:'🤝', desc:'Member yang direferensikan', table:'profiles' },
-      { key:'nonton', name:'Raja Nonton', icon:'▶️', desc:'Klaim misi nonton yang tercatat', table:'reels_claims' },
-      { key:'like', name:'Raja Like', icon:'❤️', desc:'Like yang diberikan', table:'post_likes' }
+      { key:'sawer', name:'Raja Sawer', icon:'🎁', desc:'Koin gift yang dikirim' },
+      { key:'game', name:'Raja Game', icon:'🎯', desc:'Aktivitas permainan' },
+      { key:'curhat', name:'Raja Curhat', icon:'💭', desc:'Curhatan dengan interaksi tertinggi' },
+      { key:'pujangga', name:'Raja Pujangga', icon:'✍️', desc:'Jumlah curhatan dibuat' },
+      { key:'komentar', name:'Raja Komentar', icon:'💬', desc:'Komentar yang ditulis' },
+      { key:'jaringan', name:'Raja Jaringan', icon:'👥', desc:'Pengikut yang diperoleh' },
+      { key:'koin', name:'Raja Koin', icon:'🪙', desc:'Koin gift yang diterima' },
+      { key:'sponsor', name:'Raja Sponsor', icon:'🤝', desc:'Member yang direferensikan' },
+      { key:'nonton', name:'Raja Nonton', icon:'▶️', desc:'Klaim misi nonton yang tercatat' },
+      { key:'like', name:'Raja Like', icon:'❤️', desc:'Like yang diberikan' }
     ];
 
     function renderAchievementRows(containerId, rows, scoreLabel) {
@@ -3743,18 +3705,6 @@ async function openDailyCheckin() {
       d.setTime(d.getTime() - offset*86400000);
       return d;
     }
-    function safeNameFromRow(row) {
-      return row?.username || row?.sender_name || row?.name || (row?.email ? String(row.email).split('@')[0] : '') || (row?.user_email ? String(row.user_email).split('@')[0] : '') || 'Member CUIT';
-    }
-    function winnerFromCounts(counts) {
-      const sorted = Object.entries(counts || {}).filter(([,score]) => Number(score)>0).sort((a,b)=>Number(b[1])-Number(a[1]));
-      return sorted.length ? { key:sorted[0][0], score:Number(sorted[0][1]) } : null;
-    }
-    function countBy(rows, keyFn, scoreFn = () => 1) {
-      const counts = {};
-      (rows || []).forEach(row => { const key = keyFn(row); if (key) counts[key] = (counts[key] || 0) + Number(scoreFn(row) || 0); });
-      return counts;
-    }
     function renderKingCategories(containerId, categoryResults) {
       const el = document.getElementById(containerId);
       if (!el) return;
@@ -3771,7 +3721,6 @@ async function openDailyCheckin() {
       }).join('');
     }
 
-    
 async function loadAchievements() {
   renderLevelDirectory();
 
@@ -3919,381 +3868,87 @@ async function loadAchievements() {
 
         if (error) throw error;
 
-        let profilesData, weeklyGifts, weeklyComments, weeklyFollows, weeklyNewMembers, weeklyLikes, weeklyReelsClaims;
+        let profilesData = [];
+        const profilesById = new Map();
+        profilesMap = {};
 
         try {
-          const results = await Promise.all([
-            supabaseClient.from('profiles').select('id, email, used_paid_coins, username, sponsor, followers_count, gems'),
-            supabaseClient.from('gift_transactions').select('*').gte('created_at', startOfWeekISO),
-            supabaseClient.from('comments').select('username, user_email, created_at').gte('created_at', startOfWeekISO),
-            supabaseClient.from('follows').select('following_email, created_at').gte('created_at', startOfWeekISO),
-            supabaseClient.from('profiles').select('sponsor, username, email, created_at').gte('created_at', startOfWeekISO),
-            supabaseClient.from('post_likes').select('user_id, guest_token, created_at').gte('created_at', startOfWeekISO),
-            supabaseClient.from('reels_claims').select('user_id, user_email, created_at').gte('created_at', startOfWeekISO)
-          ]);
+          const { data, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('id,email,username,used_paid_coins');
+          if (profilesError) throw profilesError;
 
-          profilesData = results[0].data;
-          weeklyGifts = results[1].data;
-          weeklyComments = results[2].data;
-          weeklyFollows = results[3].data;
-          weeklyNewMembers = results[4].data;
-          weeklyLikes = results[5].data;
-          weeklyReelsClaims = results[6].data;
-        } catch (err) {
-          console.warn("Peringatan saat mengambil data panggung raja:", err);
-        }
-
-        if (profilesData) {
-          profilesMap = {};
-          profilesData.forEach(pr => {
-            if (pr.id) profilesMap[pr.id] = pr.used_paid_coins || 0;
-            if (pr.email) profilesMap[pr.email] = pr.used_paid_coins || 0;
-          });
-        }
-
-        // --- 1. RAJA SAWER ---
-        if (weeklyGifts && weeklyGifts.length > 0) {
-          const sawerMap = {};
-          weeklyGifts.forEach(g => { 
-            const name = g.sender_name || 'Sultan';
-            sawerMap[name] = (sawerMap[name] || 0) + (g.coins_amount || 0); 
-          });
-
-          const sortedSawers = Object.keys(sawerMap).sort((a, b) => sawerMap[b] - sawerMap[a]);
-          let validSawerName = null;
-          let validSawerScore = 0;
-
-          for (const sName of sortedSawers) {
-            const { data: prof } = await supabaseClient
-              .from('profiles')
-              .select('username, email')
-              .or(`username.ilike.${sName},email.ilike.${sName}`)
-              .maybeSingle();
-
-            if (prof) {
-              validSawerName = prof.username || prof.email.split('@')[0];
-              validSawerScore = sawerMap[sName];
-              break;
+          profilesData = data || [];
+          profilesData.forEach(profile => {
+            const xp = Number(profile.used_paid_coins || 0);
+            if (profile.id) {
+              profilesMap[profile.id] = xp;
+              profilesById.set(profile.id, profile);
             }
-          }
-
-          if (validSawerName) {
-            document.getElementById('champSawerName').innerText = validSawerName;
-            document.getElementById('champSawerScore').innerText = `${validSawerScore.toLocaleString('id-ID')} 🪙`;
-          } else {
-            document.getElementById('champSawerName').innerText = 'Belum Ada';
-            document.getElementById('champSawerScore').innerText = '0 🪙';
-          }
-        } else {
-          document.getElementById('champSawerName').innerText = 'Belum Ada';
-          document.getElementById('champSawerScore').innerText = '0 🪙';
-        }
-
-        // --- 2. RAJA GAME ---
-const gameNameEl = document.getElementById('champGameName');
-const gameScoreEl = document.getElementById('champGameScore');
-
-try {
-  const { data: gameRanking, error: gameRankingError } =
-    await supabaseClient.rpc('cuit_get_king_game_ranking', {
-      p_period: 'weekly'
-    });
-
-  if (gameRankingError) throw gameRankingError;
-
-  if (gameRanking && gameRanking.length > 0) {
-    const winner = gameRanking[0];
-
-    if (gameNameEl) {
-      gameNameEl.innerText = winner.username || 'Anggota CUIT';
-    }
-
-    if (gameScoreEl) {
-      gameScoreEl.innerText =
-        `${Number(winner.total_games || 0).toLocaleString('id-ID')} permainan`;
-    }
-  } else {
-    if (gameNameEl) gameNameEl.innerText = 'Belum Ada';
-    if (gameScoreEl) gameScoreEl.innerText = '0 permainan';
-  }
-} catch (error) {
-  console.error('Gagal memuat Raja Game:', error);
-
-  if (gameNameEl) gameNameEl.innerText = 'Data belum tersedia';
-  if (gameScoreEl) gameScoreEl.innerText = 'Coba muat ulang';
-}
-
-        // --- 3. RAJA CURHAT ---
-const giftCountByPost = {};
-
-(weeklyGifts || []).forEach(g => {
-  const postId = String(g.post_id || '');
-  if (postId) {
-    giftCountByPost[postId] = (giftCountByPost[postId] || 0) + 1;
-  }
-});
-
-const weeklyPosts = (data || []).filter(p =>
-  p.created_at && new Date(p.created_at) >= startOfWeek
-);
-
-let topPost = null;
-let topScore = -1;
-
-weeklyPosts.forEach(p => {
-  const score =
-    Number(p.likes_count || 0) +
-    Number(p.comments_count || 0) +
-    Number(giftCountByPost[String(p.id)] || 0);
-
-  if (score > topScore) {
-    topPost = p;
-    topScore = score;
-  }
-});
-
-if (topPost && topScore > 0) {
-  const author =
-    topPost.username ||
-    (topPost.user_email
-      ? topPost.user_email.split('@')[0]
-      : 'Pengguna');
-
-  document.getElementById('champCurhatName').innerText = author;
-  document.getElementById('champCurhatScore').innerText =
-    `${Number(topPost.likes_count || 0)} ♥ + ` +
-    `${Number(topPost.comments_count || 0)} 💬 + ` +
-    `${Number(giftCountByPost[String(topPost.id)] || 0)} 🎁`;
-} else {
-  document.getElementById('champCurhatName').innerText = 'Belum Ada';
-  document.getElementById('champCurhatScore').innerText = '0 ♥ + 0 💬 + 0 🎁';
-}
-
-        // --- 4. RAJA PUJANGGA ---
-        if (data && data.length > 0) {
-          const weeklyPosts = data.filter(p => new Date(p.created_at) >= startOfWeek);
-          if (weeklyPosts.length > 0) {
-            const postCounts = {};
-            weeklyPosts.forEach(p => { 
-              const name = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna'); 
-              postCounts[name] = (postCounts[name] || 0) + 1; 
-            });
-            const topPujangga = Object.keys(postCounts).reduce((a, b) => postCounts[a] > postCounts[b] ? a : b);
-            document.getElementById('champPujanggaName').innerText = topPujangga;
-            document.getElementById('champPujanggaScore').innerText = `${postCounts[topPujangga]} Post`;
-          } else {
-            document.getElementById('champPujanggaName').innerText = 'Belum Ada';
-            document.getElementById('champPujanggaScore').innerText = '0 Post';
-          }
-        } else {
-          document.getElementById('champPujanggaName').innerText = 'Belum Ada';
-          document.getElementById('champPujanggaScore').innerText = '0 Post';
-        }
-
-        // --- 5. RAJA KOMENTAR ---
-        if (weeklyComments && weeklyComments.length > 0) {
-          const commentCounts = {};
-          weeklyComments.forEach(c => { 
-            const name = c.username || (c.user_email ? c.user_email.split('@')[0] : 'Komentator'); 
-            commentCounts[name] = (commentCounts[name] || 0) + 1; 
+            if (profile.email) profilesMap[profile.email] = xp;
           });
-          const topKomentator = Object.keys(commentCounts).reduce((a, b) => commentCounts[a] > commentCounts[b] ? a : b);
-          document.getElementById('champKomentarName').innerText = topKomentator;
-          document.getElementById('champKomentarScore').innerText = `${commentCounts[topKomentator]} Komen`;
-        } else {
-          document.getElementById('champKomentarName').innerText = 'Belum Ada';
-          document.getElementById('champKomentarScore').innerText = '0 Komen';
+        } catch (profileError) {
+          console.warn('Data profil untuk kartu Raja belum tersedia:', profileError);
         }
 
-        // --- 6. RAJA JARINGAN ---
-        if (weeklyFollows && weeklyFollows.length > 0) {
-          const followCounts = {};
-          weeklyFollows.forEach(f => {
-            if (f.following_email) followCounts[f.following_email] = (followCounts[f.following_email] || 0) + 1;
-          });
-          if (Object.keys(followCounts).length > 0) {
-            const topEmail = Object.keys(followCounts).reduce((a, b) => followCounts[a] > followCounts[b] ? a : b);
-            
-            const { data: topUserProf } = await supabaseClient
-              .from('profiles')
-              .select('username, email')
-              .eq('email', topEmail)
-              .maybeSingle();
+        const championCategories = [
+          { key: 'sawer', nameId: 'champSawerName', scoreId: 'champSawerScore', unit: '🪙', empty: '0 🪙' },
+          { key: 'game', nameId: 'champGameName', scoreId: 'champGameScore', unit: 'permainan', empty: '0 permainan' },
+          { key: 'curhat', nameId: 'champCurhatName', scoreId: 'champCurhatScore', unit: 'interaksi', empty: '0 interaksi' },
+          { key: 'pujangga', nameId: 'champPujanggaName', scoreId: 'champPujanggaScore', unit: 'curhatan', empty: '0 curhatan' },
+          { key: 'komentar', nameId: 'champKomentarName', scoreId: 'champKomentarScore', unit: 'komentar', empty: '0 komentar' },
+          { key: 'jaringan', nameId: 'champFollowersName', scoreId: 'champFollowersScore', unit: 'aktivitas', empty: '0 aktivitas' },
+          { key: 'koin', nameId: 'champPermataName', scoreId: 'champPermataScore', unit: '🪙', empty: '0 🪙' },
+          { key: 'sponsor', nameId: 'champSponsorName', scoreId: 'champSponsorScore', unit: 'anggota', empty: '0 anggota' },
+          { key: 'nonton', nameId: 'champNontonName', scoreId: 'champNontonScore', unit: 'klaim', empty: '0 klaim' },
+          { key: 'like', nameId: 'champLikeName', scoreId: 'champLikeScore', unit: 'like', empty: '0 like' }
+        ];
 
-            const displayName = (topUserProf && topUserProf.username) 
-              ? topUserProf.username 
-              : topEmail.split('@')[0];
-
-            document.getElementById('champFollowersName').innerText = displayName;
-            document.getElementById('champFollowersScore').innerText = `+${followCounts[topEmail]} Pengikut`;
-          } else {
-            document.getElementById('champFollowersName').innerText = 'Belum Ada';
-            document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-          }
-        } else {
-          document.getElementById('champFollowersName').innerText = 'Belum Ada';
-          document.getElementById('champFollowersScore').innerText = '0 Pengikut';
-        }
-
-        // --- 7. RAJA KOIN ---
-        if (weeklyGifts && weeklyGifts.length > 0) {
-          const collectorMap = {};
-          weeklyGifts.forEach(g => { 
-            if (g.recipient_email === 'SYSTEM_WEEKLY_POOL') return;
-
-            const rec = g.recipient_email || g.recipient_id || g.recipient_name;
-            if (rec) {
-              const cleanRec = rec.trim();
-              collectorMap[cleanRec] = (collectorMap[cleanRec] || 0) + (g.coins_amount || 0); 
+        const rankingStart = localStartOfWeekWIB();
+        const championResults = await Promise.all(
+          championCategories.map(async category => {
+            try {
+              const { data: ranking, error: rankingError } = await supabaseClient.rpc(
+                'cuit_central_get_activity_ranking',
+                {
+                  p_category: category.key,
+                  p_start: rankingStart.toISOString(),
+                  p_end: null,
+                  p_limit: 100
+                }
+              );
+              if (rankingError) throw rankingError;
+              return { category, winner: Array.isArray(ranking) ? ranking[0] : null };
+            } catch (rankingError) {
+              console.warn(`Gagal memuat Raja ${category.key} dari data pusat:`, rankingError);
+              return { category, winner: null };
             }
-          });
+          })
+        );
 
-          const sortedCollectors = Object.keys(collectorMap).sort((a, b) => collectorMap[b] - collectorMap[a]);
-          let topCollectorName = null;
-          let topCoins = 0;
+        championResults.forEach(({ category, winner }) => {
+          const score = Number(winner?.total_points || 0);
+          const profile = winner?.user_id ? profilesById.get(winner.user_id) : null;
+          const name = winner && score > 0
+            ? profile?.username || profile?.email?.split('@')[0] || 'Anggota CUIT'
+            : 'Belum Ada';
 
-          for (const key of sortedCollectors) {
-            let { data: prof } = await supabaseClient
-              .from('profiles')
-              .select('username, email')
-              .eq('email', key)
-              .maybeSingle();
-
-            if (!prof) {
-              const { data: profAlt } = await supabaseClient
-                .from('profiles')
-                .select('username, email')
-                .or(`id.eq.${key},username.ilike.${key}`)
-                .maybeSingle();
-              prof = profAlt;
-            }
-
-            if (prof) {
-              topCollectorName = prof.username || (prof.email ? prof.email.split('@')[0] : key);
-              topCoins = collectorMap[key];
-              break; 
-            }
+          const nameElement = document.getElementById(category.nameId);
+          const scoreElement = document.getElementById(category.scoreId);
+          if (nameElement) nameElement.innerText = name;
+          if (scoreElement) {
+            scoreElement.innerText = score > 0
+              ? `${score.toLocaleString('id-ID')} ${category.unit}`
+              : category.empty;
           }
 
-          if (topCollectorName && topCoins > 0) {
-            currentChampKoinData = { name: topCollectorName, coins: topCoins };
-            document.getElementById('champPermataName').innerText = topCollectorName;
-            document.getElementById('champPermataScore').innerText = `${topCoins.toLocaleString('id-ID')} 🪙`;
-          } else {
-            currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-            document.getElementById('champPermataName').innerText = 'Belum Ada';
-            document.getElementById('champPermataScore').innerText = '0 🪙';
+          if (category.key === 'koin') {
+            currentChampKoinData = {
+              name: score > 0 ? name : 'Belum Ada',
+              coins: score > 0 ? score : 0
+            };
           }
-        } else {
-          currentChampKoinData = { name: 'Belum Ada', coins: 0 };
-          document.getElementById('champPermataName').innerText = 'Belum Ada';
-          document.getElementById('champPermataScore').innerText = '0 🪙';
-        }
-
-        // --- 8. RAJA SPONSOR ---
-        if (weeklyNewMembers && weeklyNewMembers.length > 0) {
-          const sponsorCounts = {};
-          weeklyNewMembers.forEach(m => {
-            if (m.sponsor && m.sponsor.trim() !== '') {
-              const sp = m.sponsor.trim();
-              sponsorCounts[sp] = (sponsorCounts[sp] || 0) + 1;
-            }
-          });
-
-          const sortedSponsors = Object.keys(sponsorCounts).sort((a, b) => sponsorCounts[b] - sponsorCounts[a]);
-          let validSponsorName = null;
-          let validSponsorScore = 0;
-
-          for (const spKey of sortedSponsors) {
-            const { data: sponsorProf } = await supabaseClient
-              .from('profiles')
-              .select('username, email')
-              .or(`referral_code.ilike.${spKey},email.ilike.${spKey},username.ilike.${spKey}`)
-              .maybeSingle();
-
-            if (sponsorProf) {
-              validSponsorName = sponsorProf.username || sponsorProf.email.split('@')[0];
-              validSponsorScore = sponsorCounts[spKey];
-              break;
-            }
-          }
-
-          if (validSponsorName) {
-            document.getElementById('champSponsorName').innerText = validSponsorName;
-            document.getElementById('champSponsorScore').innerText = `+${validSponsorScore} Member`;
-          } else {
-            document.getElementById('champSponsorName').innerText = 'Belum Ada';
-            document.getElementById('champSponsorScore').innerText = '0 Member';
-          }
-        } else {
-          document.getElementById('champSponsorName').innerText = 'Belum Ada';
-          document.getElementById('champSponsorScore').innerText = '0 Member';
-        }
-
-        // --- 9. KALKULASI RAJA NONTON ---
-        // Gunakan peringkat dari Supabase agar klaim berhadiah dihitung lebih dulu,
-        // lalu tontonan tambahan hanya menjadi pemecah seri.
-        try {
-          const { data: nontonRanking, error: nontonRankingError } =
-            await supabaseClient.rpc('cuit_get_weekly_nonton_ranking');
-
-          if (nontonRankingError) throw nontonRankingError;
-
-          const topNonton = Array.isArray(nontonRanking) ? nontonRanking[0] : null;
-          if (topNonton && topNonton.nama_anggota) {
-            document.getElementById('champNontonName').innerText = topNonton.nama_anggota;
-            const claimsScore = Number(topNonton.klaim_berhadiah || 0);
-            const extraScore = Number(topNonton.tontonan_tambahan || 0);
-            document.getElementById('champNontonScore').innerText =
-              `${claimsScore} klaim · +${extraScore}`;
-          } else {
-            document.getElementById('champNontonName').innerText = 'Belum Ada';
-            document.getElementById('champNontonScore').innerText = '0 klaim · +0';
-          }
-        } catch (nontonRankingError) {
-          console.error('Peringkat Raja Nonton dari Supabase gagal dimuat:', nontonRankingError);
-          document.getElementById('champNontonName').innerText = 'Data belum tersedia';
-          document.getElementById('champNontonScore').innerText = 'Periksa Supabase';
-        }
-
-
-        // --- 10. KALKULASI RAJA LIKE ---
-        if (weeklyLikes && weeklyLikes.length > 0) {
-          const likeCounts = {};
-          weeklyLikes.forEach(l => {
-            const key = l.user_id || l.guest_token;
-            if (key) likeCounts[key] = (likeCounts[key] || 0) + 1;
-          });
-
-          const sortedLikes = Object.keys(likeCounts).sort((a, b) => likeCounts[b] - likeCounts[a]);
-          let topLikeName = null;
-          let topLikeScore = 0;
-
-          for (const key of sortedLikes) {
-            const { data: prof } = await supabaseClient
-              .from('profiles')
-              .select('username, email')
-              .eq('id', key)
-              .maybeSingle();
-
-            if (prof) {
-              topLikeName = prof.username || prof.email.split('@')[0];
-              topLikeScore = likeCounts[key];
-              break;
-            }
-          }
-
-          if (topLikeName) {
-            document.getElementById('champLikeName').innerText = topLikeName;
-            document.getElementById('champLikeScore').innerText = `${topLikeScore} Like`;
-          } else {
-            document.getElementById('champLikeName').innerText = 'Belum Ada';
-            document.getElementById('champLikeScore').innerText = '0 Like';
-          }
-        } else {
-          document.getElementById('champLikeName').innerText = 'Belum Ada';
-          document.getElementById('champLikeScore').innerText = '0 Like';
-        }
+        });
 
         // --- RENDER SOROTAN PROMOSI & BERANDA ---
         const nowMs = Date.now();
@@ -4314,7 +3969,7 @@ if (topPost && topScore > 0) {
           });
 
         if (sorotanItems.length > 0) {
-          
+
 let cardsHTML = '';
 window.cuitAllPromotedItems = sorotanItems;
 
@@ -4558,7 +4213,7 @@ window.openAllPromoted = function() {
   document.getElementById('confirmPromotionButton').disabled =
     !valid || (!saldoCukup && !bisaAntre) || promotionSubmitting;
 }
-    
+
 async function confirmPostPromotion() {
   if (promotionSubmitting || !pendingPromotionPostId) return;
 
@@ -4717,12 +4372,12 @@ function renderCardHTML(p) {
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
   let feelingTag = p.feeling || 'Bahagia';
   const cleanTag = feelingTag.replace(/[^a-zA-Z]/g, '');
-  
+
   const likesCount = p.likes_count ?? 0;
   const commentsCount = p.comments_count ?? 0;
   const giftsCoinsCount = p.gifts_count ?? 0;
   const isLiked = userLikedPostsSet.has(String(p.id));
-  
+
   let authorPoin = 0;
   if (p.user_id && profilesMap[p.user_id] !== undefined) {
     authorPoin = profilesMap[p.user_id];
@@ -4766,26 +4421,26 @@ function renderCardHTML(p) {
             </div>
           </div>
         </div>
-        
+
         <!-- KANAN: Jam + Titik 3 + Menu Dropdown -->
         <div class="post-header-right">
           <span class="post-time">${new Date(p.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
           <button class="btn-more-options" onclick="togglePostMenu('${p.id}', event)">⋮</button>
-          
+
           <div class="post-menu-dropdown" id="post-dropdown-${p.id}">
             ${isSelf ? `
               <button class="post-menu-item" onclick="openEditPostModal('${p.id}')">
                 <span>✏️</span> Edit Postingan
               </button>
             ` : ''}
-            
+
             <button class="post-menu-item" onclick="promotePost('${p.id}')">
               <span>🚀</span> Promosikan Post
             </button>
             <button class="post-menu-item" onclick="sharePost('${p.id}', '${safeContent}')">
               <span>🔗</span> Bagikan Post
             </button>
-            
+
             ${isAdmin ? `
               <button class="post-menu-item danger" onclick="deletePostByAdmin('${p.id}')">
                 <span>🗑️</span> Hapus (Admin)
@@ -4800,7 +4455,7 @@ function renderCardHTML(p) {
       </div>
 
       <!-- ISI CURHATAN -->
-      <div class="post-body"${cuitStyleInlineForPost(p.post_style)}>${escapeHtml(p.content || '')}</div>      
+      <div class="post-body"${cuitStyleInlineForPost(p.post_style)}>${escapeHtml(p.content || '')}</div>
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
         <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; padding: 4px 10px; border-radius: 10px; font-size: 10.5px; font-weight: 800; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);">
           🎁 Sisa ${p.remaining_reward_coins} Koin Berbayar untuk Komentator Tercepat!
@@ -4875,7 +4530,6 @@ function renderCardHTML(p) {
         }).subscribe();
     }
 
-    
 async function toggleLike(postId) {
   let guestToken = localStorage.getItem('cuit_guest_token');
   if (!guestToken) {
@@ -5030,7 +4684,6 @@ async function toggleLike(postId) {
       await openCommentsModal(postId);
     }
 
-    
 async function submitCommentAction() {
   const input = document.getElementById('commentInputText');
   const comm = input.value.trim();
@@ -5347,8 +5000,8 @@ async function submitCommentAction() {
             </div>
 
             ${isGiftNotif ? `
-              <button class="btn-primary" 
-                      style="padding:5px 10px; font-size:10px; border-radius:8px; background:linear-gradient(135deg, #319af0, #e32636); align-self:flex-start;" 
+              <button class="btn-primary"
+                      style="padding:5px 10px; font-size:10px; border-radius:8px; background:linear-gradient(135deg, #319af0, #e32636); align-self:flex-start;"
                       onclick="openThankYouDraft('${senderName.replace(/'/g, "\\'")}', '${giftDetailText.replace(/'/g, "\\'")}')">
                 💬 Balas Ucapan Terima Kasih
               </button>
@@ -5363,10 +5016,10 @@ async function submitCommentAction() {
       if (notifModal) notifModal.style.display = 'none';
 
       const defaultText = `Terima kasih banyak ya Kak @${senderName} atas kiriman ${giftDetail} nya! Ditunggu support-nya lagi, sehat dan sukses selalu ya! 🙏✨`;
-      
+
       const postInput = document.getElementById('postContent');
       const feelingSelect = document.getElementById('postFeeling');
-      
+
       if (postInput) {
         postInput.value = defaultText;
         if (typeof updateCharCount === 'function') updateCharCount(postInput);
@@ -5450,7 +5103,7 @@ async function submitCommentAction() {
       if (filterType === 'top_level' || filterType === 'top_sawer') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
         const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
-        
+
         if (!topUsers || topUsers.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
           return;
@@ -5479,7 +5132,7 @@ async function submitCommentAction() {
       if (filterType === 'top_followers' || filterType === 'top_sponsor') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Data Rangking...</p>';
         const { data: topFollowed } = await supabaseClient.from('profiles').select('*').order('followers_count', { ascending: false }).limit(10);
-        
+
         if (!topFollowed || topFollowed.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
           return;
@@ -5555,7 +5208,7 @@ async function submitCommentAction() {
       document.getElementById('walletModal').style.display = 'none';
       const qrisModal = document.getElementById('qrisDisplayModal');
       const qrisContainer = document.getElementById('qrisImageContainer');
-      
+
       qrisModal.style.display = 'flex';
       qrisContainer.innerHTML = `
         <div style="font-size: 12px; font-weight: 700; color: #4338ca;">Menghubungkan ke DOKU QRIS...</div>
@@ -5679,7 +5332,7 @@ async function submitCommentAction() {
         else status.textContent='Koneksi RPC berhasil, tetapi belum ada data pool aktif.';
       }catch(err){status.textContent='Koneksi Pool Mingguan belum aktif di database. Jalankan SQL integrasi Pool Mingguan yang disertakan bersama file ini. Hasil permainan tidak akan menambah saldo sebelum server mengonfirmasi.';console.warn('Pool status:',err?.message||err);}
     }
-    
+
 const CUIT_LEVEL_FACILITIES = [
   'Promosi Biasa — 1 koin/jam',
   'Promosi Istimewa — 5 koin/jam',
@@ -5733,7 +5386,7 @@ const CUIT_LEVEL_FACILITIES = [
       style.italic=document.getElementById('postItalicBtn')?.classList.contains('selected')||false;
       return style;
     }
-    
+
 function cuitPostStyleCss(style) {
   const s = { ...CUIT_POST_STYLE_DEFAULT, ...(style || {}) };
 
@@ -5845,7 +5498,6 @@ case 'batik-nusantara':
   if (!style || typeof style !== 'object') return '';
   return ` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`;
 }
-    function cuitGetPostStyle(postId){try{return JSON.parse(localStorage.getItem('cuit_post_styles_v1')||'{}')[String(postId)]||null;}catch(e){return null;}}
     function cuitResetPostStyle(){Object.entries({postBorderStyle:'solid',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
     document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();if(currentUser)cuitRefreshMyLevel();});
 
@@ -6068,7 +5720,7 @@ if (isAdmin) {
               ? '▶ Tonton tambahan · tanpa koin'
               : (isClaimed ? '🔒 Sudah diklaim' : 'Tonton & Klaim +10 🪙'));
         const safeUrl = String(url).replace(/&/g, '&amp;').replace(/'/g, '\\\'').replace(/"/g, '&quot;');
-        
+
 html += `
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border:1px solid ${isClaimed ? '#b8d9c2' : '#e0e0e0'};border-radius:12px;background:${isClaimed ? '#eef8f0' : '#f9f9f9'};">
     <span style="font-weight:800;font-size:12px;color:#333;">🎬 Video ${i}</span>
@@ -6105,13 +5757,13 @@ container.innerHTML = html;
       }
 
       const frameContainer = document.getElementById('videoFrameContainer');
-      
+
       frameContainer.innerHTML = `
-        <div class="fb-video" 
-          data-href="${rawUrl}" 
-          data-width="360" 
-          data-show-text="false" 
-          data-autoplay="false" 
+        <div class="fb-video"
+          data-href="${rawUrl}"
+          data-width="360"
+          data-show-text="false"
+          data-autoplay="false"
           data-allowfullscreen="true">
         </div>
       `;
@@ -6287,7 +5939,7 @@ await updateCoinUI(true);
       } catch (err) {
         console.error("Gagal mengambil reels_missions:", err);
       }
-      
+
       const modal = document.getElementById('adminReelsModal');
       if (modal) {
         modal.style.display = 'flex';
@@ -6448,7 +6100,7 @@ function updateCommentCharCount(input) {
     display.textContent = `${count} karakter · Biaya: ${fee} koin`;
   }
 }
-    
+
 async function submitNewPost() {
   const content = document.getElementById('postContent').value.trim();
   const feeling = document.getElementById('postFeeling').value;
@@ -6588,7 +6240,7 @@ async function submitNewPost() {
         document.getElementById('cuitModalText').innerText = message;
         document.getElementById('cuitModalInput').style.display = 'none';
         document.getElementById('cuitModalCancelBtn').style.display = 'none';
-        
+
         const modal = document.getElementById('cuitSystemModal');
         modal.style.display = 'flex';
 
@@ -6602,11 +6254,11 @@ async function submitNewPost() {
     window.prompt = function(message, defaultValue = "") {
       return new Promise((resolve) => {
         document.getElementById('cuitModalText').innerText = message;
-        
+
         const input = document.getElementById('cuitModalInput');
         input.style.display = 'block';
         input.value = defaultValue;
-        
+
         const cancelBtn = document.getElementById('cuitModalCancelBtn');
         cancelBtn.style.display = 'block';
 
@@ -6711,7 +6363,7 @@ function cuitConfirm(message) {
       if (!modal) return;
 
       const lvl = getUserLevel(userExp || 0);
-      
+
       document.getElementById('mMainBadge').innerHTML = cuitBadgeSvg(lvl.title);
 
       document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
@@ -6750,7 +6402,7 @@ function cuitConfirm(message) {
       const followContainer = document.getElementById('mFollowActionContainer');
       if (!isSelf) {
         followContainer.innerHTML = `
-          <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eaf5ff' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};" 
+          <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eaf5ff' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};"
                   onclick="toggleFollow('${userEmail}', this); openUserProfileModal('${userEmail}', '${userName}', ${userExp});">
             ${isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini'}
           </button>
@@ -6787,10 +6439,10 @@ function cuitConfirm(message) {
 
       const { error } = await supabaseClient
         .from('profiles')
-        .update({ 
-          username: newName, 
+        .update({
+          username: newName,
           referral_code: newName.replace(/\s+/g, '').toUpperCase(),
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString()
         })
         .eq('email', myEmail);
 
@@ -6800,7 +6452,7 @@ function cuitConfirm(message) {
 
       document.getElementById('editProfileModal').style.display = 'none';
       alert('✅ Profil berhasil diperbarui!');
-      
+
       renderProfileData();
       loadPosts();
     }
@@ -6809,7 +6461,6 @@ function cuitConfirm(message) {
     checkUser();
   </script>
 
-  
 <!-- MODAL STANDAR CUIT PREMIUM -->
 <div id="cuitSystemModal" class="modal cuit-premium-modal" style="z-index:99999;">
   <div class="modal-content cuit-premium-content">
@@ -6928,7 +6579,7 @@ function cuitConfirm(message) {
     <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; text-align:center;">
       <h3 style="margin-top:0;">Top-Up Paid Coins</h3>
       <p style="font-size:13px; color:#666;">Pilih nominal koin yang ingin dibeli (1 Koin = Rp 1):</p>
-      
+
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <button class="btn-primary" onclick="handleTopUp(1000)">1.000 Koin<br>Rp 1.000</button>
         <button class="btn-primary" onclick="handleTopUp(5000)">5.000 Koin<br>Rp 5.000</button>
@@ -6947,17 +6598,17 @@ function cuitConfirm(message) {
     <div style="background:#fff; padding:20px; border-radius:12px; text-align:center; max-width:320px; width:90%;">
       <h3 style="margin-top:0;">Scan QRIS untuk Bayar</h3>
       <p style="font-size:13px; color:#666;">Silakan scan QRIS di bawah menggunakan E-Wallet atau M-Banking kamu.</p>
-      
+
       <div id="qrisContainer" style="margin: 15px 0;"></div>
 
       <p style="font-size:12px; color:#007bff; font-weight:bold;">Menunggu pembayaran... Koin akan otomatis masuk!</p>
-      
+
       <button onclick="closeQRISModal()" style="margin-top:10px; width:100%; padding:10px; background:#ccc; border:none; border-radius:6px; font-weight:bold;">Batal</button>
     </div>
   </div>
 
   <script>
-    
+
 async function handleTopUp(amount) {
   const packageIds = {
     1000: "cuit_1000",
