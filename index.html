@@ -4174,10 +4174,6 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
         const name = escapeHtml(rawName);
         const feeling = escapeHtml(post.feeling || 'Curhat');
         const fullContent = escapeHtml(post.content || 'Curhatan istimewa').replace(/\n/g, '<br>');
-        const needsReadMore = String(post.content || '').length > 78;
-        const content = needsReadMore
-          ? escapeHtml(String(post.content || '').replace(/\n/g, ' ').substring(0, 78).trimEnd()) + '…'
-          : fullContent;
         let authorPoin = 0;
         if (post.user_id && profilesMap[post.user_id] !== undefined) authorPoin = profilesMap[post.user_id];
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
@@ -4188,15 +4184,23 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
   <div style="display:flex;align-items:center;gap:5px;min-width:0;margin:0 6px 5px;">
     <div style="width:23px;height:23px;flex:0 0 23px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff;border:1px solid #e8b2bd;">${badge}</div>
 
-    <div style="min-width:0;flex:1;display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;">
-      <span style="font-size:10px;font-weight:900;color:#30242a;overflow:hidden;text-overflow:ellipsis;">${name}</span>
-      <span style="flex:0 0 auto;font-size:7px;font-weight:850;color:#fff;background:${userLvl.color || '#a50d27'};padding:2px 4px;border-radius:4px;">${escapeHtml(userLvl.title || 'Anggota')}</span>
-      <span style="flex:0 0 auto;font-size:8px;font-weight:700;color:#8b7b82;overflow:hidden;text-overflow:ellipsis;">${feeling}</span>
+    <div style="min-width:0;flex:1;display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;">
+      <span style="min-width:0;flex:1 1 0;font-size:10px;font-weight:900;color:#30242a;overflow:hidden;text-overflow:ellipsis;">${name}</span>
+      <span style="flex:0 0 auto;font-size:6.5px;font-weight:850;color:#fff;background:${userLvl.color || '#a50d27'};padding:2px 3px;border-radius:4px;">${escapeHtml(userLvl.title || 'Anggota')}</span>
+      <span style="min-width:0;max-width:25%;flex:0 1 25%;font-size:8px;font-weight:700;color:#8b7b82;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${feeling}</span>
     </div>
   </div>
 
-  <div style="width:100%;box-sizing:border-box;min-height:78px;font-size:12px;line-height:1.35;overflow-wrap:anywhere;white-space:normal;display:flex;flex-direction:column;overflow:hidden;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><span style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${content}</span>${needsReadMore ? '<span style="display:block;margin-top:auto;padding-top:3px;text-align:right;font-size:9px;line-height:1.2;font-weight:900;color:#c8102e;white-space:nowrap;">Baca selengkapnya ›</span>' : ''}</div>
-</div>`;
+  <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:78px;min-height:78px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
+ </div>`;
+         const specialBox = slot.querySelector('.special-content-box');
+         const specialInner = specialBox && specialBox.querySelector('.special-content-inner');
+         if (specialBox && specialInner && specialInner.scrollHeight > specialBox.clientHeight + 2) {
+           const readMore = document.createElement('span');
+           readMore.textContent = 'Baca selengkapnya ›';
+           readMore.style.cssText = 'position:absolute;right:5px;bottom:3px;z-index:2;padding:2px 4px;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,.72),rgba(255,255,255,.98) 30%);color:#c8102e;font-size:9px;line-height:12px;font-weight:900;white-space:nowrap;text-shadow:0 1px 0 #fff;pointer-events:none;';
+           specialBox.appendChild(readMore);
+         }</div>`;
       }
     }
 window.openAllPromoted = function() {
