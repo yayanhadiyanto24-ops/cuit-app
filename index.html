@@ -4421,7 +4421,8 @@ async function confirmPostPromotion() {
     // Jika masuk antrean, saldo tidak dipotong.
     if (data.queued === true) {
       let posisi = Number(data.queue_position || 0);
-      let tunggu = data.estimated_wait_minutes;\n      let nomorSlot = Number(data.slot_number || 0);
+      let tunggu = data.estimated_wait_minutes;
+      let nomorSlot = Number(data.slot_number || 0);
 
       // Ambil estimasi terbaru jika queue_id tersedia.
       if (data.queue_id) {
@@ -4433,7 +4434,8 @@ async function confirmPostPromotion() {
 
         if (!statusError && statusData?.ok === true) {
           posisi = Number(statusData.queue_position || posisi);
-          tunggu = statusData.estimated_wait_minutes;\n          nomorSlot = Number(statusData.slot_number || nomorSlot);
+          tunggu = statusData.estimated_wait_minutes;
+          nomorSlot = Number(statusData.slot_number || nomorSlot);
         }
       }
 
