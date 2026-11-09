@@ -1925,7 +1925,7 @@ ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
   }
 
   function drawObstacles() {
-  // Hanya paku yang menjadi rintangan fisika.
+  // Pasak kecil dan bumper besar terlihat sama dengan rintangan fisika server.
   for (let row = 0; row < 11; row++) {
     for (let col = 0; col < 9; col++) {
       const x = 48 + col * 48 + (row % 2 ? 24 : 0);
@@ -1933,6 +1933,39 @@ ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
       if (x < 430) peg(x, y, 6.5);
     }
   }
+
+  const rect=canvas.getBoundingClientRect();
+  const sx=(rect.height/H)/(rect.width/W);
+  const bumpers=[
+    {x:120,y:255,r:14},
+    {x:360,y:255,r:14},
+    {x:240,y:430,r:15},
+    {x:120,y:575,r:14},
+    {x:360,y:575,r:14}
+  ];
+  bumpers.forEach(({x,y,r})=>{
+    ctx.save();
+    ctx.shadowColor='rgba(120,35,25,.35)';
+    ctx.shadowBlur=8;
+    const g=ctx.createRadialGradient(x-4,y-5,2,x,y,r);
+    g.addColorStop(0,'#fff8cc');
+    g.addColorStop(.38,'#f5c54c');
+    g.addColorStop(.78,'#bd7720');
+    g.addColorStop(1,'#7e4218');
+    ctx.beginPath();
+    ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
+    ctx.fillStyle=g;
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.strokeStyle='#fff0ae';
+    ctx.lineWidth=2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(x-4*sx,y-5,r*.34*sx,r*.28,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,.8)';
+    ctx.fill();
+    ctx.restore();
+  });
 }
   function drawTube(i, balls, settled) {
     const x=i*tubeW;
