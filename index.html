@@ -2198,9 +2198,8 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
         lastTime = now;
         animationTime += delta;
 
-        // Setiap sampel server mewakili 24 langkah fisika
-        // dengan kecepatan simulasi 120 langkah per detik.
-        const sampleDuration = 24 / 120;
+        // Sampel server setiap 4 langkah fisika (30 frame/detik).
+        const sampleDuration = 4 / 120;
 
         while (
           frameIndex < trace.length - 1 &&
