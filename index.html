@@ -1964,9 +1964,10 @@ ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
     // Pasak dasar.
     for (let row=0; row<11; row++) {
       const count=row%2===0?9:10;
-      const startX=row%2===0?48:24;
+      const startX=row%2===0?48:36;
+      const stepX=row%2===0?48:(W-72)/9;
       for (let col=0; col<count; col++) {
-        const x=startX+col*48;
+        const x=startX+col*stepX;
         const y=65+row*55;
         peg(x,y,6.5);
       }
@@ -1974,12 +1975,12 @@ ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
 
     // Papan pendek berpasangan dan bercermin, tanpa corong ke tengah.
     const ramps=[
-      {x1:34,y1:310,x2:188,y2:330,power:1.04},
-      {x1:292,y1:330,x2:446,y2:310,power:1.04},
-      {x1:34,y1:510,x2:188,y2:490,power:1.06},
-      {x1:292,y1:490,x2:446,y2:510,power:1.06},
-      {x1:34,y1:650,x2:188,y2:630,power:1.08},
-      {x1:292,y1:630,x2:446,y2:650,power:1.08}
+      {x1:62,y1:310,x2:188,y2:330,power:1.04},
+      {x1:292,y1:330,x2:418,y2:310,power:1.04},
+      {x1:62,y1:510,x2:188,y2:490,power:1.06},
+      {x1:292,y1:490,x2:418,y2:510,power:1.06},
+      {x1:62,y1:650,x2:188,y2:630,power:1.08},
+      {x1:292,y1:630,x2:418,y2:650,power:1.08}
     ];
     ramps.forEach((r,index)=>{
       const isLauncher=index>=4;
@@ -2196,7 +2197,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
 
         const delta = Math.min((now - lastTime) / 1000, 0.05);
         lastTime = now;
-        animationTime += delta;
+        animationTime += delta * 1.7;
 
         // Sampel server setiap 4 langkah fisika (30 frame/detik).
         const sampleDuration = 4 / 120;
