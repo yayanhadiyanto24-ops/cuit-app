@@ -7933,7 +7933,7 @@ if (!confirmed) {
     return;
   }
 
-  const index = matchingIndexes[0];
+  const index = matchingIndexes[Math.floor(Math.random()*matchingIndexes.length)];
 
   message('Roda sedang berputar...');
 
