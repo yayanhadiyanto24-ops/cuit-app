@@ -3136,101 +3136,25 @@ async function openDailyCheckin() {
   const day = new Date().toLocaleDateString('en-CA', {
     timeZone: 'Asia/Jakarta'
   });
-
-  const rewards = [1, 2, 3, 5, 8, 13, 21];
   const ok = await showCuitCheckinModal(day);
   if (!ok) return;
 
   try {
-    const { data: existing, error: readError } =
-      await supabaseClient.from('cuit_checkins')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .eq('checkin_date', day)
-        .maybeSingle();
+    // Backend performs duplicate check, streak calculation, check-in insert,
+    // and free-coin credit atomically in one transaction.
+    const { data, error } = await supabaseClient.rpc('cuit_claim_daily_checkin');
 
-    if (readError) throw readError;
-
-    if (existing) {
-      alert('Kamu sudah absen hari ini. Bonus tidak bisa diambil dua kali.');
-      return;
+    if (error) throw error;
+    if (!data || data.reward == null || data.free_coins == null) {
+      throw new Error('Respons bonus absen tidak lengkap. Silakan coba lagi.');
     }
 
-    const yesterday = new Date(
-      new Date(day + 'T00:00:00+07:00').getTime() - 86400000
-    );
-
-    const fromDay = new Date(
-      yesterday.getTime() - 6 * 86400000
-    ).toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
-
-    const { data: recent, error: historyError } =
-      await supabaseClient.from('cuit_checkins')
-        .select('checkin_date')
-        .eq('user_id', currentUser.id)
-        .gte('checkin_date', fromDay)
-        .lt('checkin_date', day)
-        .order('checkin_date', { ascending: false });
-
-    if (historyError) throw historyError;
-
-    const priorDates = new Set(
-      (recent || []).map(r => String(r.checkin_date).slice(0, 10))
-    );
-
-    let streak = 0;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(
-        yesterday.getTime() - i * 86400000
-      ).toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
-
-      if (priorDates.has(d)) streak++;
-      else break;
-    }
-
-    const rewardIndex = Math.min(streak, rewards.length - 1);
-    const reward = rewards[rewardIndex];
-
-    const { error: insertError } =
-      await supabaseClient.from('cuit_checkins').insert({
-        user_id: currentUser.id,
-        checkin_date: day
-      });
-
-    if (insertError) throw insertError;
-
-    const { data: profile, error: profileError } =
-      await supabaseClient.from('profiles')
-        .select('free_coins')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-
-    if (profileError || !profile) {
-      throw new Error('Absen tercatat, tetapi saldo tidak bisa dibaca. Hubungi admin.');
-    }
-
-    const before = Math.max(
-      0, Number(profile.free_coins ?? freeCoins ?? 0)
-    );
-    const after = before + reward;
-
-    const { error: awardError } =
-      await supabaseClient.from('profiles')
-        .update({ free_coins: after })
-        .eq('id', currentUser.id);
-
-    if (awardError) {
-      throw new Error(
-        `Absen tercatat, tetapi bonus ${reward} Koin Gratis gagal disimpan. Hubungi admin.`
-      );
-    }
-
-    freeCoins = after;
+    freeCoins = Number(data.free_coins);
     localStorage.setItem('cuit_free_coins', String(freeCoins));
     await updateCoinUI(true);
 
     alert(
-      `Absen berhasil! Bonus hari ke-${rewardIndex + 1}: ${reward} Koin Gratis.\n` +
+      `Absen berhasil! Bonus hari ke-${Number(data.reward_day)}: ${Number(data.reward)} Koin Gratis.\n` +
       `Saldo Koin Gratis: ${freeCoins.toLocaleString('id-ID')}.`
     );
   } catch (error) {
