@@ -1796,7 +1796,7 @@ poolStatus=feePaid>0
   <p class="mg-sub">Tiga kelereng meluncur melewati rintangan. Perhatikan tempat ketiganya berhenti dan temukan pesan inspirasi hari ini!</p>
 
   <div class="mg-info">
-    <div>BIAYA<strong id="mgFeeText">Mulai 1 Koin Gratis</strong></div>
+    <div>BIAYA<strong>1, 2, 3... Koin Gratis</strong></div>
     <div>HADIAH<strong>1 Permata</strong></div>
     <div>KELERENG<strong>3 Buah</strong></div>
   </div>
@@ -2285,9 +2285,6 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     session = { ...row, session_id: sid };
 
     const currentFee = Math.max(1, Number(row.fee || 1));
-    const feeText = document.getElementById('mgFeeText');
-    if (feeText) feeText.textContent = currentFee + ' Koin Gratis';
-    
     if (typeof updateCoinUI === 'function') {
       await updateCoinUI();
     }
