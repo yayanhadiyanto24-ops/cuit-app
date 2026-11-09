@@ -7719,6 +7719,42 @@ function confirmRouletteSpin(fee, isExtraSpin) {
     });
   });
       }
+  // Animasi roda dengan requestAnimationFrame: kontrol frame lebih stabil
+  // daripada mengandalkan transisi CSS panjang pada beberapa WebView Android.
+  function animateRouletteWheel(targetRotation,duration=8200) {
+    const wheel=$('cuit-roulette-wheel');
+    if (!wheel) return Promise.resolve();
+
+    return new Promise(resolve=>{
+      const startRotation=wheelRotation;
+      const change=targetRotation-startRotation;
+      const startTime=performance.now();
+
+      wheel.style.transition='none';
+      wheel.style.willChange='transform';
+      wheel.style.transform='translate3d(0,0,0) rotate('+startRotation+'deg)';
+
+      function frame(now) {
+        const progress=Math.min(1,(now-startTime)/duration);
+        // Ease-out quint: putaran cepat di awal, melambat mulus mendekati hasil.
+        const eased=1-Math.pow(1-progress,5);
+        const angle=startRotation+change*eased;
+
+        wheel.style.transform='translate3d(0,0,0) rotate('+angle+'deg)';
+
+        if (progress<1) {
+          requestAnimationFrame(frame);
+        } else {
+          wheelRotation=targetRotation;
+          wheel.style.transform='translate3d(0,0,0) rotate('+targetRotation+'deg)';
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(frame);
+    });
+  }
+
   async function spin() {
   if (spinning) return;
 
@@ -7820,16 +7856,13 @@ if (!confirmed) {
   const current = wheelRotation%360;
   const delta = (target-current+360)%360;
 
-  wheelRotation += 360*7+delta;
+  const targetRotation=wheelRotation+360*7+delta;
 
-  $('cuit-roulette-wheel').style.transform =
-    `rotate(${wheelRotation}deg)`;
+  await animateRouletteWheel(targetRotation,8200);
 
-  setTimeout(async()=>{
-    spinning = false;
-    showResult(row);
-    await loadPending();
-  },8200);
+  spinning = false;
+  showResult(row);
+  await loadPending();
 }
   function showResult(row) {
     const result = $('cuit-roulette-result');
