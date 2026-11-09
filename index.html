@@ -1406,8 +1406,12 @@
   border: 2px solid #a91429;
   border-radius: 10px;
   font-size: 22px;
-  box-shadow: 0 3px 0 #780b1a;
-  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 2px 0 #780b1a;
+  transition: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cuit-kilat-page .kilat-tile.open,
@@ -1462,7 +1466,28 @@
       function shuffle(items){const arr=items.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
       function setMessage(text){message.textContent=text;}
       function makeDeck(){letters=shuffle(alphabet).slice(0,8);deck=shuffle(letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]));}
-      function render(){grid.innerHTML='';deck.forEach((card,index)=>{const button=document.createElement('button');button.type='button';button.className='kilat-tile'+((card.revealed||card.matched)?' open':'')+(card.matched?' matched':'');button.textContent=(card.revealed||card.matched)?card.letter:'';button.setAttribute('aria-label',(card.revealed||card.matched)?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);button.disabled=!started||ended||lock||card.matched||card.revealed;button.addEventListener('click',()=>flip(index));grid.appendChild(button);});}
+      function render(){
+        if(grid.children.length!==deck.length){
+          const fragment=document.createDocumentFragment();
+          deck.forEach((card,index)=>{
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='kilat-tile';
+            button.dataset.index=String(index);
+            button.setAttribute('aria-label',`Kotak ${index+1}, tertutup`);
+            fragment.appendChild(button);
+          });
+          grid.replaceChildren(fragment);
+        }
+        for(let index=0;index<deck.length;index++){
+          const card=deck[index],button=grid.children[index];
+          const visible=card.revealed||card.matched;
+          button.className='kilat-tile'+(visible?' open':'')+(card.matched?' matched':'');
+          button.textContent=visible?card.letter:'';
+          button.setAttribute('aria-label',visible?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);
+          button.disabled=!started||ended||lock||card.matched||card.revealed;
+        }
+      }
       function updateStats(){timeEl.textContent=remaining;foundEl.textContent=`${matches.length}/3`;bar.style.width=`${Math.max(0,remaining/30*100)}%`;roundEl.textContent=matches.length>=3?'Selesai!':started?`Pasangan ${matches.length+1} dari 3`:'Siap bermain';}
       // Mengatur ulang papan lokal tanpa memanggil RPC yang dapat memotong koin.
       function init(resetOffer=true){
@@ -1544,6 +1569,11 @@
     }
   }
 
+      grid.addEventListener('click',event=>{
+        const tile=event.target.closest('.kilat-tile');
+        if(!tile||!grid.contains(tile))return;
+        flip(Number(tile.dataset.index));
+      });
       function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},700);}}
       function makeFallbackWisdom(foundLetters){return 'Jangan berkecil hati karena belum berhasil. Setiap kesempatan adalah awal yang baru. Tarik napas, bangkitkan semangat, dan cobalah kembali. Siapa tahu, keberhasilanmu sudah menunggu di percobaan berikutnya.';}
 
@@ -7030,19 +7060,11 @@ document.addEventListener('DOMContentLoaded', function () {
   transform:translate3d(0,0,0);
   backface-visibility:hidden;
   contain:paint;
-  background:conic-gradient(
-    #bd172d 0deg 30deg,
-    #171717 30deg 60deg,
-    #e8b83e 60deg 90deg,
-    #fff8e9 90deg 120deg,
-    #bd172d 120deg 150deg,
-    #171717 150deg 180deg,
-    #e8b83e 180deg 210deg,
-    #fff8e9 210deg 240deg,
-    #bd172d 240deg 270deg,
-    #171717 270deg 300deg,
-    #e8b83e 300deg 330deg,
-    #fff8e9 330deg 360deg
+  background:repeating-conic-gradient(
+    #bd172d 0deg 22.5deg,
+    #171717 22.5deg 45deg,
+    #e8b83e 45deg 67.5deg,
+    #fff8e9 67.5deg 90deg
   );
   transition:transform 8.2s cubic-bezier(.16,.72,.12,1);
   transform-origin:50% 50%;
@@ -7053,8 +7075,8 @@ document.addEventListener('DOMContentLoaded', function () {
   inset:0;
   border-radius:50%;
   background:repeating-conic-gradient(
-    transparent 0deg 29.4deg,
-    #fff8d8 29.4deg 30deg
+    transparent 0deg 21.9deg,
+    #fff8d8 21.9deg 22.5deg
   );
   pointer-events:none;
   /* Lapisan garis tidak ikut memicu repaint saat roda berotasi */
@@ -7292,9 +7314,13 @@ document.addEventListener('DOMContentLoaded', function () {
     {code:'coin_5',label:'+5 KOIN'},
     {code:'mission_like',label:'MISI LIKE'},
     {code:'coin_1',label:'+1 KOIN'},
+    {code:'mission_comment',label:'MISI KOMEN'},
     {code:'coin_10',label:'+10 KOIN'},
+    {code:'mission_like',label:'MISI LIKE'},
     {code:'coin_2',label:'+2 KOIN'},
-    {code:'jackpot_50',label:'JACKPOT +50'}
+    {code:'mission_comment',label:'MISI KOMEN'},
+    {code:'jackpot_50',label:'JACKPOT +50'},
+    {code:'mission_like',label:'MISI LIKE'}
   ];
 
   const $ = id => document.getElementById(id);
@@ -7390,11 +7416,11 @@ document.addEventListener('DOMContentLoaded', function () {
     sectors.forEach((sector,i)=>{
       const label = document.createElement('div');
       label.className = 'cr-sector-label' +
-        ([3,7,11].includes(i) ? ' light' : '');
+        ([3,7,11,15].includes(i) ? ' light' : '');
       label.textContent = sector.label;
 
       label.style.transform =
-        `rotate(${i*30-75}deg) translateX(0)`;
+        `rotate(${i*22.5-78.75}deg) translateX(0)`;
 
       wheel.appendChild(label);
     });
@@ -7905,7 +7931,7 @@ if (!confirmed) {
 
   message('Roda sedang berputar...');
 
-  const sectorCenter = index*30+15;
+  const sectorCenter = index*22.5+11.25;
   const target = (360-sectorCenter)%360;
 
   const current = wheelRotation%360;
