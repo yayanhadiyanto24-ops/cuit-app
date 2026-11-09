@@ -1559,7 +1559,11 @@
       clearInterval(timer); timer = setInterval(tick, 1000);
       const actualFree = sessionData.is_free === true || sessionData.is_free_play === true || Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee) === 0;
       setMessage(actualFree ? 'Kesempatan gratis harian digunakan!' : `Sesi berbayar dimulai (${Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee)} koin).`);
-      if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) await CuitApp.loadProfile();
+      if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
+        Promise.resolve(CuitApp.loadProfile()).catch(err =>
+          console.warn('Pembaruan profil setelah mulai game:',err)
+        );
+      }
     } catch (err) {
       setMessage(err.message || 'Gagal memulai permainan.');
       console.warn('Gagal memulai 3 Huruf Kilat:', err);
@@ -1690,6 +1694,8 @@ async function makeWisdom(foundLetters) {
   setMessage('Permainan selesai. Mengirim hasil ke server CUIT…');
 
   let poolStatus='Hasil belum dikonfirmasi server.';
+  // Ambil kutipan bersamaan dengan validasi hasil agar layar selesai lebih cepat.
+  const wisdomPromise=makeWisdom(matches);
   try{
     if(!gameSession || !gameSession.session_id){
       throw new Error('ID sesi tidak ditemukan. Hasil tidak diberi hadiah.');
@@ -1744,7 +1750,7 @@ poolStatus=feePaid>0
   poolNotice.textContent=poolStatus;
 
   try{
-    const wisdom=await makeWisdom(matches);
+    const wisdom=await wisdomPromise;
     el('kilatWisdom').textContent='“'+wisdom.text+'”';
     const sourceLabel=wisdom.source==='Supabase'
       ?`Sumber: Bank CUIT • ${wisdom.category} • ID ${wisdom.quoteId}`
@@ -7093,7 +7099,7 @@ document.addEventListener('DOMContentLoaded', function () {
   text-align:right;
   padding-right:10px;
   box-sizing:border-box;
-  font-size:10px;
+  font-size:8px;
   font-weight:950;
   color:#fff;
   text-shadow:0 1px 3px #000;
