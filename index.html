@@ -1770,7 +1770,8 @@ poolStatus=feePaid>0
 #mgCanvas{
   display:block;
   width:min(100%,340px);
-  height:420px;
+  height:auto;
+  aspect-ratio:8 / 15;
   margin:0 auto;
   }
 </style>
@@ -2072,9 +2073,7 @@ poolStatus=feePaid>0
     ctx.shadowColor='rgba(30,20,10,.4)';
     ctx.shadowBlur=7;
     ctx.beginPath();
-    const rect=canvas.getBoundingClientRect();
-const sx=(rect.height/H)/(rect.width/W);
-ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
+    ctx.arc(x,y,radius,0,Math.PI*2);
     ctx.fillStyle=g;
     ctx.fill();
     ctx.shadowBlur=0;
