@@ -1958,22 +1958,26 @@ poolStatus=feePaid>0
   }
 
   function drawObstacles() {
-    // Tujuh baris rintangan mengikuti simulasi server.
+    // Sepuluh baris rintangan; pola harus sama dengan simulasi server.
     let spinnerIndex=0;
-    for(let row=0;row<7;row++){
-      const y=110+row*78;
-      const isSpinner=row%3===2;
+    const spinnerRows=[2,5,8];
+    const pegCounts=[4,5,4,5,4,4,5,4,5,4];
+    const offsets=[-12,12,-18,8,16,-8,14,-14,10,-6];
+    for(let row=0;row<10;row++){
+      const y=105+row*56;
+      const isSpinner=spinnerRows.includes(row);
 
       if(!isSpinner){
-        const count=3+(row%3);
+        const count=pegCounts[row];
         const spacing=W/(count+1);
-        const offset=row%2===0?-8:8;
         for(let col=0;col<count;col++){
-          const x=Math.max(24,Math.min(W-24,spacing*(col+1)+offset));
-          peg(x,y,8.5);
+          const stagger=col%2===0?-3:3;
+          const x=Math.max(24,Math.min(W-24,spacing*(col+1)+offsets[row]+stagger));
+          const radius=8+((row+col)%3)*0.6;
+          peg(x,y,radius);
         }
       }else{
-        const count=1+(row%2);
+        const count=row===5?2:1;
         for(let i=0;i<count;i++){
           const x=W*(i+1)/(count+1);
           drawSpinner(x,y,16,spinnerIndex++);
