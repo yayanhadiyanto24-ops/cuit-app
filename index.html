@@ -53,7 +53,7 @@
       border-bottom: 1px solid #e2e8f5;
       line-height: 0;
       background: #fff;
-      transition: all 0.5s ease;
+      transition: max-height 0.22s ease, opacity 0.18s ease;
       overflow: hidden;
       max-height: 250px;
     }
@@ -369,7 +369,7 @@
     .nav-icon { font-size: 16px; margin-bottom: 2px; }
 
     /* Modal Styling */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(3px); }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.64); justify-content: center; align-items: center; z-index: 10000; }
     .modal-content { background: #fff; padding: 16px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
     #promotedDetailContent {
       padding: 0;
@@ -691,7 +691,7 @@
     .nav-add-button{width:38px;height:38px;font-size:21px;margin-top:-11px;border-width:3px;box-shadow:0 3px 9px rgba(200,30,50,.22)}
     .nav-profile-avatar{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:#fff5d6;border:1px solid #e5c16a;box-shadow:0 1px 4px rgba(110,20,35,.12)}
     .nav-profile-avatar svg{width:100%;height:100%;display:block}
-    .nav-bar{background:rgba(255,255,255,.97)!important;backdrop-filter:blur(12px);border-top-color:#ead8dc!important}
+    .nav-bar{background:#fff!important;border-top-color:#ead8dc!important}
     @media(max-width:380px){#pageHome .pills-group .pill-btn:last-child{font-size:10.5px;padding:7px 8px}.special-window{min-height:102px!important}}
 
 
@@ -6591,6 +6591,13 @@ function cuitConfirm(message) {
       const modal = document.getElementById('userProfileModal');
       if (!modal) return;
 
+      // Tampilkan kerangka profil segera; jangan menunggu beberapa query jaringan.
+      modal.style.display = 'flex';
+      ['mFollowers','mFollowing','mDownlines','mPostsCount','mFreeCoins','mPaidCoins','mGems','mSponsorName'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el) el.textContent='…';
+      });
+
       const lvl = getUserLevel(userExp || 0);
 
       document.getElementById('mMainBadge').innerHTML = cuitBadgeSvg(lvl.title);
@@ -6640,7 +6647,6 @@ function cuitConfirm(message) {
         followContainer.innerHTML = `<div style="text-align:center; font-size:11px; color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>`;
       }
 
-      modal.style.display = 'flex';
     }
 
     function openEditProfileModal() {
@@ -7620,7 +7626,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (panel) {
       panel.style.display = 'block';
       panel.scrollIntoView({
-        behavior:'smooth',
+        behavior:'auto',
         block:'center'
       });
       loadPending();
@@ -7692,7 +7698,7 @@ function confirmRouletteSpin(fee, isExtraSpin) {
           justify-content:center;
           padding:20px;
           background:rgba(28,5,12,.78);
-          backdrop-filter:blur(5px);
+          /* Hindari blur layar penuh yang mahal pada GPU ponsel. */
         }
         #cuit-roulette-confirm .cuit-confirm-card {
           width:100%;
