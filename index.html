@@ -2548,6 +2548,7 @@ poolStatus=feePaid>0
           <div class="progress-bar-fill" id="levelProgressBar"></div>
         </div>
       </div>
+      <div id="myActivityLevelProgressProfile" style="margin-top:10px;padding:11px;border:1px solid #f1d7db;border-radius:12px;background:#fffdfd"><div class="achievement-empty">Memuat progres aktivitas…</div></div>
 
     <div id="memberGemBalanceCard" style="margin:10px 0 12px;padding:12px;background:#fff;border:1px solid #e8c4c8;border-left:4px solid #c81e32;border-radius:14px;box-shadow:0 3px 10px #5b1b2208">
       <div style="font-size:13px;font-weight:900;color:#b91c1c">💎 Permata Saya</div>
@@ -3774,11 +3775,12 @@ async function openDailyCheckin() {
     }
 
     function renderMyActivityLevelProgress() {
-      const el=document.getElementById('myActivityLevelProgress');
-      if(!el) return;
-      if(!currentUser?.id){el.innerHTML='<div class="achievement-empty">Masuk untuk melihat progres jalur aktivitas.</div>';return;}
+      const els=[document.getElementById('myActivityLevelProgress'),document.getElementById('myActivityLevelProgressProfile')].filter(Boolean);
+      if(!els.length) return;
+      const setHtml=html=>els.forEach(el=>el.innerHTML=html);
+      if(!currentUser?.id){setHtml('<div class="achievement-empty">Masuk untuk melihat progres jalur aktivitas.</div>');return;}
       const p=cuitActivityLevelProgress;
-      if(!p){el.innerHTML='<div class="achievement-empty">Progres aktivitas belum tersedia. Coba muat ulang.</div>';return;}
+      if(!p){setHtml('<div class="achievement-empty">Progres aktivitas belum tersedia. Coba muat ulang.</div>');return;}
       const level=Number(p.activity_level||1);
       const next=CUIT_ACTIVITY_LEVELS.find(x=>x.level===Number(p.next_level||0));
       const groups=[
@@ -3786,7 +3788,7 @@ async function openDailyCheckin() {
         {key:'response_points',name:'Respons komunitas',target:Number(p.response_target||0),icon:'💬',color:'#2471a3'},
         {key:'network_points',name:'Membangun jaringan',target:Number(p.network_target||0),icon:'👥',color:'#8e44ad'}
       ];
-      el.innerHTML=`
+      setHtml(`
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px">
           <strong style="font-size:12px;color:#8f1730">🌱 Jalur Aktivitas</strong>
           <span style="font-size:10px;font-weight:900;color:#8f1730">Level ${level}${level===10?' · Maksimal':''}</span>
@@ -3805,7 +3807,7 @@ async function openDailyCheckin() {
           </div>`;
         }).join('')}
         <div style="font-size:9px;color:#806a6f;margin-top:8px">Batas harian: kontribusi 80, respons 60, jaringan 35 poin. Poin aktivitas terpisah dari koin.</div>
-      `;
+      `);
     }
 
     function getUserLevel(expPoints = null) {
