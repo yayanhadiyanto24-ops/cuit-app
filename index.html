@@ -7343,60 +7343,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </style>
 <!-- =====================================================
      CUIT ROULETTE — VERSI PERBAIKAN
-     Tempel tepat sebelum <script>
-(function(){
-  const $ = id => document.getElementById(id);
-  const historyKey='cuit_ai_content_history_v1';
-  function aiKey(){return localStorage.getItem('gemini_custom_api_key')||localStorage.getItem('gemini_api_key')||localStorage.getItem('GEMINI_API_KEY')||'';}
-  function setStatus(msg,isError){const el=$('aiContentStatus');if(el){el.textContent=msg;el.style.color=isError?'#b91c1c':'#76565b';}}
-  function renderHistory(){
-    let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
-    const host=$('aiContentHistory');if(!host)return;
-    if(!items.length){host.textContent='Belum ada riwayat kreasi di perangkat ini.';return;}
-    host.innerHTML=items.slice(0,8).map((x,i)=>'<button type="button" data-ai-history="'+i+'" style="display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #f1e4e6;background:transparent;padding:8px 2px;color:#6e2533;font-size:12px;font-weight:750;">'+String(x.title||x.type||'Konten AI').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+' · '+new Date(x.at).toLocaleDateString('id-ID')+'</button>').join('');
-    host.querySelectorAll('[data-ai-history]').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.aiHistory)];$('aiContentResult').value=x.content;$('aiContentResultWrap').style.display='block';}));
-  }
-  window.refreshCuitAICoinBalance=async function(){
-    const el=$('aiCoinBalance');if(!el)return;
-    if(typeof supabaseClient==='undefined'||typeof currentUser==='undefined'||!currentUser){el.textContent='Masuk sebagai member untuk menggunakan KontenAI.';return;}
-    try{const {data,error}=await supabaseClient.from('profiles').select('free_coins,paid_coins').eq('id',currentUser.id).single();if(error)throw error;el.textContent='Saldo: '+Number(data.free_coins||0)+' Koin Gratis · '+Number(data.paid_coins||0)+' Koin Berbayar';}
-    catch(e){el.textContent='Saldo koin akan diperiksa saat membuat konten.';}
-  };
-  window.generateCuitAIContent=async function(regenerate){
-    const btn=$('aiGenerateButton'),idea=$('aiContentIdea').value.trim(),key=aiKey();
-    if(typeof currentUser==='undefined'||!currentUser||typeof supabaseClient==='undefined'){setStatus('Silakan masuk sebagai member CUIT terlebih dahulu.',true);return;}
-    if(!idea){setStatus('Tuliskan ide atau tema konten terlebih dahulu.',true);$('aiContentIdea').focus();return;}
-    if(!key){setStatus('API key Gemini belum ditemukan di penyimpanan aplikasi. Periksa pengaturan API key yang sudah digunakan oleh Kreator AI.',true);return;}
-    btn.disabled=true;btn.textContent='⏳ AI sedang menyusun konten…';setStatus('Menghubungi Gemini. Koin belum dipotong.');
-    try{
-      const type=$('aiContentType').value,tone=$('aiContentTone').value,length=$('aiContentLength').value;
-      const prompt='Kamu adalah Kreator Konten AI untuk aplikasi CUIT (Curhat dapat Duit). Buat satu konten orisinal berbahasa Indonesia. Jenis: '+type+'. Ide/tema: '+idea+'. Gaya bahasa: '+tone+'. Panjang: '+length+'. Hasil harus siap disunting pengguna, alami, tidak menggurui, tidak mengarang pengalaman pribadi seolah fakta. Sertakan judul singkat jika sesuai. Jangan sertakan penjelasan tentang proses AI.';
-      const response=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:.85,maxOutputTokens:length==='Panjang'?1800: length==='Sedang'?1100:600}})});
-      const payload=await response.json();if(!response.ok)throw new Error(payload?.error?.message||'Gemini gagal membuat konten.');
-      const content=(payload?.candidates||[]).map(c=>(c.content?.parts||[]).map(p=>p.text||'').join('')).join('\n').trim();
-      if(!content)throw new Error('AI belum menghasilkan tulisan. Silakan coba lagi.');
-      const requestId=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
-      const {data:charge,error:chargeError}=await supabaseClient.rpc('cuit_charge_ai_content',{p_request_id:requestId});
-      if(chargeError)throw new Error(chargeError.message||'Pembayaran koin gagal. Konten tidak ditampilkan.');
-      if(!charge||charge.success!==true)throw new Error('Pembayaran koin belum berhasil. Silakan coba lagi.');
-      $('aiContentResult').value=content;$('aiContentResultWrap').style.display='block';
-      let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
-      items.unshift({type,content,title:content.split('\n')[0].slice(0,80),at:new Date().toISOString()});localStorage.setItem(historyKey,JSON.stringify(items.slice(0,15)));
-      setStatus('Berhasil dibuat. Terpakai '+charge.charged+' '+(charge.account==='free_coins'?'Koin Gratis':'Koin Berbayar')+'.',false);
-      await refreshCuitAICoinBalance();renderHistory();
-    }catch(e){console.error('KontenAI:',e);setStatus(e.message||'Terjadi kesalahan saat membuat konten.',true);await refreshCuitAICoinBalance();}
-    finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
-  };
-  window.sendAIContentToPost=function(){
-    const content=$('aiContentResult')?.value?.trim();if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
-    const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
-    editor.value=content;if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
-    if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
-    setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},150);
-  };
-  document.addEventListener('DOMContentLoaded',()=>{renderHistory();refreshCuitAICoinBalance();});
-})();
-</script>
+     Tempel tepat sebelum 
 </body>
 ===================================================== -->
 
@@ -8697,6 +8644,58 @@ function confirmRouletteSpin(fee, isExtraSpin) {
   }
 
   console.log('CUIT: pengatur pemuatan realtime aktif.');
+})();
+</script>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const historyKey='cuit_ai_content_history_v1';
+  function setStatus(msg,isError){const el=$('aiContentStatus');if(el){el.textContent=msg;el.style.color=isError?'#b91c1c':'#76565b';}}
+  function renderHistory(){
+    let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
+    const host=$('aiContentHistory');if(!host)return;
+    if(!items.length){host.textContent='Belum ada riwayat kreasi di perangkat ini.';return;}
+    host.innerHTML=items.slice(0,8).map((x,i)=>'<button type="button" data-ai-history="'+i+'" style="display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #f1e4e6;background:transparent;padding:8px 2px;color:#6e2533;font-size:12px;font-weight:750;">'+String(x.title||x.type||'Konten AI').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+' · '+new Date(x.at).toLocaleDateString('id-ID')+'</button>').join('');
+    host.querySelectorAll('[data-ai-history]').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.aiHistory)];$('aiContentResult').value=x.content;$('aiContentResultWrap').style.display='block';}));
+  }
+  window.refreshCuitAICoinBalance=async function(){
+    const el=$('aiCoinBalance');if(!el)return;
+    if(typeof supabaseClient==='undefined'||typeof currentUser==='undefined'||!currentUser){el.textContent='Masuk sebagai member untuk menggunakan KontenAI.';return;}
+    try{const {data,error}=await supabaseClient.from('profiles').select('free_coins,paid_coins').eq('id',currentUser.id).single();if(error)throw error;el.textContent='Saldo: '+Number(data.free_coins||0)+' Koin Gratis · '+Number(data.paid_coins||0)+' Koin Berbayar';}
+    catch(e){el.textContent='Saldo koin akan diperiksa saat membuat konten.';}
+  };
+  window.generateCuitAIContent=async function(regenerate){
+    const btn=$('aiGenerateButton'),idea=$('aiContentIdea').value.trim();
+    if(typeof currentUser==='undefined'||!currentUser||typeof supabaseClient==='undefined'){setStatus('Silakan masuk sebagai member CUIT terlebih dahulu.',true);return;}
+    if(!idea){setStatus('Tuliskan ide atau tema konten terlebih dahulu.',true);$('aiContentIdea').focus();return;}
+    btn.disabled=true;btn.textContent='⏳ AI sedang menyusun konten…';setStatus('Menghubungi Gemini. Koin belum dipotong.');
+    try{
+      const type=$('aiContentType').value,tone=$('aiContentTone').value,length=$('aiContentLength').value;
+      const {data:generated,error:generateError}=await supabaseClient.functions.invoke('cuit-generate-ai-content',{body:{type,idea,tone,length}});
+      if(generateError)throw new Error(generateError.message||'Layanan AI gagal dihubungi.');
+      const content=String(generated?.content||'').trim();
+      if(!content)throw new Error(generated?.error||'AI belum menghasilkan tulisan. Silakan coba lagi.');
+      const requestId=(crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(36).slice(2));
+      const {data:charge,error:chargeError}=await supabaseClient.rpc('cuit_charge_ai_content',{p_request_id:requestId});
+      if(chargeError)throw new Error(chargeError.message||'Pembayaran koin gagal. Konten tidak ditampilkan.');
+      if(!charge||charge.success!==true)throw new Error('Pembayaran koin belum berhasil. Silakan coba lagi.');
+      $('aiContentResult').value=content;$('aiContentResultWrap').style.display='block';
+      let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
+      items.unshift({type,content,title:content.split('\n')[0].slice(0,80),at:new Date().toISOString()});localStorage.setItem(historyKey,JSON.stringify(items.slice(0,15)));
+      setStatus('Berhasil dibuat. Terpakai '+charge.charged+' '+(charge.account==='free_coins'?'Koin Gratis':'Koin Berbayar')+'.',false);
+      await refreshCuitAICoinBalance();renderHistory();
+    }catch(e){console.error('KontenAI:',e);setStatus(e.message||'Terjadi kesalahan saat membuat konten.',true);await refreshCuitAICoinBalance();}
+    finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
+  };
+  window.sendAIContentToPost=function(){
+    const content=$('aiContentResult')?.value?.trim();if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
+    editor.value=content;if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
+    if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
+    setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},150);
+  };
+  document.addEventListener('DOMContentLoaded',()=>{renderHistory();refreshCuitAICoinBalance();});
 })();
 </script>
 </body>
