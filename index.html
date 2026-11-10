@@ -6806,7 +6806,28 @@ function cuitConfirm(message) {
         if(el) el.textContent='…';
       });
 
-      const lvl = getUserLevel(userExp || 0);
+      let effectiveUserExp = Number(userExp || 0);
+      if (currentUser?.email && currentUser.email.toLowerCase() === String(userEmail || '').toLowerCase()) {
+        await loadCuitActivityLevelProgress();
+      } else if (userEmail && supabaseClient) {
+        try {
+          const {data:levelProfile,error:levelError}=await supabaseClient
+            .from('profiles').select('used_paid_coins,activity_level')
+            .eq('email',userEmail).maybeSingle();
+          if (!levelError && levelProfile) {
+            const paidXp=Number(levelProfile.used_paid_coins||effectiveUserExp||0);
+            const paidLevel=getUserLevel(paidXp).level;
+            const activityLevel=Math.max(1,Math.min(10,Number(levelProfile.activity_level)||1));
+            const displayLevel=Math.max(paidLevel,activityLevel);
+            effectiveUserExp=Math.max(paidXp,Number(CUIT_LEVELS[displayLevel-1]?.xp||0));
+          }
+        } catch(levelError) {
+          console.warn('Level anggota belum dapat diperbarui:',levelError);
+        }
+      }
+      const lvl = currentUser?.email && currentUser.email.toLowerCase() === String(userEmail || '').toLowerCase()
+        ? getUserLevel()
+        : getUserLevel(effectiveUserExp);
 
       document.getElementById('mMainBadge').innerHTML = cuitBadgeSvg(lvl.title);
 
