@@ -1937,17 +1937,16 @@ poolStatus=feePaid>0
       }
     }
 
-    // Papan pendek berpasangan dan bercermin, tanpa corong ke tengah.
+    // Empat bumper miring di area atas/tengah.
+    // Area bawah sengaja dibiarkan terbuka agar semua tabung bisa dicapai.
     const ramps=[
-      {x1:62,y1:310,x2:188,y2:330,power:1.04},
-      {x1:292,y1:330,x2:418,y2:310,power:1.04},
-      {x1:62,y1:510,x2:188,y2:490,power:1.06},
-      {x1:292,y1:490,x2:418,y2:510,power:1.06},
-      {x1:62,y1:650,x2:188,y2:630,power:1.08},
-      {x1:292,y1:630,x2:418,y2:650,power:1.08}
+      {x1:62,y1:310,x2:188,y2:330,power:1.02},
+      {x1:292,y1:330,x2:418,y2:310,power:1.02},
+      {x1:62,y1:490,x2:188,y2:510,power:1.04},
+      {x1:292,y1:510,x2:418,y2:490,power:1.04}
     ];
     ramps.forEach((r,index)=>{
-      const isLauncher=index>=4;
+      const isLauncher=false;
       ctx.save();
       ctx.lineCap='round';
       ctx.shadowColor=isLauncher?'rgba(255,185,45,.75)':'rgba(25,65,95,.45)';
@@ -2177,7 +2176,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
 
         const delta = Math.min((now - lastTime) / 1000, 0.10);
         lastTime = now;
-        animationTime += delta * 1.7;
+        animationTime += delta * 2.4;
 
         // Sampel server setiap 4 langkah fisika (30 frame/detik).
         const sampleDuration = 4 / 120;
