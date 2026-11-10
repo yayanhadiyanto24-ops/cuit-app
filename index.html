@@ -1827,7 +1827,7 @@ poolStatus=feePaid>0
 
   const $ = id => root.querySelector('#' + id);
   const canvas = $('mgCanvas');
-  const ctx = canvas.getContext('2d');
+  let ctx = canvas.getContext('2d');
 
   const W = 480, H = 900;
   canvas.width = W;
@@ -2068,16 +2068,32 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
     ctx.restore();
 }
 
-  function drawBoard(balls=[],settled=[]) {
+  // Latar, rintangan, dan 10 tabung tidak berubah selama balapan.
+  // Render satu kali ke canvas penyangga agar tidak membuat ulang banyak
+  // gradient, bayangan, dan garis pada setiap frame animasi.
+  let staticBoardCanvas = null;
+  function buildStaticBoard() {
+    if (staticBoardCanvas) return;
+    staticBoardCanvas = document.createElement('canvas');
+    staticBoardCanvas.width = W;
+    staticBoardCanvas.height = H;
+    const mainContext = ctx;
+    ctx = staticBoardCanvas.getContext('2d');
     drawBackground();
     drawObstacles();
+    for (let i=0; i<10; i++) drawTube(i,[],[]);
+    ctx = mainContext;
+  }
 
-    // Gelas rapat tanpa kotak nomor terpisah
-    for(let i=0;i<10;i++) drawTube(i,balls,settled);
+  function drawBoard(balls=[],settled=[]) {
+    buildStaticBoard();
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(staticBoardCanvas,0,0);
 
-    // Kelereng yang masih bergerak
-    balls.forEach(b=>{
-      if(!b.done) drawMarble(b.x,b.y,b.color);
+    // Hanya kelereng yang berubah posisi digambar ulang setiap frame.
+    settled.forEach(ball => drawMarble(ball.x,ball.y,ball.color));
+    balls.forEach(ball=>{
+      if(!ball.done) drawMarble(ball.x,ball.y,ball.color);
     });
   }
 
@@ -2148,7 +2164,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
 
         if (!lastTime) lastTime = now;
 
-        const delta = Math.min((now - lastTime) / 1000, 0.05);
+        const delta = Math.min((now - lastTime) / 1000, 0.10);
         lastTime = now;
         animationTime += delta * 1.7;
 
