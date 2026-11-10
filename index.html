@@ -1218,27 +1218,18 @@
         <div id="styleLevelNotice" class="style-level-notice">Fasilitas mengikuti level tertinggi yang telah dicapai.</div>
 
 <div class="style-control">
-  <label for="postBorderStyle">Border sederhana <small>Level 3</small></label>
+  <label for="postBorderStyle">Warna border sederhana <small>Level 3</small></label>
   <select id="postBorderStyle" data-unlock="3" onchange="updatePostStylePreview()">
-    <option value="solid">Garis CUIT marun</option>
-    <option value="dashed">Garis putus-putus</option>
-    <option value="double">Garis ganda elegan</option>
-    <option value="none">Tanpa garis</option>
+    <option value="#a83249">Marun CUIT</option><option value="#d97757">Terracotta</option><option value="#d6a43b">Emas lembut</option><option value="#6d9b78">Sage</option><option value="#5794bd">Biru langit</option><option value="#8873b5">Lavender</option><option value="#c77d9b">Rose</option><option value="#8b796d">Cokelat muda</option><option value="#87939b">Abu lembut</option>
   </select>
 </div>
 
 <div class="style-control">
-  <label for="postBackgroundStyle">Warna latar <small>Level 4</small></label>
+  <label for="postBackgroundStyle">Warna latar polos <small>Level 4</small></label>
   <select id="postBackgroundStyle" data-unlock="4" onchange="updatePostStylePreview()">
+    <optgroup label="Primer & sekunder"><option value="#ffd9d9">Merah lembut</option><option value="#fff1b8">Kuning cerah</option><option value="#d8e8ff">Biru cerah</option><option value="#d9f0d8">Hijau</option><option value="#ffe0c2">Jingga</option><option value="#eadcff">Ungu</option></optgroup>
+    <optgroup label="Pastel terang"><option value="#ffe4ec">Pink pastel</option><option value="#dff5eb">Mint</option><option value="#eee5ff">Lavender</option><option value="#ffe8d8">Peach</option><option value="#dff7f7">Aqua</option><option value="#fff4d8">Cream</option><option value="#e2f0ff">Baby blue</option><option value="#fffbd6">Lemon</option><option value="#f8e1e8">Rose</option><option value="#e2f3df">Sage muda</option><option value="#fce2cf">Salmon muda</option><option value="#e1e8ff">Periwinkle</option><option value="#fff0c9">Vanilla</option><option value="#e1f4ff">Ice blue</option></optgroup>
     <option value="#ffffff">Putih</option>
-    <option value="#fff0f2">Merah muda pastel</option>
-    <option value="#fff7d6">Kuning pastel</option>
-    <option value="#eaf7ef">Hijau mint</option>
-    <option value="#edf4ff">Biru lembut</option>
-    <option value="#f4edff">Lavender</option>
-    <option value="#351522">Marun gelap</option>
-    <option value="#17243b">Biru malam</option>
-    <option value="#242424">Hitam elegan</option>
   </select>
 </div>
 
@@ -1251,8 +1242,8 @@
 </div>
 
 <div class="style-control">
-  <label for="postDecorBorder">Border dekoratif <small>Level 7</small></label>
-  <select id="postDecorBorder" data-unlock="7" onchange="updatePostStylePreview()">
+  <label for="postDecorBorder">Border dekoratif istimewa <small>Level 10</small></label>
+  <select id="postDecorBorder" data-unlock="10" onchange="updatePostStylePreview()">
     <option value="none">Tanpa dekorasi</option>
     <option value="gold">Bingkai emas elegan</option>
     <option value="floral">Bingkai bunga</option>
@@ -1266,8 +1257,8 @@
 </div>
 
 <div class="style-control">
-  <label for="postDecorBackground">Latar dekoratif <small>Level 8</small></label>
-  <select id="postDecorBackground" data-unlock="8" onchange="updatePostStylePreview()">
+  <label for="postDecorBackground">Latar dekoratif istimewa <small>Level 10</small></label>
+  <select id="postDecorBackground" data-unlock="10" onchange="updatePostStylePreview()">
     <option value="none">Polos</option>
     <option value="sunrise">Fajar hangat</option>
     <option value="garden">Taman lembut</option>
@@ -1282,8 +1273,8 @@
 </div>
 
 <div class="style-control">
-  <label for="postTextColor">Warna huruf <small>Level 9</small></label>
-  <select id="postTextColor" data-unlock="9" onchange="updatePostStylePreview()">
+  <label for="postTextColor">Warna huruf <small>Level 3</small></label>
+  <select id="postTextColor" data-unlock="3" onchange="updatePostStylePreview()">
     <option value="#4a2028">Marun</option>
     <option value="#b91c1c">Merah</option>
     <option value="#1d4ed8">Biru</option>
@@ -1297,8 +1288,8 @@
 </div>
 
 <div class="style-control">
-  <label for="postFontFamily">Jenis huruf <small>Level 10</small></label>
-  <select id="postFontFamily" data-unlock="10" onchange="updatePostStylePreview()">
+  <label for="postFontFamily">Jenis huruf <small>Level 9</small></label>
+  <select id="postFontFamily" data-unlock="9" onchange="updatePostStylePreview()">
     <option value="system-ui, sans-serif">Standar modern</option>
     <option value="Georgia, serif">Georgia elegan</option>
     <option value="'Trebuchet MS', sans-serif">Trebuchet modern</option>
@@ -5533,14 +5524,14 @@ async function submitCommentAction() {
 const CUIT_LEVEL_FACILITIES = [
   'Promosi Biasa — 1 koin/jam',
   'Promosi Istimewa — 5 koin/jam',
-  'Memilih border sederhana curhatan',
-  'Memilih warna latar curhatan',
+  'Memilih warna border sederhana dan warna huruf',
+  'Memilih warna latar polos',
   'Format huruf bold',
   'Format huruf italic',
-  'Memilih bingkai dekoratif artistik',
-  'Memilih latar dekoratif berwarna',
-  'Menentukan warna huruf',
-  'Memilih hingga 12 jenis huruf'
+  'Fasilitas tampilan lanjutan',
+  'Fasilitas tampilan lanjutan',
+  'Memilih hingga 12 jenis huruf',
+  'Menggabungkan latar dan border dekoratif istimewa'
 ];
 
     function cuitGetCurrentLevelNumber(userLvl) {
@@ -5560,7 +5551,7 @@ const CUIT_LEVEL_FACILITIES = [
         host.appendChild(item);
       });
     }
-    const CUIT_POST_STYLE_DEFAULT = {border:'solid',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif'};
+    const CUIT_POST_STYLE_DEFAULT = {border:'#a83249',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif'};
     function cuitCurrentStyleLevel(){
       // Gunakan XP profil yang sudah dimuat, bukan nilai default lokal.
       const pts = Number.isFinite(Number(usedPaidCoins)) ? Number(usedPaidCoins) : 0;
@@ -5587,8 +5578,7 @@ const CUIT_LEVEL_FACILITIES = [
 function cuitPostStyleCss(style) {
   const s = { ...CUIT_POST_STYLE_DEFAULT, ...(style || {}) };
 
-  const border = ['solid', 'dashed', 'double', 'none'].includes(s.border)
-    ? s.border : 'solid';
+  const borderColor = /^#[0-9a-f]{6}$/i.test(s.border) ? s.border : '#a83249';
 
   const color = /^#[0-9a-f]{6}$/i.test(s.background)
     ? s.background : '#ffffff';
@@ -5634,7 +5624,7 @@ const backgrounds = {
     bg = backgrounds[s.decorBackground];
   }
 
-  let borderCss = `border:2px ${border} #a83249;`;
+  let borderCss = `border:2px solid ${borderColor};`;
   let ornament = '';
 
   switch (s.decorBorder) {
