@@ -2187,7 +2187,7 @@ poolStatus=feePaid>0
 
         const delta = Math.min((now - lastTime) / 1000, 0.10);
         lastTime = now;
-        animationTime += delta * 2.4;
+        animationTime += delta;
 
         // Sampel server setiap 4 langkah fisika (30 frame/detik).
         const sampleDuration = 4 / 120;
