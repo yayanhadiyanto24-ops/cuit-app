@@ -4820,6 +4820,77 @@ async function toggleLike(postId) {
   syncPostLikeButtons(postId, currentPost);
 }
 
+    const CUIT_COMMENT_TEMPLATES = [
+      'Apa bagian curhatan ini yang paling menyentuh menurutmu?',
+      'Kalau kamu berada di posisi ini, apa saran baik yang ingin kamu berikan?',
+      '💛 Tinggalkan tanggapan bermakna dan raih kesempatan mendapat hadiah Koin Gratis dari CUIT!'
+    ];
+
+    function useCommentTemplate(index) {
+      const promoted = document.getElementById('promotedDetailModal');
+      const inlineOpen = promoted && window.getComputedStyle(promoted).display !== 'none' && document.getElementById('promotedInlineCommentInput');
+      const input = inlineOpen ? document.getElementById('promotedInlineCommentInput') : document.getElementById('commentInputText');
+      if (!input || !CUIT_COMMENT_TEMPLATES[index]) return;
+      input.value = CUIT_COMMENT_TEMPLATES[index];
+      input.focus();
+      if (!inlineOpen && typeof updateCommentCharCount === 'function') updateCommentCharCount(input);
+    }
+
+    async function activateCommentRewardMode(postId) {
+      if (!currentUser || !currentUser.id) return alert('Silakan masuk terlebih dahulu.');
+      const button = document.getElementById('activateCommentRewardButton');
+      if (button) { button.disabled = true; button.textContent = 'Mengaktifkan…'; }
+      const { data, error } = await supabaseClient.rpc('cuit_activate_comment_reward_mode', { p_post_id: Number(postId) });
+      if (error || !data || data.ok !== true) {
+        if (button) { button.disabled = false; button.textContent = 'Aktifkan Mode Berhadiah'; }
+        return alert(data?.message || error?.message || 'Mode berhadiah gagal diaktifkan.');
+      }
+      void updateCoinUI(false);
+      await openCommentsModal(postId);
+      alert(data.cost_type === 'free'
+        ? 'Mode komentar berhadiah aktif. Biaya: 5 Koin Gratis.'
+        : 'Mode komentar berhadiah aktif. Biaya: 1 Koin Berbayar; kontribusi sudah dicatat ke pool.');
+    }
+
+    function replyToComment(commentId) {
+      const form = document.getElementById('replyForm_' + commentId);
+      if (!form) return;
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      const input = document.getElementById('replyInput_' + commentId);
+      if (form.style.display !== 'none' && input) input.focus();
+    }
+
+    async function sendCommentReply(commentId) {
+      if (!currentUser || !currentUser.id) return alert('Silakan masuk untuk membalas komentar.');
+      const input = document.getElementById('replyInput_' + commentId);
+      const content = input ? input.value.trim() : '';
+      if (!content) return alert('Isi balasan tidak boleh kosong.');
+      const postId = activeCommentPostId;
+      const authorName = customDisplayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Anggota CUIT');
+      const button = document.getElementById('replyButton_' + commentId);
+      if (button) { button.disabled = true; button.textContent = 'Mengirim…'; }
+      const { data, error } = await supabaseClient.rpc('cuit_submit_comment_thread_transaction', {
+        p_post_id: Number(postId),
+        p_content: content,
+        p_username: authorName,
+        p_parent_comment_id: Number(commentId)
+      });
+      if (error || !data || data.ok !== true) {
+        if (button) { button.disabled = false; button.textContent = 'Kirim Balasan'; }
+        return alert(data?.message || error?.message || 'Balasan gagal dikirim.');
+      }
+      const post = allPostsCache.find(p => String(p.id) === String(postId));
+      if (post) post.comments_count = Number(post.comments_count || 0) + 1;
+      void updateCoinUI(false);
+      const messages = [];
+      if (data.reward_earned) messages.push('Kamu mendapat 1 Koin Berbayar dari hadiah komentar lama.');
+      if (data.free_reward_earned) messages.push('🎉 Hadiah sistem: +' + data.free_reward_amount + ' Koin Gratis!');
+      else if (data.duplicate_for_reward) messages.push('Balasan terkirim. Isi ini sudah pernah kamu gunakan pada curhatan ini, jadi tidak ada hadiah duplikat.');
+      if (messages.length) alert(messages.join('\n'));
+      renderFilteredFeed();
+      await openCommentsModal(postId);
+    }
+
     async function openCommentsModal(postId) {
       activeCommentPostId = postId;
       const promotedModal = document.getElementById('promotedDetailModal');
@@ -4827,28 +4898,63 @@ async function toggleLike(postId) {
       const listContainer = inlineOpen ? document.getElementById('promotedInlineCommentsList') : document.getElementById('commentsList');
       if (!inlineOpen) { document.getElementById('commentsModal').style.display = 'flex'; document.getElementById('commentsModal').style.zIndex = '10001'; }
       else { const section=document.getElementById('promotedInlineComments'); if(section) section.scrollIntoView({block:'nearest',behavior:'smooth'}); }
-      listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat komentar...</p>';
+      listContainer.innerHTML = '<p style="text-align:center;color:var(--text-sub);font-size:11px;">Memuat komentar…</p>';
 
-      const { data: comments } = await supabaseClient
-        .from('comments')
-        .select('*')
-        .eq('post_id', postId)
+      const { data: postData } = await supabaseClient.from('curhat')
+        .select('id,user_id,comment_reward_mode')
+        .eq('id', postId).maybeSingle();
+      const owner = !!(currentUser && currentUser.id && postData && String(postData.user_id) === String(currentUser.id));
+      const modeOn = !!(postData && postData.comment_reward_mode);
+      const panelId = inlineOpen ? 'commentRewardPanelInline' : 'commentRewardPanelModal';
+      document.getElementById(panelId)?.remove();
+      if (modeOn || owner) {
+        const panel = document.createElement('div');
+        panel.id = panelId;
+        panel.style.cssText = 'margin:0 0 8px;padding:9px 10px;border:1px solid #e6c36b;border-radius:11px;background:linear-gradient(135deg,#fffaf0,#fff1f2);';
+        panel.innerHTML = modeOn
+          ? '<div style="font-size:11px;font-weight:900;color:#8b5b00;margin-bottom:5px;">🎁 MODE KOMENTAR BERHADIAH AKTIF</div><div style="font-size:10px;color:#684d26;margin-bottom:7px;">Komentar dan balasan dengan isi berbeda berpeluang mendapat 1, 2, 3, 5, atau 10 Koin Gratis dari sistem. Tidak ada batas jumlah komentar unik.</div><div style="font-size:10px;font-weight:800;color:#8b2638;margin-bottom:5px;">Ide komentar:</div><div style="display:flex;flex-wrap:wrap;gap:5px;">' + CUIT_COMMENT_TEMPLATES.map((t,i) => '<button type="button" onclick="useCommentTemplate(' + i + ')" style="border:1px solid #e8c66e;border-radius:8px;background:#fff;padding:5px 7px;font-size:10px;color:#704b12;">' + ['Pertanyaan','Saran','Kesempatan hadiah'][i] + '</button>').join('') + '</div>'
+          : '<div style="font-size:11px;font-weight:900;color:#8b2638;margin-bottom:4px;">💬 Ajak anggota berdiskusi</div><div style="font-size:10px;color:#684d26;margin-bottom:7px;">Aktifkan hadiah komentar untuk mendorong percakapan.</div><button id="activateCommentRewardButton" type="button" onclick="activateCommentRewardMode(' + Number(postId) + ')" style="border:0;border-radius:8px;background:linear-gradient(110deg,#c8102e,#e3a52d);color:white;padding:8px 11px;font-size:11px;font-weight:900;">Aktifkan Mode Berhadiah</button><div style="font-size:9px;color:#795b37;margin-top:5px;">Biaya: 5 Koin Gratis, atau 1 Koin Berbayar jika Koin Gratis kurang dari 5.</div>';
+        listContainer.parentNode.insertBefore(panel, listContainer);
+      }
+
+      const { data: comments, error: commentsError } = await supabaseClient
+        .from('comments').select('*').eq('post_id', String(postId))
         .order('created_at', { ascending: true });
-
+      if (commentsError) {
+        listContainer.innerHTML = '<p style="text-align:center;color:#b91c32;font-size:11px;">Komentar gagal dimuat.</p>';
+        return;
+      }
       if (!comments || comments.length === 0) {
-        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-top: 8px;">Belum ada komentar. Jadilah yang pertama!</p>';
+        listContainer.innerHTML = '<p style="text-align:center;color:var(--text-sub);font-size:11px;margin-top:8px;">Belum ada komentar. Jadilah yang pertama!</p>';
         return;
       }
 
-      listContainer.innerHTML = comments.map(c => `
-        <div style="background: #f3faff; padding: 8px 10px; border-radius: 12px; border: 1px solid #eaf5ff;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-            <span style="font-weight: 800; font-size: 11px; color: var(--text-main);">${c.username || 'Pengguna'}</span>
-            <span style="font-size: 9px; color: var(--text-sub);">${new Date(c.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})} WIB</span>
-          </div>
-          <div style="font-size: 12px; color: #4a2028; word-break: break-word;">${c.content}</div>
-        </div>
-      `).join('');
+      const children = new Map();
+      comments.forEach(c => {
+        const key = c.parent_comment_id ? String(c.parent_comment_id) : 'root';
+        if (!children.has(key)) children.set(key, []);
+        children.get(key).push(c);
+      });
+      const renderComment = (c, depth) => {
+        const id = Number(c.id);
+        const name = escapeHtml(c.username || 'Pengguna');
+        const content = escapeHtml(c.content || '').replace(/\n/g, '<br>');
+        const time = new Date(c.created_at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+        const replies = children.get(String(id)) || [];
+        const replyButton = currentUser && currentUser.id
+          ? '<button type="button" onclick="replyToComment(' + id + ')" style="border:0;background:transparent;color:#b91c32;font-size:10px;font-weight:800;padding:5px 0;">↳ Balas</button><div id="replyForm_' + id + '" style="display:none;margin-top:4px;"><textarea id="replyInput_' + id + '" rows="2" maxlength="5000" placeholder="Tulis balasan…" style="width:100%;box-sizing:border-box;font-size:11px;padding:7px;border:1px solid #e6cbd0;border-radius:8px;"></textarea><button id="replyButton_' + id + '" type="button" onclick="sendCommentReply(' + id + ')" style="border:0;border-radius:7px;background:#c8102e;color:white;padding:6px 10px;font-size:10px;font-weight:800;">Kirim Balasan</button></div>'
+          : '';
+        return '<div style="margin-left:' + Math.min(depth,5)*12 + 'px;background:' + (depth ? '#fffaf5' : '#f3faff') + ';padding:8px 10px;border-radius:11px;border:1px solid ' + (depth ? '#f1dfc5' : '#eaf5ff') + ';">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-weight:800;font-size:11px;color:var(--text-main);">' + name + '</span><span style="font-size:9px;color:var(--text-sub);">' + time + ' WIB</span></div>' +
+          '<div style="font-size:12px;color:#4a2028;word-break:break-word;line-height:1.45;">' + content + '</div>' + replyButton +
+          replies.map(child => renderComment(child, depth + 1)).join('') + '</div>';
+      };
+      const roots = children.get('root') || [];
+      const rendered = roots.map(c => renderComment(c,0));
+      // Jika ada data lama dengan induk yang hilang, jangan sembunyikan komentarnya.
+      const renderedIds = new Set(comments.map(c => String(c.id)));
+      const orphaned = comments.filter(c => c.parent_comment_id && !renderedIds.has(String(c.parent_comment_id)));
+      listContainer.innerHTML = rendered.concat(orphaned.map(c => renderComment(c,0))).join('');
     }
 
     async function submitPromotedInlineComment(postId) {
@@ -4883,11 +4989,12 @@ async function submitCommentAction() {
 
   if (currentUser && currentUser.id) {
     const { data, error } = await supabaseClient.rpc(
-      'cuit_submit_comment_transaction',
+      'cuit_submit_comment_thread_transaction',
       {
         p_post_id: Number(postId),
         p_content: comm,
-        p_username: authorName
+        p_username: authorName,
+        p_parent_comment_id: null
       }
     );
 
@@ -4907,17 +5014,14 @@ async function submitCommentAction() {
     );
 
     if (currentPost) {
-      currentPost.comments_count =
-        (currentPost.comments_count || 0) + 1;
-
-      if (data.reward_earned) {
-        currentPost.remaining_reward_coins = Math.max(
-          0,
-          (currentPost.remaining_reward_coins || 0) - 1
-        );
-        alert('🎉 Kamu mendapatkan 1 Koin Berbayar dari hadiah komentar!');
-      }
+      currentPost.comments_count = (currentPost.comments_count || 0) + 1;
+      if (data.reward_earned) currentPost.remaining_reward_coins = Math.max(0, (currentPost.remaining_reward_coins || 0) - 1);
     }
+    const rewardMessages = [];
+    if (data.reward_earned) rewardMessages.push('Kamu mendapat 1 Koin Berbayar dari hadiah komentar lama.');
+    if (data.free_reward_earned) rewardMessages.push('🎉 Hadiah sistem: +' + data.free_reward_amount + ' Koin Gratis!');
+    else if (data.duplicate_for_reward) rewardMessages.push('Komentar terkirim, tetapi isi ini sudah pernah kamu gunakan pada curhatan ini sehingga tidak mendapat hadiah duplikat.');
+    if (rewardMessages.length) alert(rewardMessages.join('\\n'));
 
     input.value = '';
     if (typeof updateCommentCharCount === 'function') {
