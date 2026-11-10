@@ -4821,10 +4821,26 @@ async function toggleLike(postId) {
 }
 
     const CUIT_VISITOR_COMMENT_TEMPLATES = [
-      'Boleh cerita lebih lanjut, apa yang sudah kamu lakukan untuk menghadapi masalah ini?',
-      'Menurutku, kamu bisa mencoba mencari jalan keluar secara bertahap dan meminta dukungan orang yang kamu percaya.',
-      '💛 Aku ingin ikut menyemangati. Semoga ada jalan terbaik untukmu.'
+      'Terima kasih sudah berbagi cerita. Apa hal yang paling kamu harapkan setelah ini?',
+      'Kalau berkenan, boleh ceritakan sedikit lagi bagian yang paling ingin kamu sampaikan?',
+      'Menurutmu, apa langkah kecil yang paling mungkin dilakukan setelah ini?',
+      'Aku ingin memahami ceritamu lebih baik. Bagian mana yang paling ingin kamu bahas?',
+      'Apa yang paling kamu butuhkan dari orang-orang yang membaca ceritamu saat ini?',
+      'Terima kasih sudah terbuka. Apakah ada hal lain yang menurutmu penting untuk kami pahami?',
+      'Dari semua yang kamu ceritakan, apa yang paling ingin kamu prioritaskan sekarang?',
+      'Kalau boleh tahu, apa yang membuat hal ini terasa penting bagimu?',
+      'Semoga ada hal baik yang bisa kamu temukan dari situasi ini. Apa harapan terbesarmu sekarang?',
+      'Menurutmu, dukungan seperti apa yang paling membantu dalam keadaan ini?',
+      'Apakah ada sudut pandang lain yang ingin kamu ceritakan agar kami bisa lebih memahami?',
+      'Terima kasih sudah mempercayakan cerita ini di sini. Apa yang ingin kamu lakukan selanjutnya?'
     ];
+
+    function getVisitorCommentSuggestionIndex(postId) {
+      const identity = String(currentUser?.id || 'guest') + ':' + String(postId || '');
+      let hash = 216 | 0;
+      for (let i = 0; i < identity.length; i++) hash = ((hash * 31) + identity.charCodeAt(i)) | 0;
+      return Math.abs(hash) % CUIT_VISITOR_COMMENT_TEMPLATES.length;
+    }
     const CUIT_OWNER_REPLY_TEMPLATES = [
       'Terima kasih sudah meluangkan waktu untuk membaca dan menanggapi curhatanku.',
       'Aku menghargai pendapatmu. Boleh ceritakan sedikit alasan kamu melihatnya seperti itu?',
@@ -4923,8 +4939,9 @@ async function toggleLike(postId) {
         const panel = document.createElement('div');
         panel.id = panelId;
         panel.style.cssText = 'margin:0 0 8px;padding:9px 10px;border:1px solid #e6c36b;border-radius:11px;background:linear-gradient(135deg,#fffaf0,#fff1f2);';
+        const visitorSuggestionIndex = getVisitorCommentSuggestionIndex(postId);
         panel.innerHTML = modeOn
-          ? '<div style="font-size:11px;font-weight:900;color:#8b5b00;margin-bottom:5px;">🎁 MODE KOMENTAR BERHADIAH AKTIF</div><div style="font-size:10px;color:#684d26;margin-bottom:7px;">Komentar dan balasan dengan isi berbeda berpeluang mendapat 1, 2, 3, 5, atau 10 Koin Gratis dari sistem. Tidak ada batas jumlah komentar unik. Isi yang sama hanya mendapat hadiah sekali per akun pada curhatan ini; komentar duplikat tetap terkirim.</div><div style="font-size:10px;font-weight:800;color:#8b2638;margin-bottom:5px;">' + (owner ? 'Panduan pemilik saat membalas:' : 'Ide komentar pengunjung:') + '</div><div style="font-size:10px;color:#684d26;">' + (owner ? 'Balas dengan ucapan terima kasih, tanggapi pendapat, atau ajukan pertanyaan lanjutan. Contoh kalimat tersedia di setiap formulir balasan.' : 'Pilih pertanyaan, saran, atau dukungan yang sesuai dengan isi curhatan.') + '</div>' + (!owner ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">' + CUIT_VISITOR_COMMENT_TEMPLATES.map((t,i) => '<button type="button" onclick="useCommentTemplate(' + i + ')" style="border:1px solid #e8c66e;border-radius:8px;background:#fff;padding:5px 7px;font-size:10px;color:#704b12;">' + ['Tanya','Beri saran','Dukung'][i] + '</button>').join('') + '</div>' : '')
+          ? '<div style="font-size:11px;font-weight:900;color:#8b5b00;margin-bottom:5px;">🎁 MODE KOMENTAR BERHADIAH AKTIF</div><div style="font-size:10px;color:#684d26;margin-bottom:7px;">Komentar dan balasan dengan isi berbeda berpeluang mendapat 1, 2, 3, 5, atau 10 Koin Gratis dari sistem. Tidak ada batas jumlah komentar unik. Isi yang sama hanya mendapat hadiah sekali per akun pada curhatan ini; komentar duplikat tetap terkirim.</div><div style="font-size:10px;font-weight:800;color:#8b2638;margin-bottom:5px;">' + (owner ? 'Panduan pemilik saat membalas:' : 'Satu ide komentar untukmu:') + '</div><div style="font-size:10px;color:#684d26;">' + (owner ? 'Balas dengan ucapan terima kasih, tanggapi pendapat, atau ajukan pertanyaan lanjutan. Contoh kalimat tersedia di setiap formulir balasan.' : 'Ide ini bervariasi untuk setiap pengunjung. Sesuaikan dengan isi curhatan sebelum dikirim.') + '</div>' + (!owner ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"><button type="button" onclick="useCommentTemplate(' + visitorSuggestionIndex + ')" style="border:1px solid #e8c66e;border-radius:8px;background:#fff;padding:6px 9px;font-size:10px;color:#704b12;">' + escapeHtml(CUIT_VISITOR_COMMENT_TEMPLATES[visitorSuggestionIndex]) + ' · Pakai ide ini</button></div>' : '')
           : '<div style="font-size:11px;font-weight:900;color:#8b2638;margin-bottom:4px;">💬 Ajak anggota berdiskusi</div><div style="font-size:10px;color:#684d26;margin-bottom:7px;">Aktifkan hadiah komentar untuk mendorong percakapan.</div><button id="activateCommentRewardButton" type="button" onclick="activateCommentRewardMode(' + Number(postId) + ')" style="border:0;border-radius:8px;background:linear-gradient(110deg,#c8102e,#e3a52d);color:white;padding:8px 11px;font-size:11px;font-weight:900;">Aktifkan Mode Berhadiah</button><div style="font-size:9px;color:#795b37;margin-top:5px;">Biaya: 5 Koin Gratis, atau 1 Koin Berbayar jika Koin Gratis kurang dari 5.</div>';
         listContainer.parentNode.insertBefore(panel, listContainer);
       }
