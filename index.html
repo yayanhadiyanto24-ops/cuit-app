@@ -7358,13 +7358,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   window.refreshCuitAICoinBalance=async function(){
     const el=$('aiCoinBalance');if(!el)return;
-    if(!window.supabaseClient||!window.currentUser){el.textContent='Masuk sebagai member untuk menggunakan KontenAI.';return;}
+    if(typeof supabaseClient==='undefined'||typeof currentUser==='undefined'||!currentUser){el.textContent='Masuk sebagai member untuk menggunakan KontenAI.';return;}
     try{const {data,error}=await supabaseClient.from('profiles').select('free_coins,paid_coins').eq('id',currentUser.id).single();if(error)throw error;el.textContent='Saldo: '+Number(data.free_coins||0)+' Koin Gratis · '+Number(data.paid_coins||0)+' Koin Berbayar';}
     catch(e){el.textContent='Saldo koin akan diperiksa saat membuat konten.';}
   };
   window.generateCuitAIContent=async function(regenerate){
     const btn=$('aiGenerateButton'),idea=$('aiContentIdea').value.trim(),key=aiKey();
-    if(!window.currentUser||!window.supabaseClient){setStatus('Silakan masuk sebagai member CUIT terlebih dahulu.',true);return;}
+    if(typeof currentUser==='undefined'||!currentUser||typeof supabaseClient==='undefined'){setStatus('Silakan masuk sebagai member CUIT terlebih dahulu.',true);return;}
     if(!idea){setStatus('Tuliskan ide atau tema konten terlebih dahulu.',true);$('aiContentIdea').focus();return;}
     if(!key){setStatus('API key Gemini belum ditemukan di penyimpanan aplikasi. Periksa pengaturan API key yang sudah digunakan oleh Kreator AI.',true);return;}
     btn.disabled=true;btn.textContent='⏳ AI sedang menyusun konten…';setStatus('Menghubungi Gemini. Koin belum dipotong.');
