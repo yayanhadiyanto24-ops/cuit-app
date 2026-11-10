@@ -1253,6 +1253,7 @@
     <option value="royal-filigree">Royal Filigree — ukiran emas</option>
 <option value="floral-prestige">Floral Prestige — bunga dan sulur</option>
 <option value="batik-nusantara">Batik Nusantara — motif geometris</option>
+<option value="pearl-garden">Pearl Garden — mutiara dan bunga</option><option value="royal-arch">Royal Arch — lengkung istana</option><option value="sakura-frame">Sakura Frame — ranting sakura</option><option value="celestial-gold">Celestial Gold — ornamen bintang</option>
   </select>
 </div>
 
@@ -1269,6 +1270,7 @@
     <option value="emerald">Emerald mewah</option>
     <option value="damask-royal">Damask Royal — motif klasik</option>
 <option value="art-deco-gold">Art Deco Gold — geometri emas</option>
+<option value="sakura-bloom">Sakura Bloom — taman sakura</option><option value="botanical-luxe">Botanical Luxe — dedaunan mewah</option><option value="aurora-sky">Aurora Sky — aurora berkilau</option><option value="royal-velvet">Royal Velvet — beludru marun emas</option><option value="pearl-cloud">Pearl Cloud — awan mutiara</option><option value="ocean-jewel">Ocean Jewel — samudra permata</option>
   </select>
 </div>
 
@@ -5617,7 +5619,13 @@ const backgrounds = {
 
   'damask-royal': 'radial-gradient(ellipse at 50% 0%,rgba(236,195,91,.28) 0 10%,transparent 11%),radial-gradient(ellipse at 0% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),radial-gradient(ellipse at 100% 50%,rgba(236,195,91,.20) 0 10%,transparent 11%),repeating-linear-gradient(45deg,rgba(255,220,130,.07) 0 2px,transparent 2px 12px),linear-gradient(135deg,#351522,#70263c 58%,#24101b)',
 
-  'art-deco-gold': 'repeating-linear-gradient(45deg,transparent 0 10px,rgba(177,126,28,.20) 10px 12px,transparent 12px 22px),repeating-linear-gradient(-45deg,transparent 0 10px,rgba(177,126,28,.14) 10px 12px,transparent 12px 22px),linear-gradient(135deg,#fff9e9,#f4e4bd 55%,#fffdf6)'
+  'art-deco-gold': 'repeating-linear-gradient(45deg,transparent 0 10px,rgba(177,126,28,.20) 10px 12px,transparent 12px 22px),repeating-linear-gradient(-45deg,transparent 0 10px,rgba(177,126,28,.14) 10px 12px,transparent 12px 22px),linear-gradient(135deg,#fff9e9,#f4e4bd 55%,#fffdf6)',
+  'sakura-bloom':'radial-gradient(circle at 15% 20%,rgba(255,255,255,.85) 0 2px,transparent 3px),radial-gradient(circle at 85% 75%,rgba(255,255,255,.75) 0 3px,transparent 4px),linear-gradient(135deg,#fff0f5,#f7dce9 50%,#fff8f1)',
+  'botanical-luxe':'radial-gradient(ellipse at 10% 10%,rgba(68,125,86,.18),transparent 35%),radial-gradient(ellipse at 90% 90%,rgba(68,125,86,.16),transparent 35%),linear-gradient(135deg,#f5f8e9,#dcebdc 55%,#fff9ec)',
+  'aurora-sky':'radial-gradient(ellipse at 20% 20%,rgba(255,255,255,.65),transparent 40%),linear-gradient(135deg,#e5e2ff,#c9e8f2 48%,#f8e4f1)',
+  'royal-velvet':'repeating-linear-gradient(135deg,rgba(255,220,145,.08) 0 2px,transparent 2px 14px),linear-gradient(135deg,#401326,#792b48 55%,#24101e)',
+  'pearl-cloud':'radial-gradient(ellipse at 20% 15%,rgba(255,255,255,.95),transparent 38%),radial-gradient(ellipse at 85% 85%,rgba(255,255,255,.85),transparent 35%),linear-gradient(135deg,#fffaf5,#e8edf8 55%,#f9e8ef)',
+  'ocean-jewel':'radial-gradient(circle at 80% 20%,rgba(255,255,255,.45) 0 2px,transparent 3px),linear-gradient(135deg,#d9f4f5,#a9d7e5 55%,#e7e6fa)'
 };
 
   if (backgrounds[s.decorBackground]) {
@@ -5662,6 +5670,22 @@ case 'floral-prestige':
 case 'batik-nusantara':
   borderCss = 'border:8px double #9d273d;outline:2px solid #d4a72c;outline-offset:-7px;';
   ornament = 'box-shadow:inset 0 0 0 4px rgba(212,167,44,.35),inset 0 0 20px rgba(91,25,37,.18);';
+  break;
+case 'pearl-garden':
+  borderCss = 'border:7px double #c7a7b8;outline:2px solid #f4e5c9;outline-offset:-7px;';
+  ornament = 'box-shadow:inset 0 0 0 4px rgba(255,255,255,.8),inset 0 0 20px rgba(164,125,150,.2);';
+  break;
+case 'royal-arch':
+  borderCss = 'border:8px ridge #c49a42;outline:2px solid #f8e7ae;outline-offset:-8px;';
+  ornament = 'box-shadow:inset 0 0 0 5px rgba(255,231,174,.35),inset 0 0 24px rgba(89,28,48,.2);';
+  break;
+case 'sakura-frame':
+  borderCss = 'border:6px double #d58ca7;outline:2px solid #f4cbd9;outline-offset:-7px;';
+  ornament = 'box-shadow:inset 0 0 0 5px rgba(255,255,255,.65),inset 0 0 18px rgba(213,140,167,.2);';
+  break;
+case 'celestial-gold':
+  borderCss = 'border:7px double #b99548;outline:2px solid #f6e4a8;outline-offset:-7px;';
+  ornament = 'box-shadow:inset 0 0 0 4px rgba(255,239,190,.5),inset 0 0 22px rgba(185,149,72,.24);';
   break;
   }
 
