@@ -7162,6 +7162,8 @@ document.addEventListener('DOMContentLoaded', function () {
   text-shadow:0 1px 3px #000;
   z-index:2;
   white-space:nowrap;
+  backface-visibility:hidden;
+  -webkit-font-smoothing:antialiased;
 }
 .cr-sector-label.light {
   color:#54101b;
@@ -7867,8 +7869,44 @@ function confirmRouletteSpin(fee, isExtraSpin) {
     });
   });
       }
-  // Satu jalur animasi compositor: tanpa timer JS dan tanpa CSS transition ganda.
-  function animateRouletteWheel(targetRotation,duration=8200) {
+  // Putaran ringan langsung dimulai setelah konfirmasi, sambil menunggu hasil server.
+  function startRouletteIdleSpin() {
+    const wheel=$('cuit-roulette-wheel');
+    if (!wheel) return null;
+
+    const startRotation=wheelRotation;
+    const duration=1400;
+    wheel.style.transform='translate3d(0,0,0) rotate('+startRotation+'deg)';
+
+    const animation=wheel.animate(
+      [
+        { transform:'translate3d(0,0,0) rotate('+startRotation+'deg)' },
+        { transform:'translate3d(0,0,0) rotate('+(startRotation+360)+'deg)' }
+      ],
+      {
+        duration,
+        iterations:Infinity,
+        easing:'linear'
+      }
+    );
+
+    return {animation,startRotation,duration};
+  }
+
+  // Ambil sudut aktual sebelum animasi sementara dihentikan agar tidak melompat.
+  function stopRouletteIdleSpin(idleSpin) {
+    const wheel=$('cuit-roulette-wheel');
+    if (!idleSpin || !wheel) return wheelRotation;
+
+    const elapsed=Number(idleSpin.animation.currentTime)||0;
+    wheelRotation=idleSpin.startRotation+(elapsed/idleSpin.duration)*360;
+    wheel.style.transform='translate3d(0,0,0) rotate('+wheelRotation+'deg)';
+    idleSpin.animation.cancel();
+    return wheelRotation;
+  }
+
+  // Animasi penentu tetap menuju sektor yang ditetapkan hasil server.
+  function animateRouletteWheel(targetRotation,duration=6500) {
     const wheel=$('cuit-roulette-wheel');
     if (!wheel) return Promise.resolve();
 
@@ -7882,8 +7920,8 @@ function confirmRouletteSpin(fee, isExtraSpin) {
       ],
       {
         duration,
-        easing:'cubic-bezier(.12,.78,.18,1)',
-        fill:'both'
+        easing:'cubic-bezier(.15,0,.15,1)',
+        fill:'forwards'
       }
     );
 
@@ -7895,114 +7933,120 @@ function confirmRouletteSpin(fee, isExtraSpin) {
   }
 
   async function spin() {
-  if (spinning) return;
+    if (spinning) return;
 
-  if (!currentUser || !currentUser.id) {
-    alert('Silakan masuk terlebih dahulu.');
-    return;
-  }
-
-  const button = $('cuit-roulette-spin');
-  button.disabled = true;
-
-  // Baca status biaya dan EXTRA SPIN dari server
-  const {data:state,error:stateError} = await supabaseClient
-    .from('cuit_roulette_player_state')
-    .select('spins_since_reset,extra_spins,jackpot_cooldown_until')
-    .eq('user_id',currentUser.id)
-    .maybeSingle();
-
-  if (stateError || !state) {
-    button.disabled = false;
-    message('Biaya putaran belum dapat diperiksa. Silakan coba lagi.');
-    console.error('Roulette fee state:',stateError);
-    return;
-  }
-
-  const extraSpins = Number(state.extra_spins || 0);
-  const isExtraSpin = extraSpins > 0;
-  const fee = isExtraSpin
-    ? 0
-    : Number(state.spins_since_reset || 0);
-
-  const confirmed = await confirmRouletteSpin(fee,isExtraSpin);
-
-if (!confirmed) {
-  button.disabled = false;
-  return;
-}
-
-  spinning = true;
-  message('Memproses putaran Roulette...');
-
-  const requestId = makeUUID();
-
-  const {data,error} = await supabaseClient.rpc(
-    'cuit_roulette_spin',
-    {p_request_id:requestId}
-  );
-
-  if (error) {
-    spinning = false;
-    button.disabled = false;
-    message(error.message || 'Putaran belum berhasil. Silakan coba lagi.');
-    return;
-  }
-
-  const {data:row,error:readError} = await supabaseClient
-    .from('cuit_roulette_spins')
-    .select('*')
-    .eq('request_id',requestId)
-    .eq('user_id',currentUser.id)
-    .maybeSingle();
-
-  if (readError || !row) {
-    spinning = false;
-    button.disabled = false;
-    message(
-      'Transaksi diterima, tetapi hasil belum dapat dibaca. ' +
-      'Muat ulang halaman dan periksa status permainan.'
-    );
-    console.error('Roulette result read:',readError,data);
-    return;
-  }
-
-  currentSpin = row;
-  await updateCoinUI(false);
-
-  const matchingIndexes = [];
-
-  sectors.forEach((sector,i)=>{
-    if (sector.code === row.result_code) {
-      matchingIndexes.push(i);
+    if (!currentUser || !currentUser.id) {
+      alert('Silakan masuk terlebih dahulu.');
+      return;
     }
-  });
 
-  if (!matchingIndexes.length) {
+    const button = $('cuit-roulette-spin');
+    button.disabled = true;
+
+    // Biaya dan EXTRA SPIN tetap diverifikasi server sebelum roda bergerak.
+    const {data:state,error:stateError} = await supabaseClient
+      .from('cuit_roulette_player_state')
+      .select('spins_since_reset,extra_spins,jackpot_cooldown_until')
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+
+    if (stateError || !state) {
+      button.disabled = false;
+      message('Biaya putaran belum dapat diperiksa. Silakan coba lagi.');
+      console.error('Roulette fee state:',stateError);
+      return;
+    }
+
+    const extraSpins = Number(state.extra_spins || 0);
+    const isExtraSpin = extraSpins > 0;
+    const fee = isExtraSpin
+      ? 0
+      : Number(state.spins_since_reset || 0);
+
+    const confirmed = await confirmRouletteSpin(fee,isExtraSpin);
+
+    if (!confirmed) {
+      button.disabled = false;
+      return;
+    }
+
+    spinning = true;
+    message('Roda mulai berputar...');
+    const idleSpin = startRouletteIdleSpin();
+    const requestId = makeUUID();
+
+    // Putaran visual berjalan selama transaksi diproses; hasil tetap dari server.
+    const {data,error} = await supabaseClient.rpc(
+      'cuit_roulette_spin',
+      {p_request_id:requestId}
+    );
+
+    if (error) {
+      stopRouletteIdleSpin(idleSpin);
+      spinning = false;
+      button.disabled = false;
+      message(error.message || 'Putaran belum berhasil. Silakan coba lagi.');
+      return;
+    }
+
+    const {data:row,error:readError} = await supabaseClient
+      .from('cuit_roulette_spins')
+      .select('*')
+      .eq('request_id',requestId)
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+
+    if (readError || !row) {
+      stopRouletteIdleSpin(idleSpin);
+      spinning = false;
+      button.disabled = false;
+      message(
+        'Transaksi diterima, tetapi hasil belum dapat dibaca. ' +
+        'Muat ulang halaman dan periksa status permainan.'
+      );
+      console.error('Roulette result read:',readError,data);
+      return;
+    }
+
+    currentSpin = row;
+    await updateCoinUI(false);
+
+    const matchingIndexes = [];
+
+    sectors.forEach((sector,i)=>{
+      if (sector.code === row.result_code) {
+        matchingIndexes.push(i);
+      }
+    });
+
+    if (!matchingIndexes.length) {
+      stopRouletteIdleSpin(idleSpin);
+      spinning = false;
+      button.disabled = false;
+      message('Kode hasil server tidak dikenali: '+row.result_code);
+      return;
+    }
+
+    const index = matchingIndexes[
+      Math.floor(Math.random()*matchingIndexes.length)
+    ];
+
+    // Sambungkan sudut aktual putaran awal ke animasi berhenti tanpa loncatan.
+    stopRouletteIdleSpin(idleSpin);
+    message('Roda sedang melambat...');
+
+    const sectorCenter = index*22.5+11.25;
+    const target = (360-sectorCenter)%360;
+    const current = wheelRotation%360;
+    const delta = (target-current+360)%360;
+    const targetRotation=wheelRotation+360*5+delta;
+
+    await animateRouletteWheel(targetRotation,6500);
+
     spinning = false;
-    button.disabled = false;
-    message('Kode hasil server tidak dikenali: '+row.result_code);
-    return;
+    showResult(row);
+    await loadPending();
   }
-
-  const index = matchingIndexes[Math.floor(Math.random()*matchingIndexes.length)];
-
-  message('Roda sedang berputar...');
-
-  const sectorCenter = index*22.5+11.25;
-  const target = (360-sectorCenter)%360;
-
-  const current = wheelRotation%360;
-  const delta = (target-current+360)%360;
-
-  const targetRotation=wheelRotation+360*7+delta;
-
-  await animateRouletteWheel(targetRotation,8200);
-
-  spinning = false;
-  showResult(row);
-  await loadPending();
-}
   function showResult(row) {
     const result = $('cuit-roulette-result');
     result.style.display = 'block';
