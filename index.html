@@ -5624,12 +5624,26 @@ case 'celestial-gold':
   break;
   }
 
+  let textEffect = '';
+  switch (s.textStyle) {
+    case 'shadow':
+      textEffect = 'text-shadow:1px 2px 3px rgba(75,25,38,.38);';
+      break;
+    case 'underline':
+      textEffect = 'text-decoration-line:underline;text-decoration-color:currentColor;text-decoration-thickness:1.5px;text-underline-offset:3px;';
+      break;
+    case 'letter':
+      textEffect = 'letter-spacing:1.2px;';
+      break;
+  }
+
   return `${borderCss}
     background:${bg};
     color:${text};
     font-family:${font};
     font-weight:${s.bold ? '800' : '500'};
     font-style:${s.italic ? 'italic' : 'normal'};
+    ${textEffect}
     ${ornament}`;
 }
 
