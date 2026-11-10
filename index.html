@@ -1924,20 +1924,60 @@ poolStatus=feePaid>0
     ctx.restore();
   }
 
+  function drawSpinner(x,y,r,index) {
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(index * 0.63);
+    ctx.shadowColor='rgba(90,25,20,.25)';
+    ctx.shadowBlur=5;
+    for(let i=0;i<4;i++){
+      ctx.rotate(Math.PI/2);
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.lineTo(r,-4.5);
+      ctx.lineTo(r,4.5);
+      ctx.closePath();
+      ctx.fillStyle=i%2?'#d84a3e':'#a9152b';
+      ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.65)';
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
+    ctx.shadowBlur=0;
+    ctx.beginPath();
+    ctx.arc(0,0,5.5,0,Math.PI*2);
+    ctx.fillStyle='#d9a52d';
+    ctx.fill();
+    ctx.strokeStyle='#805b08';
+    ctx.lineWidth=1.2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawObstacles() {
-    // Pasak dasar.
-    for (let row=0; row<13; row++) {
-      const count=row%2===0?9:10;
-      const startX=row%2===0?48:36;
-      const stepX=row%2===0?48:(W-72)/9;
-      for (let col=0; col<count; col++) {
-        const x=startX+col*stepX;
-        const y=65+row*45;
-        peg(x,y,7.5);
+    // Tujuh baris rintangan mengikuti simulasi server.
+    let spinnerIndex=0;
+    for(let row=0;row<7;row++){
+      const y=110+row*78;
+      const isSpinner=row%3===2;
+
+      if(!isSpinner){
+        const count=3+(row%3);
+        const spacing=W/(count+1);
+        const offset=row%2===0?-8:8;
+        for(let col=0;col<count;col++){
+          const x=Math.max(24,Math.min(W-24,spacing*(col+1)+offset));
+          peg(x,y,8.5);
+        }
+      }else{
+        const count=1+(row%2);
+        for(let i=0;i<count;i++){
+          const x=W*(i+1)/(count+1);
+          drawSpinner(x,y,16,spinnerIndex++);
+        }
       }
     }
 
-    // Area bawah bebas dari papan panjang; pasak bulat membentuk lintasan.
     ctx.textAlign='center';
     ctx.font='bold 12px sans-serif';
     ctx.fillStyle='#fff0bd';
@@ -2193,7 +2233,7 @@ ctx.ellipse(x,y,radius*sx,radius,0,0,Math.PI*2);
   .map(ball => ({
     x: ball.x,
     y: ball.y,
-    slot: ball.tube === null ? 9 : Number(ball.tube) - 1,
+    slot: ball.tube === null ? 9 : Number(ball.tube),
     color: ball.color
   }));
 
