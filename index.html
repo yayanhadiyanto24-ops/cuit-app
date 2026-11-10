@@ -725,7 +725,13 @@
     #pageKings .achievement-score { font-size: 10px; line-height: 1.2; }
     #pageKings .my-level-callout { margin-top: 6px; padding: 7px 8px; font-size: 10.5px; border-radius: 8px; }
 
-  </style>
+  
+/* Tata letak final toolbar editor: seluruh baris memakai lebar penuh */
+#postStyleEditor{display:block!important}
+#postStyleEditor .style-toolbar-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0}
+#postStyleEditor .style-tool{min-width:0;max-width:100%}
+@media(min-width:600px){#postStyleEditor .style-toolbar-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
 
 </head>
 <body onclick="closeAllPostMenus(event)">
