@@ -1899,20 +1899,29 @@ poolStatus=feePaid>0
     ctx.fillRect(20,0,W-40,H);
   }
 
-  function peg(x,y,r=7) {
-    const g=ctx.createRadialGradient(x-2,y-3,1,x,y,r);
-    g.addColorStop(0,'#f6d69b');
-    g.addColorStop(.55,'#bd8740');
-    g.addColorStop(1,'#70451f');
+  function peg(x,y,r=7.5) {
+    // Pasak kontras agar titik benturan selalu terlihat.
+    ctx.save();
+    ctx.shadowColor='rgba(20,45,65,.55)';
+    ctx.shadowBlur=7;
     ctx.beginPath();
-    const rect=canvas.getBoundingClientRect();
-const sx=(rect.height/H)/(rect.width/W);
-ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
-    ctx.fillStyle=g;
+    ctx.arc(x,y,r+1.5,0,Math.PI*2);
+    const rim=ctx.createRadialGradient(x-2,y-3,1,x,y,r+1.5);
+    rim.addColorStop(0,'#f8fcff');
+    rim.addColorStop(.32,'#91b8cb');
+    rim.addColorStop(.78,'#315b73');
+    rim.addColorStop(1,'#17394f');
+    ctx.fillStyle=rim;
     ctx.fill();
-    ctx.strokeStyle='#80572e';
     ctx.lineWidth=1.5;
+    ctx.strokeStyle='#17394f';
     ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.beginPath();
+    ctx.arc(x-2.2,y-2.5,2.1,0,Math.PI*2);
+    ctx.fillStyle='#ffffff';
+    ctx.fill();
+    ctx.restore();
   }
 
   function drawObstacles() {
@@ -1924,7 +1933,7 @@ ctx.ellipse(x,y,r*sx,r,0,0,Math.PI*2);
       for (let col=0; col<count; col++) {
         const x=startX+col*stepX;
         const y=65+row*55;
-        peg(x,y,6.5);
+        peg(x,y,7.5);
       }
     }
 
