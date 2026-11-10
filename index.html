@@ -5721,7 +5721,10 @@ function cuitPostTextEffectCss(style) {
     function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?4:5;if(level<need)return;const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
     function cuitStyleInlineForPost(style){
   if (!style || typeof style !== 'object') return '';
-  return ` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`;
+  // Feed Curhatan Terbaik tetap memakai ukuran asli kartu; Level 7 hanya
+  // tersimpan untuk editor/pratinjau dan tidak boleh membesarkan teks feed.
+  const css = cuitPostStyleCss(style) + 'font-size:13px !important;line-height:1.45 !important;';
+  return ` style="${css.replace(/"/g,'&quot;')}"`;
 }
     function cuitResetPostStyle(){Object.entries({postBorderStyle:'#a83249',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif',postFontSize:'14px',postTextStyle:'normal'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
     document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();if(currentUser)cuitRefreshMyLevel();});
