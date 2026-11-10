@@ -5630,7 +5630,7 @@ case 'celestial-gold':
       const notice=document.getElementById('styleLevelNotice');if(notice)notice.textContent=`Levelmu saat ini ${level}/10. Fasilitas yang belum terbuka akan aktif saat levelnya tercapai.`;
       const preview=document.getElementById('postStylePreview');if(preview){const st=cuitPostStyleRead();preview.style.cssText=cuitPostStyleCss(st)+';padding:12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;margin-top:10px;';preview.textContent=document.getElementById('postContent')?.value.trim()||'Pratinjau tampilan curhatanmu akan terlihat di sini.';}
     }
-    function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?5:6;if(level<need)return alert(`Fasilitas ini terbuka mulai Level ${need}.`);const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
+    function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?4:5;if(level<need)return;const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
     function cuitStyleInlineForPost(style){
   if (!style || typeof style !== 'object') return '';
   return ` style="${cuitPostStyleCss(style).replace(/"/g,'&quot;')}"`;
