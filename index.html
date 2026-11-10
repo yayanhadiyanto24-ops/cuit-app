@@ -4567,7 +4567,7 @@ function renderCardHTML(p) {
 
       <!-- ISI CURHATAN -->
       <div class="post-body-wrap">
-        <div class="post-body"${cuitStyleInlineForPost(p.post_style)}>${escapeHtml(p.content || '')}</div>
+        <div class="post-body"${cuitStyleInlineForPost(p.post_style)}><span class="cuit-post-text-effect" style="${cuitPostTextEffectCss(p.post_style).replace(/"/g,'&quot;')}">${escapeHtml(p.content || '')}</span></div>
         ${(String(p.content || '').length > 220 || (String(p.content || '').match(/\n/g) || []).length > 6) ? `<button type="button" class="post-read-more" onclick="event.stopPropagation();togglePostReadMore('${p.id}',this)">Baca selengkapnya</button>` : ''}
       </div>
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
@@ -5650,21 +5650,55 @@ case 'celestial-gold':
     case 'letter': textEffect = 'letter-spacing:1.2px;'; break;
   }
 
+  const allowedSizes = ['12px','14px','16px','18px','20px'];
+  const fontSize = allowedSizes.includes(s.fontSize) ? s.fontSize : '14px';
+
   return `${borderCss}
     background:${bg};
     color:${text};
     font-family:${font};
+    font-size:${fontSize};
     font-weight:${s.bold ? '800' : '500'};
     font-style:${s.italic ? 'italic' : 'normal'};
-    ${textEffect}
     ${ornament}`;
+}
+function cuitPostTextEffectCss(style) {
+  const s = { ...CUIT_POST_STYLE_DEFAULT, ...(style || {}) };
+  const text = /^#[0-9a-f]{6}$/i.test(s.textColor) ? s.textColor : '#4a2028';
+  let effect = '';
+  const outline = (c) => `-webkit-text-stroke:1px ${c};paint-order:stroke fill;`;
+  switch (s.textStyle) {
+    case 'outline-auto': {
+      const v=text.slice(1);
+      const rgb=[0,2,4].map(i=>parseInt(v.slice(i,i+2),16)/255).map(x=>x<=.04045?x/12.92:Math.pow((x+.055)/1.055,2.4));
+      const luminance=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
+      effect=outline(luminance>0.48?'#3b2028':'#fff8e8'); break;
+    }
+    case 'outline-white': effect=outline('#fffdf5'); break;
+    case 'outline-dark': effect=outline('#24151a'); break;
+    case 'outline-gold': effect=outline('#d6a83d'); break;
+    case 'outline-red': effect=outline('#c62845'); break;
+    case 'outline-blue': effect=outline('#2563eb'); break;
+    case 'outline-pink': effect=outline('#ec4899'); break;
+    case 'neon-pink': effect='text-shadow:0 0 2px #fff,0 0 5px #ff4da6,0 0 11px #ff168b,0 0 20px #ff168b;'; break;
+    case 'neon-blue': effect='text-shadow:0 0 2px #fff,0 0 5px #38bdf8,0 0 11px #0ea5e9,0 0 20px #0284c7;'; break;
+    case 'neon-green': effect='text-shadow:0 0 2px #fff,0 0 5px #4ade80,0 0 11px #22c55e,0 0 20px #16a34a;'; break;
+    case 'neon-gold': effect='text-shadow:0 0 2px #fff7d6,0 0 5px #facc15,0 0 11px #eab308,0 0 20px #ca8a04;'; break;
+    case 'color-sunset': effect='background-image:linear-gradient(90deg,#ef4444,#f97316,#eab308);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;'; break;
+    case 'color-ocean': effect='background-image:linear-gradient(90deg,#06b6d4,#2563eb,#7c3aed);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;'; break;
+    case 'color-royal': effect='background-image:linear-gradient(90deg,#7c3aed,#d6a83d,#f5d98b);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;'; break;
+    case 'shadow': effect='text-shadow:1px 2px 3px rgba(75,25,38,.38);'; break;
+    case 'underline': effect='text-decoration-line:underline;text-decoration-color:currentColor;text-decoration-thickness:1.5px;text-underline-offset:3px;'; break;
+    case 'letter': effect='letter-spacing:1.2px;'; break;
+  }
+  return effect;
 }
 
     function updatePostStylePreview(){
       const level=cuitCurrentStyleLevel();
       document.querySelectorAll('#postStyleEditor [data-unlock]').forEach(el=>{const need=Number(el.dataset.unlock);el.disabled=level<need;el.title=level<need?`Terbuka mulai Level ${need}`:'';});
       const notice=document.getElementById('styleLevelNotice');if(notice)notice.textContent=`Levelmu saat ini ${level}/10. Fasilitas yang belum terbuka akan aktif saat levelnya tercapai.`;
-      const preview=document.getElementById('postStylePreview');if(preview){const st=cuitPostStyleRead();preview.style.cssText=cuitPostStyleCss(st)+';padding:12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;margin-top:10px;';preview.textContent=document.getElementById('postContent')?.value.trim()||'Pratinjau tampilan curhatanmu akan terlihat di sini.';}
+      const preview=document.getElementById('postStylePreview');if(preview){const st=cuitPostStyleRead();preview.style.cssText=cuitPostStyleCss(st)+';padding:12px;border-radius:12px;white-space:pre-wrap;line-height:1.5;margin-top:10px;';const previewText=document.getElementById('postContent')?.value.trim()||'Pratinjau tampilan curhatanmu akan terlihat di sini.';preview.innerHTML='<span class="cuit-post-text-effect" style="'+cuitPostTextEffectCss(st).replace(/"/g,'&quot;')+'">'+escapeHtml(previewText)+'</span>';}
     }
     function togglePostStyle(which){const level=cuitCurrentStyleLevel(),need=which==='bold'?4:5;if(level<need)return;const btn=document.getElementById(which==='bold'?'postBoldBtn':'postItalicBtn');btn?.classList.toggle('selected');updatePostStylePreview();}
     function cuitStyleInlineForPost(style){
