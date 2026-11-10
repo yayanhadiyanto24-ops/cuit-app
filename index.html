@@ -4051,25 +4051,22 @@ async function loadAchievements() {
         try {
           const { data, error: profilesError } = await supabaseClient
             .from('profiles')
-            .select('id,email,username,used_paid_coins');
+            .select('id,email,username,used_paid_coins,activity_level');
           if (profilesError) throw profilesError;
 
           profilesData = data || [];
           profilesData.forEach(profile => {
-            const xp = Number(profile.used_paid_coins || 0);
+            const paidXp = Number(profile.used_paid_coins || 0);
+            const paidLevel = getUserLevel(paidXp).level;
+            const activityLevel = Math.max(1,Math.min(10,Number(profile.activity_level)||1));
+            const displayLevel = Math.max(paidLevel,activityLevel);
+            const displayXp = Math.max(paidXp,Number(CUIT_LEVELS[displayLevel-1]?.xp||0));
             if (profile.id) {
-              profilesMap[profile.id] = xp;
-              profilesById.set(profile.id, profile);
+              profilesMap[profile.id] = displayXp;
+              profilesById.set(profile.id, {...profile,display_level:displayLevel});
             }
-            if (profile.email) profilesMap[profile.email] = xp;
+            if (profile.email) profilesMap[profile.email] = displayXp;
           });
-          if (currentUser?.id && cuitActivityLevelProgress) {
-            const activityLevel = Math.max(1,Math.min(10,Number(cuitActivityLevelProgress.activity_level)||1));
-            const activityBadgeXp = Number(CUIT_LEVELS[activityLevel-1]?.xp || 0);
-            const effectiveBadgeXp = Math.max(Number(profilesMap[currentUser.id]||0),activityBadgeXp);
-            profilesMap[currentUser.id] = effectiveBadgeXp;
-            if (currentUser.email) profilesMap[currentUser.email] = effectiveBadgeXp;
-          }
         } catch (profileError) {
           console.warn('Data profil untuk kartu Raja belum tersedia:', profileError);
         }
