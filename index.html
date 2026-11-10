@@ -1937,41 +1937,11 @@ poolStatus=feePaid>0
       }
     }
 
-    // Empat bumper miring di area atas/tengah.
-    // Area bawah sengaja dibiarkan terbuka agar semua tabung bisa dicapai.
-    const ramps=[
-      {x1:62,y1:310,x2:188,y2:330,power:1.02},
-      {x1:292,y1:330,x2:418,y2:310,power:1.02},
-      {x1:62,y1:490,x2:188,y2:510,power:1.04},
-      {x1:292,y1:510,x2:418,y2:490,power:1.04}
-    ];
-    ramps.forEach((r,index)=>{
-      const isLauncher=false;
-      ctx.save();
-      ctx.lineCap='round';
-      ctx.shadowColor=isLauncher?'rgba(255,185,45,.75)':'rgba(25,65,95,.45)';
-      ctx.shadowBlur=isLauncher?14:8;
-      ctx.strokeStyle=isLauncher?'#ffcf55':'#416f8c';
-      ctx.lineWidth=isLauncher?17:14;
-      ctx.beginPath(); ctx.moveTo(r.x1,r.y1); ctx.lineTo(r.x2,r.y2); ctx.stroke();
-      ctx.shadowBlur=0;
-      const metal=ctx.createLinearGradient(r.x1,r.y1,r.x2,r.y2);
-      metal.addColorStop(0,'#f8e7b3');
-      metal.addColorStop(.45,isLauncher?'#fff2a1':'#d9eaf0');
-      metal.addColorStop(1,isLauncher?'#d68b20':'#7197a9');
-      ctx.strokeStyle=metal;
-      ctx.lineWidth=isLauncher?9:7;
-      ctx.beginPath(); ctx.moveTo(r.x1,r.y1); ctx.lineTo(r.x2,r.y2); ctx.stroke();
-      // Garis pantul di sisi atas papan.
-      ctx.strokeStyle='rgba(255,255,255,.9)';
-      ctx.lineWidth=2;
-      ctx.beginPath(); ctx.moveTo(r.x1,r.y1-4); ctx.lineTo(r.x2,r.y2-4); ctx.stroke();
-      ctx.restore();
-    });
+    // Area bawah bebas dari papan panjang; pasak bulat membentuk lintasan.
     ctx.textAlign='center';
     ctx.font='bold 12px sans-serif';
     ctx.fillStyle='#fff0bd';
-    ctx.fillText('JALUR TERBUKA MENUJU 10 BOTOL',240,680);
+    ctx.fillText('LINTASAN BEBAS MENUJU 10 BOTOL',240,680);
   }
   function drawTube(i, balls, settled) {
     const x=i*tubeW;
