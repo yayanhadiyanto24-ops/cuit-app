@@ -1216,7 +1216,7 @@
       <div id="weeklyKings" class="achievement-list"><div class="achievement-empty">Memuat kategori Raja Minggu Ini…</div></div>
     </div>
     <div class="achievement-panel">
-      <div class="achievement-heading"><span>⭐ 10 Level Member Teratas</span><small>Diurutkan berdasarkan akumulasi koin berbayar terpakai yang tercatat</small></div>
+      <div class="achievement-heading"><span>⭐ 10 Level Member Teratas</span><small>Diurutkan berdasarkan level tertinggi dari kedua jalur</small></div>
       <div id="topLevelMembers" class="achievement-list"><div class="achievement-empty">Memuat peringkat level…</div></div>
       <div id="myLevelAchievement" class="my-level-callout">Ini levelmu: memuat…</div>
       <div id="myActivityLevelProgress" style="margin-top:10px;padding:11px;border:1px solid #f1d7db;border-radius:12px;background:#fffdfd"><div class="achievement-empty">Memuat progres jalur aktivitas…</div></div>
@@ -3918,42 +3918,47 @@ async function loadAchievements() {
   try {
     const { data: profiles, error: profileError } = await supabaseClient
       .from('profiles')
-      .select('id,email,username,used_paid_coins,sponsor,created_at');
+      .select('id,email,username,used_paid_coins,activity_level,sponsor,created_at');
 
     if (profileError) throw profileError;
 
-    const members = (profiles || []).map(p => ({
-      id: p.id,
-      email: p.email,
-      name: p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'),
-      xp: Number(p.used_paid_coins || 0)
-    }));
+    const members = (profiles || []).map(p => {
+      const paidXp = Number(p.used_paid_coins || 0);
+      const paidLevel = getUserLevel(paidXp).level;
+      const activityLevel = Math.max(1,Math.min(10,Number(p.activity_level)||1));
+      const level = Math.max(paidLevel,activityLevel);
+      return {
+        id:p.id,email:p.email,
+        name:p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'),
+        xp:paidXp,level
+      };
+    });
 
-    const mine = currentUser
-      ? members.find(m => m.id === currentUser.id)
-      : null;
-
+    const mine = currentUser ? members.find(m => m.id === currentUser.id) : null;
     const myXP = mine ? mine.xp : Number(usedPaidCoins || 0);
     const myLevel = mine && currentUser ? getUserLevel() : getUserLevel(myXP);
 
     if (myCallout) {
       const inTopTen = currentUser &&
-        [...members].sort((a, b) => b.xp - a.xp)
-          .slice(0, 10).some(m => m.id === currentUser.id);
-
+        [...members].sort((a,b)=>b.level-a.level || b.xp-a.xp)
+          .slice(0,10).some(m=>m.id===currentUser.id);
       myCallout.innerHTML =
         `✨ Level saat ini: Level ${myLevel.level} — ${myLevel.title} · ` +
         `Jalur Koin Berbayar: ${myXP.toLocaleString('id-ID')} terpakai · ` +
         `Jalur Aktivitas: Level ${Number(cuitActivityLevelProgress?.activity_level || 1)}` +
-        `${inTopTen ? ' · Masuk 10 besar pengguna Koin Berbayar!' : ''}`;
+        `${inTopTen ? ' · Masuk 10 besar level CUIT!' : ''}`;
     }
 
     const levelRows = [...members]
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, 10)
-      .map(m => ({ ...m, score: m.xp }));
+      .sort((a,b)=>b.level-a.level || b.xp-a.xp)
+      .slice(0,10)
+      .map(m=>({
+        ...m,
+        score:m.level,
+        levelInfo:getUserLevel(Number(CUIT_LEVELS[m.level-1]?.xp||0))
+      }));
 
-    renderAchievementRows('topLevelMembers', levelRows, 'koin terpakai');
+    renderAchievementRows('topLevelMembers',levelRows,'level');
 
     const dayStart = localStartOfDayWIB();
     const weekStart = localStartOfWeekWIB();
