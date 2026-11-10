@@ -1222,7 +1222,7 @@
       <div id="myActivityLevelProgress" style="margin-top:10px;padding:11px;border:1px solid #f1d7db;border-radius:12px;background:#fffdfd"><div class="achievement-empty">Memuat progres jalur aktivitas…</div></div>
     </div>
     <div class="achievement-panel">
-      <div class="achievement-heading"><span>🎖️ Daftar Lengkap Level CUIT</span><small>Target kumulatif koin berbayar terpakai sesuai rancangan</small></div>
+      <div class="achievement-heading"><span>🎖️ Daftar Lengkap Level CUIT</span><small>Setiap level dapat dicapai melalui salah satu dari dua jalur</small></div>
       <div id="allCuitLevels" class="level-directory"></div>
     </div>
   </div>
@@ -3580,7 +3580,7 @@ async function openDailyCheckin() {
         usedPaidCoins = 0;
       }
 
-      updateCoinUI();
+      await updateCoinUI();
 
       await Promise.all([
         loadUserLikes(),
@@ -3940,10 +3940,10 @@ async function loadAchievements() {
           .slice(0, 10).some(m => m.id === currentUser.id);
 
       myCallout.innerHTML =
-        `✨ Ini levelmu: Level ${myLevel.level} — ${myLevel.title} · ` +
-        `${myXP.toLocaleString('id-ID')} / ` +
-        `${myLevel.next ? myLevel.target.toLocaleString('id-ID') : 'maksimal'} ` +
-        `koin berbayar terpakai · Jalur aktivitas Level ${Number(cuitActivityLevelProgress?.activity_level || 1)}${inTopTen ? ' · Kamu juga masuk 10 besar!' : ''}`;
+        `✨ Level saat ini: Level ${myLevel.level} — ${myLevel.title} · ` +
+        `Jalur Koin Berbayar: ${myXP.toLocaleString('id-ID')} terpakai · ` +
+        `Jalur Aktivitas: Level ${Number(cuitActivityLevelProgress?.activity_level || 1)}` +
+        `${inTopTen ? ' · Masuk 10 besar pengguna Koin Berbayar!' : ''}`;
     }
 
     const levelRows = [...members]
@@ -4063,6 +4063,13 @@ async function loadAchievements() {
             }
             if (profile.email) profilesMap[profile.email] = xp;
           });
+          if (currentUser?.id && cuitActivityLevelProgress) {
+            const activityLevel = Math.max(1,Math.min(10,Number(cuitActivityLevelProgress.activity_level)||1));
+            const activityBadgeXp = Number(CUIT_LEVELS[activityLevel-1]?.xp || 0);
+            const effectiveBadgeXp = Math.max(Number(profilesMap[currentUser.id]||0),activityBadgeXp);
+            profilesMap[currentUser.id] = effectiveBadgeXp;
+            if (currentUser.email) profilesMap[currentUser.email] = effectiveBadgeXp;
+          }
         } catch (profileError) {
           console.warn('Data profil untuk kartu Raja belum tersedia:', profileError);
         }
