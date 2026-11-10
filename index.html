@@ -1457,10 +1457,12 @@
         setMessage('Tekan “Mulai Permainan” untuk memulai ronde.');
       }
       function tick(){
-        if(!started || ended) return;
-        remaining=Math.max(0,remaining-1); updateStats();
-        if(remaining<=0){clearInterval(timer);timer=null;finish(true);}
-      }
+         if(!started || ended) return;
+         // Gunakan waktu nyata; interval dapat tertunda pada Android/WebView.
+         remaining=Math.max(0,30-Math.floor((Date.now()-startedAt)/1000));
+         updateStats();
+         if(remaining<=0){clearInterval(timer);timer=null;finish(true);}
+       }
           // 1. Memeriksa Status Biaya Game
   async function refreshOffer() {
     try {
