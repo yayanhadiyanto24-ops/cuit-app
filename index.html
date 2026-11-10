@@ -7128,7 +7128,8 @@ document.addEventListener('DOMContentLoaded', function () {
     #e8b83e 45deg 67.5deg,
     #fff8e9 67.5deg 90deg
   );
-  transition:transform 8.2s cubic-bezier(.16,.72,.12,1);
+  /* Rotasi dikendalikan Web Animations API; hindari transition ganda. */
+  transition:none!important;
   transform-origin:50% 50%;
 }
 #cuit-roulette-wheel:after {
@@ -7866,15 +7867,14 @@ function confirmRouletteSpin(fee, isExtraSpin) {
     });
   });
       }
-  // Animasi roda dengan requestAnimationFrame: kontrol frame lebih stabil
-  // daripada mengandalkan transisi CSS panjang pada beberapa WebView Android.
-  // Animasi roda memakai Web Animations API agar transform diproses compositor
-  // native, bukan diubah setiap frame oleh JavaScript.
+  // Satu jalur animasi compositor: tanpa timer JS dan tanpa CSS transition ganda.
   function animateRouletteWheel(targetRotation,duration=8200) {
     const wheel=$('cuit-roulette-wheel');
     if (!wheel) return Promise.resolve();
 
     const startRotation=wheelRotation;
+    wheel.style.transform='translate3d(0,0,0) rotate('+startRotation+'deg)';
+
     const animation=wheel.animate(
       [
         { transform:'translate3d(0,0,0) rotate('+startRotation+'deg)' },
@@ -7882,8 +7882,8 @@ function confirmRouletteSpin(fee, isExtraSpin) {
       ],
       {
         duration,
-        easing:'cubic-bezier(.16,.72,.12,1)',
-        fill:'forwards'
+        easing:'cubic-bezier(.12,.78,.18,1)',
+        fill:'both'
       }
     );
 
@@ -7891,10 +7891,6 @@ function confirmRouletteSpin(fee, isExtraSpin) {
       wheelRotation=targetRotation;
       wheel.style.transform='translate3d(0,0,0) rotate('+targetRotation+'deg)';
       animation.cancel();
-    }).catch(()=>{
-      // Bila animasi dibatalkan, pertahankan posisi akhir yang diminta.
-      wheelRotation=targetRotation;
-      wheel.style.transform='translate3d(0,0,0) rotate('+targetRotation+'deg)';
     });
   }
 
