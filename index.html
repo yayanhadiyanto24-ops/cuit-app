@@ -4078,7 +4078,7 @@ sorotanItems.slice(0, 10).forEach((item, index) => {
         </div>
       </div>
 
-      <div data-promoted-text="1" style="position:relative;height:78px;min-height:78px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}"><div class="promoted-text-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${escapeHtml(fullText)}</div></div>
+      <div data-promoted-text="1" style="position:relative;height:78px;min-height:78px;width:100%;box-sizing:border-box;font-size:10px;line-height:1.25;font-weight:650;overflow:hidden;overflow-wrap:anywhere;padding:5px 6px 2px;border-radius:0;${cuitPostStyleCss(item.rawPost && item.rawPost.post_style)}font-size:10px !important;line-height:1.25 !important;"><div class="promoted-text-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${escapeHtml(fullText)}</div></div>
     </div>
   `;
 });
@@ -4179,7 +4179,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
     <span style="flex:0 0 auto;max-width:35%;min-width:0;font-size:8px;line-height:1.2;font-weight:750;color:#8b7b82;white-space:normal;overflow-wrap:anywhere;text-align:right;">${feeling}</span>
   </div>
 
-  <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:78px;min-height:78px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
+  <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:78px;min-height:78px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}font-size:12px !important;line-height:1.35 !important;"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
  </div>`;
          const accountName = slot.querySelector('[data-special-account-name="1"]');
           if (accountName) {
