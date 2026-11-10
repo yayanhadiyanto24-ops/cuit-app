@@ -1219,6 +1219,7 @@
       <div class="achievement-heading"><span>⭐ 10 Level Member Teratas</span><small>Diurutkan berdasarkan akumulasi koin berbayar terpakai yang tercatat</small></div>
       <div id="topLevelMembers" class="achievement-list"><div class="achievement-empty">Memuat peringkat level…</div></div>
       <div id="myLevelAchievement" class="my-level-callout">Ini levelmu: memuat…</div>
+      <div id="myActivityLevelProgress" style="margin-top:10px;padding:11px;border:1px solid #f1d7db;border-radius:12px;background:#fffdfd"><div class="achievement-empty">Memuat progres jalur aktivitas…</div></div>
     </div>
     <div class="achievement-panel">
       <div class="achievement-heading"><span>🎖️ Daftar Lengkap Level CUIT</span><small>Target kumulatif koin berbayar terpakai sesuai rancangan</small></div>
@@ -3264,6 +3265,7 @@ async function openDailyCheckin() {
     let paidCoins = 0;
     let gems = 0;
     let usedPaidCoins = 0;
+    let cuitActivityLevelProgress = null;
 
     let activeVideoSlot = null;
     let activeVideoExtraMode = false;
@@ -3660,7 +3662,10 @@ async function openDailyCheckin() {
       document.getElementById('freeCoinCount').innerText = freeCoins;
       document.getElementById('paidCoinCount').innerText = paidCoins;
 
+      if (currentUser?.id) await loadCuitActivityLevelProgress();
+      else cuitActivityLevelProgress = null;
       const myLvl = getUserLevel();
+      renderMyActivityLevelProgress();
       const badgeElem = document.getElementById('homeQuickUserBadge');
       if (badgeElem) badgeElem.innerHTML = cuitBadgeSvg(myLvl.title);
 
@@ -3745,17 +3750,77 @@ async function openDailyCheckin() {
       { level: 10, title: 'Dewa Cuiter', icon: '🌟', xp: 10000000, color: '#b8860b', emblem: 'dewa' }
     ];
 
+    const CUIT_ACTIVITY_LEVELS = [
+      {level:1,total:0,direct:0,response:0,network:0},
+      {level:2,total:300,direct:150,response:105,network:45},
+      {level:3,total:900,direct:450,response:315,network:135},
+      {level:4,total:2500,direct:1250,response:875,network:375},
+      {level:5,total:5000,direct:2500,response:1750,network:750},
+      {level:6,total:8500,direct:4250,response:2975,network:1275},
+      {level:7,total:13000,direct:6500,response:4550,network:1950},
+      {level:8,total:18500,direct:9250,response:6475,network:2775},
+      {level:9,total:24000,direct:12000,response:8400,network:3600},
+      {level:10,total:30000,direct:15000,response:10500,network:4500}
+    ];
+
+    async function loadCuitActivityLevelProgress() {
+      if (!currentUser?.id || !supabaseClient) { cuitActivityLevelProgress = null; return null; }
+      try {
+        const {data,error}=await supabaseClient.rpc('cuit_get_my_level_activity_progress');
+        if(error) throw error;
+        cuitActivityLevelProgress=data||null;
+      } catch(error) { console.warn('Progres level aktivitas belum dapat dimuat:',error); }
+      return cuitActivityLevelProgress;
+    }
+
+    function renderMyActivityLevelProgress() {
+      const el=document.getElementById('myActivityLevelProgress');
+      if(!el) return;
+      if(!currentUser?.id){el.innerHTML='<div class="achievement-empty">Masuk untuk melihat progres jalur aktivitas.</div>';return;}
+      const p=cuitActivityLevelProgress;
+      if(!p){el.innerHTML='<div class="achievement-empty">Progres aktivitas belum tersedia. Coba muat ulang.</div>';return;}
+      const level=Number(p.activity_level||1);
+      const next=CUIT_ACTIVITY_LEVELS.find(x=>x.level===Number(p.next_level||0));
+      const groups=[
+        {key:'direct_points',name:'Kontribusi langsung',target:Number(p.direct_target||0),icon:'✍️',color:'#c81e32'},
+        {key:'response_points',name:'Respons komunitas',target:Number(p.response_target||0),icon:'💬',color:'#2471a3'},
+        {key:'network_points',name:'Membangun jaringan',target:Number(p.network_target||0),icon:'👥',color:'#8e44ad'}
+      ];
+      el.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px">
+          <strong style="font-size:12px;color:#8f1730">🌱 Jalur Aktivitas</strong>
+          <span style="font-size:10px;font-weight:900;color:#8f1730">Level ${level}${level===10?' · Maksimal':''}</span>
+        </div>
+        <div style="font-size:10px;color:#77535a;margin-bottom:9px">
+          Total ${Number(p.total_points||0).toLocaleString('id-ID')} poin · Ketiga kelompok wajib terpenuhi.
+          ${next?'Target berikutnya: Level '+next.level+' ('+next.total.toLocaleString('id-ID')+' poin).':'Target aktivitas Level 10 telah tercapai.'}
+        </div>
+        ${groups.map(g=>{
+          const value=Number(p[g.key]||0),pct=g.target>0?Math.min(100,value/g.target*100):100;
+          return `<div style="margin:8px 0">
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-bottom:4px">
+              <strong>${g.icon} ${g.name}</strong><span style="color:#77535a">${value.toLocaleString('id-ID')} / ${g.target.toLocaleString('id-ID')}</span>
+            </div>
+            <div style="height:8px;background:#f3e8ea;border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${g.color};border-radius:99px"></div></div>
+          </div>`;
+        }).join('')}
+        <div style="font-size:9px;color:#806a6f;margin-top:8px">Batas harian: kontribusi 80, respons 60, jaringan 35 poin. Poin aktivitas terpisah dari koin.</div>
+      `;
+    }
+
     function getUserLevel(expPoints = null) {
-      const pts = Math.max(0, Number.parseInt(expPoints !== null ? expPoints : usedPaidCoins, 10) || 0);
-      let current = CUIT_LEVELS[0];
-      for (const item of CUIT_LEVELS) { if (pts >= item.xp) current = item; else break; }
-      const next = CUIT_LEVELS.find(item => item.level === current.level + 1) || null;
-      return {
-        title: `${current.icon} ${current.title}`, icon: current.icon, level: current.level,
-        next: next ? `${next.icon} ${next.title}` : null,
-        target: next ? next.xp : current.xp,
-        prev: current.xp, color: current.color, xp: pts
-      };
+      const pts=Math.max(0,Number.parseInt(expPoints!==null?expPoints:usedPaidCoins,10)||0);
+      let current=CUIT_LEVELS[0];
+      for(const item of CUIT_LEVELS){if(pts>=item.xp)current=item;else break;}
+      if(expPoints===null && cuitActivityLevelProgress){
+        const activityLevel=Math.max(1,Math.min(10,Number(cuitActivityLevelProgress.activity_level)||1));
+        if(activityLevel>current.level)current=CUIT_LEVELS[activityLevel-1];
+      }
+      const next=CUIT_LEVELS.find(item=>item.level===current.level+1)||null;
+      return {title:`${current.icon} ${current.title}`,icon:current.icon,level:current.level,
+        next:next?`${next.icon} ${next.title}`:null,target:next?next.xp:current.xp,
+        prev:current.xp,color:current.color,xp:pts,
+        activityLevel:Number(cuitActivityLevelProgress?.activity_level||1)};
     }
 
     function escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch])); }
@@ -3793,10 +3858,13 @@ async function openDailyCheckin() {
       const el = document.getElementById('allCuitLevels');
       if (!el) return;
       const myLevel = getUserLevel();
-      el.innerHTML = CUIT_LEVELS.map(item => `<div class="level-card" style="${item.level === myLevel.level ? 'border-color:#d4a72c;background:#fffaf0;' : ''}">
-        <div class="level-logo" style="width:44px;height:44px;padding:0;background:transparent;border:0;border-radius:0;flex:0 0 44px">${cuitBadgeSvg(item.level)}</div>
-        <div><div class="level-card-name">Level ${item.level} · ${item.title}${item.level === myLevel.level ? ' <span style="color:#9a6a00">(Ini levelmu)</span>' : ''}</div><div class="level-card-xp">Target: ${item.xp.toLocaleString('id-ID')} koin berbayar terpakai</div></div>
-      </div>`).join('');
+      el.innerHTML = CUIT_LEVELS.map((item,index) => {
+        const a=CUIT_ACTIVITY_LEVELS[index];
+        return `<div class="level-card" style="${item.level === myLevel.level ? 'border-color:#d4a72c;background:#fffaf0;' : ''}">
+          <div class="level-logo" style="width:44px;height:44px;padding:0;background:transparent;border:0;border-radius:0;flex:0 0 44px">${cuitBadgeSvg(item.level)}</div>
+          <div style="min-width:0"><div class="level-card-name">Level ${item.level} · ${item.title}${item.level === myLevel.level ? ' <span style="color:#9a6a00">(Ini levelmu)</span>' : ''}</div><div class="level-card-xp">Koin berbayar: ${item.xp.toLocaleString('id-ID')} · Aktivitas: ${a.total.toLocaleString('id-ID')} poin</div></div>
+        </div>`;
+      }).join('');
     }
 
     function localStartOfDayWIB(date = new Date()) {
@@ -3864,7 +3932,7 @@ async function loadAchievements() {
       : null;
 
     const myXP = mine ? mine.xp : Number(usedPaidCoins || 0);
-    const myLevel = getUserLevel(myXP);
+    const myLevel = mine && currentUser ? getUserLevel() : getUserLevel(myXP);
 
     if (myCallout) {
       const inTopTen = currentUser &&
@@ -3875,7 +3943,7 @@ async function loadAchievements() {
         `✨ Ini levelmu: Level ${myLevel.level} — ${myLevel.title} · ` +
         `${myXP.toLocaleString('id-ID')} / ` +
         `${myLevel.next ? myLevel.target.toLocaleString('id-ID') : 'maksimal'} ` +
-        `koin berbayar terpakai${inTopTen ? ' · Kamu juga masuk 10 besar!' : ''}`;
+        `koin berbayar terpakai · Jalur aktivitas Level ${Number(cuitActivityLevelProgress?.activity_level || 1)}${inTopTen ? ' · Kamu juga masuk 10 besar!' : ''}`;
     }
 
     const levelRows = [...members]
@@ -5661,15 +5729,14 @@ const CUIT_LEVEL_FACILITIES = [
     }
     const CUIT_POST_STYLE_DEFAULT = {border:'#a83249',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif'};
     function cuitCurrentStyleLevel(){
-      // Gunakan XP profil yang sudah dimuat, bukan nilai default lokal.
-      const pts = Number.isFinite(Number(usedPaidCoins)) ? Number(usedPaidCoins) : 0;
-      return getUserLevel(pts).level;
+      return getUserLevel().level;
     }
     async function cuitRefreshMyLevel(){
       if(!currentUser?.id || !supabaseClient) return cuitCurrentStyleLevel();
       try {
         const {data,error}=await supabaseClient.from('profiles').select('used_paid_coins').eq('id',currentUser.id).maybeSingle();
         if(!error && data){ usedPaidCoins=Number(data.used_paid_coins||0); }
+        await loadCuitActivityLevelProgress();
       } catch(err){ console.warn('Level profil belum bisa diperbarui:',err); }
       updatePostStylePreview();
       return cuitCurrentStyleLevel();
