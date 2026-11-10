@@ -1218,14 +1218,14 @@
         <div id="styleLevelNotice" class="style-level-notice">Fasilitas mengikuti level tertinggi yang telah dicapai.</div>
 
 <div class="style-control">
-  <label for="postBorderStyle">Warna border sederhana <small>Level 3</small></label>
+  <label for="postBorderStyle">Border <small>Level 3</small></label>
   <select id="postBorderStyle" data-unlock="3" onchange="updatePostStylePreview()">
     <option value="#a83249">Marun CUIT</option><option value="#d97757">Terracotta</option><option value="#d6a43b">Emas lembut</option><option value="#6d9b78">Sage</option><option value="#5794bd">Biru langit</option><option value="#8873b5">Lavender</option><option value="#c77d9b">Rose</option><option value="#8b796d">Cokelat muda</option><option value="#87939b">Abu lembut</option>
   </select>
 </div>
 
 <div class="style-control">
-  <label for="postBackgroundStyle">Warna latar polos <small>Level 4</small></label>
+  <label for="postBackgroundStyle">Latar <small>Level 4</small></label>
   <select id="postBackgroundStyle" data-unlock="4" onchange="updatePostStylePreview()">
     <optgroup label="Primer & sekunder"><option value="#ffd9d9">Merah lembut</option><option value="#fff1b8">Kuning cerah</option><option value="#d8e8ff">Biru cerah</option><option value="#d9f0d8">Hijau</option><option value="#ffe0c2">Jingga</option><option value="#eadcff">Ungu</option></optgroup>
     <optgroup label="Pastel terang"><option value="#ffe4ec">Pink pastel</option><option value="#dff5eb">Mint</option><option value="#eee5ff">Lavender</option><option value="#ffe8d8">Peach</option><option value="#dff7f7">Aqua</option><option value="#fff4d8">Cream</option><option value="#e2f0ff">Baby blue</option><option value="#fffbd6">Lemon</option><option value="#f8e1e8">Rose</option><option value="#e2f3df">Sage muda</option><option value="#fce2cf">Salmon muda</option><option value="#e1e8ff">Periwinkle</option><option value="#fff0c9">Vanilla</option><option value="#e1f4ff">Ice blue</option></optgroup>
@@ -1234,15 +1234,15 @@
 </div>
 
 <div class="style-control">
-  <label>Format huruf <small>Level 5–6</small></label>
+  
   <div class="style-buttons">
-    <button type="button" id="postBoldBtn" data-unlock="5" onclick="togglePostStyle('bold')"><b>B</b> Tebal</button>
-    <button type="button" id="postItalicBtn" data-unlock="6" onclick="togglePostStyle('italic')"><i>I</i> Miring</button>
+    <button type="button" id="postBoldBtn" data-unlock="5" onclick="togglePostStyle('bold')"><b>B</b></button>
+    <button type="button" id="postItalicBtn" data-unlock="6" onclick="togglePostStyle('italic')"><i>I</i></button>
   </div>
 </div>
 
 <div class="style-control">
-  <label for="postDecorBorder">Border dekoratif istimewa <small>Level 10</small></label>
+  <label for="postDecorBorder">Border dekoratif <small>Level 10</small></label>
   <select id="postDecorBorder" data-unlock="10" onchange="updatePostStylePreview()">
     <option value="none">Tanpa dekorasi</option>
     <option value="gold">Bingkai emas elegan</option>
@@ -1258,7 +1258,7 @@
 </div>
 
 <div class="style-control">
-  <label for="postDecorBackground">Latar dekoratif istimewa <small>Level 10</small></label>
+  <label for="postDecorBackground">Latar dekoratif <small>Level 10</small></label>
   <select id="postDecorBackground" data-unlock="10" onchange="updatePostStylePreview()">
     <option value="none">Polos</option>
     <option value="sunrise">Fajar hangat</option>
@@ -5524,16 +5524,16 @@ async function submitCommentAction() {
     }
 
 const CUIT_LEVEL_FACILITIES = [
-  'Promosi Biasa — 1 koin/jam',
-  'Promosi Istimewa — 5 koin/jam',
-  'Memilih warna border sederhana dan warna huruf',
-  'Memilih warna latar polos',
-  'Format huruf bold',
-  'Format huruf italic',
-  'Fasilitas tampilan lanjutan',
-  'Fasilitas tampilan lanjutan',
-  'Memilih hingga 12 jenis huruf',
-  'Menggabungkan latar dan border dekoratif istimewa'
+  'Promosi biasa — 1 koin/jam',
+  'Promosi istimewa — 5 koin/jam',
+  'Border & warna huruf',
+  'Latar',
+  '𝐁',
+  '𝑰',
+  'Fasilitas lanjutan',
+  'Fasilitas lanjutan',
+  '12 jenis huruf',
+  'Latar & border dekoratif istimewa'
 ];
 
     function cuitGetCurrentLevelNumber(userLvl) {
