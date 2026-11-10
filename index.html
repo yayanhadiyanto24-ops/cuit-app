@@ -5046,11 +5046,8 @@ async function submitCommentAction() {
             message: `🎁 ${myName} memberikan Gift ${giftName} (${amount} 🪙) pada postingan kamu!`
           }]);
           if (notifError) console.error('Gift sukses, tetapi notifikasi gagal disimpan:', notifError);
-          const { error: postError } = await supabaseClient.from('curhat').update({
-            gifts_count: Number(currentPost.gifts_count || 0) + amount
-          }).eq('id', activeTargetPostId);
-          if (postError) console.error('Gift sukses, tetapi jumlah Gift pada postingan gagal diperbarui:', postError);
-          else currentPost.gifts_count = Number(currentPost.gifts_count || 0) + amount;
+          // gifts_count diperbarui atomik oleh trigger database saat ledger Gift dicatat.
+          currentPost.gifts_count = Number(currentPost.gifts_count || 0) + amount;
           await updateCoinUI(false);
           triggerGiftAnimation(myName, giftName, amount, targetName);
           loadPosts();
