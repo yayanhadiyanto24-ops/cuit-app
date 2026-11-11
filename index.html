@@ -949,9 +949,7 @@
     </div>
 
     <div class="home-shortcuts" aria-label="Menu cepat CUIT">
-      <button type="button" onclick="switchTab('pageRoulette',null)"><span class="shortcut-icon game">🎡</span><span>Roulette</span></button>
       <button type="button" onclick="openDailyCheckin()"><span class="shortcut-icon checkin">📅</span><span>Absen</span></button>
-      <button type="button" onclick="switchTab('pageKings',document.querySelectorAll('.nav-bar .nav-item')[3])"><span class="shortcut-icon king">👑</span><span>Raja Cuit</span></button>
       <button type="button" id="openTodayProgressButton" aria-label="Buka Progres Hari Ini"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
       <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
       <button type="button" onclick="switchTab('pageContentAI',null);"><span class="shortcut-icon ai">✨</span><span>KontenAI</span></button>
@@ -1393,11 +1391,11 @@
       .cuit-kilat-page #kilatCurhatBtn:active{transform:translateY(1px)}
       @media(max-height:650px){.cuit-kilat-page .kilat-shell{padding:9px}.cuit-kilat-page .kilat-tile{height:min(16vw,5.5dvh,50px)}.cuit-kilat-page .kilat-panel{padding:7px}}
 
-    .home-shortcuts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
+    .home-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
     .home-shortcuts button{min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:1px 0;color:#45343a;font-size:9px;font-weight:850;cursor:pointer}
     .shortcut-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(30,35,60,.06)}
     .shortcut-icon svg{width:24px;height:24px}.shortcut-icon.ai{background:linear-gradient(145deg,#fff0c2,#ffe0e5);border:1px solid #e8c56b;color:#a50f2b}.shortcut-icon.game{background:#fff0e2}.shortcut-icon.checkin{background:#e5f8ee}.shortcut-icon.king{background:#fff4c9}.shortcut-icon.progress{background:#f1e8ff}.shortcut-icon.nonton{background:#e7f2ff;border:1px solid #c7e0ff}
-    @media(min-width:600px){.home-shortcuts{max-width:560px;gap:12px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
+    @media(min-width:600px){.home-shortcuts{max-width:440px;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
 
       .pool-shortcut{float:right;margin:-34px 0 8px 8px;border:1px solid #e5b8bd;border-radius:999px;padding:6px 10px;background:#fff;color:#b91c1c;font-size:11px;font-weight:850;box-shadow:0 2px 6px #b91c1c12}
       .page-section{position:relative}.page-section>.pool-shortcut{position:absolute;right:12px;top:12px;float:none;margin:0;z-index:2}
