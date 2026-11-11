@@ -7685,6 +7685,13 @@ document.addEventListener('DOMContentLoaded', function () {
   $('cuit-roulette-edu-overlay').style.display='none';
   setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},160);
  }
+ function waitForMember(){
+  let attempts=0;
+  const timer=setInterval(()=>{
+   if(getUser()?.id&&getClient()){clearInterval(timer);showLauncher();}
+   else if(++attempts>=80)clearInterval(timer);
+  },250);
+ }
  function boot(){
   let tries=0;
   const timer=setInterval(()=>{
@@ -7694,7 +7701,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const client=getClient();
   if(client?.auth?.onAuthStateChange){
    const {data}=client.auth.onAuthStateChange((_event,session)=>{
-    if(session?.user){setTimeout(showLauncher,450);}
+    if(session?.user)waitForMember();
     else if($('cuit-roulette-edu-launch'))$('cuit-roulette-edu-launch').style.display='none';
    });
    authSubscription=data?.subscription||null;
