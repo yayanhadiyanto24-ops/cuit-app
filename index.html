@@ -5381,7 +5381,7 @@ async function submitCommentAction() {
     if (data.reward_earned) rewardMessages.push('Kamu mendapat 1 Koin Berbayar dari hadiah komentar lama.');
     if (data.free_reward_earned) rewardMessages.push('🎉 Hadiah sistem: +' + data.free_reward_amount + ' Koin Gratis!');
     else if (data.duplicate_for_reward) rewardMessages.push('Komentar terkirim, tetapi isi ini sudah pernah kamu gunakan pada curhatan ini sehingga tidak mendapat hadiah duplikat.');
-    if (rewardMessages.length) alert(rewardMessages.join('\\n'));
+    if (rewardMessages.length) alert(rewardMessages.join('\n'));
 
     input.value = '';
     if (typeof updateCommentCharCount === 'function') {
@@ -7877,15 +7877,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const $ = id => document.getElementById(id);
   const historyKey='cuit_ai_content_history_v1';
   function setStatus(msg,isError){const el=$('aiContentStatus');if(el){el.textContent=msg;el.style.color=isError?'#b91c1c':'#76565b';}}
-  function cleanAITitle(line){return String(line||'').replace(/^\\s*\\*{1,2}\\s*/,'').replace(/\\s*\\*{1,2}\\s*$/,'').replace(/^\\s*(?:judul\\s*:\\s*)/i,'').trim();}
+  function cleanAITitle(line){return String(line||'').replace(/^\s*\*{1,2}\s*/,'').replace(/\s*\*{1,2}\s*$/,'').replace(/^\s*(?:judul\s*:\s*)/i,'').trim();}
   function setAIResult(raw){
-    const lines=String(raw||'').replace(/\\r\\n?/g,'\\n').split('\\n');
+    const lines=String(raw||'').replace(/\r\n?/g,'\n').split('\n');
     let titleIndex=lines.findIndex(line=>line.trim()!=='');
     const title=titleIndex>=0?cleanAITitle(lines[titleIndex]):'';
     if(titleIndex>=0)lines.splice(titleIndex,1);
     const preview=$('aiContentTitlePreview');
     if(preview){preview.textContent=title;preview.style.display=title?'block':'none';}
-    $('aiContentResult').value=lines.join('\\n').replace(/^\\n+/, '');
+    $('aiContentResult').value=lines.join('\n').replace(/^\n+/, '');
   }
   function renderHistory(){
     let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
@@ -7924,7 +7924,7 @@ document.addEventListener('DOMContentLoaded', function () {
     finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
   };
   window.sendAIContentToPost=function(){
-    const body=$('aiContentResult')?.value?.trim();const title=$('aiContentTitlePreview')?.textContent?.trim();const content=[title,body].filter(Boolean).join('\\n\\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const body=$('aiContentResult')?.value?.trim();const title=$('aiContentTitlePreview')?.textContent?.trim();const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
     const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
     editor.value=content;if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
     if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
