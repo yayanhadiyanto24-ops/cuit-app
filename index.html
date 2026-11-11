@@ -7506,6 +7506,204 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 
+
+<style id="cuit-roulette-edu-style">
+#cuit-roulette-edu-launch{position:fixed;right:14px;bottom:82px;z-index:99990;border:2px solid #f2d47d;border-radius:999px;padding:11px 16px;background:linear-gradient(135deg,#790b20,#d51d38);color:#fff;font-weight:950;box-shadow:0 5px 18px #6b0a2444;display:none}
+#cuit-roulette-edu-overlay{display:none;position:fixed;inset:0;z-index:100100;background:#17060bef;overflow:auto;padding:14px;align-items:center;justify-content:center}
+#cuit-roulette-edu-card{width:min(100%,440px);max-height:94dvh;overflow:auto;background:linear-gradient(145deg,#fff9e9,#fff 55%,#fff0f2);border:2px solid #dfb84f;border-radius:20px;padding:16px;color:#321016;box-shadow:0 16px 44px #0007}
+#cuit-roulette-edu-card h2{text-align:center;color:#a51026;font-size:19px;margin:2px 0 5px}
+#cuit-roulette-edu-card .edu-sub{text-align:center;font-size:11px;line-height:1.45;color:#79545b;margin-bottom:12px}
+#cuit-roulette-edu-wheel-wrap{width:min(68vw,250px);aspect-ratio:1;margin:8px auto 12px;position:relative}
+#cuit-roulette-edu-wheel{width:100%;height:100%;border-radius:50%;border:5px solid #e1bd58;background:repeating-conic-gradient(#bd172d 0deg 30deg,#f4d77d 30deg 60deg,#fff8e9 60deg 90deg,#8e1028 90deg 120deg);box-shadow:0 4px 14px #0003;transition:transform 4.3s cubic-bezier(.12,.72,.12,1);position:relative;will-change:transform}
+#cuit-roulette-edu-wheel:after{content:"CUIT";position:absolute;width:25%;height:25%;left:37.5%;top:37.5%;display:grid;place-items:center;border-radius:50%;background:#fff8df;border:3px solid #d7ad42;color:#a51026;font-weight:1000;font-size:13px;box-shadow:0 2px 6px #0003}
+.cuit-roulette-edu-label{position:absolute;left:50%;top:50%;width:66px;height:18px;margin:-9px 0 0 -33px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:8px;line-height:1;font-weight:950;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none;white-space:nowrap}
+#cuit-roulette-edu-pointer{position:absolute;z-index:3;top:-5px;left:calc(50% - 10px);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:24px solid #a51026;filter:drop-shadow(0 2px 2px #0005)}
+#cuit-roulette-edu-status{text-align:center;font-size:12px;line-height:1.45;color:#70434b;min-height:22px;margin:8px 0}
+#cuit-roulette-edu-spin,#cuit-roulette-edu-close,#cuit-roulette-edu-publish{width:100%;border:0;border-radius:11px;padding:12px;margin-top:8px;font-weight:950}
+#cuit-roulette-edu-spin,#cuit-roulette-edu-publish{background:linear-gradient(120deg,#8e1028,#d51e3a);color:#fff}
+#cuit-roulette-edu-spin:disabled{opacity:.55}
+#cuit-roulette-edu-close{background:#f4e7e8;color:#852033}
+#cuit-roulette-edu-question{display:none;margin-top:12px;padding:12px;border:1px solid #ead7a5;border-radius:13px;background:#fff}
+#cuit-roulette-edu-question h3{font-size:14px;color:#a51026;margin-bottom:7px}
+#cuit-roulette-edu-prompt{font-size:13px;line-height:1.5;font-weight:750;margin-bottom:9px}
+#cuit-roulette-edu-options{display:grid;gap:7px}
+#cuit-roulette-edu-options button{padding:10px;text-align:left;border:1px solid #e8d4d7;border-radius:9px;background:#fffafa;color:#321016;font-size:12px;font-weight:700}
+#cuit-roulette-edu-options button:disabled{opacity:.65}
+#cuit-roulette-edu-feedback{font-size:12px;line-height:1.5;margin-top:10px;white-space:pre-wrap}
+#cuit-roulette-edu-draft{display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff8e5;border:1px solid #e8cf8c;font-size:12px;line-height:1.5;white-space:pre-wrap}
+@media(max-width:360px){#cuit-roulette-edu-wheel-wrap{width:205px}}
+</style>
+<script id="cuit-roulette-edu-app">
+(function(){
+ 'use strict';
+ if(window.__cuitRouletteEduInstalled)return;
+ window.__cuitRouletteEduInstalled=true;
+ const categories=['Like','Komen','Peribahasa','Geografi Indonesia','Matematika','Sejarah Indonesia','Bahasa Indonesia','Bahasa Inggris','Ekonomi','Biologi','Fisika','Kimia'];
+ const shortNames=['LIKE','KOMEN','PERIBAHASA','GEOGRAFI','MATEMATIKA','SEJARAH','B. INDONESIA','B. INGGRIS','EKONOMI','BIOLOGI','FISIKA','KIMIA'];
+ const $=id=>document.getElementById(id);
+ const getUser=()=>typeof currentUser!=='undefined'?currentUser:null;
+ const getClient=()=>typeof supabaseClient!=='undefined'?supabaseClient:null;
+ let busy=false,question=null,rotation=0,authSubscription=null;
+ function node(tag,attrs,text){const n=document.createElement(tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;}
+ function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
+ function ensureUI(){
+  if(!$('cuit-roulette-edu-launch')){
+   const b=node('button',{id:'cuit-roulette-edu-launch',type:'button','aria-label':'Buka Roulette CUIT'},'🎡 ROULETTE');
+   b.addEventListener('click',open);document.body.appendChild(b);
+  }
+  if(!$('cuit-roulette-edu-overlay')){
+   const o=node('div',{id:'cuit-roulette-edu-overlay'});
+   o.innerHTML='<section id="cuit-roulette-edu-card" role="dialog" aria-modal="true" aria-label="Roulette edukatif CUIT"><h2>🎡 ROULETTE CUIT</h2><div class="edu-sub">Roda memilih tantangan secara acak. Gratis dimainkan; tidak ada hadiah koin atau permata dari undian.</div><div id="cuit-roulette-edu-wheel-wrap"><div id="cuit-roulette-edu-pointer"></div><div id="cuit-roulette-edu-wheel"></div></div><div id="cuit-roulette-edu-status">Siap bermain?</div><button id="cuit-roulette-edu-spin" type="button">PUTAR RODA</button><div id="cuit-roulette-edu-question"><h3 id="cuit-roulette-edu-heading"></h3><div id="cuit-roulette-edu-prompt"></div><div id="cuit-roulette-edu-options"></div><div id="cuit-roulette-edu-feedback"></div><div id="cuit-roulette-edu-draft"></div><button id="cuit-roulette-edu-publish" type="button" style="display:none">JADIKAN CURHATAN</button></div><button id="cuit-roulette-edu-close" type="button">TUTUP</button></section>';
+   document.body.appendChild(o);
+   const wheel=$('cuit-roulette-edu-wheel');
+   categories.forEach((_,i)=>{
+    const label=node('span',{class:'cuit-roulette-edu-label'},shortNames[i]);
+    const angle=i*30+15;
+    label.style.transform='rotate('+angle+'deg) translateY(-82px) rotate('+(-angle)+'deg)';
+    wheel.appendChild(label);
+   });
+   $('cuit-roulette-edu-spin').addEventListener('click',spin);
+   $('cuit-roulette-edu-close').addEventListener('click',()=>{o.style.display='none';});
+   $('cuit-roulette-edu-publish').addEventListener('click',publishDraft);
+  }
+ }
+ async function bankReady(){
+  const client=getClient();if(!client)return false;
+  const {data,error}=await client.from('cuit_roulette_questions').select('category,difficulty').eq('is_active',true);
+  if(error)throw error;
+  const counts={};
+  (data||[]).forEach(r=>{const k=r.category+'|'+r.difficulty;counts[k]=(counts[k]||0)+1;});
+  return categories.slice(2).every(c=>['mudah','sedang','sulit'].every(d=>(counts[c+'|'+d]||0)>0));
+ }
+ async function showLauncher(){
+  if(!getUser()?.id||!getClient()){if($('cuit-roulette-edu-launch'))$('cuit-roulette-edu-launch').style.display='none';return;}
+  try{
+   const ready=await bankReady();
+   ensureUI();
+   $('cuit-roulette-edu-launch').style.display=ready?'block':'none';
+   if(!ready)console.warn('Roulette disembunyikan: bank soal belum lengkap.');
+  }catch(e){console.error('Roulette bank check:',e);if($('cuit-roulette-edu-launch'))$('cuit-roulette-edu-launch').style.display='none';}
+ }
+ function open(){
+  if(!getUser()?.id){status('Silakan masuk ke akun CUIT terlebih dahulu.');return;}
+  ensureUI();$('cuit-roulette-edu-overlay').style.display='flex';
+  $('cuit-roulette-edu-question').style.display='none';
+  $('cuit-roulette-edu-spin').disabled=false;
+  question=null;status('Putar roda. Kategori dan soal ditentukan oleh server.');
+ }
+ function animateTo(index){
+  const wheel=$('cuit-roulette-edu-wheel');
+  const center=index*30+15;
+  const target=rotation+360*5+((360-center)%360);
+  wheel.style.transform='rotate('+target+'deg)';
+  rotation=target;
+  return new Promise(resolve=>setTimeout(resolve,4400));
+ }
+ async function spin(){
+  if(busy)return;
+  const client=getClient();if(!getUser()?.id||!client){status('Sesi login tidak ditemukan. Silakan masuk kembali.');return;}
+  busy=true;$('cuit-roulette-edu-spin').disabled=true;$('cuit-roulette-edu-question').style.display='none';
+  status('Roda berputar dan server memilih kategori...');
+  try{
+   const {data,error}=await client.rpc('cuit_roulette_next_turn');
+   if(error)throw error;
+   if(!data?.ok){
+    if(data?.exhausted){status(data.message||'Soal kategori ini sudah habis untuk hari ini. Putar lagi untuk kategori lain.');return;}
+    throw new Error(data?.message||'Tantangan belum tersedia.');
+   }
+   const index=categories.indexOf(data.category);
+   if(index<0)throw new Error('Kategori dari server tidak dikenali.');
+   await animateTo(index);
+   if(data.type==='mission'){showMission(data);return;}
+   question=data;showQuestion(data);
+  }catch(e){status(e?.message||'Koneksi bermasalah. Silakan coba lagi.');}
+  finally{busy=false;$('cuit-roulette-edu-spin').disabled=false;}
+ }
+ function showMission(d){
+  $('cuit-roulette-edu-question').style.display='block';
+  $('cuit-roulette-edu-heading').textContent='MISI '+String(d.category||'').toUpperCase();
+  $('cuit-roulette-edu-prompt').textContent=d.instruction||'Selesaikan aktivitas komunitas di CUIT.';
+  $('cuit-roulette-edu-options').replaceChildren();
+  $('cuit-roulette-edu-feedback').textContent='Misi komunitas ini tidak memberikan koin atau permata. Setelah selesai, kamu bebas memutar roda lagi.';
+  $('cuit-roulette-edu-draft').style.display='none';$('cuit-roulette-edu-publish').style.display='none';
+  const go=node('button',{type:'button'},'BUKA BERANDA CUIT');
+  go.style.cssText='width:100%;margin-top:9px;padding:10px;border:0;border-radius:9px;background:#fff0d0;color:#8c1728;font-weight:900';
+  go.addEventListener('click',()=>{
+   $('cuit-roulette-edu-overlay').style.display='none';
+   if(typeof window.switchTab==='function')window.switchTab('pageHome',document.querySelector('.nav-bar .nav-item')||null);
+  });
+  $('cuit-roulette-edu-options').appendChild(go);
+  status('Roda memilih misi komunitas.');
+ }
+ function showQuestion(d){
+  $('cuit-roulette-edu-question').style.display='block';
+  $('cuit-roulette-edu-heading').textContent=d.category+' • '+String(d.difficulty||'').toUpperCase();
+  $('cuit-roulette-edu-prompt').textContent=d.question||'';
+  const wrap=$('cuit-roulette-edu-options');wrap.replaceChildren();
+  $('cuit-roulette-edu-feedback').textContent='';
+  $('cuit-roulette-edu-draft').style.display='none';$('cuit-roulette-edu-publish').style.display='none';
+  (Array.isArray(d.options)?d.options:[]).forEach(opt=>{
+   const b=node('button',{type:'button'},String(opt));
+   b.addEventListener('click',()=>answer(String(opt)));
+   wrap.appendChild(b);
+  });
+  status('Pilih satu jawaban yang paling tepat.');
+ }
+ async function answer(value){
+  if(!question||busy)return;
+  busy=true;
+  [...$('cuit-roulette-edu-options').children].forEach(b=>b.disabled=true);
+  try{
+   const {data,error}=await getClient().rpc('cuit_roulette_submit_answer',{p_question_id:question.question_id,p_answer:value});
+   if(error)throw error;
+   if(!data?.ok)throw new Error(data?.message||'Jawaban belum dapat diperiksa.');
+   if(!data.correct){
+    $('cuit-roulette-edu-feedback').textContent='Belum tepat. Coba lagi; soal ini tetap bisa kamu jawab sampai benar.';
+    [...$('cuit-roulette-edu-options').children].forEach(b=>b.disabled=false);
+    return;
+   }
+   $('cuit-roulette-edu-feedback').textContent='Benar! '+(data.explanation||'');
+   if(data.achievement)$('cuit-roulette-edu-feedback').textContent+='\n🏅 '+data.achievement;
+   const draft=String(data.curhat_content||'');
+   $('cuit-roulette-edu-draft').textContent=draft;
+   $('cuit-roulette-edu-draft').style.display=draft?'block':'none';
+   $('cuit-roulette-edu-publish').style.display=draft?'block':'none';
+   status('Jawaban benar. Soal ini tidak akan muncul lagi untuk akunmu sampai hari berganti.');
+   question=null;
+  }catch(e){
+   $('cuit-roulette-edu-feedback').textContent=e?.message||'Jawaban belum tersimpan. Coba lagi.';
+   [...$('cuit-roulette-edu-options').children].forEach(b=>b.disabled=false);
+  }finally{busy=false;}
+ }
+ function publishDraft(){
+  const draft=$('cuit-roulette-edu-draft').textContent.trim();
+  const editor=document.getElementById('postContent');
+  if(!draft||!editor){status('Editor curhatan belum tersedia.');return;}
+  editor.value=draft;
+  if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
+  if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
+  $('cuit-roulette-edu-overlay').style.display='none';
+  setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},160);
+ }
+ function boot(){
+  let tries=0;
+  const timer=setInterval(()=>{
+   if(getClient()&&getUser()?.id){clearInterval(timer);showLauncher();}
+   else if(++tries>240)clearInterval(timer);
+  },250);
+  const client=getClient();
+  if(client?.auth?.onAuthStateChange){
+   const {data}=client.auth.onAuthStateChange((_event,session)=>{
+    if(session?.user){setTimeout(showLauncher,450);}
+    else if($('cuit-roulette-edu-launch'))$('cuit-roulette-edu-launch').style.display='none';
+   });
+   authSubscription=data?.subscription||null;
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
 </body>
 ===================================================== -->
 
