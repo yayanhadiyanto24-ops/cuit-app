@@ -3327,12 +3327,29 @@ async function openDailyCheckin() {
         if (error) throw error;
         if (!data?.success) throw new Error(data?.code || 'Pemeriksaan tidak berhasil.');
         const flags = data.requiredSecretsPresent || {};
-        const labels = { DOKU_CLIENT_ID: 'DOKU Client ID', DOKU_SECRET_KEY: 'DOKU Secret Key', DOKU_PRIVATE_KEY: 'DOKU Private Key', DOKU_MERCHANT_ID: 'DOKU Merchant ID' };
-        const lines = Object.entries(labels).map(([key, label]) => (flags[key] ? '✅ ' : '❌ ') + label + (flags[key] ? ' tersedia' : ' belum tersedia'));
+        const labels = {
+          DOKU_CLIENT_ID: 'DOKU Client ID',
+          DOKU_SECRET_KEY: 'DOKU Secret Key',
+          DOKU_PRIVATE_KEY: 'DOKU Private Key',
+          DOKU_MERCHANT_ID: 'DOKU Merchant ID',
+          DOKU_MALL_ID: 'DOKU Mall ID'
+        };
+        const lines = Object.entries(labels).map(([key, label]) =>
+          (flags[key] ? '✅ ' : '❌ ') + label + (flags[key] ? ' tersedia' : ' belum tersedia')
+        );
         lines.unshift('Lingkungan: ' + (data.environment || 'tidak diketahui'));
-        lines.push('', data.readyForSandboxIntegration ? 'Konfigurasi Sandbox lengkap secara keberadaan Secret.' : 'Konfigurasi belum siap. Periksa item bertanda ❌ dan DOKU_ENV.');
-        lines.push('Catatan: pemeriksaan ini hanya mengecek keberadaan Secret, bukan menguji keabsahan kunci ke DOKU.');
-        output.textContent = lines.join('\\n');
+        lines.push(
+          (data.merchantIdMatchesClientId ? '✅' : '❌') + ' Merchant ID sama dengan Client ID',
+          (data.mallIdMatchesSupportValue ? '✅' : '❌') + ' Mall ID sesuai informasi DOKU (113493)'
+        );
+        lines.push(
+          '',
+          data.readyForSandboxIntegration
+            ? 'Konfigurasi Sandbox lengkap. Berikutnya perlu uji koneksi autentikasi ke DOKU.'
+            : 'Konfigurasi belum siap. Lengkapi Secret yang bertanda ❌ dan pastikan DOKU_ENV = sandbox.'
+        );
+        lines.push('Catatan: pemeriksaan ini belum menguji keabsahan kredensial melalui API DOKU.');
+        output.textContent = lines.join('\n');
       } catch (error) {
         console.error('Pemeriksaan DOKU Sandbox:', error);
         output.textContent = 'Gagal memeriksa: ' + (error?.message || 'Terjadi kesalahan.');
