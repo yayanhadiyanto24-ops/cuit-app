@@ -13,14 +13,6 @@
 
   <title>CUIT — Curhat dapat Duit</title>
 
-  <script>window.CUIT_GAMES_DISABLED = true; document.documentElement.classList.add('cuit-games-disabled');</script>
-  <style>
-    /* CUIT: game sementara dinonaktifkan, seluruh markup dan data tetap dipertahankan */
-    html.cuit-games-disabled .home-shortcuts button[onclick*="pageGame"],
-    html.cuit-games-disabled button[onclick*="pageGame"],
-    html.cuit-games-disabled .nav-bar .nav-item[onclick*="pageGame"] { display:none !important; }
-    html.cuit-games-disabled #pageGame { display:none !important; }
-  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/id_ID/sdk.js"></script>
     <style>
@@ -3619,21 +3611,7 @@ async function openDailyCheckin() {
           notice = document.createElement('div');
           notice.id = 'cuitGamesPausedNotice';
           notice.textContent = 'Seluruh permainan CUIT sedang dijeda sementara. Fitur dan data permainan tidak dihapus.';
-          notice.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:100020;width:calc(100% - 28px);max-width:440px;padding:12px 14px;border:1px solid #d4a72c;border-radius:12px;background:#fff8df;color:#6b4700;font-size:12px;font-weight:800;line-height:1.45;box-shadow:0 5px 20px #0002;text-align:center;';
-          document.body.appendChild(notice);
-          setTimeout(() => notice.remove(), 4000);
-        }
-        return;
-      }
-      if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
-      if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
-
-      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
-
-      const targetPage = document.getElementById(pageId);
-      if (targetPage) targetPage.classList.add('active');
-      if (navElement) navElement.classList.add('active');
+          notice.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:100020;width:calc(100% - 28px);max-width:440px (navElement) navElement.classList.add('active');
 
       if (pageId === 'pageProfile') renderProfileData();
       if (pageId === 'pageCreate') loadDraftLocally();
