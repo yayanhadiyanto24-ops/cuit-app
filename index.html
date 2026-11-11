@@ -3626,7 +3626,7 @@ async function openDailyCheckin() {
         return;
       }
       if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
-      if ((pageId === 'pageKings' || pageId === 'pageHome') && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
+      if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
 
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
