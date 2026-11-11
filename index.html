@@ -2946,6 +2946,7 @@ poolStatus=feePaid>0
   <div id="cashoutModal" class="modal">
     <div class="modal-content">
       <h3>💸 Penarikan Permata CUIT</h3>
+      <div id="cashoutUnavailableNotice" style="padding:10px;margin:8px 0;border:1px solid #e6c66c;border-radius:10px;background:#fff8df;color:#684b12;font-size:11px;line-height:1.45">Layanan penarikan belum aktif. Jangan masukkan data rekening dahulu. Saldo Permata tidak akan dipotong sampai sistem payout dan pencatatan pusat siap.</div>
       <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 8px;">1 Permata CUIT = Rp 1</div>
 
       <label style="font-size: 11px; font-weight: 700; display: block;">Tujuan Penarikan (Bank / E-Wallet):</label>
@@ -2987,7 +2988,7 @@ poolStatus=feePaid>0
       <input type="text" id="cashoutAccount" placeholder="Contoh: 081234567890">
 
       <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <button class="btn-primary" style="flex: 1;" onclick="submitCashout()">Cairkan Sekarang</button>
+        <button class="btn-primary" style="flex: 1;opacity:.55;cursor:not-allowed" type="button" disabled title="Layanan penarikan belum aktif">Penarikan Belum Aktif</button>
         <button class="btn-secondary" style="background:#eee;" onclick="document.getElementById('cashoutModal').style.display='none'">Batal</button>
       </div>
     </div>
@@ -5656,8 +5657,8 @@ async function submitCommentAction() {
       const container = document.getElementById('packageListContainer');
       container.innerHTML = `
         <div style="padding:12px;text-align:center;background:#fff8e8;border:1px solid #ead29a;border-radius:12px;color:#684b12">
-          <b>Top Up sedang dipersiapkan</b>
-          <div style="font-size:11px;margin-top:5px">Integrasi DOKU belum diaktifkan karena sandbox masih dalam pemeliharaan. Saldo dan riwayat yang sudah ada tetap aman.</div>
+          <b>Top Up belum tersedia</b>
+          <div style="font-size:11px;margin-top:5px">Integrasi pembayaran DOKU sedang menunggu konfigurasi dan pengujian merchant. Belum ada pembayaran atau penambahan koin yang diproses. Saldo dan riwayat tetap aman.</div>
           <div style="font-size:11px;font-weight:800;margin-top:9px">Rencana nominal: Rp10.000 · Rp20.000 · Rp30.000 · Rp50.000 · Rp100.000 · Rp200.000 · Rp300.000 · Rp500.000</div>
         </div>`;
     }
@@ -5683,51 +5684,12 @@ async function submitCommentAction() {
     }
 
     async function submitCashout() {
-      const typeInput = document.getElementById('cashoutType');
-      const type = typeInput ? typeInput.value.trim() : '';
-      const coins = parseInt(document.getElementById('cashoutCoins').value) || 0;
-      const accountName = document.getElementById('cashoutAccountName').value.trim();
-      const account = document.getElementById('cashoutAccount').value.trim();
-
-      if (!type) return alert('Silakan pilih atau ketik nama Bank/E-Wallet tujuan!');
-      if (coins < 50000) return alert('Minimum penarikan adalah 50.000 Permata CUIT (Rp 50.000)!');
-      if (coins > gems) return alert('Saldo Permata CUIT Anda tidak cukup!');
-      if (!accountName) return alert('Nama pemilik akun DANA / Bank wajib diisi!');
-      if (!account) return alert('Nomor tujuan DANA / Bank wajib diisi!');
-
-      const gross = coins * 1;
-      const fee = 5000;
-      const netAmount = Math.max(0, gross - fee);
-
-      try {
-        const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-        const myEmail = currentUser ? currentUser.email : guestId;
-
-        await supabaseClient.from('payouts').insert([
-          {
-            user_id: currentUser ? currentUser.id : 'demo_id',
-            user_email: myEmail,
-            payout_type: type,
-            account_name: accountName,
-            account_number: account,
-            coins_deducted: coins,
-            net_amount: netAmount,
-            status: 'pending'
-          }
-        ]);
-
-        gems -= coins;
-        updateCoinUI(true);
-        document.getElementById('cashoutModal').style.display = 'none';
-
-        document.getElementById('cashoutType').value = '';
-        document.getElementById('cashoutAccountName').value = '';
-        document.getElementById('cashoutAccount').value = '';
-
-        alert(`Pengajuan penarikan dana ke ${type.toUpperCase()} (${accountName} - ${account}) berhasil dikirim!`);
-      } catch (err) {
-        alert('Terjadi kesalahan proses penarikan: ' + err.message);
-      }
+      const notice = document.getElementById('cashoutUnavailableNotice');
+      if (notice) notice.style.display = 'block';
+      // Penarikan sengaja tidak diproses sebelum backend payout, validasi saldo,
+      // pencatatan ledger pusat, dan kanal DOKU Disbursement siap diuji.
+      // Jangan mengurangi saldo lokal atau mengirim data rekening dari browser.
+      return false;
     }
 
     function openConfigModal() {
