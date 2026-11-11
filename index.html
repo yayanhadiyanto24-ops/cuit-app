@@ -6166,7 +6166,7 @@ function cuitPostTextEffectCss(style) {
   const css = cuitPostStyleCss(style) + 'font-size:13px !important;line-height:1.45 !important;';
   return ` style="${css.replace(/"/g,'&quot;')}"`;
 }
-    function cuitResetPostStyle(){Object.entries({postBorderStyle:'#a83249',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif',postFontSize:'14px',postTextStyle:'normal'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
+    function cuitResetPostStyle(){window.__cuitAIForceBold=false;Object.entries({postBorderStyle:'#a83249',postBackgroundStyle:'#ffffff',postDecorBorder:'none',postDecorBackground:'none',postTextColor:'#4a2028',postFontFamily:'system-ui, sans-serif',postFontSize:'14px',postTextStyle:'normal'}).forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});['postBoldBtn','postItalicBtn'].forEach(id=>document.getElementById(id)?.classList.remove('selected'));updatePostStylePreview();}
     document.addEventListener('DOMContentLoaded',()=>{const input=document.getElementById('postContent');if(input)input.addEventListener('input',updatePostStylePreview);updatePostStylePreview();if(currentUser)cuitRefreshMyLevel();});
 
     function cuitActivityKey() {
@@ -6801,7 +6801,7 @@ async function submitNewPost() {
   if (
     (postStyle.border !== 'solid' && styleLevel < 3) ||
     (postStyle.background !== '#ffffff' && styleLevel < 4) ||
-    (postStyle.bold && styleLevel < 5) ||
+    (postStyle.bold && styleLevel < 5 && window.__cuitAIForceBold !== true) ||
     (postStyle.italic && styleLevel < 6) ||
     (postStyle.decorBorder !== 'none' && styleLevel < 7) ||
     (postStyle.decorBackground !== 'none' && styleLevel < 8) ||
@@ -7924,9 +7924,13 @@ document.addEventListener('DOMContentLoaded', function () {
     finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
   };
   window.sendAIContentToPost=function(){
-    const body=$('aiContentResult')?.value?.trim();const title=$('aiContentTitlePreview')?.textContent?.trim();const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const body=$('aiContentResult')?.value?.trim().replace(/\\*+/g,'');const title=$('aiContentTitlePreview')?.textContent?.trim().replace(/\\*+/g,'');const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
     const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
-    editor.value=content;if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
+    editor.value=content;
+    window.__cuitAIForceBold=true;
+    document.getElementById('postBoldBtn')?.classList.add('selected');
+    if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
+    if(typeof window.updatePostStylePreview==='function')window.updatePostStylePreview();
     if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
     setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},150);
   };
