@@ -6322,7 +6322,10 @@ container.innerHTML = html;
       // Pemutar tampil sebagai modal di atasnya sehingga panel tidak terasa hilang
       // dan pengguna dapat kembali ke daftar setelah menutup video.
       const reelsModal = document.getElementById('reelsModal');
-      if (reelsModal) reelsModal.style.display = 'flex';
+      if (reelsModal) {
+        reelsModal.style.display = 'flex';
+        reelsModal.style.zIndex = '10000';
+      }
 
       let rawUrl = normalizeFbUrl(targetUrl);
       if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
@@ -6364,7 +6367,11 @@ container.innerHTML = html;
       }
 
       const playerModal = document.getElementById('videoPlayerModal');
-      if (playerModal) playerModal.style.display = 'flex';
+      if (playerModal) {
+        playerModal.style.display = 'flex';
+        // Pastikan pemutar selalu berada di atas panel daftar misi.
+        playerModal.style.zIndex = '10001';
+      }
     }
 
     let videoSecondsLeft = 10;
