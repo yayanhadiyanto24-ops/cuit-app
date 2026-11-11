@@ -7421,7 +7421,7 @@ document.addEventListener('DOMContentLoaded', function () {
    o.innerHTML='<section id="cuit-roulette-edu-card" role="dialog" aria-modal="true" aria-label="Roulette edukatif CUIT"><h2>🎡 ROULETTE CUIT</h2><div class="edu-sub">Roda memilih tantangan secara acak. Gratis dimainkan; tidak ada hadiah koin atau permata dari undian.</div><div id="cuit-roulette-edu-wheel-wrap"><div id="cuit-roulette-edu-pointer"></div><div id="cuit-roulette-edu-wheel"></div><div id="cuit-roulette-edu-center"><img src="assets/cuit-app-icon.svg" alt="Logo CUIT"></div></div><div id="cuit-roulette-edu-status">Siap bermain?</div><button id="cuit-roulette-edu-spin" type="button">PUTAR RODA</button><div id="cuit-roulette-edu-question"><h3 id="cuit-roulette-edu-heading"></h3><div id="cuit-roulette-edu-prompt"></div><div id="cuit-roulette-edu-options"></div><div id="cuit-roulette-edu-feedback"></div><div id="cuit-roulette-edu-draft"></div><button id="cuit-roulette-edu-publish" type="button" style="display:none">JADIKAN CURHATAN</button></div><button id="cuit-roulette-edu-close" type="button">TUTUP</button></section>';
    document.body.appendChild(o);
    const mini=node('button',{id:'cuit-roulette-edu-mini',type:'button'},'🎡 MISI ROULETTE • BUKA');
-   mini.addEventListener('click',()=>{mini.style.display='none';o.style.display='flex';$('cuit-roulette-edu-card').style.display='block';});
+   mini.addEventListener('click',()=>{mini.style.display='none';o.style.display='flex';o.style.background='#17060bef';o.style.pointerEvents='none';$('cuit-roulette-edu-card').style.display='block';});
    document.body.appendChild(mini);
    const wheel=$('cuit-roulette-edu-wheel');
    categories.forEach((_,i)=>{
