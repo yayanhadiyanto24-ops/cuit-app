@@ -1311,6 +1311,7 @@
       </div>
       <div id="aiContentResultWrap" style="display:none;margin-top:12px;padding:13px;background:#fff;border:1px solid #e7c978;border-radius:16px;">
         <div style="font-weight:900;color:#9d1730;margin-bottom:8px;">Hasil Kreator Konten AI</div>
+        <div id="aiContentTitlePreview" style="display:none;font-weight:900;font-size:16px;line-height:1.4;color:#741326;margin:2px 0 9px;"></div>
         <textarea id="aiContentResult" rows="10" style="line-height:1.55;"></textarea>
         <div style="display:flex;gap:7px;margin-top:8px;">
           <button type="button" class="btn-secondary" style="flex:1;" onclick="generateCuitAIContent(true)">Buat Ulang</button>
@@ -7876,12 +7877,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const $ = id => document.getElementById(id);
   const historyKey='cuit_ai_content_history_v1';
   function setStatus(msg,isError){const el=$('aiContentStatus');if(el){el.textContent=msg;el.style.color=isError?'#b91c1c':'#76565b';}}
+  function cleanAITitle(line){return String(line||'').replace(/^\\s*\\*{1,2}\\s*/,'').replace(/\\s*\\*{1,2}\\s*$/,'').replace(/^\\s*(?:judul\\s*:\\s*)/i,'').trim();}
+  function setAIResult(raw){
+    const lines=String(raw||'').replace(/\\r\\n?/g,'\\n').split('\\n');
+    let titleIndex=lines.findIndex(line=>line.trim()!=='');
+    const title=titleIndex>=0?cleanAITitle(lines[titleIndex]):'';
+    if(titleIndex>=0)lines.splice(titleIndex,1);
+    const preview=$('aiContentTitlePreview');
+    if(preview){preview.textContent=title;preview.style.display=title?'block':'none';}
+    $('aiContentResult').value=lines.join('\\n').replace(/^\\n+/, '');
+  }
   function renderHistory(){
     let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
     const host=$('aiContentHistory');if(!host)return;
     if(!items.length){host.textContent='Belum ada riwayat kreasi di perangkat ini.';return;}
     host.innerHTML=items.slice(0,8).map((x,i)=>'<button type="button" data-ai-history="'+i+'" style="display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #f1e4e6;background:transparent;padding:8px 2px;color:#6e2533;font-size:12px;font-weight:750;">'+String(x.title||x.type||'Konten AI').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+' · '+new Date(x.at).toLocaleDateString('id-ID')+'</button>').join('');
-    host.querySelectorAll('[data-ai-history]').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.aiHistory)];$('aiContentResult').value=x.content;$('aiContentResultWrap').style.display='block';}));
+    host.querySelectorAll('[data-ai-history]').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.aiHistory)];setAIResult(x.content);$('aiContentResultWrap').style.display='block';}));
   }
   window.refreshCuitAICoinBalance=async function(){
     const el=$('aiCoinBalance');if(!el)return;
@@ -7904,7 +7915,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const {data:charge,error:chargeError}=await supabaseClient.rpc('cuit_charge_ai_content',{p_request_id:requestId});
       if(chargeError)throw new Error(chargeError.message||'Pembayaran koin gagal. Konten tidak ditampilkan.');
       if(!charge||charge.success!==true)throw new Error('Pembayaran koin belum berhasil. Silakan coba lagi.');
-      $('aiContentResult').value=content;$('aiContentResultWrap').style.display='block';
+      setAIResult(content);$('aiContentResultWrap').style.display='block';
       let items=[];try{items=JSON.parse(localStorage.getItem(historyKey)||'[]');}catch(_){}
       items.unshift({type,content,title:content.split('\n')[0].slice(0,80),at:new Date().toISOString()});localStorage.setItem(historyKey,JSON.stringify(items.slice(0,15)));
       setStatus('Berhasil dibuat. Terpakai '+charge.charged+' '+(charge.account==='free_coins'?'Koin Gratis':'Koin Berbayar')+'.',false);
@@ -7913,7 +7924,7 @@ document.addEventListener('DOMContentLoaded', function () {
     finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
   };
   window.sendAIContentToPost=function(){
-    const content=$('aiContentResult')?.value?.trim();if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const body=$('aiContentResult')?.value?.trim();const title=$('aiContentTitlePreview')?.textContent?.trim();const content=[title,body].filter(Boolean).join('\\n\\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
     const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
     editor.value=content;if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
     if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
