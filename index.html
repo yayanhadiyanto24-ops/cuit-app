@@ -2661,6 +2661,8 @@ poolStatus=feePaid>0
       <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
       <button class="btn-primary" style="width: 100%; margin-top: 8px; background: #9a6a12;" onclick="checkDokuSandboxConfig()">🔐 Periksa Konfigurasi DOKU Sandbox</button>
       <div id="dokuSandboxCheckResult" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #d7b46a;font-size:12px;line-height:1.6;white-space:pre-line"></div>
+      <button class="btn-primary" style="width: 100%; margin-top: 8px; background: #176b55;" onclick="testDokuSandboxAuth()">🧪 Uji Autentikasi DOKU Sandbox</button>
+      <div id="dokuSandboxAuthResult" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #9bc9b5;font-size:12px;line-height:1.6;white-space:pre-line"></div>
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
@@ -3358,6 +3360,38 @@ async function openDailyCheckin() {
       }
     }
 
+
+    async function testDokuSandboxAuth() {
+      const button = document.querySelector('#adminPanelSection button[onclick="testDokuSandboxAuth()"]');
+      const output = document.getElementById('dokuSandboxAuthResult');
+      if (!output) return;
+      output.style.display = 'block';
+      output.textContent = 'Menghubungi DOKU Sandbox untuk meminta token autentikasi...';
+      if (button) button.disabled = true;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('cuit-doku-auth-check', { method: 'POST', body: {} });
+        if (error) throw error;
+        if (!data?.success) {
+          output.textContent = 'Uji autentikasi belum berhasil.\nKode: ' + (data?.code || 'UNKNOWN') + '\n' + (data?.message || 'Periksa konfigurasi private key di Supabase.');
+          return;
+        }
+        const lines = [
+          'Lingkungan: ' + (data.environment || 'tidak diketahui'),
+          'HTTP DOKU: ' + (data.httpStatus ?? '-'),
+          'Kode respons: ' + (data.responseCode || '-'),
+          'Pesan DOKU: ' + (data.responseMessage || '-'),
+          data.authenticated ? '✅ Autentikasi Sandbox berhasil.' : '❌ DOKU belum menerbitkan token autentikasi.',
+          data.expiresIn ? 'Masa berlaku token: ' + data.expiresIn + ' detik' : '',
+          data.note || ''
+        ].filter(Boolean);
+        output.textContent = lines.join('\n');
+      } catch (error) {
+        console.error('Uji autentikasi DOKU:', error);
+        output.textContent = 'Gagal menjalankan uji: ' + (error?.message || 'Terjadi kesalahan.');
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
 
     let currentUser = null;
     let customDisplayName = localStorage.getItem('cuit_user_name') || 'TamuCuit';
