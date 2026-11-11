@@ -7554,11 +7554,34 @@ document.addEventListener('DOMContentLoaded', function () {
   const draft=$('cuit-roulette-edu-draft').textContent.trim();
   const editor=document.getElementById('postContent');
   if(!draft||!editor){status('Editor curhatan belum tersedia.');return;}
+
+  // Siapkan isi curhatan terlebih dahulu.
   editor.value=draft;
+  editor.dispatchEvent(new Event('input',{bubbles:true}));
   if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
-  if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
-  $('cuit-roulette-edu-overlay').style.display='none';
-  setTimeout(()=>{editor.focus({preventScroll:true});editor.scrollIntoView({behavior:'smooth',block:'center'});},160);
+
+  // Tutup modal Roulette sebelum berpindah halaman agar tidak menutupi editor.
+  const overlay=$('cuit-roulette-edu-overlay');
+  if(overlay)overlay.style.display='none';
+
+  // Gunakan navigasi Buat yang sama dengan navigasi utama aplikasi.
+  const createNav=document.querySelector('.nav-bar .nav-item[onclick*="pageCreate"]');
+  if(createNav)createNav.click();
+  if(typeof window.switchTab==='function'){
+   window.switchTab('pageCreate',createNav||null);
+  }else{
+   document.querySelectorAll('.page-section').forEach(sec=>sec.classList.remove('active'));
+   const page=document.getElementById('pageCreate');
+   if(page)page.classList.add('active');
+  }
+
+  // Pastikan editor terlihat dan langsung siap diedit.
+  setTimeout(()=>{
+   const page=document.getElementById('pageCreate');
+   if(page)page.classList.add('active');
+   editor.focus({preventScroll:true});
+   editor.scrollIntoView({behavior:'smooth',block:'center'});
+  },180);
  }
  function boot(){
   let tries=0;
