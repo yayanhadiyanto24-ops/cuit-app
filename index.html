@@ -7439,8 +7439,12 @@ document.addEventListener('DOMContentLoaded', function () {
   $('cuit-roulette-edu-heading').textContent='MISI '+d.category.toUpperCase();
   $('cuit-roulette-edu-prompt').textContent=d.instruction;
   $('cuit-roulette-edu-options').replaceChildren();
-  $('cuit-roulette-edu-feedback').textContent='Misi ini tidak memberikan koin atau permata. Setelah selesai, putar kembali untuk tantangan berikutnya.';
+  $('cuit-roulette-edu-feedback').textContent='Misi ini tidak memberikan koin atau permata. Selesaikan aktivitas di beranda, lalu kembali untuk putaran berikutnya.';
   $('cuit-roulette-edu-draft').style.display='none';$('cuit-roulette-edu-publish').style.display='none';
+  const go=el('button',{type:'button'},'BUKA BERANDA CUIT');
+  go.style.cssText='width:100%;margin-top:9px;padding:10px;border:0;border-radius:9px;background:#fff0d0;color:#8c1728;font-weight:900';
+  go.addEventListener('click',()=>{ $('cuit-roulette-edu-overlay').style.display='none'; if(typeof window.switchTab==='function')window.switchTab('pageHome',document.querySelector('.nav-bar .nav-item')||null); });
+  $('cuit-roulette-edu-options').appendChild(go);
   status('Roda memilih misi komunitas.');$('cuit-roulette-edu-spin').disabled=false;
  }
  function showQuestion(d){
