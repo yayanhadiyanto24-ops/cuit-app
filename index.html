@@ -1740,6 +1740,7 @@ async function makeWisdom(foundLetters) {
     if(!row || row.ok!==true){
       throw new Error(row?.message||'Server menolak hasil permainan.');
     }
+    if (typeof window.refreshCuitGameRanking === 'function') window.refreshCuitGameRanking();
 
     const awarded=Number(row.coins_awarded||0);
     const feePaid=Number(row.entry_fee ?? gameSession.entry_fee ?? 0);
@@ -2419,6 +2420,7 @@ poolStatus=feePaid>0
 
     // Hasil akhir dibaca dari RPC server, bukan dari animasi.
     showResult(finished);
+    if (typeof window.refreshCuitGameRanking === 'function') window.refreshCuitGameRanking();
 
     message(
       'Berhasil! Server mengonfirmasi hadiah 1 Permata.'
@@ -4863,8 +4865,6 @@ function renderCardHTML(p) {
 
     let cuitCurhatRealtimeChannel = null;
     let cuitRealtimeFeedTimer = null;
-    let cuitGameRankingRealtimeChannel = null;
-    let cuitGameRankingRefreshTimer = null;
 
     async function refreshGameKingUI() {
       const nameElement = document.getElementById('champGameName');
@@ -4904,14 +4904,11 @@ function renderCardHTML(p) {
       }
     }
 
-    function scheduleGameRankingRefresh() {
-      if (cuitGameRankingRefreshTimer) clearTimeout(cuitGameRankingRefreshTimer);
-      cuitGameRankingRefreshTimer = setTimeout(() => {
-        cuitGameRankingRefreshTimer = null;
-        refreshGameKingUI();
-        if (typeof loadAchievements === 'function') loadAchievements();
-      }, 450);
-    }
+    window.refreshCuitGameRanking = function() {
+      refreshGameKingUI();
+      const kingsPage = document.getElementById('pageKings');
+      if (kingsPage?.classList.contains('active') && typeof loadAchievements === 'function') loadAchievements();
+    };
 
     function initGlobalRealtime() {
       // Hindari channel ganda ketika status akun berubah tanpa memuat ulang halaman.
@@ -4934,23 +4931,6 @@ function renderCardHTML(p) {
             loadPosts({ feedOnly: true });
           }, 250);
         }).subscribe();
-
-      if (cuitGameRankingRealtimeChannel) {
-        supabaseClient.removeChannel(cuitGameRankingRealtimeChannel);
-        cuitGameRankingRealtimeChannel = null;
-      }
-      if (cuitGameRankingRefreshTimer) {
-        clearTimeout(cuitGameRankingRefreshTimer);
-        cuitGameRankingRefreshTimer = null;
-      }
-      cuitGameRankingRealtimeChannel = supabaseClient.channel('realtime_cuit_game_ranking')
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'cuit_central_entries',
-          filter: 'activity_category=eq.game'
-        }, scheduleGameRankingRefresh)
-        .subscribe();
 
       // user_notifications belum masuk publication Realtime dan RLS-nya belum aman.
       // Jangan membuat channel yang tidak bekerja atau membuka data notifikasi.
@@ -7552,6 +7532,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if(data?.exhausted){status(data.message||'Soal kategori ini sudah habis untuk hari ini. Putar lagi untuk kategori lain.');return;}
     throw new Error(data?.message||'Tantangan belum tersedia.');
    }
+   if (typeof window.refreshCuitGameRanking === 'function') window.refreshCuitGameRanking();
    const index=categories.indexOf(data.category);
    if(index<0)throw new Error('Kategori dari server tidak dikenali.');
    await animateTo(index);
