@@ -4802,6 +4802,15 @@ function togglePostReadMore(postId, button) {
   button.textContent = expanded ? 'Tutup' : 'Baca selengkapnya';
 }
 
+// Format bold AI dengan aman: teks di-escape dahulu, lalu hanya **...**
+// yang diubah menjadi elemen strong. Konten biasa tetap tampil normal.
+function cuitFormatPostContent(value) {
+  const escaped = escapeHtml(String(value || ''));
+  return escaped
+    .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
 function renderCardHTML(p) {
 
   let rawName = p.username || (p.user_email ? p.user_email.split('@')[0] : 'Pengguna CUIT');
@@ -4891,7 +4900,7 @@ function renderCardHTML(p) {
 
       <!-- ISI CURHATAN -->
       <div class="post-body-wrap">
-        <div class="post-body"${cuitStyleInlineForPost(p.post_style)}><span class="cuit-post-text-effect" style="${cuitPostTextEffectCss(p.post_style).replace(/"/g,'&quot;')}">${escapeHtml(p.content || '')}</span></div>
+        <div class="post-body"${cuitStyleInlineForPost(p.post_style)}><span class="cuit-post-text-effect" style="${cuitPostTextEffectCss(p.post_style).replace(/"/g,'&quot;')}">${cuitFormatPostContent(p.content || '')}</span></div>
         ${(String(p.content || '').length > 220 || (String(p.content || '').match(/\n/g) || []).length > 6) ? `<button type="button" class="post-read-more" onclick="event.stopPropagation();togglePostReadMore('${p.id}',this)">Baca selengkapnya</button>` : ''}
       </div>
       ${(p.remaining_reward_coins && p.remaining_reward_coins > 0) ? `
@@ -6796,14 +6805,12 @@ async function submitNewPost() {
   const feeling = document.getElementById('postFeeling').value;
   const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
   const postStyle = cuitPostStyleRead();
-  // Konten AI wajib mempertahankan bold sampai tersimpan di kolom curhat.post_style.
-  if (window.__cuitAIForceBold === true) postStyle.bold = true;
   const styleLevel = cuitCurrentStyleLevel();
 
   if (
     (postStyle.border !== 'solid' && styleLevel < 3) ||
     (postStyle.background !== '#ffffff' && styleLevel < 4) ||
-    (postStyle.bold && styleLevel < 5 && window.__cuitAIForceBold !== true) ||
+    (postStyle.bold && styleLevel < 5) ||
     (postStyle.italic && styleLevel < 6) ||
     (postStyle.decorBorder !== 'none' && styleLevel < 7) ||
     (postStyle.decorBackground !== 'none' && styleLevel < 8) ||
@@ -7926,11 +7933,14 @@ document.addEventListener('DOMContentLoaded', function () {
     finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
   };
   window.sendAIContentToPost=function(){
-    const body=$('aiContentResult')?.value?.trim().replace(/\*+/g,'');const title=$('aiContentTitlePreview')?.textContent?.trim().replace(/\*+/g,'');const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const body=$('aiContentResult')?.value?.trim();
+    const title=$('aiContentTitlePreview')?.textContent?.trim();
+    // Judul otomatis bold; penanda bold dari paragraf dipertahankan.
+    const content=[title ? '**'+title+'**' : '',body || ''].filter(Boolean).join('\n\n');
+    if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
     const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
     editor.value=content;
-    window.__cuitAIForceBold=true;
-    document.getElementById('postBoldBtn')?.classList.add('selected');
+    window.__cuitAIForceBold=false;
     if(typeof window.updateCharCount==='function')window.updateCharCount(editor);
     if(typeof window.updatePostStylePreview==='function')window.updatePostStylePreview();
     if(typeof window.switchTab==='function')window.switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
