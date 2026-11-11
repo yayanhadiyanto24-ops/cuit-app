@@ -7493,8 +7493,19 @@ document.addEventListener('DOMContentLoaded', function () {
   const go=node('button',{type:'button'},'BUKA BERANDA CUIT');
   go.style.cssText='width:100%;margin-top:9px;padding:10px;border:0;border-radius:9px;background:#fff0d0;color:#8c1728;font-weight:900';
   go.addEventListener('click',()=>{
-   $('cuit-roulette-edu-overlay').style.display='none';
-   if(typeof window.switchTab==='function')window.switchTab('pageHome',document.querySelector('.nav-bar .nav-item')||null);
+   const overlay=$('cuit-roulette-edu-overlay');
+   if(overlay)overlay.style.display='none';
+   // Kembali ke Beranda melalui navigasi utama agar seluruh state halaman ikut diperbarui.
+   const homeNav=document.querySelector('.nav-bar .nav-item[onclick*="pageHome"]');
+   if(homeNav){
+    homeNav.click();
+   }else{
+    document.querySelectorAll('.page-section').forEach(sec=>sec.classList.remove('active'));
+    const home=document.getElementById('pageHome');
+    if(home)home.classList.add('active');
+   }
+   question=null;
+   status('Misi komunitas siap diselesaikan di Beranda. Setelah selesai, buka Roulette kembali untuk tantangan berikutnya.');
   });
   $('cuit-roulette-edu-options').appendChild(go);
   status('Roda memilih misi komunitas.');
