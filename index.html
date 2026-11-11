@@ -3341,7 +3341,8 @@ async function openDailyCheckin() {
         );
         lines.unshift('Lingkungan: ' + (data.environment || 'tidak diketahui'));
         lines.push(
-          (data.merchantIdMatchesClientId ? '✅' : '❌') + ' Merchant ID sama dengan Client ID',
+          (data.clientIdFormatLooksLikeDokuPartnerId ? '✅' : '❌') + ' Client ID menggunakan format BRN untuk autentikasi SNAP B2B',
+          (data.merchantIdMatchesQrisCredential ? '✅' : '❌') + ' Merchant ID sesuai Client ID pada QRIS Credentials DOKU',
           (data.mallIdMatchesSupportValue ? '✅' : '❌') + ' Mall ID sesuai informasi DOKU (113493)'
         );
         lines.push(
