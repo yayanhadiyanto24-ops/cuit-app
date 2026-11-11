@@ -951,6 +951,7 @@
     <div class="home-shortcuts" aria-label="Menu cepat CUIT">
       <button type="button" onclick="openDailyCheckin()"><span class="shortcut-icon checkin">📅</span><span>Absen</span></button>
       <button type="button" id="openTodayProgressButton" aria-label="Buka Progres Hari Ini"><span class="shortcut-icon progress">🏅</span><span>Progres</span></button>
+      <button type="button" onclick="openMyLevelModal()" aria-label="Buka Levelku"><span class="shortcut-icon levelku">🎖️</span><span>Levelku</span></button>
       <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
       <button type="button" onclick="switchTab('pageContentAI',null);"><span class="shortcut-icon ai">✨</span><span>KontenAI</span></button>
     </div>
@@ -1391,11 +1392,11 @@
       .cuit-kilat-page #kilatCurhatBtn:active{transform:translateY(1px)}
       @media(max-height:650px){.cuit-kilat-page .kilat-shell{padding:9px}.cuit-kilat-page .kilat-tile{height:min(16vw,5.5dvh,50px)}.cuit-kilat-page .kilat-panel{padding:7px}}
 
-    .home-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
+    .home-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
     .home-shortcuts button{min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:1px 0;color:#45343a;font-size:9px;font-weight:850;cursor:pointer}
     .shortcut-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(30,35,60,.06)}
-    .shortcut-icon svg{width:24px;height:24px}.shortcut-icon.ai{background:linear-gradient(145deg,#fff0c2,#ffe0e5);border:1px solid #e8c56b;color:#a50f2b}.shortcut-icon.game{background:#fff0e2}.shortcut-icon.checkin{background:#e5f8ee}.shortcut-icon.king{background:#fff4c9}.shortcut-icon.progress{background:#f1e8ff}.shortcut-icon.nonton{background:#e7f2ff;border:1px solid #c7e0ff}
-    @media(min-width:600px){.home-shortcuts{max-width:440px;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
+    .shortcut-icon svg{width:24px;height:24px}.shortcut-icon.levelku{background:linear-gradient(145deg,#fff3c4,#f8d878);border:1px solid #e5bd4e;color:#805300}.shortcut-icon.ai{background:linear-gradient(145deg,#fff0c2,#ffe0e5);border:1px solid #e8c56b;color:#a50f2b}.shortcut-icon.game{background:#fff0e2}.shortcut-icon.checkin{background:#e5f8ee}.shortcut-icon.king{background:#fff4c9}.shortcut-icon.progress{background:#f1e8ff}.shortcut-icon.nonton{background:#e7f2ff;border:1px solid #c7e0ff}
+    @media(min-width:600px){.home-shortcuts{max-width:500px;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
 
       .pool-shortcut{float:right;margin:-34px 0 8px 8px;border:1px solid #e5b8bd;border-radius:999px;padding:6px 10px;background:#fff;color:#b91c1c;font-size:11px;font-weight:850;box-shadow:0 2px 6px #b91c1c12}
       .page-section{position:relative}.page-section>.pool-shortcut{position:absolute;right:12px;top:12px;float:none;margin:0;z-index:2}
@@ -3015,6 +3016,26 @@ poolStatus=feePaid>0
     </div>
   </div>
 
+  <!-- MODAL LEVELKU: DUA JALUR PENCAPAIAN -->
+  <div id="myLevelModal" class="modal" style="display:none;position:fixed;inset:0;z-index:1000001;align-items:center;justify-content:center;background:rgba(30,15,20,.62);padding:12px;box-sizing:border-box;" onclick="if(event.target===this)closeMyLevelModal()">
+    <div class="modal-content" style="max-width:500px;width:96%;max-height:88vh;overflow:auto;border-radius:18px;padding:14px;background:#fff;border:1px solid #e7c45f;box-shadow:0 12px 40px #28071155">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+        <div><div style="font-size:17px;font-weight:950;color:#97172d">🎖️ Levelku</div><div id="myLevelModalCurrent" style="font-size:11px;color:#76545a;margin-top:3px">Memuat level…</div></div>
+        <button type="button" onclick="closeMyLevelModal()" aria-label="Tutup Levelku" style="border:0;background:#f8e9ec;border-radius:50%;width:32px;height:32px;font-size:20px;color:#8f1730">×</button>
+      </div>
+      <section style="padding:11px;border:1px solid #ead39a;border-radius:13px;background:linear-gradient(135deg,#fffdf5,#fff6d9);margin-bottom:10px">
+        <div style="font-size:13px;font-weight:950;color:#805300">🪙 Jalur Koin Berbayar</div>
+        <div style="font-size:10px;color:#715d36;margin:4px 0 9px;line-height:1.45">Dihitung dari total koin berbayar yang benar-benar digunakan pada transaksi berhasil. Top up dan koin gratis tidak dihitung.</div>
+        <div id="myLevelPaidPath"></div>
+      </section>
+      <section style="padding:11px;border:1px solid #edcbd1;border-radius:13px;background:#fffafa">
+        <div style="font-size:13px;font-weight:950;color:#97172d">🌱 Jalur Aktivitas</div>
+        <div style="font-size:10px;color:#76545a;margin:4px 0 8px;line-height:1.45">Pencapaian dibangun dari kontribusi langsung, respons komunitas, dan membangun jaringan. Ketiga target harus terpenuhi untuk naik level.</div>
+        <div id="myActivityLevelProgressLevelModal"><div class="achievement-empty">Memuat progres aktivitas…</div></div>
+      </section>
+    </div>
+  </div>
+
   <!-- MODAL PROGRES HARI INI -->
   <div id="todayProgressModal" class="modal" style="display:none;position:fixed;inset:0;z-index:1000000;pointer-events:auto;align-items:center;justify-content:center;background:rgba(30,15,20,.55);padding:12px;box-sizing:border-box;" onclick="if(event.target===this)closeTodayProgress()">
     <div class="modal-content" style="max-width:480px;width:94%;max-height:85vh;overflow:auto;border-radius:18px;padding:14px;background:#fff;">
@@ -3026,6 +3047,44 @@ poolStatus=feePaid>0
   </div>
 
   <script>
+
+    function closeMyLevelModal(){const el=document.getElementById('myLevelModal');if(el)el.style.display='none';}
+    async function openMyLevelModal(){
+      const modal=document.getElementById('myLevelModal');
+      const paidBox=document.getElementById('myLevelPaidPath');
+      const currentBox=document.getElementById('myLevelModalCurrent');
+      if(!modal||!paidBox)return;
+      modal.style.display='flex';
+      if(!currentUser?.id){
+        currentBox.textContent='Masuk untuk melihat pencapaian level akun.';
+        paidBox.innerHTML='<div class="achievement-empty">Silakan masuk terlebih dahulu.</div>';
+        renderMyActivityLevelProgress();
+        return;
+      }
+      currentBox.textContent='Memuat pencapaian kedua jalur…';
+      paidBox.innerHTML='<div class="achievement-empty">Memuat progres koin berbayar…</div>';
+      try{
+        await loadCuitActivityLevelProgress();
+        const paid= Math.max(0,Number(usedPaidCoins)||0);
+        const paidLevel=getUserLevel(paid);
+        const next=CUIT_LEVELS.find(x=>x.level===paidLevel.level+1)||null;
+        const pct=next?Math.min(100,Math.max(0,((paid-paidLevel.prev)/(next.xp-paidLevel.prev))*100)):100;
+        const needed=next?Math.max(0,next.xp-paid):0;
+        const highest=getUserLevel();
+        currentBox.textContent='Level tertinggi yang sudah dicapai: Level '+highest.level+' · '+highest.title;
+        paidBox.innerHTML=`
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:850;color:#503b16"><span>Level jalur koin: ${paidLevel.level} · ${paidLevel.title}</span><span>${paid.toLocaleString('id-ID')} koin</span></div>
+          <div style="height:9px;background:#f0e6c9;border-radius:99px;overflow:hidden;margin:8px 0"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#d5a52c,#f2d879);border-radius:99px"></div></div>
+          <div style="font-size:10px;color:#715d36">${next?'Kurang '+needed.toLocaleString('id-ID')+' koin berbayar terpakai menuju Level '+next.level+' · '+next.title:'Target Level 10 jalur koin berbayar telah tercapai.'}</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:9px">${CUIT_LEVELS.map(x=>'<div style="padding:6px;border-radius:8px;background:'+(x.level===paidLevel.level?'#fff0bd':'#fff')+';border:1px solid '+(x.level===paidLevel.level?'#d8b34b':'#eee4cc')+';font-size:9px;color:#5c4a28">Level '+x.level+' · '+x.title+'<br><strong>'+x.xp.toLocaleString('id-ID')+'</strong> koin</div>').join('')}</div>`;
+        renderMyActivityLevelProgress();
+      }catch(error){
+        currentBox.textContent='Level tertinggi belum dapat dimuat.';
+        paidBox.innerHTML='<div class="achievement-empty">Progres koin berbayar belum tersedia. Coba muat ulang.</div>';
+        renderMyActivityLevelProgress();
+        console.warn('Gagal membuka Levelku:',error);
+      }
+    }
 
     function closeTodayProgress(){ const el=document.getElementById('todayProgressModal'); if(el) { el.style.display='none'; el.style.pointerEvents='none'; } }
     document.addEventListener('DOMContentLoaded', function(){ const b=document.getElementById('openTodayProgressButton'); const m=document.getElementById('todayProgressModal'); if(m) m.style.pointerEvents='none'; if(b) b.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); const modal=document.getElementById('todayProgressModal'); if(modal) modal.style.pointerEvents='auto'; openTodayProgress(); }); });
@@ -3919,7 +3978,7 @@ async function openDailyCheckin() {
     }
 
     function renderMyActivityLevelProgress() {
-      const els=[document.getElementById('myActivityLevelProgress'),document.getElementById('myActivityLevelProgressProfile')].filter(Boolean);
+      const els=[document.getElementById('myActivityLevelProgress'),document.getElementById('myActivityLevelProgressProfile'),document.getElementById('myActivityLevelProgressLevelModal')].filter(Boolean);
       if(!els.length) return;
       const setHtml=html=>els.forEach(el=>el.innerHTML=html);
       if(!currentUser?.id){setHtml('<div class="achievement-empty">Masuk untuk melihat progres jalur aktivitas.</div>');return;}
