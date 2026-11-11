@@ -7924,7 +7924,7 @@ document.addEventListener('DOMContentLoaded', function () {
     finally{btn.disabled=false;btn.textContent='✨ BUAT KONTEN · 5 KOIN GRATIS / 1 KOIN BERBAYAR';}
   };
   window.sendAIContentToPost=function(){
-    const body=$('aiContentResult')?.value?.trim().replace(/\\*+/g,'');const title=$('aiContentTitlePreview')?.textContent?.trim().replace(/\\*+/g,'');const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
+    const body=$('aiContentResult')?.value?.trim().replace(/\*+/g,'');const title=$('aiContentTitlePreview')?.textContent?.trim().replace(/\*+/g,'');const content=[title,body].filter(Boolean).join('\n\n');if(!content){setStatus('Belum ada hasil konten untuk dikirim.',true);return;}
     const editor=$('postContent');if(!editor){setStatus('Editor curhatan belum tersedia.',true);return;}
     editor.value=content;
     window.__cuitAIForceBold=true;
