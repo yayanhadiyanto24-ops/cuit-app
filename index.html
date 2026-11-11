@@ -2640,6 +2640,8 @@ poolStatus=feePaid>0
       <h4 style="margin: 0 0 6px 0; color: #c81e32; font-size: 13px;">⚙️ Panel Rahasia Admin</h4>
       <p style="font-size: 11px; color: #374151; margin-bottom: 10px;">Kelola 10 link Facebook Reels harian untuk Misi Koin Gratisan.</p>
       <button class="btn-primary" style="width: 100%; background: #1877f2;" onclick="openAdminModal()">⚙️ Kelola 10 Reels FB</button>
+      <button class="btn-primary" style="width: 100%; margin-top: 8px; background: #9a6a12;" onclick="checkDokuSandboxConfig()">🔐 Periksa Konfigurasi DOKU Sandbox</button>
+      <div id="dokuSandboxCheckResult" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #d7b46a;font-size:12px;line-height:1.6;white-space:pre-line"></div>
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
@@ -3292,6 +3294,33 @@ async function openDailyCheckin() {
     // Public publishable/anon key only. Never place service_role keys in browser code.
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    async function checkDokuSandboxConfig() {
+      const button = document.querySelector('#adminPanelSection button[onclick="checkDokuSandboxConfig()"]');
+      const output = document.getElementById('dokuSandboxCheckResult');
+      if (!output) return;
+      output.style.display = 'block';
+      output.textContent = 'Sedang memeriksa konfigurasi...';
+      if (button) button.disabled = true;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('cuit-doku-sandbox-check', { method: 'GET' });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.code || 'Pemeriksaan tidak berhasil.');
+        const flags = data.requiredSecretsPresent || {};
+        const labels = { DOKU_CLIENT_ID: 'DOKU Client ID', DOKU_SECRET_KEY: 'DOKU Secret Key', DOKU_PRIVATE_KEY: 'DOKU Private Key', DOKU_MERCHANT_ID: 'DOKU Merchant ID' };
+        const lines = Object.entries(labels).map(([key, label]) => (flags[key] ? '✅ ' : '❌ ') + label + (flags[key] ? ' tersedia' : ' belum tersedia'));
+        lines.unshift('Lingkungan: ' + (data.environment || 'tidak diketahui'));
+        lines.push('', data.readyForSandboxIntegration ? 'Konfigurasi Sandbox lengkap secara keberadaan Secret.' : 'Konfigurasi belum siap. Periksa item bertanda ❌ dan DOKU_ENV.');
+        lines.push('Catatan: pemeriksaan ini hanya mengecek keberadaan Secret, bukan menguji keabsahan kunci ke DOKU.');
+        output.textContent = lines.join('\\n');
+      } catch (error) {
+        console.error('Pemeriksaan DOKU Sandbox:', error);
+        output.textContent = 'Gagal memeriksa: ' + (error?.message || 'Terjadi kesalahan.');
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+
 
     let currentUser = null;
     let customDisplayName = localStorage.getItem('cuit_user_name') || 'TamuCuit';
