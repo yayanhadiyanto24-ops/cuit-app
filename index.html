@@ -1484,7 +1484,7 @@
       let letters = [];
       let selectedLevel = 1;
       const levelButtons = [...root.querySelectorAll(".kilat-level")];
-      function chooseLevel(level){if(started||gameStarting||ended)return;selectedLevel=Number(level);levelButtons.forEach(btn=>{const active=Number(btn.dataset.level)===selectedLevel;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});init(false);refreshOffer();}
+      function chooseLevel(level){if(started||gameStarting)return;selectedLevel=Number(level);levelButtons.forEach(btn=>{const active=Number(btn.dataset.level)===selectedLevel;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});init(false);refreshOffer();}
       const el = id => root.querySelector('#' + id);
       const grid=el('kilatGrid'), timeEl=el('kilatTime'), foundEl=el('kilatFound'), coinEl=el('kilatCoin'), bar=el('kilatBar'), message=el('kilatMessage'), startBtn=el('kilatStart'), resetBtn=el('kilatReset'), result=el('kilatResult'), lettersBox=el('kilatLetters'), rewardEl=el('kilatReward'), speedEl=el('kilatSpeed'), resultTitle=el('kilatResultTitle'), resultDesc=el('kilatResultDesc'), roundEl=el('kilatRound');
       let deck=[], first=null, second=null, lock=false, matches=[], started=false, ended=false, remaining=30, timer=null, startedAt=0, mismatchTimer=null, gameSession=null, gameStarting=false;
