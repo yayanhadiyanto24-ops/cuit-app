@@ -6796,6 +6796,8 @@ async function submitNewPost() {
   const feeling = document.getElementById('postFeeling').value;
   const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
   const postStyle = cuitPostStyleRead();
+  // Konten AI wajib mempertahankan bold sampai tersimpan di kolom curhat.post_style.
+  if (window.__cuitAIForceBold === true) postStyle.bold = true;
   const styleLevel = cuitCurrentStyleLevel();
 
   if (
