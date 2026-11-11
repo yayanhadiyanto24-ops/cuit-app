@@ -1368,8 +1368,8 @@
       .cuit-kilat-page .kilat-targetrow{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px}
       .cuit-kilat-page .kilat-small-label{font-size:9px;font-weight:900;letter-spacing:.5px;color:#9a7777}
       .cuit-kilat-page .kilat-pairs{font-size:10px;font-weight:850;color:#875e08;background:#fff5d5;border:1px solid #f0d68b;padding:6px 8px;border-radius:999px}
-      .cuit-kilat-page .kilat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:min(100%,310px);margin:0 auto}
-      .cuit-kilat-page .kilat-tile{border:1px solid #9f1225;aspect-ratio:1/1;height:min(15vw,5.5dvh,50px);border-radius:13px;background:linear-gradient(145deg,#df263b,#a30d24);color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 0 #780b1a;cursor:pointer;position:relative;touch-action:manipulation}
+      .cuit-kilat-page .kilat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:min(100%,340px);margin:0 auto}
+      .cuit-kilat-page .kilat-tile{border:1px solid #9f1225;aspect-ratio:1/1;height:clamp(36px,10.5vw,50px);min-width:0;border-radius:11px;background:linear-gradient(145deg,#df263b,#a30d24);color:#fff;font-size:clamp(17px,4.5vw,22px);font-weight:900;box-shadow:0 4px 0 #780b1a;cursor:pointer;position:relative;touch-action:manipulation}
       .cuit-kilat-page .kilat-tile:active{transform:translateY(2px);box-shadow:0 2px 0 #780b1a}
       .cuit-kilat-page .kilat-tile::after{content:"✦";font-size:20px;color:#ffe6a0}
       .cuit-kilat-page .kilat-tile.open,.cuit-kilat-page .kilat-tile.matched{background:linear-gradient(145deg,#fff8dc,#ffecae);color:#8b171f;border:2px solid #d5a52f;box-shadow:0 3px 0 #d9b65b}
@@ -1441,7 +1441,12 @@
         <div class="kilat-brand"><div class="kilat-logo" aria-hidden="true">✦</div><div><div class="kilat-eyebrow">PERMAINAN CUIT</div><h2 class="kilat-title">3 Huruf Kilat</h2></div></div>
 
       </div>
-      <p class="kilat-intro">Buka dua kotak, ingat hurufnya, lalu cari pasangannya. Temukan 3 pasangan untuk mendapatkan kombinasi tiga huruf!</p>
+      <p class="kilat-intro">Buka dua kotak, ingat hurufnya, lalu temukan tepat 3 pasangan. Pilih jumlah kartu sesuai level!</p>
+      <div class="kilat-levels" id="kilatLevels" role="group" aria-label="Pilih jumlah kartu" style="display:flex;gap:6px;margin:8px 0 10px">
+        <button type="button" class="kilat-btn kilat-level active" data-level="1" style="flex:1;padding:8px 4px">3×3 <small>9 kartu</small></button>
+        <button type="button" class="kilat-btn kilat-level" data-level="2" style="flex:1;padding:8px 4px">4×4 <small>16 kartu</small></button>
+        <button type="button" class="kilat-btn kilat-level" data-level="3" style="flex:1;padding:8px 4px">5×5 <small>25 kartu</small></button>
+      </div>
       <section class="kilat-stats" aria-label="Status permainan">
         <div class="kilat-stat"><div class="kilat-stat-label">WAKTU</div><div class="kilat-stat-value" id="kilatTime">30</div></div>
         <div class="kilat-stat"><div class="kilat-stat-label">PASANGAN</div><div class="kilat-stat-value" id="kilatFound">0/3</div></div>
@@ -1450,7 +1455,7 @@
       <div class="kilat-progress" aria-hidden="true"><span id="kilatBar"></span></div>
       <section class="kilat-panel">
         <div class="kilat-targetrow"><div class="kilat-small-label">BUKA KOTAK UNTUK MENEMUKAN PASANGAN</div><div class="kilat-pairs" id="kilatRound">Siap bermain</div></div>
-        <div class="kilat-grid" id="kilatGrid" aria-label="16 kotak huruf tertutup"></div>
+        <div class="kilat-grid" id="kilatGrid" aria-label="9 kotak huruf tertutup"></div>
         <div class="kilat-message" id="kilatMessage" aria-live="polite">Tekan “Mulai Permainan” untuk mengacak huruf dan menjalankan waktu.</div>
         <div class="kilat-actions"><button class="kilat-btn kilat-btn-primary" id="kilatStart" type="button">▶ Mulai Permainan</button><button class="kilat-btn kilat-btn-secondary" id="kilatReset" type="button">Ulangi</button></div>
       </section>
@@ -1464,23 +1469,24 @@
         <p id="kilatCurhatHint">Tekan tombol untuk membuka kolom curhat CUIT dengan kata bijak terisi otomatis. Anda tetap dapat mengedit sebelum menerbitkan.</p>
         <div class="kilat-actions"><button class="kilat-btn kilat-btn-primary" id="kilatPlayAgain" type="button">Main Lagi</button></div>
       </section>
-      <p class="kilat-note"><strong>Aturan permainan:</strong> 16 kotak berisi 8 pasangan dari 8 huruf berbeda yang dipilih acak dari alfabet A-Z setiap ronde. Pasangan cocok tetap terbuka; pasangan tidak cocok tertutup lagi setelah jeda singkat. Selesaikan 3 pasangan dalam 30 detik. Biaya/jatah tampil di kotak status sebelum mulai dan selama permainan. Hadiah Koin Gratis hanya untuk kesempatan gratis harian yang dikonfirmasi server; permainan berbayar tidak menghasilkan bonus koin.</p>
+      <p class="kilat-note"><strong>Aturan permainan:</strong> Level 1 berisi 9 kartu (3×3), Level 2 berisi 16 kartu (4×4), dan Level 3 berisi 25 kartu (5×5). Setiap level selalu memiliki tepat 3 pasangan; kartu lainnya adalah huruf pengalih yang semuanya berbeda. Temukan ketiga pasangan dalam 30 detik. Biaya level 1/2/3 adalah 1/2/3 koin. Koin Gratis digunakan lebih dahulu, lalu Koin Berbayar bila diperlukan.</p>
     </div>
     <script>
     (() => {
       const root = document.getElementById('pageGame');
       if (!root || root.dataset.kilatReady === '1') return;
       root.dataset.kilatReady = '1';
-      // Tiap ronde memilih 8 huruf berbeda secara acak dari alfabet A-Z.
-      // Setiap huruf terpilih dibuat menjadi sepasang kartu yang valid.
+      // Tiga huruf berpasangan; sisa kartu adalah huruf pengalih yang semuanya unik.
       const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       let letters = [];
+      let selectedLevel = 1;
+      const levelButtons = [...root.querySelectorAll(".kilat-level")];
       const el = id => root.querySelector('#' + id);
       const grid=el('kilatGrid'), timeEl=el('kilatTime'), foundEl=el('kilatFound'), coinEl=el('kilatCoin'), bar=el('kilatBar'), message=el('kilatMessage'), startBtn=el('kilatStart'), resetBtn=el('kilatReset'), result=el('kilatResult'), lettersBox=el('kilatLetters'), rewardEl=el('kilatReward'), speedEl=el('kilatSpeed'), resultTitle=el('kilatResultTitle'), resultDesc=el('kilatResultDesc'), roundEl=el('kilatRound');
       let deck=[], first=null, second=null, lock=false, matches=[], started=false, ended=false, remaining=30, timer=null, startedAt=0, mismatchTimer=null, gameSession=null, gameStarting=false;
       function shuffle(items){const arr=items.slice();for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
       function setMessage(text){message.textContent=text;}
-      function makeDeck(){letters=shuffle(alphabet).slice(0,8);deck=shuffle(letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]));}
+      function makeDeck(){const total=selectedLevel===1?9:selectedLevel===2?16:25;letters=shuffle(alphabet).slice(0,3);const pairs=letters.flatMap((letter,pairId)=>[{letter,pairId,matched:false},{letter,pairId,matched:false}]);const distractors=shuffle(alphabet.filter(letter=>!letters.includes(letter))).slice(0,total-6).map((letter,index)=>({letter,pairId:-1-index,matched:false}));deck=shuffle([...pairs,...distractors]);grid.style.gridTemplateColumns=`repeat(${selectedLevel+2},minmax(0,1fr))`;grid.setAttribute("aria-label",`${total} kotak huruf tertutup`); }
       function render(){
         if(grid.children.length!==deck.length){
           const fragment=document.createDocumentFragment();
@@ -1500,7 +1506,7 @@
           button.className='kilat-tile'+(visible?' open':'')+(card.matched?' matched':'');
           button.textContent=visible?card.letter:'';
           button.setAttribute('aria-label',visible?`Kotak ${index+1}, huruf ${card.letter}`:`Kotak ${index+1}, tertutup`);
-          button.disabled=!started||ended||lock||card.matched||card.revealed;
+          button.disabled=!started||ended||(lock&&!card.revealed)||card.matched||card.revealed;
         }
       }
       function updateStats(){timeEl.textContent=remaining;foundEl.textContent=`${matches.length}/3`;bar.style.width=`${Math.max(0,remaining/30*100)}%`;roundEl.textContent=matches.length>=3?'Selesai!':started?`Pasangan ${matches.length+1} dari 3`:'Siap bermain';}
@@ -1530,14 +1536,13 @@
     try {
       coinEl.textContent = 'Cek biaya...';
       const client = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
-      const { data, error } = await client.rpc('cuit_get_word_game_offer');
+      const { data, error } = await client.rpc('cuit_get_word_game_offer', { p_level: selectedLevel });
       if (error || !data) throw new Error(error ? error.message : 'Penawaran permainan tidak tersedia.');
       const offer = Array.isArray(data) ? data[0] : data;
       if (!offer) throw new Error('Penawaran permainan kosong.');
-      const fee = Number(offer.entry_fee ?? offer.fee ?? 0);
-      const free = offer.is_free === true || offer.is_free_play === true || fee === 0;
-      coinEl.textContent = free ? 'GRATIS' : `${fee} KOIN`;
-      setMessage(free ? 'Jatah gratis harian tersedia!' : `Biaya permainan berikutnya ${fee} koin berbayar.`);
+      const fee = Number(offer.entry_fee ?? offer.fee ?? selectedLevel);
+      coinEl.textContent = `${fee} KOIN`;
+      setMessage(`Level ${selectedLevel}: ${selectedLevel===1?9:selectedLevel===2?16:25} kartu, biaya ${fee} koin. Koin Gratis dipakai lebih dahulu.`);
     } catch (err) {
       coinEl.textContent = 'Cek biaya gagal';
       setMessage('Biaya belum dapat diperiksa. Coba lagi sebentar.');
@@ -1552,17 +1557,18 @@
     startBtn.disabled = true;
     try {
       const client = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
-      const { data: offerData, error: offerError } = await client.rpc('cuit_get_word_game_offer');
+      const { data: offerData, error: offerError } = await client.rpc('cuit_get_word_game_offer', { p_level: selectedLevel });
       if (offerError) throw offerError;
       const offer = Array.isArray(offerData) ? offerData[0] : offerData;
       if (!offer) throw new Error('Biaya permainan tidak berhasil diperiksa.');
       const fee = Number(offer.entry_fee ?? offer.fee ?? 0);
-      const isFree = offer.is_free === true || offer.is_free_play === true || fee === 0;
-      if (!isFree && !await cuitConfirm(`Permainan ini membutuhkan ${fee} Koin Berbayar. Apakah Anda ingin melanjutkan permainan?`)) return;
+      const isFree = false;
+      if (!await cuitConfirm(`Mulai Level ${selectedLevel} dengan biaya ${fee} koin? Koin Gratis digunakan lebih dahulu, kemudian Koin Berbayar bila saldo gratis tidak cukup.`)) return;
 
       const { data, error } = await client.rpc('cuit_start_word_game', {
         p_confirmed_fee: isFree ? 0 : fee,
-        p_letters: 'KLT'
+        p_letters: 'KLT',
+        p_level: selectedLevel
       });
       if (error) throw error;
       const sessionData = Array.isArray(data) ? data[0] : data;
@@ -1574,8 +1580,8 @@
       started = true; ended = false; startedAt = Date.now();
       makeDeck(); render(); updateStats();
       clearInterval(timer); timer = setInterval(tick, 1000);
-      const actualFree = sessionData.is_free === true || sessionData.is_free_play === true || Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee) === 0;
-      setMessage(actualFree ? 'Kesempatan gratis harian digunakan!' : `Sesi berbayar dimulai (${Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee)} koin).`);
+      const actualFee = Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee);
+      setMessage(`Level ${selectedLevel} dimulai · ${deck.length} kartu · biaya ${actualFee} koin.`);
       if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
         Promise.resolve(CuitApp.loadProfile()).catch(err =>
           console.warn('Pembaruan profil setelah mulai game:',err)
@@ -1595,7 +1601,7 @@
         if(!tile||!grid.contains(tile))return;
         flip(Number(tile.dataset.index));
       });
-      function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},700);}}
+      function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},260);}}
       function makeFallbackWisdom(foundLetters){return 'Jangan berkecil hati karena belum berhasil. Setiap kesempatan adalah awal yang baru. Tarik napas, bangkitkan semangat, dan cobalah kembali. Siapa tahu, keberhasilanmu sudah menunggu di percobaan berikutnya.';}
 
 async function makeWisdom(foundLetters) {
