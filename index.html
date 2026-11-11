@@ -1804,6 +1804,7 @@ poolStatus=feePaid>0
   startBtn.textContent='▶ Mulai Lagi';
 }
       function openCurhat(){const quote=el('kilatWisdom').textContent.replace(/^“|”$/g,'').trim();const textarea=document.getElementById('postContent');if(textarea){textarea.value=quote;if(typeof updateCharCount==='function')updateCharCount(textarea);}const navItems=document.querySelectorAll('.nav-bar .nav-item');if(typeof switchTab==='function')switchTab('pageCreate',navItems[2]||null);if(textarea){setTimeout(()=>{textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});},120);} }
+      levelButtons.forEach(btn=>btn.addEventListener('click',()=>chooseLevel(btn.dataset.level)));
       startBtn.addEventListener('click',startGame);resetBtn.addEventListener('click',()=>{init();refreshOffer();});el('kilatPlayAgain').addEventListener('click',()=>{init();refreshOffer();});el('kilatCurhatBtn').addEventListener('click',openCurhat);init();refreshOffer();
     })();
     </script>
