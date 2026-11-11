@@ -3116,17 +3116,15 @@ poolStatus=feePaid>0
       const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
             async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
 
-      const [checkins,posts,likes,comments,reels,games,paidLedger,paidGames,marbleSessions,rouletteSpins]=await Promise.all([
+      const [checkins,reels,games,paidLedger,paidGames,marbleSessions,rouletteSpins,socialProgressResult]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
-        rows('curhat','id,created_at,user_id,likes_count,comments_count',q=>q.gte('created_at',start).lt('created_at',end)),
-        rows('post_likes','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
-        rows('comments','id,created_at,user_id,post_id',q=>q.gte('created_at',start).lt('created_at',end)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
         rows('cuit_kilat_results','id,created_at,user_id',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
         rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','sawer').gte('occurred_at',start).lt('occurred_at',end)),
         rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end)),
         rows('cuit_marble_sessions','id,game_date,status',q=>q.eq('user_id',currentUser.id).eq('game_date',day).eq('status','completed')),
-        rows('cuit_roulette_spins','id,completed_at,user_id',q=>q.eq('user_id',currentUser.id).gte('completed_at',start).lt('completed_at',end))
+        rows('cuit_roulette_spins','id,completed_at,user_id',q=>q.eq('user_id',currentUser.id).gte('completed_at',start).lt('completed_at',end)),
+        supabaseClient.rpc('cuit_get_today_social_progress')
       ]);
 
       values.checkin=checkins===null?'Belum terhubung':(checkins.length?'Sudah':'Belum');
@@ -3147,9 +3145,19 @@ values.game = (
       marbleSessions.length +
       rouletteSpins.length
     ).toLocaleString('id-ID');
-      if(posts!==null){const mine=posts.filter(x=>x.user_id===currentUser.id);values.posts=mine.length; const ids=mine.map(x=>String(x.id)); if(likes!==null)values.likesReceived=likes.filter(x=>ids.includes(String(x.post_id))).length; if(comments!==null)values.commentsReceived=comments.filter(x=>ids.includes(String(x.post_id))).length;} else {values.posts=values.likesReceived=values.commentsReceived='Belum terhubung';}
-      values.likesGiven=likes===null?'Belum terhubung':likes.filter(x=>x.user_id===currentUser.id).length;
-      values.commentsGiven=comments===null?'Belum terhubung':comments.filter(x=>x.user_id===currentUser.id).length;
+      // Statistik sosial dihitung di server dari seluruh curhatan milik anggota,
+      // bukan hanya curhatan yang dibuat hari ini. Batas hari mengikuti WIB.
+      if(socialProgressResult && !socialProgressResult.error && socialProgressResult.data){
+        const sp=socialProgressResult.data;
+        values.posts=Number(sp.posts||0).toLocaleString('id-ID');
+        values.likesGiven=Number(sp.likes_given||0).toLocaleString('id-ID');
+        values.commentsGiven=Number(sp.comments_given||0).toLocaleString('id-ID');
+        values.likesReceived=Number(sp.likes_received||0).toLocaleString('id-ID');
+        values.commentsReceived=Number(sp.comments_received||0).toLocaleString('id-ID');
+      } else {
+        values.posts=values.likesGiven=values.commentsGiven=values.likesReceived=values.commentsReceived='Belum terhubung';
+        console.error('Gagal memuat progres sosial:',socialProgressResult?.error);
+      }
       // Total koin berbayar keluar hari ini
 if (paidLedger === null || paidGames === null) {
   values.paidSpent = 'Belum terhubung';
