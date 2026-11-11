@@ -1380,6 +1380,9 @@
       .cuit-kilat-page .kilat-btn{border:0;border-radius:12px;padding:10px 9px;font:inherit;font-size:11px;font-weight:900;cursor:pointer}
       .cuit-kilat-page .kilat-btn-primary{background:linear-gradient(135deg,#d92339,#a70f25);color:#fff;flex:1;box-shadow:0 3px 0 #780b1a}
       .cuit-kilat-page .kilat-btn-secondary{background:#fff7dc;color:#805b08;border:1px solid #e8cf83}
+      .cuit-kilat-page .kilat-level{background:#fff;color:#8b171f;border:1px solid #e4c6a0;line-height:1.2}
+      .cuit-kilat-page .kilat-level small{display:block;font-size:9px;font-weight:750;margin-top:3px}
+      .cuit-kilat-page .kilat-level.active{background:linear-gradient(135deg,#d92339,#a70f25);color:#fff;border-color:#a70f25;box-shadow:0 2px 0 #780b1a}
       .cuit-kilat-page .kilat-result{display:none;margin-top:9px;background:#fff;border:1px solid #e5c66d;border-radius:17px;padding:12px;box-shadow:0 7px 20px #8d202010}
       .cuit-kilat-page .kilat-result.show{display:flex;flex-direction:column;gap:8px}
       .cuit-kilat-page .kilat-result h3{margin:0;font-size:16px;color:#b91c1c}
@@ -1481,6 +1484,7 @@
       let letters = [];
       let selectedLevel = 1;
       const levelButtons = [...root.querySelectorAll(".kilat-level")];
+      function chooseLevel(level){if(started||gameStarting||ended)return;selectedLevel=Number(level);levelButtons.forEach(btn=>{const active=Number(btn.dataset.level)===selectedLevel;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});init(false);refreshOffer();}
       const el = id => root.querySelector('#' + id);
       const grid=el('kilatGrid'), timeEl=el('kilatTime'), foundEl=el('kilatFound'), coinEl=el('kilatCoin'), bar=el('kilatBar'), message=el('kilatMessage'), startBtn=el('kilatStart'), resetBtn=el('kilatReset'), result=el('kilatResult'), lettersBox=el('kilatLetters'), rewardEl=el('kilatReward'), speedEl=el('kilatSpeed'), resultTitle=el('kilatResultTitle'), resultDesc=el('kilatResultDesc'), roundEl=el('kilatRound');
       let deck=[], first=null, second=null, lock=false, matches=[], started=false, ended=false, remaining=30, timer=null, startedAt=0, mismatchTimer=null, gameSession=null, gameStarting=false;
@@ -1525,7 +1529,7 @@
         setMessage('Tekan “Mulai Permainan” untuk memulai ronde.');
       }
       function tick(){
-         if(!started || ended) return;
+         if(!started || ended || !startedAt) return;
          // Gunakan waktu nyata; interval dapat tertunda pada Android/WebView.
          remaining=Math.max(0,30-Math.floor((Date.now()-startedAt)/1000));
          updateStats();
@@ -1577,9 +1581,9 @@
       gameSession = sessionData;
       init(false);
       gameSession = sessionData;
-      started = true; ended = false; startedAt = Date.now();
+      started = true; ended = false; startedAt = 0;
       makeDeck(); render(); updateStats();
-      clearInterval(timer); timer = setInterval(tick, 1000);
+      clearInterval(timer); timer = null;
       const actualFee = Number(sessionData.entry_fee ?? sessionData.fee_applied ?? fee);
       setMessage(`Level ${selectedLevel} dimulai · ${deck.length} kartu · biaya ${actualFee} koin.`);
       if (typeof CuitApp !== 'undefined' && CuitApp.loadProfile) {
@@ -1596,12 +1600,13 @@
     }
   }
 
+      levelButtons.forEach(btn=>btn.addEventListener("click",()=>chooseLevel(btn.dataset.level)));
       grid.addEventListener('click',event=>{
         const tile=event.target.closest('.kilat-tile');
         if(!tile||!grid.contains(tile))return;
         flip(Number(tile.dataset.index));
       });
-      function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},260);}}
+      function flip(index){if(!started||ended||lock)return;const card=deck[index];if(!card||card.matched||card.revealed)return;if(!startedAt){startedAt=Date.now();timer=setInterval(tick,250);setMessage("Waktu dimulai! Temukan tiga pasangan.");}card.revealed=true;render();if(first===null){first=index;setMessage('Sekarang buka kotak kedua. Ingat huruf pertama!');return;}second=index;lock=true;if(deck[first].pairId===deck[second].pairId){deck[first].matched=deck[second].matched=true;deck[first].revealed=deck[second].revealed=false;matches.push(deck[first].letter);first=second=null;lock=false;updateStats();render();if(matches.length>=3){setMessage('Hebat! Tiga pasangan berhasil ditemukan.');finish(false);}else setMessage('Pasangan cocok! Lanjut cari pasangan berikutnya.');}else{setMessage('Belum cocok. Ingat posisinya, kotak akan tertutup lagi.');mismatchTimer=setTimeout(()=>{if(first!==null)deck[first].revealed=false;if(second!==null)deck[second].revealed=false;first=second=null;lock=false;render();setMessage('Coba lagi. Ingat huruf yang tadi kamu lihat!');},260);}}
       function makeFallbackWisdom(foundLetters){return 'Jangan berkecil hati karena belum berhasil. Setiap kesempatan adalah awal yang baru. Tarik napas, bangkitkan semangat, dan cobalah kembali. Siapa tahu, keberhasilanmu sudah menunggu di percobaan berikutnya.';}
 
 async function makeWisdom(foundLetters) {
