@@ -4467,7 +4467,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
         const rawName = post.username || (post.user_email ? post.user_email.split('@')[0] : 'Pengguna CUIT');
         const name = escapeHtml(rawName);
         const feeling = escapeHtml(post.feeling || 'Curhat');
-        const fullContent = escapeHtml(post.content || 'Curhatan istimewa').replace(/\n/g, '<br>');
+        const fullContent = cuitFormatPostContent(post.content || 'Curhatan istimewa');
         let authorPoin = 0;
         if (post.user_id && profilesMap[post.user_id] !== undefined) authorPoin = profilesMap[post.user_id];
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
