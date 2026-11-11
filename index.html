@@ -7385,6 +7385,8 @@ document.addEventListener('DOMContentLoaded', function () {
  window.__cuitRouletteEduInstalled=true;
  const categories=['Like','Komen','Peribahasa','Geografi Indonesia','Matematika','Sejarah Indonesia','Bahasa Indonesia','Bahasa Inggris','Ekonomi','Biologi','Fisika','Kimia'];
  const $=id=>document.getElementById(id);
+ const getUser=()=>typeof currentUser!=='undefined'?currentUser:null;
+ const getClient=()=>typeof supabaseClient!=='undefined'?supabaseClient:null;
  let busy=false,question=null,rotation=0;
  function el(tag,attrs,text){const n=document.createElement(tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;}
  function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
@@ -7402,10 +7404,10 @@ document.addEventListener('DOMContentLoaded', function () {
    $('cuit-roulette-edu-publish').addEventListener('click',publishDraft);
   }
  }
- function open(){if(!window.currentUser?.id){status('Silakan masuk ke akun CUIT terlebih dahulu.');return;}ensureUI();$('cuit-roulette-edu-overlay').style.display='flex';$('cuit-roulette-edu-question').style.display='none';$('cuit-roulette-edu-spin').disabled=false;status('Putar roda untuk mendapatkan kategori secara acak.');}
+ function open(){if(!getUser()?.id){status('Silakan masuk ke akun CUIT terlebih dahulu.');return;}ensureUI();$('cuit-roulette-edu-overlay').style.display='flex';$('cuit-roulette-edu-question').style.display='none';$('cuit-roulette-edu-spin').disabled=false;status('Putar roda untuk mendapatkan kategori secara acak.');}
  async function readiness(){
   try{
-   const {data,error}=await window.supabaseClient.from('cuit_roulette_questions').select('category,difficulty').eq('is_active',true);
+   const {data,error}=await getClient().from('cuit_roulette_questions').select('category,difficulty').eq('is_active',true);
    if(error)throw error;
    const counts={};(data||[]).forEach(x=>{const k=x.category+'|'+x.difficulty;counts[k]=(counts[k]||0)+1;});
    const complete=categories.slice(2).every(c=>['mudah','sedang','sulit'].every(d=>counts[c+'|'+d]>=10));
