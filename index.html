@@ -3319,6 +3319,7 @@ async function openDailyCheckin() {
     // Public publishable/anon key only. Never place service_role keys in browser code.
     const SUPABASE_ANON_KEY = 'sb_publishable_SeHIgYxNgIKYiZtdg8Wd3w_dicERUWl';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.__cuitSupabaseClient = supabaseClient;
     
     async function checkDokuSandboxConfig() {
       const button = document.querySelector('#adminPanelSection button[onclick="checkDokuSandboxConfig()"]');
@@ -7403,7 +7404,8 @@ document.addEventListener('DOMContentLoaded', function () {
  const categories=['Like','Komen','Peribahasa','Geografi Indonesia','Matematika','Sejarah Indonesia','Bahasa Indonesia','Bahasa Inggris','Ekonomi','Biologi','Fisika','Kimia'];
  const $=id=>document.getElementById(id);
  const getUser=()=>typeof currentUser!=='undefined'?currentUser:null;
- const getClient=()=>typeof supabaseClient!=='undefined'?supabaseClient:null;
+ const getClient=()=>window.__cuitSupabaseClient||(typeof supabaseClient!=='undefined'?supabaseClient:null);
+ async function signedIn(){try{const c=getClient();if(!c?.auth)return null;const {data,error}=await c.auth.getUser();if(error)return null;return data?.user||null;}catch(_){return null;}}
  let busy=false,question=null,rotation=0;
  function el(tag,attrs,text){const n=document.createElement(tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;}
  function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
@@ -7421,7 +7423,7 @@ document.addEventListener('DOMContentLoaded', function () {
    $('cuit-roulette-edu-publish').addEventListener('click',publishDraft);
   }
  }
- function open(){if(!getUser()?.id){status('Silakan masuk ke akun CUIT terlebih dahulu.');return;}ensureUI();$('cuit-roulette-edu-overlay').style.display='flex';$('cuit-roulette-edu-question').style.display='none';$('cuit-roulette-edu-spin').disabled=false;status('Putar roda untuk mendapatkan kategori secara acak.');}
+ async function open(){ensureUI();$('cuit-roulette-edu-overlay').style.display='flex';$('cuit-roulette-edu-question').style.display='none';$('cuit-roulette-edu-spin').disabled=false;status('Memeriksa sesi akun...');const user=await signedIn();if(!user?.id){status('Silakan masuk ke akun CUIT terlebih dahulu, lalu buka Roulette kembali.');$('cuit-roulette-edu-spin').disabled=true;return;}status('Putar roda untuk mendapatkan kategori secara acak.');}
  async function readiness(){
   try{
    const {data,error}=await getClient().from('cuit_roulette_questions').select('category,difficulty').eq('is_active',true);
@@ -7434,7 +7436,7 @@ document.addEventListener('DOMContentLoaded', function () {
  }
  async function spin(){
   if(busy)return;
-  if(!getClient()||!getUser()?.id){status('Silakan login kembali.');return;}
+  if(!getClient()||!(await signedIn())?.id){status('Sesi akun tidak ditemukan. Silakan masuk kembali.');return;}
   busy=true;$('cuit-roulette-edu-spin').disabled=true;$('cuit-roulette-edu-question').style.display='none';
   status('Roda berputar...');
   try{
@@ -7508,17 +7510,20 @@ document.addEventListener('DOMContentLoaded', function () {
  }
  window.openCuitEducationalRoulette=open;
  async function init(){
-  let tries=0;
+  let tries=0,checking=false;
   const wait=async()=>{
-   if(getUser()?.id&&getClient()){
+   if(checking)return;checking=true;
+   const user=await signedIn();
+   if(user?.id){
     const ready=await readiness();
     if(ready){ensureUI();$('cuit-roulette-edu-launch').style.display='block';}
-    else console.info('Roulette belum ditampilkan: bank soal belum mencapai 300 soal aktif.');
-    return;
+    else {ensureUI();$('cuit-roulette-edu-launch').style.display='block';status('Bank soal belum dapat dimuat. Tekan Roulette untuk mencoba lagi.');}
+    checking=false;return;
    }
-   if(++tries<240)setTimeout(wait,250);
+   checking=false;
+   if(++tries<480)setTimeout(wait,500);
   };
-  wait();
+  await wait();
   const client=getClient();
   if(client?.auth?.onAuthStateChange){
    client.auth.onAuthStateChange((_event,session)=>{
