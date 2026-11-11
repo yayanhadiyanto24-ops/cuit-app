@@ -6318,8 +6318,11 @@ container.innerHTML = html;
       activeVideoSlot = slot;
       activeVideoExtraMode = extraMode === true;
 
+      // Pertahankan panel daftar misi di belakang pemutar.
+      // Pemutar tampil sebagai modal di atasnya sehingga panel tidak terasa hilang
+      // dan pengguna dapat kembali ke daftar setelah menutup video.
       const reelsModal = document.getElementById('reelsModal');
-      if (reelsModal) reelsModal.style.display = 'none';
+      if (reelsModal) reelsModal.style.display = 'flex';
 
       let rawUrl = normalizeFbUrl(targetUrl);
       if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
