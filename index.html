@@ -3605,13 +3605,15 @@ async function openDailyCheckin() {
     }
 
     function switchTab(pageId, navElement) {
-      if (pageId === 'pageGame' && window.CUIT_GAMES_DISABLED) {
-        let notice = document.getElementById('cuitGamesPausedNotice');
-        if (!notice) {
-          notice = document.createElement('div');
-          notice.id = 'cuitGamesPausedNotice';
-          notice.textContent = 'Seluruh permainan CUIT sedang dijeda sementara. Fitur dan data permainan tidak dihapus.';
-          notice.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:100020;width:calc(100% - 28px);max-width:440px (navElement) navElement.classList.add('active');
+      if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
+      if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
+
+      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-bar .nav-item').forEach(nav => nav.classList.remove('active'));
+
+      const targetPage = document.getElementById(pageId);
+      if (targetPage) targetPage.classList.add('active');
+      if (navElement) navElement.classList.add('active');
 
       if (pageId === 'pageProfile') renderProfileData();
       if (pageId === 'pageCreate') loadDraftLocally();
