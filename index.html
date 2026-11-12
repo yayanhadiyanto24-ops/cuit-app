@@ -1824,7 +1824,7 @@ poolStatus=feePaid>0
   width:100vw;
   max-width:none;
   height:auto;
-  aspect-ratio:8 / 15;
+  aspect-ratio:8 / 9;
   margin:0 0 0 calc(50% - 50vw);
   background:linear-gradient(#fffaf0,#fff1d5);
   border-top:1px solid #e8d5a3;
@@ -1872,7 +1872,7 @@ poolStatus=feePaid>0
   </div>
   <div class="mg-message" id="mgMessage">Tekan PUTAR BALAPAN untuk memulai permainan.</div>
 
-  <canvas id="mgCanvas" width="480" height="900"></canvas>
+  <canvas id="mgCanvas" width="480" height="540"></canvas>
 
   <div class="mg-result" id="mgResult">
     <h3>✨ Hasil Balap Kelereng</h3>
@@ -1904,7 +1904,7 @@ poolStatus=feePaid>0
   const canvas = $('mgCanvas');
   let ctx = canvas.getContext('2d');
 
-  const W = 480, H = 900;
+  const W = 480, H = 540;
   canvas.width = W;
   canvas.height = H;
 
@@ -1916,9 +1916,9 @@ poolStatus=feePaid>0
   const colors = ['#e52b43','#2584ed','#f2bd32'];
   const names = ['Merah','Biru','Kuning'];
   const radius = 10;
-  const floorY = 755;
-  const tubeTop = 735;
-  const tubeBottom = 860;
+  const floorY = 490;
+  const tubeTop = 450;
+  const tubeBottom = 512;
   const tubeW = W / 10;
 
   function client() {
@@ -1943,7 +1943,7 @@ poolStatus=feePaid>0
   }
 
   function wallLeftAt(y) {
-    const p=Math.max(0,Math.min(1,y/735));
+    const p=Math.max(0,Math.min(1,y/450));
     return 6;
   }
   function drawBackground() {
@@ -1956,7 +1956,7 @@ poolStatus=feePaid>0
     rail.addColorStop(.7,'#9b6a30');rail.addColorStop(1,'#f5d99c');
     ctx.lineWidth=12;ctx.lineCap='round';
     ctx.beginPath();
-    for(let y=0;y<=735;y+=5){const x=wallLeftAt(y);if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    for(let y=0;y<=450;y+=5){const x=wallLeftAt(y);if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
     ctx.strokeStyle=rail;ctx.stroke();
     ctx.beginPath();
     for(let y=0;y<=735;y+=5){const x=W-wallLeftAt(y);if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
@@ -2056,26 +2056,23 @@ poolStatus=feePaid>0
     ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='#fff4cf';ctx.fill();ctx.restore();
   }
   function drawObstacles() {
-    [[140,245],[340,245],[140,413],[340,413],[140,581],[340,581]].forEach(p=>drawBumper(p[0],p[1]));
-    const spinnerRows=[2,4,5,7,8];
-    const pegCounts=[5,6,5,6,5,5,6,5,6,5];
-    const offsets=[-12,12,-18,8,16,-8,14,-14,10,-6];
+    [[120,110],[360,110],[120,233],[360,233],[120,356],[360,356]].forEach(p=>drawBumper(p[0],p[1]));
+    const spinnerRows=[1,4,7];
+    const bumperRows=[2,5,8];
+    const pegCounts=[6,0,0,6,0,0,6,0,0,6];
     let spinnerIndex=0;
     for(let row=0;row<10;row++){
-      const y=105+row*56;
+      const y=28+row*41;
       if(spinnerRows.includes(row)){
-        spinnerIndex += ([4,7,5].includes(row)?2:1);
-      }else{
+        spinnerIndex += 2;
+      }else if(!bumperRows.includes(row)){
         const count=pegCounts[row],spacing=W/(count+1);
         for(let col=0;col<count;col++){
-          const stagger=col%2===0?-3:3;
-          const x=Math.max(wallLeftAt(y)+22,Math.min(W-wallLeftAt(y)-22,spacing*(col+1)+offsets[row]+stagger));
-          peg(x,y,8+((row+col)%3)*.6);
+          const x=spacing*(col+1)+(col%2===0?-4:4);
+          peg(x,y,8.5);
         }
       }
     }
-    ctx.textAlign='center';ctx.font='bold 12px sans-serif';ctx.fillStyle='#fff0bd';
-    ctx.fillText('LINTASAN BEBAS MENUJU 10 BOTOL',240,680);
   }
 
   function drawTube(i, balls, settled) {
@@ -2186,10 +2183,10 @@ poolStatus=feePaid>0
   // gradient, bayangan, dan garis pada setiap frame animasi.
   let staticBoardCanvas = null;
   function drawAnimatedSpinners(time=0) {
-    const spinnerRows=[2,4,5,7,8];let index=0;
+    const spinnerRows=[1,4,7];let index=0;
     for(let row=0;row<10;row++){
       if(!spinnerRows.includes(row))continue;
-      const y=105+row*56,count=[4,7,5].includes(row)?2:1;
+      const y=28+row*41,count=2;
       for(let i=0;i<count;i++)drawSpinner(W*(i+1)/(count+1),y,16,index++,time);
     }
   }
