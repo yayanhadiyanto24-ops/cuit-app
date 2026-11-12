@@ -5173,7 +5173,7 @@ async function toggleLike(postId) {
       const { data: savedLike, error: savedLikeError } = await supabaseClient
         .from('post_likes').select('id').eq('post_id', Number(postId))
         .eq('user_id', currentUser.id).maybeSingle();
-      if (!savedLikeError && savedLike?.id) await validateMissionActionNow('like', savedLike.id);
+      if (!savedLikeError && savedLike?.id) await window.validateCuitRouletteMissionAction?.('like', savedLike.id);
     }
     freeCoins = Math.max(0, freeCoins - Number(result.free_coins_used || 0));
     paidCoins = Math.max(0, paidCoins - Number(result.paid_coins_used || 0));
@@ -5419,7 +5419,7 @@ async function submitCommentAction() {
     }
 
     // Validasi misi langsung memakai ID komentar yang baru benar-benar tersimpan.
-    if (data.comment_id) await validateMissionActionNow('comment', data.comment_id);
+    if (data.comment_id) await window.validateCuitRouletteMissionAction?.('comment', data.comment_id);
 
     // Perbarui saldo di latar belakang agar tampilan komentar tidak menunggu query profil.
     void updateCoinUI(false);
@@ -7753,6 +7753,7 @@ document.addEventListener('DOMContentLoaded', function () {
    if(activeMission&&!missionCheckTimer)missionCheckTimer=setTimeout(checkMissionAutomatically,250);
   }
  }
+ window.validateCuitRouletteMissionAction=validateMissionActionNow;
  async function checkMissionAutomatically(){
   if(!activeMission||missionCheckBusy)return;
   missionCheckBusy=true;
