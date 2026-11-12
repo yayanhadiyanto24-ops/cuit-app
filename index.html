@@ -3119,8 +3119,10 @@ poolStatus=feePaid>0
       const [checkins,reels,centralGameEntries,paidLedger,paidGames,socialProgressResult]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
-        // Panel Progres memakai ledger pusat yang sama dengan Raja Game.
-        rows('cuit_central_entries','activity_points',q=>q.eq('owner_user_id',currentUser.id).eq('entry_kind','activity').eq('activity_category','game').gte('created_at',start).lt('created_at',end)),
+        // Gunakan RPC yang sama dengan Raja Game agar pembacaan mengikuti akses SECURITY DEFINER.
+        supabaseClient.rpc('cuit_central_get_activity_ranking',{
+          p_category:'game',p_start:start,p_end:end,p_limit:500
+        }),
         rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','sawer').gte('occurred_at',start).lt('occurred_at',end)),
         rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end)),
         supabaseClient.rpc('cuit_get_today_social_progress')
@@ -3132,12 +3134,14 @@ values.watch = reels === null
   ? 'Belum terhubung'
   : reels.length.toLocaleString('id-ID');
 
-// Main Game: jumlah poin aktivitas dari ledger pusat, sama dengan Raja Game.
-values.game = centralGameEntries === null
-  ? 'Belum terhubung'
-  : centralGameEntries.reduce(
-      (total, row) => total + Number(row.activity_points || 0), 0
-    ).toLocaleString('id-ID');
+// Main Game: ambil total akun aktif dari RPC ranking pusat yang sama dengan Raja Game.
+if (centralGameEntries && !centralGameEntries.error && Array.isArray(centralGameEntries.data)) {
+  const myGameRow = centralGameEntries.data.find(row => row.user_id === currentUser.id);
+  values.game = Number(myGameRow?.total_points || 0).toLocaleString('id-ID');
+} else {
+  values.game = 'Belum terhubung';
+  console.error('Gagal memuat progres game dari data pusat:', centralGameEntries?.error);
+}
       // Statistik sosial dihitung di server dari seluruh curhatan milik anggota,
       // bukan hanya curhatan yang dibuat hari ini. Batas hari mengikuti WIB.
       if(socialProgressResult && !socialProgressResult.error && socialProgressResult.data){
