@@ -210,6 +210,8 @@
     .post-body { font-size: 13px; line-height: 1.45; color: #4a2028; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #fffafa; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .action-chip.is-liked { background: #fff0f1 !important; color: #c81e32 !important; font-weight: 800 !important; border: 1px solid #f3b7bf !important; }
+    .action-chip.is-liked:active { background: #ffe0e4 !important; }
 /* --- KODE PERBAIKAN HEADER POSTINGAN & DROPDOWN --- */
 
 /* Memaksa header postingan rata kiri-kanan secara fleksibel */
@@ -4986,7 +4988,7 @@ function renderCardHTML(p) {
 
       <!-- AKSI FOOTER -->
       <div class="post-footer-actions">
-        <div class="action-chip" data-like-action="true" style="${isLiked ? 'background:#fff0f1; color:#c81e32; font-weight:800;' : ''}" onclick="event.stopPropagation(); toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
+        <div class="action-chip ${isLiked ? 'is-liked' : ''}" data-like-action="true" aria-pressed="${isLiked ? 'true' : 'false'}" onclick="event.stopPropagation(); toggleLike('${p.id}')">${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${likesCount})</div>
         <div class="action-chip" onclick="openCommentsModal('${p.id}')">💬 Komentar (${commentsCount})</div>
         <div class="action-chip" onclick="openGiftModal('${p.id}')">🎁 Gift (${giftsCoinsCount} 🪙)</div>
       </div>
@@ -5120,9 +5122,11 @@ function syncPromotedLikeUI(postId) {
   const isLiked = userLikedPostsSet.has(String(postId));
   const count = Number(post.likes_count || 0);
   chip.textContent = `${isLiked ? '♥ Batal Suka' : '♡ Suka'} (${count})`;
-  chip.style.background = isLiked ? '#fff0f1' : '';
-  chip.style.color = isLiked ? '#c81e32' : '';
-  chip.style.fontWeight = isLiked ? '800' : '';
+  chip.classList.toggle('is-liked', isLiked);
+  chip.setAttribute('aria-pressed', isLiked ? 'true' : 'false');
+  chip.style.background = '';
+  chip.style.color = '';
+  chip.style.fontWeight = '';
 }
 
 function syncPostLikeButtons(postId, post) {
@@ -5133,9 +5137,11 @@ function syncPostLikeButtons(postId, post) {
     const button = card.querySelector('[data-like-action="true"]');
     if (!button) return;
     button.textContent = `${liked ? '♥ Batal Suka' : '♡ Suka'} (${count})`;
-    button.style.background = liked ? '#fff0f1' : '';
-    button.style.color = liked ? '#c81e32' : '';
-    button.style.fontWeight = liked ? '800' : '';
+    button.classList.toggle('is-liked', liked);
+    button.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    button.style.background = '';
+    button.style.color = '';
+    button.style.fontWeight = '';
   });
 }
 
