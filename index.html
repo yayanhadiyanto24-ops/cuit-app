@@ -1866,14 +1866,13 @@ poolStatus=feePaid>0
     <div>KELERENG<strong>3 Buah</strong></div>
   </div>
 
-  <canvas id="mgCanvas" width="480" height="900"></canvas>
-
-  <div class="mg-message" id="mgMessage">Tekan Mulai Balapan untuk memulai permainan.</div>
-
   <div class="mg-actions">
-    <button class="mg-btn mg-primary" id="mgStart">🏁 Mulai Balapan</button>
+    <button class="mg-btn mg-primary" id="mgStart">🏁 PUTAR BALAPAN</button>
     <button class="mg-btn mg-secondary" id="mgReset">Ulangi</button>
   </div>
+  <div class="mg-message" id="mgMessage">Tekan PUTAR BALAPAN untuk memulai permainan.</div>
+
+  <canvas id="mgCanvas" width="480" height="900"></canvas>
 
   <div class="mg-result" id="mgResult">
     <h3>✨ Hasil Balap Kelereng</h3>
@@ -1945,7 +1944,7 @@ poolStatus=feePaid>0
 
   function wallLeftAt(y) {
     const p=Math.max(0,Math.min(1,y/735));
-    return 5+34*(1-Math.sin(Math.PI*p));
+    return 5+34*Math.sin(Math.PI*p);
   }
   function drawBackground() {
     const bg=ctx.createLinearGradient(0,0,0,H);
@@ -2048,9 +2047,18 @@ poolStatus=feePaid>0
       ctx.restore();
     });
   }
+  function drawBumper(x,y) {
+    ctx.save();ctx.shadowColor='rgba(120,35,20,.35)';ctx.shadowBlur=7;
+    ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);
+    const g=ctx.createRadialGradient(x-4,y-5,2,x,y,15);
+    g.addColorStop(0,'#fff8c9');g.addColorStop(.45,'#f4c34e');g.addColorStop(1,'#a9152b');
+    ctx.fillStyle=g;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#8e1028';ctx.stroke();
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='#fff4cf';ctx.fill();ctx.restore();
+  }
   function drawObstacles() {
+    [[140,245],[340,245],[140,413],[340,413],[140,581],[340,581]].forEach(p=>drawBumper(p[0],p[1]));
     const spinnerRows=[2,4,5,7,8];
-    const pegCounts=[6,7,6,7,6,6,7,6,7,6];
+    const pegCounts=[5,6,5,6,5,5,6,5,6,5];
     const offsets=[-12,12,-18,8,16,-8,14,-14,10,-6];
     let spinnerIndex=0;
     for(let row=0;row<10;row++){
