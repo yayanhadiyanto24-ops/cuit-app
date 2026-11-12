@@ -7600,7 +7600,7 @@ document.addEventListener('DOMContentLoaded', function () {
  const $=id=>document.getElementById(id);
  const getClient=()=>window.__cuitSupabaseClient||(typeof supabaseClient!=='undefined'?supabaseClient:null);
  async function signedIn(){try{const c=getClient();if(!c?.auth)return null;const {data,error}=await c.auth.getUser();if(error)return null;return data?.user||null;}catch(_){return null;}}
- let busy=false,question=null,rotation=0,authSubscription=null;
+ let busy=false,question=null,rotation=0,authSubscription=null,activeMission=null,missionCheckTimer=null,missionCheckBusy=false;
  function node(tag,attrs,text){const n=document.createElement(tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;}
  function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
  function ensureUI(){
@@ -7649,6 +7649,7 @@ document.addEventListener('DOMContentLoaded', function () {
   status('Memeriksa sesi akun...');
   if(!(await signedIn())?.id){status('Silakan masuk ke akun CUIT terlebih dahulu, lalu buka Roulette kembali.');$('cuit-roulette-edu-spin').disabled=true;return;}
   $('cuit-roulette-edu-question').style.display='none';
+  if(activeMission){$('cuit-roulette-edu-spin').disabled=true;status('Misi masih menunggu diselesaikan. Selesaikan LIKE/KOMEN pada curhatan anggota lain.');return;}
   $('cuit-roulette-edu-spin').disabled=false;
   question=null;status('Putar roda. Kategori dan soal ditentukan oleh server.');
  }
@@ -7667,6 +7668,7 @@ document.addEventListener('DOMContentLoaded', function () {
  }
  async function spin(){
   if(busy)return;
+  if(activeMission){status('Misi belum selesai. Selesaikan LIKE/KOMEN terlebih dahulu.');return;}
   const client=getClient();if(!(await signedIn())?.id||!client){status('Sesi login tidak ditemukan. Silakan masuk kembali.');return;}
   busy=true;$('cuit-roulette-edu-spin').disabled=true;$('cuit-roulette-edu-question').style.display='none';
   status('Roda berputar dan server memilih kategori...');
@@ -7684,16 +7686,19 @@ document.addEventListener('DOMContentLoaded', function () {
    if(data.type==='mission'){showMission(data);return;}
    question=data;showQuestion(data);
   }catch(e){status(e?.message||'Koneksi bermasalah. Silakan coba lagi.');}
-  finally{busy=false;$('cuit-roulette-edu-spin').disabled=false;$('cuit-roulette-edu-spin').textContent='PUTAR RODA';}
+  finally{busy=false;$('cuit-roulette-edu-spin').disabled=!!activeMission;$('cuit-roulette-edu-spin').textContent=activeMission?'SELESAIKAN MISI':'PUTAR RODA';}
  }
  function showMission(d){
+  activeMission={id:d.spin_id,category:d.category};
+  if(missionCheckTimer){clearTimeout(missionCheckTimer);missionCheckTimer=null;}
   $('cuit-roulette-edu-question').style.display='block';
   $('cuit-roulette-edu-heading').textContent='MISI '+String(d.category||'').toUpperCase();
   $('cuit-roulette-edu-prompt').textContent=d.instruction||'Selesaikan aktivitas komunitas di CUIT.';
   $('cuit-roulette-edu-options').replaceChildren();
-  $('cuit-roulette-edu-feedback').textContent='Misi belum selesai. Setelah LIKE atau KOMEN benar-benar tersimpan, tekan PUTAR RODA untuk memeriksa. Roda tidak akan memberi tantangan baru sebelum misi ini sah.';
+  $('cuit-roulette-edu-feedback').textContent='⏳ MISI BELUM SELESAI. Tombol PUTAR dikunci. Setelah LIKE/KOMEN berhasil tersimpan pada curhatan anggota lain, status akan berubah otomatis.';
   $('cuit-roulette-edu-draft').style.display='none';$('cuit-roulette-edu-publish').style.display='none';
-  $('cuit-roulette-edu-spin').textContent='PERIKSA MISI / PUTAR RODA';
+  $('cuit-roulette-edu-spin').textContent='SELESAIKAN MISI';
+  $('cuit-roulette-edu-spin').disabled=true;
   const mini=$('cuit-roulette-edu-mini');
   mini.textContent='🎡 MISI '+String(d.category||'').toUpperCase()+' • KETUK UNTUK BUKA';
   const minimize=node('button',{type:'button'},'KECILKAN ROULETTE • LAKUKAN MISI');
@@ -7706,7 +7711,37 @@ document.addEventListener('DOMContentLoaded', function () {
    status('Roulette diperkecil. Bar navigasi tetap aktif; silakan LIKE/KOMEN pada curhatan. Ketuk kapsul Roulette untuk memeriksa misi.');
   });
   $('cuit-roulette-edu-options').appendChild(minimize);
-  status('Misi '+String(d.category||'').toUpperCase()+' wajib diselesaikan. Kamu bisa mengecilkan Roulette tanpa menutupnya.');
+  status('Misi '+String(d.category||'').toUpperCase()+' belum selesai. Tombol putar terkunci sampai LIKE/KOMEN sah tersimpan.');
+  checkMissionAutomatically();
+ }
+ async function checkMissionAutomatically(){
+  if(!activeMission||missionCheckBusy)return;
+  missionCheckBusy=true;
+  try{
+   const client=getClient();
+   if(!client)throw new Error('Sesi belum tersedia');
+   const {data,error}=await client.rpc('cuit_roulette_claim_mission',{p_spin_id:activeMission.id,p_action_id:null});
+   if(error)throw error;
+   if(data?.ok){
+    const completed=activeMission;activeMission=null;
+    if(missionCheckTimer){clearTimeout(missionCheckTimer);missionCheckTimer=null;}
+    $('cuit-roulette-edu-feedback').textContent='✅ MISI SELESAI! '+(data.message||'3 Koin Gratis berhasil diberikan.');
+    $('cuit-roulette-edu-spin').disabled=false;
+    $('cuit-roulette-edu-spin').textContent='PUTAR RODA';
+    status('Misi '+String(completed.category||'').toUpperCase()+' selesai. Tombol PUTAR RODA aktif kembali.');
+    const mini=$('cuit-roulette-edu-mini');
+    mini.textContent='🎡 MISI SELESAI • PUTAR LAGI';
+    if(typeof window.loadProfile==='function')window.loadProfile();
+    if(typeof window.refreshProfile==='function')window.refreshProfile();
+    if(typeof window.refreshCuitGameRanking==='function')window.refreshCuitGameRanking();
+    return;
+   }
+  }catch(e){
+   // Selama belum ada tindakan baru yang sah, RPC memang mengembalikan error.
+  }finally{
+   missionCheckBusy=false;
+   if(activeMission)missionCheckTimer=setTimeout(checkMissionAutomatically,1400);
+  }
  }
  function showQuestion(d){
   $('cuit-roulette-edu-question').style.display='block';
