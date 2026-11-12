@@ -2059,18 +2059,19 @@ poolStatus=feePaid>0
     [[120,110],[360,110],[120,233],[360,233],[120,356],[360,356]].forEach(p=>drawBumper(p[0],p[1]));
     const spinnerRows=[1,4,7];
     const bumperRows=[2,5,8];
-    const pegCounts=[6,0,0,6,0,0,6,0,0,6];
     let spinnerIndex=0;
     for(let row=0;row<10;row++){
       const y=28+row*41;
       if(spinnerRows.includes(row)){
         spinnerIndex += 2;
       }else if(!bumperRows.includes(row)){
-        const count=pegCounts[row],spacing=W/(count+1);
-        for(let col=0;col<count;col++){
-          const x=spacing*(col+1)+(col%2===0?-4:4);
-          peg(x,y,8.5);
-        }
+        // Baris genap: 7 paku termasuk tepat di tengah.
+        // Baris ganjil: 6 paku bergeser setengah jarak agar pola berselang-seling.
+        const shifted=(row===3||row===9);
+        const xs=shifted
+          ? [40,112,184,256,328,400]
+          : [60,120,180,240,300,360,420];
+        xs.forEach(x=>peg(x,y,8.5));
       }
     }
   }
