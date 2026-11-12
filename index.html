@@ -2228,7 +2228,7 @@ poolStatus=feePaid>0
       const elapsed = (now - startedAt) / 1000;
       const balls = colors.map((color, i) => ({
         x: 240 + (i - 1) * 24 + Math.sin(elapsed * 4 + i) * 5,
-        y: 12 + Math.min(42, elapsed * 16) + i * 3,
+        y: 12 + Math.min(42, elapsed * 90) + i * 3,
         color, done: false, tube: null
       }));
       drawBoard(balls, [], elapsed);
@@ -2267,16 +2267,13 @@ poolStatus=feePaid>0
 
       function animateServerTrace(trace) {
   if (!Array.isArray(trace) || trace.length < 2) {
-    return Promise.reject(
-      new Error('Jejak simulasi dari server tidak lengkap.')
-    );
+    return Promise.reject(new Error('Jejak simulasi dari server tidak lengkap.'));
   }
 
   const colors = ['#e52b43', '#2584ed', '#f2bd32'];
   let frameIndex = 0;
-  let lastTime = 0;
-  let animationTime = 0;
   let settledPromise = false;
+  let startedAt = 0;
 
   return new Promise((resolve, reject) => {
     function stop() {
@@ -2285,14 +2282,12 @@ poolStatus=feePaid>0
         animation = null;
       }
     }
-
     function fail(error) {
       if (settledPromise) return;
       settledPromise = true;
       stop();
       reject(error);
     }
-
     function finish() {
       if (settledPromise) return;
       settledPromise = true;
@@ -2303,72 +2298,66 @@ poolStatus=feePaid>0
     function frame(now) {
       try {
         if (settledPromise) return;
+        if (!startedAt) startedAt = now;
 
-        if (!lastTime) lastTime = now;
-
-        const delta = Math.min((now - lastTime) / 1000, 0.10);
-        lastTime = now;
-        animationTime += delta;
-
-        // Jejak server diringkas; diputar 2,5x agar balapan responsif.
-        const sampleDuration = 6 / 60 / 2.5;
+        // Ikuti waktu fisika asli dari server (DT 1/60 detik).
+        // Tidak ada pengali percepatan: pantulan dan jatuh terlihat alami.
+        const elapsed = Math.max(0, (now - startedAt) / 1000);
+        const playbackTime = Number(trace[0].t || 0) + elapsed;
 
         while (
-          frameIndex < trace.length - 1 &&
-          animationTime >= (frameIndex + 1) * sampleDuration
+          frameIndex < trace.length - 2 &&
+          playbackTime >= Number(trace[frameIndex + 1].t)
         ) {
           frameIndex++;
         }
 
-        const progress = Math.min(
-          1,
-          (animationTime - frameIndex * sampleDuration) /
-            sampleDuration
-        );
-
         const current = trace[frameIndex];
         const next = trace[Math.min(frameIndex + 1, trace.length - 1)];
-
-        if (!current || !current.balls || !next || !next.balls) {
+        if (!current?.balls || !next?.balls) {
           throw new Error('Format jejak simulasi server tidak sesuai.');
         }
 
+        const t0 = Number(current.t || 0);
+        const t1 = Number(next.t || t0);
+        const span = Math.max(0.000001, t1 - t0);
+        const progress = Math.max(0, Math.min(1, (playbackTime - t0) / span));
+
         const balls = current.balls.map((ball, i) => {
           const target = next.balls[i] || ball;
-
           return {
-            x: Number(ball.x) +
-              (Number(target.x) - Number(ball.x)) * progress,
-            y: Number(ball.y) +
-              (Number(target.y) - Number(ball.y)) * progress,
-            tube: ball.tube,
-            done: Boolean(ball.done),
+            x: Number(ball.x) + (Number(target.x) - Number(ball.x)) * progress,
+            y: Number(ball.y) + (Number(target.y) - Number(ball.y)) * progress,
+            tube: progress >= 1 ? target.tube : ball.tube,
+            done: progress >= 1 ? Boolean(target.done) : Boolean(ball.done),
             color: colors[i]
           };
         });
 
         const settled = balls
-  .filter(ball =>
-    ball.done &&
-    (ball.tube === null || Number.isInteger(Number(ball.tube)))
-  )
-  .map(ball => ({
-    x: ball.x,
-    y: ball.y,
-    slot: ball.tube === null ? 9 : Number(ball.tube),
-    color: ball.color
-  }));
+          .filter(ball => ball.done)
+          .map(ball => ({
+            x: ball.x,
+            y: ball.y,
+            slot: ball.tube === null ? 9 : Number(ball.tube),
+            color: ball.color
+          }));
 
-        drawBoard(balls, settled, Number(current.t)||0);
+        drawBoard(balls, settled, t0 + span * progress);
 
-        if (frameIndex >= trace.length - 1) {
-          const lastFrame = trace[trace.length - 1];
-          const allDone = lastFrame.balls.every(ball => ball.done);
-
-          if (allDone) {
-            finish();
-            return;
-          }
+        const lastFrame = trace[trace.length - 1];
+        if (
+          playbackTime >= Number(lastFrame.t) &&
+          lastFrame.balls.every(ball => ball.done)
+        ) {
+          drawBoard([], lastFrame.balls.map((ball, i) => ({
+            x: Number(ball.x),
+            y: Number(ball.y),
+            slot: ball.tube === null ? 9 : Number(ball.tube),
+            color: colors[i]
+          })), Number(lastFrame.t || 0));
+          finish();
+          return;
         }
 
         animation = requestAnimationFrame(frame);
