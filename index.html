@@ -3170,9 +3170,24 @@ if (paidLedger === null || paidGames === null) {
     (total, row) => total + Number(row.entry_fee || 0), 0
   );
 
-  values.paidSpent = (
-    fromActions + fromGames
-  ).toLocaleString('id-ID');
+  // Biaya promosi dari kontribusi Pool Raja milik curhatan akun ini.
+  let fromPromotions = 0;
+  try {
+    const { data: promotionSpend, error: promotionSpendError } =
+      await supabaseClient.rpc('cuit_get_today_promotion_spend');
+    if (promotionSpendError) throw promotionSpendError;
+    fromPromotions = Number(promotionSpend || 0);
+  } catch (promotionSpendError) {
+    values.paidSpent = 'Belum terhubung';
+    console.error('Gagal memuat biaya promosi:', promotionSpendError);
+    fromPromotions = null;
+  }
+
+  if (fromPromotions !== null) {
+    values.paidSpent = (
+      fromActions + fromGames + fromPromotions
+    ).toLocaleString('id-ID');
+  }
 }
 
       // Total permata yang diterima hari ini dari seluruh sumber CUIT
