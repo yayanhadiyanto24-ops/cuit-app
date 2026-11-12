@@ -2219,6 +2219,28 @@ poolStatus=feePaid>0
 
   drawBoard();
 
+  let previewAnimation = null;
+  function startLaunchPreview() {
+    if (previewAnimation) cancelAnimationFrame(previewAnimation);
+    const colors = ['#e52b43', '#2584ed', '#f2bd32'];
+    const startedAt = performance.now();
+    function frame(now) {
+      const elapsed = (now - startedAt) / 1000;
+      const balls = colors.map((color, i) => ({
+        x: 240 + (i - 1) * 24 + Math.sin(elapsed * 4 + i) * 5,
+        y: 12 + Math.min(42, elapsed * 16) + i * 3,
+        color, done: false, tube: null
+      }));
+      drawBoard(balls, [], elapsed);
+      previewAnimation = requestAnimationFrame(frame);
+    }
+    previewAnimation = requestAnimationFrame(frame);
+  }
+  function stopLaunchPreview() {
+    if (previewAnimation) cancelAnimationFrame(previewAnimation);
+    previewAnimation = null;
+  }
+
   function showResult(data) {
     const red=resultNumber(data.marble_red ?? data.red);
     const blue=resultNumber(data.marble_blue ?? data.blue);
@@ -2288,8 +2310,8 @@ poolStatus=feePaid>0
         lastTime = now;
         animationTime += delta;
 
-        // Sampel server setiap 4 langkah fisika (30 frame/detik).
-        const sampleDuration = 4 / 120;
+        // Jejak server diringkas; diputar 2,5x agar balapan responsif.
+        const sampleDuration = 6 / 60 / 2.5;
 
         while (
           frameIndex < trace.length - 1 &&
@@ -2364,7 +2386,8 @@ poolStatus=feePaid>0
   busy = true;
   $('mgStart').disabled = true;
   $('mgResult').classList.remove('show');
-  message('Memeriksa saldo dan persediaan permata...');
+  startLaunchPreview();
+  message('Kelereng bersiap meluncur...');
 
   try {
     // Membuat sesi dan memotong biaya melalui RPC.
@@ -2392,10 +2415,10 @@ poolStatus=feePaid>0
 
     const currentFee = Math.max(1, Number(row.fee || 1));
     if (typeof updateCoinUI === 'function') {
-      await updateCoinUI();
+      Promise.resolve(updateCoinUI()).catch(() => {});
     }
 
-    message('Permainan ke-' + Number(row.play_number || currentFee) + ' · biaya ' + currentFee + ' koin gratis. Server sedang menjalankan simulasi fisika...');
+    message('Permainan ke-' + Number(row.play_number || currentFee) + ' · biaya ' + currentFee + ' koin gratis. Menyiapkan lintasan...');
 
     // Meminta simulasi dan hasil fisika dari Edge Function.
     const { data: physicsData, error: physicsError } =
@@ -2416,9 +2439,10 @@ poolStatus=feePaid>0
       );
     }
 
+    stopLaunchPreview();
     message('Tiga kelereng sedang meluncur...');
 
-    // Browser hanya memutar jejak yang sudah dibuat server.
+    // Browser memutar jejak fisika yang telah diverifikasi server.
     await animateServerTrace(physicsData.trace);
 
     message('Balapan selesai. Meminta konfirmasi hasil dari server...');
@@ -2465,6 +2489,7 @@ poolStatus=feePaid>0
     }
 
     } catch (err) {
+    stopLaunchPreview();
     console.warn('Balap Kelereng CUIT:', err);
 
     const alasan =
@@ -2503,6 +2528,7 @@ poolStatus=feePaid>0
 }
 
   async function cancel() {
+    stopLaunchPreview();
     if(animation) {
       cancelAnimationFrame(animation);
       animation=null;
