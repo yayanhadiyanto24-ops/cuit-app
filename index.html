@@ -5168,6 +5168,13 @@ async function toggleLike(postId) {
       alert('Transaksi Like tidak berhasil.');
       return;
     }
+    // Ambil ID Like yang sudah tersimpan oleh transaksi server, lalu validasi misi seketika.
+    if (activeMission && activeMission.category === 'like') {
+      const { data: savedLike, error: savedLikeError } = await supabaseClient
+        .from('post_likes').select('id').eq('post_id', Number(postId))
+        .eq('user_id', currentUser.id).maybeSingle();
+      if (!savedLikeError && savedLike?.id) await validateMissionActionNow('like', savedLike.id);
+    }
     freeCoins = Math.max(0, freeCoins - Number(result.free_coins_used || 0));
     paidCoins = Math.max(0, paidCoins - Number(result.paid_coins_used || 0));
     usedPaidCoins += Number(result.paid_coins_used || 0);
@@ -5410,6 +5417,9 @@ async function submitCommentAction() {
     if (!data || data.ok !== true) {
       return alert(data?.message || 'Komentar gagal dikirim.');
     }
+
+    // Validasi misi langsung memakai ID komentar yang baru benar-benar tersimpan.
+    if (data.comment_id) await validateMissionActionNow('comment', data.comment_id);
 
     // Perbarui saldo di latar belakang agar tampilan komentar tidak menunggu query profil.
     void updateCoinUI(false);
@@ -7714,6 +7724,35 @@ document.addEventListener('DOMContentLoaded', function () {
   status('Misi '+String(d.category||'').toUpperCase()+' belum selesai. Tombol putar terkunci sampai LIKE/KOMEN sah tersimpan.');
   checkMissionAutomatically();
  }
+ function finishMissionUI(data){
+  const completed=activeMission;
+  if(!completed)return;
+  activeMission=null;
+  if(missionCheckTimer){clearTimeout(missionCheckTimer);missionCheckTimer=null;}
+  $('cuit-roulette-edu-feedback').textContent='✅ MISI SELESAI! '+(data?.message||'3 Koin Gratis berhasil diberikan.');
+  $('cuit-roulette-edu-spin').disabled=false;
+  $('cuit-roulette-edu-spin').textContent='PUTAR RODA';
+  status('Misi '+String(completed.category||'').toUpperCase()+' selesai. Tombol PUTAR RODA aktif kembali.');
+  const mini=$('cuit-roulette-edu-mini');
+  mini.textContent='🎡 MISI SELESAI • PUTAR LAGI';
+  if(typeof window.loadProfile==='function')window.loadProfile();
+  if(typeof window.refreshProfile==='function')window.refreshProfile();
+  if(typeof window.refreshCuitGameRanking==='function')window.refreshCuitGameRanking();
+ }
+ async function validateMissionActionNow(type,actionId){
+  if(!activeMission||activeMission.category!==type||!actionId||missionCheckBusy)return;
+  missionCheckBusy=true;
+  try{
+   const {data,error}=await getClient().rpc('cuit_roulette_claim_mission',{p_spin_id:activeMission.id,p_action_id:String(actionId)});
+   if(error)throw error;
+   if(data?.ok)finishMissionUI(data);
+  }catch(e){
+   console.warn('Validasi misi Roulette:',e?.message||e);
+  }finally{
+   missionCheckBusy=false;
+   if(activeMission&&!missionCheckTimer)missionCheckTimer=setTimeout(checkMissionAutomatically,250);
+  }
+ }
  async function checkMissionAutomatically(){
   if(!activeMission||missionCheckBusy)return;
   missionCheckBusy=true;
@@ -7722,22 +7761,9 @@ document.addEventListener('DOMContentLoaded', function () {
    if(!client)throw new Error('Sesi belum tersedia');
    const {data,error}=await client.rpc('cuit_roulette_claim_mission',{p_spin_id:activeMission.id,p_action_id:null});
    if(error)throw error;
-   if(data?.ok){
-    const completed=activeMission;activeMission=null;
-    if(missionCheckTimer){clearTimeout(missionCheckTimer);missionCheckTimer=null;}
-    $('cuit-roulette-edu-feedback').textContent='✅ MISI SELESAI! '+(data.message||'3 Koin Gratis berhasil diberikan.');
-    $('cuit-roulette-edu-spin').disabled=false;
-    $('cuit-roulette-edu-spin').textContent='PUTAR RODA';
-    status('Misi '+String(completed.category||'').toUpperCase()+' selesai. Tombol PUTAR RODA aktif kembali.');
-    const mini=$('cuit-roulette-edu-mini');
-    mini.textContent='🎡 MISI SELESAI • PUTAR LAGI';
-    if(typeof window.loadProfile==='function')window.loadProfile();
-    if(typeof window.refreshProfile==='function')window.refreshProfile();
-    if(typeof window.refreshCuitGameRanking==='function')window.refreshCuitGameRanking();
-    return;
-   }
+   if(data?.ok)finishMissionUI(data);
   }catch(e){
-   // Selama belum ada tindakan baru yang sah, RPC memang mengembalikan error.
+   // Polling tetap menjadi cadangan bila validasi langsung belum sempat dijalankan.
   }finally{
    missionCheckBusy=false;
    if(activeMission)missionCheckTimer=setTimeout(checkMissionAutomatically,1400);
