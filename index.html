@@ -2063,6 +2063,8 @@ poolStatus=feePaid>0
     let spinnerIndex=0;
     for(let row=0;row<10;row++){
       const y=28+row*41;
+      // Paku tengah digambar dan disimulasikan pada posisi yang sama.
+      peg(240,y,8.5);
       if(spinnerRows.includes(row)){
         spinnerIndex += 2;
       }else if(!bumperRows.includes(row)){
