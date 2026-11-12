@@ -3116,14 +3116,13 @@ poolStatus=feePaid>0
       const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
             async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
 
-      const [checkins,reels,kilatResults,paidLedger,paidGames,marbleSessions,rouletteSpins,socialProgressResult]=await Promise.all([
+      const [checkins,reels,centralGameEntries,paidLedger,paidGames,socialProgressResult]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
-        rows('cuit_kilat_results','id,created_at,user_id',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
+        // Panel Progres memakai ledger pusat yang sama dengan Raja Game.
+        rows('cuit_central_entries','activity_points',q=>q.eq('owner_user_id',currentUser.id).eq('entry_kind','activity').eq('activity_category','game').gte('created_at',start).lt('created_at',end)),
         rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','sawer').gte('occurred_at',start).lt('occurred_at',end)),
         rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end)),
-        rows('cuit_marble_sessions','id,game_date,status',q=>q.eq('user_id',currentUser.id).eq('game_date',day).eq('status','completed')),
-        rows('cuit_roulette_spins','id,completed_at,user_id',q=>q.eq('user_id',currentUser.id).gte('completed_at',start).lt('completed_at',end)),
         supabaseClient.rpc('cuit_get_today_social_progress')
       ]);
 
@@ -3133,17 +3132,11 @@ values.watch = reels === null
   ? 'Belum terhubung'
   : reels.length.toLocaleString('id-ID');
 
-// Main Game: 3 Huruf Kilat + Balap Kelereng + Roulette
-values.game = (
-  kilatResults === null ||
-  marbleSessions === null ||
-  rouletteSpins === null
-)
+// Main Game: jumlah poin aktivitas dari ledger pusat, sama dengan Raja Game.
+values.game = centralGameEntries === null
   ? 'Belum terhubung'
-  : (
-      kilatResults.length +
-      marbleSessions.length +
-      rouletteSpins.length
+  : centralGameEntries.reduce(
+      (total, row) => total + Number(row.activity_points || 0), 0
     ).toLocaleString('id-ID');
       // Statistik sosial dihitung di server dari seluruh curhatan milik anggota,
       // bukan hanya curhatan yang dibuat hari ini. Batas hari mengikuti WIB.
