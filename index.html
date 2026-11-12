@@ -1811,7 +1811,8 @@ poolStatus=feePaid>0
   </div>
 <!-- ===== BALAP KELERENG INSPIRASI CUIT ===== -->
 <style>
-#marbleGame{max-width:520px;margin:14px auto;padding:12px;background:linear-gradient(145deg,#fff8ed,#fff);border:1px solid #e7c978;border-radius:18px;box-shadow:0 6px 20px #8d202012;color:#54252a}
+#marbleGame{width:100%;max-width:none;margin:14px auto;padding:12px 0;background:linear-gradient(145deg,#fff8ed,#fff);border:1px solid #e7c978;border-radius:18px;box-shadow:0 6px 20px #8d202012;color:#54252a;overflow:visible}
+#marbleGame .mg-head,#marbleGame .mg-sub,#marbleGame .mg-info,#marbleGame .mg-message,#marbleGame .mg-actions,#marbleGame .mg-result,#marbleGame>p:last-child{margin-left:12px;margin-right:12px}
 #marbleGame .mg-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
 #marbleGame h2{font-size:19px;color:#a9152b;margin:0}
 #marbleGame .mg-sub{font-size:11px;color:#806767;margin:5px 0 10px}
@@ -1820,13 +1821,15 @@ poolStatus=feePaid>0
 #marbleGame .mg-info strong{display:block;font-size:15px;color:#a9152b;margin-top:3px}
 #marbleGame canvas{
   display:block;
-  width:auto;
-  height:min(54svh,432px);
-  max-width:100%;
-  margin:0 auto;
+  width:100vw;
+  max-width:none;
+  height:auto;
+  aspect-ratio:8 / 15;
+  margin:0 0 0 calc(50% - 50vw);
   background:linear-gradient(#fffaf0,#fff1d5);
-  border:1px solid #e8d5a3;
-  border-radius:13px;
+  border-top:1px solid #e8d5a3;
+  border-bottom:1px solid #e8d5a3;
+  border-left:0;border-right:0;border-radius:0;
   touch-action:manipulation;
 }
 #marbleGame .mg-btn{border:0;border-radius:11px;padding:11px 14px;font-size:12px;font-weight:900;cursor:pointer}
@@ -1843,14 +1846,7 @@ poolStatus=feePaid>0
 #marbleGame .mg-thanks{font-size:11px;line-height:1.5;margin:9px 0;color:#755b5b}
 #marbleGame .mg-curhat{width:100%;padding:12px;border:0;border-radius:11px;background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;font-weight:900}
 #marbleGame button:disabled{opacity:.55;cursor:not-allowed}
-#mgCanvas{
-  display:block;
-  width:auto;
-  height:min(54svh,432px);
-  max-width:100%;
-  aspect-ratio:8 / 15;
-  margin:0 auto;
-}
+#mgCanvas{display:block;width:100vw;max-width:none;height:auto;aspect-ratio:8 / 15;margin:0 0 0 calc(50% - 50vw);}
 </style>
 
 <section id="marbleGame">
@@ -1947,34 +1943,33 @@ poolStatus=feePaid>0
     ctx.roundRect(x,y,w,h,r);
   }
 
+  function wallLeftAt(y) {
+    const p=Math.max(0,Math.min(1,y/735));
+    return 5+34*Math.sin(Math.PI*p);
+  }
   function drawBackground() {
-    const bg = ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,'#fffdf6');
-    bg.addColorStop(.55,'#f9e7bd');
-    bg.addColorStop(1,'#e9bd72');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0,0,W,H);
-
-    // Bingkai papan 3D
-    const rail = ctx.createLinearGradient(0,0,18,0);
-    rail.addColorStop(0,'#68451f');
-    rail.addColorStop(.35,'#e5bb70');
-    rail.addColorStop(.7,'#9b6a30');
-    rail.addColorStop(1,'#f5d99c');
-    ctx.fillStyle = rail;
-    ctx.fillRect(5,0,13,H);
-    ctx.fillRect(W-18,0,13,H);
-
-    ctx.strokeStyle='rgba(255,255,255,.7)';
-    ctx.lineWidth=2;
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#fffdf6');bg.addColorStop(.55,'#f9e7bd');bg.addColorStop(1,'#e9bd72');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // Dinding lintasan cekung, dimulai tepat dari sisi kiri dan kanan layar.
+    const rail=ctx.createLinearGradient(0,0,18,0);
+    rail.addColorStop(0,'#68451f');rail.addColorStop(.35,'#e5bb70');
+    rail.addColorStop(.7,'#9b6a30');rail.addColorStop(1,'#f5d99c');
+    ctx.lineWidth=12;ctx.lineCap='round';
     ctx.beginPath();
-    ctx.moveTo(19,0); ctx.lineTo(19,H);
-    ctx.moveTo(W-19,0); ctx.lineTo(W-19,H);
+    for(let y=0;y<=735;y+=5){const x=wallLeftAt(y);if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.strokeStyle=rail;ctx.stroke();
+    ctx.beginPath();
+    for(let y=0;y<=735;y+=5){const x=W-wallLeftAt(y);if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.strokeStyle=rail;ctx.stroke();
+    ctx.lineWidth=2;ctx.strokeStyle='rgba(255,255,255,.8)';
+    ctx.beginPath();
+    for(let y=0;y<=735;y+=5){const x=wallLeftAt(y)+6;if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
     ctx.stroke();
-
-    // Papan belakang bertekstur
-    ctx.fillStyle='rgba(255,255,255,.12)';
-    ctx.fillRect(20,0,W-40,H);
+    ctx.beginPath();
+    for(let y=0;y<=735;y+=5){const x=W-wallLeftAt(y)-6;if(y===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(20,0,W-40,H);
   }
 
   function peg(x,y,r=7.5) {
@@ -2032,39 +2027,51 @@ poolStatus=feePaid>0
     ctx.restore();
   }
 
+  function drawSeesaws(time=0) {
+    const boards=[
+      {x:W*.34,y:105+4*56,len:104,phase:4*.72},
+      {x:W*.72,y:105+4*56,len:104,phase:5*.72},
+      {x:W*.50,y:105+7*56,len:148,phase:7*.72}
+    ];
+    boards.forEach((o)=>{
+      const angle=o.phase+Math.sin(time*2.15+o.phase)*.30;
+      const dx=Math.cos(angle)*o.len/2,dy=Math.sin(angle)*o.len/2;
+      ctx.save();ctx.lineCap='round';
+      ctx.shadowColor='rgba(70,20,25,.35)';ctx.shadowBlur=7;
+      ctx.strokeStyle='#6b3c24';ctx.lineWidth=13;
+      ctx.beginPath();ctx.moveTo(o.x-dx,o.y-dy);ctx.lineTo(o.x+dx,o.y+dy);ctx.stroke();
+      ctx.shadowBlur=0;ctx.strokeStyle='#e4ad39';ctx.lineWidth=8;
+      ctx.beginPath();ctx.moveTo(o.x-dx,o.y-dy);ctx.lineTo(o.x+dx,o.y+dy);ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(o.x-dx,o.y-dy-2);ctx.lineTo(o.x+dx,o.y+dy-2);ctx.stroke();
+      ctx.fillStyle='#a9152b';ctx.beginPath();ctx.arc(o.x,o.y,6,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    });
+  }
   function drawObstacles() {
-    // Sepuluh baris rintangan; pola harus sama dengan simulasi server.
-    let spinnerIndex=0;
-    const spinnerRows=[2,5,8];
+    const spinnerRows=[2,5,8],seesawRows=[4,7];
     const pegCounts=[4,5,4,5,4,4,5,4,5,4];
     const offsets=[-12,12,-18,8,16,-8,14,-14,10,-6];
+    let spinnerIndex=0;
     for(let row=0;row<10;row++){
       const y=105+row*56;
-      const isSpinner=spinnerRows.includes(row);
-
-      if(!isSpinner){
-        const count=pegCounts[row];
-        const spacing=W/(count+1);
+      if(seesawRows.includes(row))continue;
+      if(spinnerRows.includes(row)){
+        const count=row===5?2:1;
+        for(let i=0;i<count;i++)drawSpinner(W*(i+1)/(count+1),y,16,spinnerIndex++);
+      }else{
+        const count=pegCounts[row],spacing=W/(count+1);
         for(let col=0;col<count;col++){
           const stagger=col%2===0?-3:3;
-          const x=Math.max(24,Math.min(W-24,spacing*(col+1)+offsets[row]+stagger));
-          const radius=8+((row+col)%3)*0.6;
-          peg(x,y,radius);
-        }
-      }else{
-        const count=row===5?2:1;
-        for(let i=0;i<count;i++){
-          const x=W*(i+1)/(count+1);
-          drawSpinner(x,y,16,spinnerIndex++);
+          const x=Math.max(wallLeftAt(y)+22,Math.min(W-wallLeftAt(y)-22,spacing*(col+1)+offsets[row]+stagger));
+          peg(x,y,8+((row+col)%3)*.6);
         }
       }
     }
-
-    ctx.textAlign='center';
-    ctx.font='bold 12px sans-serif';
-    ctx.fillStyle='#fff0bd';
+    ctx.textAlign='center';ctx.font='bold 12px sans-serif';ctx.fillStyle='#fff0bd';
     ctx.fillText('LINTASAN BEBAS MENUJU 10 BOTOL',240,680);
   }
+
   function drawTube(i, balls, settled) {
     const x=i*tubeW;
     const w=tubeW;
@@ -2185,10 +2192,11 @@ poolStatus=feePaid>0
     ctx = mainContext;
   }
 
-  function drawBoard(balls=[],settled=[]) {
+  function drawBoard(balls=[],settled=[],time=0) {
     buildStaticBoard();
     ctx.clearRect(0,0,W,H);
     ctx.drawImage(staticBoardCanvas,0,0);
+    drawSeesaws(time);
 
     // Hanya kelereng yang berubah posisi digambar ulang setiap frame.
     settled.forEach(ball => drawMarble(ball.x,ball.y,ball.color));
@@ -2317,7 +2325,7 @@ poolStatus=feePaid>0
     color: ball.color
   }));
 
-        drawBoard(balls, settled);
+        drawBoard(balls, settled, Number(current.t)||0);
 
         if (frameIndex >= trace.length - 1) {
           const lastFrame = trace[trace.length - 1];
