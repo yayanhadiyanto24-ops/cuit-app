@@ -2063,8 +2063,13 @@ poolStatus=feePaid>0
     let spinnerIndex=0;
     for(let row=0;row<10;row++){
       const y=28+row*41;
-      // Paku tengah digambar dan disimulasikan pada posisi yang sama.
-      peg(240,y,8.5);
+      // Jalur paku tengah rapat, berselang-seling kiri-kanan, sama dengan server.
+      if(row===0){
+        for(let k=0;k<=20;k++){
+          const centerX=k%2===0?240:(k%4===1?220:260);
+          peg(centerX,28+k*20,8.5);
+        }
+      }
       if(spinnerRows.includes(row)){
         spinnerIndex += 2;
       }else if(!bumperRows.includes(row)){
