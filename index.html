@@ -7766,8 +7766,12 @@ document.addEventListener('DOMContentLoaded', function () {
    if(error)throw error;
    if(!data?.ok)throw new Error(data?.message||'Jawaban belum dapat diperiksa.');
    if(!data.correct){
-    $('cuit-roulette-edu-feedback').textContent='Belum tepat. Coba lagi; soal ini tetap bisa kamu jawab sampai benar.';
-    [...$('cuit-roulette-edu-options').children].forEach(b=>b.disabled=false);
+    $('cuit-roulette-edu-feedback').textContent='❌ JAWABAN SALAH. Kesempatan menjawab soal ini sudah terkunci. Tekan PUTAR RODA untuk mendapatkan soal baru.';
+    [...$('cuit-roulette-edu-options').children].forEach(b=>b.disabled=true);
+    question=null;
+    $('cuit-roulette-edu-spin').textContent='PUTAR RODA LAGI';
+    $('cuit-roulette-edu-spin').disabled=false;
+    status('Jawaban salah. Soal dikunci; putar roda untuk soal berikutnya.');
     return;
    }
    $('cuit-roulette-edu-feedback').textContent='Benar! '+(data.explanation||'');
