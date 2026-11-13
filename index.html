@@ -709,8 +709,8 @@
 #promotedCarousel>div,#promotedCarousel>button{scroll-snap-align:start}
 #promotedCarousel>div{flex:0 0 92px!important;width:92px!important;min-width:92px!important;max-width:92px!important}
 #promotedCarousel>div>div:first-child{padding-left:5px!important;padding-right:5px!important}
-#specialPostsSection .special-window{min-height:112px!important}
-#specialPostsSection .special-window>div{min-height:112px!important}
+#specialPostsSection .special-window{min-height:117px!important}
+#specialPostsSection .special-window>div{min-height:117px!important}
 #specialPostsSection .special-window>div>div:last-child{border-top:1px solid #f0dce0}
 @media(max-width:380px){
  #promotedCarousel>div{flex:0 0 92px!important;width:92px!important;min-width:92px!important;max-width:92px!important}
@@ -4554,7 +4554,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
         else if (post.user_email && profilesMap[post.user_email] !== undefined) authorPoin = profilesMap[post.user_email];
         const userLvl = getUserLevel(authorPoin);
         const badge = cuitBadgeSvg(userLvl.title);
-        slot.innerHTML = `<div style="min-height:112px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 5px;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
+        slot.innerHTML = `<div style="min-height:117px;height:100%;width:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px 0 0;background:linear-gradient(110deg,#fff 0%,#fff7f8 58%,#fff0f2 100%);">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;margin:0 6px 5px;padding:0 1px;">
     <div style="display:flex;align-items:flex-start;gap:5px;flex:1 1 0;min-width:0;">
@@ -4567,7 +4567,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
     <span style="flex:0 0 auto;max-width:35%;min-width:0;font-size:8px;line-height:1.2;font-weight:750;color:#8b7b82;white-space:normal;overflow-wrap:anywhere;text-align:right;">${feeling}</span>
   </div>
 
-  <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:78px;min-height:78px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}font-size:12px !important;line-height:1.35 !important;"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
+  <div class="special-content-box" style="position:relative;width:100%;box-sizing:border-box;height:83px;min-height:83px;font-size:12px;line-height:1.35;overflow:hidden;overflow-wrap:anywhere;white-space:normal;text-align:left;padding:5px 8px 4px;border-radius:0;${cuitPostStyleCss(post.post_style)}font-size:12px !important;line-height:1.35 !important;"><div class="special-content-inner" style="display:block;width:100%;overflow-wrap:anywhere;white-space:normal;">${fullContent}</div></div>
  </div>`;
          const accountName = slot.querySelector('[data-special-account-name="1"]');
           if (accountName) {
