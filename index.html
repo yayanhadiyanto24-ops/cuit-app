@@ -5588,6 +5588,9 @@ async function submitCommentAction() {
 
     // Validasi misi langsung memakai ID komentar yang baru benar-benar tersimpan.
     if (data.comment_id) await window.validateCuitRouletteMissionAction?.('comment', data.comment_id);
+    // Fallback utama: minta server mencari komentar sah terbaru untuk spin aktif.
+    // Ini menangani perbedaan format ID/kategori dan race saat transaksi komentar baru commit.
+    window.checkCuitRouletteMissionNow?.();
 
     // Perbarui saldo di latar belakang agar tampilan komentar tidak menunggu query profil.
     void updateCoinUI(false);
@@ -7933,6 +7936,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
  }
  window.validateCuitRouletteMissionAction=validateMissionActionNow;
+ // Bisa dipanggil setelah komentar benar-benar tersimpan; lakukan pemeriksaan server
+ // segera, tanpa menunggu interval polling berikutnya atau bergantung pada ID aksi.
+ window.checkCuitRouletteMissionNow=function(){
+  if(!activeMission)return;
+  if(missionCheckTimer){clearTimeout(missionCheckTimer);missionCheckTimer=null;}
+  missionCheckTimer=setTimeout(()=>{missionCheckTimer=null;checkMissionAutomatically();},100);
+ };
  async function checkMissionAutomatically(){
   if(!activeMission||missionCheckBusy)return;
   missionCheckBusy=true;
