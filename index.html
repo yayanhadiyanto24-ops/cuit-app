@@ -784,7 +784,7 @@
 
   <!-- Top Stats Bar Compact -->
   <div class="top-bar" id="topBarNav">
-    <button onclick="location.reload()" title="Muat ulang aplikasi jika diperlukan" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+    <button onclick="location.reload()" title="Muat ulang untuk mengambil pembaruan fitur dan tampilan terbaru dari pembuat CUIT" style="background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:800; cursor:pointer; color:#c81e32; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
       🔄 Muat Ulang
     </button>
     <button onclick="openNotificationsModal()" style="position:relative; background:#fff; border:none; padding:3px 8px; border-radius:12px; font-size:12px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
@@ -3959,9 +3959,11 @@ async function openDailyCheckin() {
       const navProfileAvatar = document.getElementById('navProfileAvatar');
       if (navProfileAvatar) navProfileAvatar.innerHTML = cuitBadgeSvg(myLvl.title);
 
-      syncCoinsToSupabase();
+      // Hindari menulis metadata profil kembali saat pembaruan Realtime.
+      // Penulisan ulang tanpa perubahan dapat memicu event Realtime berulang.
+      if (!skipFetchFromDatabase) syncCoinsToSupabase();
 
-      if (document.getElementById('pageProfile').classList.contains('active')) {
+      if (document.getElementById('pageProfile')?.classList.contains('active')) {
         renderProfileData();
       }
     }
@@ -5089,8 +5091,37 @@ function renderCardHTML(p) {
       if (kingsPage?.classList.contains('active') && typeof loadAchievements === 'function') loadAchievements();
     };
 
+    let cuitRealtimeMemberTimer = null;
+
+    function scheduleOwnMemberRefresh() {
+      if (cuitRealtimeMemberTimer) clearTimeout(cuitRealtimeMemberTimer);
+      cuitRealtimeMemberTimer = setTimeout(async () => {
+        cuitRealtimeMemberTimer = null;
+        if (!currentUser?.id) return;
+
+        // Ambil saldo terbaru dari profil server tanpa menulis balik ke database.
+        await updateCoinUI(false);
+
+        const kingsPage = document.getElementById('pageKings');
+        if (kingsPage?.classList.contains('active')) {
+          await loadAchievements();
+        }
+
+        const progressModal = document.getElementById('todayProgressModal');
+        if (progressModal && getComputedStyle(progressModal).display !== 'none') {
+          await openTodayProgress();
+        }
+
+        const profilePage = document.getElementById('pageProfile');
+        if (profilePage?.classList.contains('active')) {
+          await renderProfileData();
+        }
+      }, 350);
+    }
+
     function initGlobalRealtime() {
-      // Hindari channel ganda ketika status akun berubah tanpa memuat ulang halaman.
+      // Satu channel untuk feed publik dan aktivitas akun sendiri.
+      // Hapus channel lama agar tidak ada listener ganda setelah pergantian sesi.
       if (cuitCurhatRealtimeChannel) {
         supabaseClient.removeChannel(cuitCurhatRealtimeChannel);
         cuitCurhatRealtimeChannel = null;
@@ -5099,20 +5130,45 @@ function renderCardHTML(p) {
         clearTimeout(cuitRealtimeFeedTimer);
         cuitRealtimeFeedTimer = null;
       }
+      if (cuitRealtimeMemberTimer) {
+        clearTimeout(cuitRealtimeMemberTimer);
+        cuitRealtimeMemberTimer = null;
+      }
 
-      cuitCurhatRealtimeChannel = supabaseClient.channel('realtime_curhat')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'curhat' }, () => {
-          // Satukan perubahan beruntun; pembaruan kecil tidak perlu memanggil
-          // 10 RPC ranking dan mengambil ulang seluruh profil.
+      let channel = supabaseClient.channel('realtime_cuit_app');
+      channel = channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'curhat' },
+        () => {
+          // Aktivitas anggota lain yang mengubah curhatan langsung menyegarkan feed.
           if (cuitRealtimeFeedTimer) clearTimeout(cuitRealtimeFeedTimer);
           cuitRealtimeFeedTimer = setTimeout(() => {
             cuitRealtimeFeedTimer = null;
             loadPosts({ feedOnly: true });
           }, 250);
-        }).subscribe();
+        }
+      );
 
-      // user_notifications belum masuk publication Realtime dan RLS-nya belum aman.
-      // Jangan membuat channel yang tidak bekerja atau membuka data notifikasi.
+      if (currentUser?.id) {
+        channel = channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'profiles', filter: 'id=eq.' + currentUser.id },
+          scheduleOwnMemberRefresh
+        );
+        channel = channel.on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'cuit_central_entries', filter: 'owner_user_id=eq.' + currentUser.id },
+          scheduleOwnMemberRefresh
+        );
+      }
+
+      cuitCurhatRealtimeChannel = channel.subscribe((status, error) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Realtime CUIT terputus:', status, error || '');
+        }
+      });
+
+      // Notifikasi tidak disubscribe sebelum tabel dan kebijakan aksesnya aman.
     }
 
 function syncPromotedLikeUI(postId) {
