@@ -5099,8 +5099,25 @@ function renderCardHTML(p) {
         cuitRealtimeMemberTimer = null;
         if (!currentUser?.id) return;
 
-        // Ambil saldo terbaru dari profil server tanpa menulis balik ke database.
-        await updateCoinUI(false);
+        // Ambil saldo terbaru dari profil server, lalu render lokal tanpa menulis
+        // balik ke database agar event Realtime tidak membentuk loop.
+        try {
+          const { data: latestProfile, error: profileError } = await supabaseClient
+            .from('profiles')
+            .select('free_coins,paid_coins,gems,used_paid_coins')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+          if (profileError) throw profileError;
+          if (latestProfile) {
+            freeCoins = latestProfile.free_coins ?? freeCoins;
+            paidCoins = latestProfile.paid_coins ?? paidCoins;
+            gems = latestProfile.gems ?? gems;
+            usedPaidCoins = latestProfile.used_paid_coins ?? usedPaidCoins;
+          }
+        } catch (refreshError) {
+          console.warn('Gagal mengambil saldo Realtime terbaru:', refreshError);
+        }
+        await updateCoinUI(true);
 
         const kingsPage = document.getElementById('pageKings');
         if (kingsPage?.classList.contains('active')) {
