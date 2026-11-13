@@ -7907,8 +7907,14 @@ document.addEventListener('DOMContentLoaded', function () {
   if(typeof window.refreshProfile==='function')window.refreshProfile();
   if(typeof window.refreshCuitGameRanking==='function')window.refreshCuitGameRanking();
  }
+ function normalizeMissionActionCategory(value){
+  const key=String(value||'').trim().toLowerCase();
+  if(key==='like')return 'like';
+  if(key==='komen'||key==='komentar'||key==='comment')return 'comment';
+  return key;
+ }
  async function validateMissionActionNow(type,actionId){
-  if(!activeMission||activeMission.category!==type||!actionId)return;
+  if(!activeMission||normalizeMissionActionCategory(activeMission.category)!==normalizeMissionActionCategory(type)||!actionId)return;
   // Jangan kehilangan aksi yang datang saat polling sedang memeriksa misi.
   if(missionCheckBusy){
    setTimeout(()=>validateMissionActionNow(type,actionId),150);
