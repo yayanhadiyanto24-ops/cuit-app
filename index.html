@@ -5092,6 +5092,7 @@ function renderCardHTML(p) {
     };
 
     let cuitRealtimeMemberTimer = null;
+    let cuitRealtimeSocialTimer = null;
 
     function scheduleOwnMemberRefresh() {
       if (cuitRealtimeMemberTimer) clearTimeout(cuitRealtimeMemberTimer);
@@ -5136,6 +5137,19 @@ function renderCardHTML(p) {
       }, 350);
     }
 
+    function schedulePublicSocialRefresh() {
+      if (cuitRealtimeSocialTimer) clearTimeout(cuitRealtimeSocialTimer);
+      cuitRealtimeSocialTimer = setTimeout(async () => {
+        cuitRealtimeSocialTimer = null;
+        await Promise.all([
+          loadPosts({ feedOnly: true }),
+          loadFollows()
+        ]);
+        const profilePage = document.getElementById('pageProfile');
+        if (profilePage?.classList.contains('active')) await renderProfileData();
+      }, 300);
+    }
+
     function initGlobalRealtime() {
       // Satu channel untuk feed publik dan aktivitas akun sendiri.
       // Hapus channel lama agar tidak ada listener ganda setelah pergantian sesi.
@@ -5151,6 +5165,10 @@ function renderCardHTML(p) {
         clearTimeout(cuitRealtimeMemberTimer);
         cuitRealtimeMemberTimer = null;
       }
+      if (cuitRealtimeSocialTimer) {
+        clearTimeout(cuitRealtimeSocialTimer);
+        cuitRealtimeSocialTimer = null;
+      }
 
       let channel = supabaseClient.channel('realtime_cuit_app');
       channel = channel.on(
@@ -5164,6 +5182,19 @@ function renderCardHTML(p) {
             loadPosts({ feedOnly: true });
           }, 250);
         }
+      );
+
+      // Komentar dan follow bersifat publik sesuai kebijakan SELECT yang sudah ada.
+      // Perubahan dari anggota mana pun langsung memperbarui bagian sosial yang relevan.
+      channel = channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'comments' },
+        schedulePublicSocialRefresh
+      );
+      channel = channel.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'follows' },
+        schedulePublicSocialRefresh
       );
 
       if (currentUser?.id) {
