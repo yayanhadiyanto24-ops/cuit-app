@@ -210,7 +210,14 @@
     .post-body { font-size: 13px; line-height: 1.45; color: #4a2028; margin-bottom: 10px; word-break: break-word; white-space: pre-wrap; }
     .post-footer-actions { display: flex; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; overflow-x: auto; }
     .action-chip { background: #fffafa; padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #31577e; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-    .action-chip.is-liked { background: #fff0f1 !important; color: #c81e32 !important; font-weight: 800 !important; border: 1px solid #f3b7bf !important; }
+    .action-chip.is-liked,
+    .post-footer-actions [data-like-action="true"].is-liked {
+      background: #fff0f1 !important;
+      color: #c81e32 !important;
+      -webkit-text-fill-color: #c81e32 !important;
+      font-weight: 800 !important;
+      border: 1px solid #f3b7bf !important;
+    }
     .action-chip.is-liked:active { background: #ffe0e4 !important; }
 /* --- KODE PERBAIKAN HEADER POSTINGAN & DROPDOWN --- */
 
@@ -5210,12 +5217,6 @@ async function toggleLike(postId) {
       return;
     }
     // Ambil ID Like yang sudah tersimpan oleh transaksi server, lalu validasi misi seketika.
-    if (activeMission && activeMission.category === 'like') {
-      const { data: savedLike, error: savedLikeError } = await supabaseClient
-        .from('post_likes').select('id').eq('post_id', Number(postId))
-        .eq('user_id', currentUser.id).maybeSingle();
-      if (!savedLikeError && savedLike?.id) await window.validateCuitRouletteMissionAction?.('like', savedLike.id);
-    }
     freeCoins = Math.max(0, freeCoins - Number(result.free_coins_used || 0));
     paidCoins = Math.max(0, paidCoins - Number(result.paid_coins_used || 0));
     usedPaidCoins += Number(result.paid_coins_used || 0);
@@ -5238,10 +5239,32 @@ async function toggleLike(postId) {
       .eq('id', postId);
   }
 
+  // Perbarui status lokal segera setelah transaksi LIKE berhasil.
   userLikedPostsSet.add(strPostId);
   currentPost.likes_count = Number(currentPost.likes_count || 0) + 1;
   renderFilteredFeed();
   syncPostLikeButtons(postId, currentPost);
+
+  // Validasi misi Roulette secara terpisah agar kegagalan pemeriksaan misi
+  // tidak pernah membatalkan pembaruan warna dan jumlah LIKE.
+  if (currentUser?.id && typeof window.validateCuitRouletteMissionAction === 'function') {
+    try {
+      const { data: savedLike, error: savedLikeError } = await supabaseClient
+        .from('post_likes')
+        .select('id')
+        .eq('post_id', Number(postId))
+        .eq('user_id', currentUser.id)
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (savedLikeError) throw savedLikeError;
+      if (savedLike?.id) {
+        await window.validateCuitRouletteMissionAction('like', savedLike.id);
+      }
+    } catch (missionError) {
+      console.warn('Validasi misi LIKE Roulette akan dicoba ulang otomatis:', missionError?.message || missionError);
+    }
+  }
 }
 
     const CUIT_VISITOR_COMMENT_TEMPLATES = [
@@ -7781,7 +7804,12 @@ document.addEventListener('DOMContentLoaded', function () {
   if(typeof window.refreshCuitGameRanking==='function')window.refreshCuitGameRanking();
  }
  async function validateMissionActionNow(type,actionId){
-  if(!activeMission||activeMission.category!==type||!actionId||missionCheckBusy)return;
+  if(!activeMission||activeMission.category!==type||!actionId)return;
+  // Jangan kehilangan aksi yang datang saat polling sedang memeriksa misi.
+  if(missionCheckBusy){
+   setTimeout(()=>validateMissionActionNow(type,actionId),150);
+   return;
+  }
   missionCheckBusy=true;
   try{
    const {data,error}=await getClient().rpc('cuit_roulette_claim_mission',{p_spin_id:activeMission.id,p_action_id:String(actionId)});
