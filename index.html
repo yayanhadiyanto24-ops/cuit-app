@@ -7792,9 +7792,21 @@ document.addEventListener('DOMContentLoaded', function () {
  function node(tag,attrs,text){const n=document.createElement(tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,v));if(text!==undefined)n.textContent=text;return n;}
  function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
  function ensureUI(){
-  if(!$('cuit-roulette-edu-launch')){
-   const b=node('button',{id:'cuit-roulette-edu-launch',type:'button','aria-label':'Buka Roulette CUIT'},'🎡 ROULETTE');
-   b.addEventListener('click',open);const shortcuts=document.querySelector('.home-shortcuts');if(shortcuts)shortcuts.appendChild(b);else document.body.appendChild(b);
+  let launcher=$('cuit-roulette-edu-launch');
+  if(!launcher){
+   launcher=node('button',{id:'cuit-roulette-edu-launch',type:'button','aria-label':'Buka Roulette CUIT'});
+   launcher.innerHTML='<span class="shortcut-icon" style="background:linear-gradient(145deg,#fff2c7,#f8d98a);border:1px solid #e6bf55;">🎡</span><span>Roulette</span>';
+   const shortcuts=document.querySelector('.home-shortcuts');
+   if(shortcuts)shortcuts.appendChild(launcher);else document.body.appendChild(launcher);
+  }
+  // Tombol sudah tersedia di HTML utama; pastikan handler tetap dipasang.
+  // Guard ini mencegah listener ganda saat UI Roulette dibangun ulang.
+  if(!launcher.dataset.cuitRouletteBound){
+   launcher.addEventListener('click',function(event){
+    event.preventDefault();
+    open();
+   });
+   launcher.dataset.cuitRouletteBound='1';
   }
   if(!$('cuit-roulette-edu-overlay')){
    const o=node('div',{id:'cuit-roulette-edu-overlay'});
