@@ -5365,8 +5365,13 @@ async function toggleLike(postId) {
       if (savedLike?.id) {
         await window.validateCuitRouletteMissionAction('like', savedLike.id);
       }
+      // Selalu minta server memeriksa misi aktif setelah LIKE berhasil.
+      // Fallback ini tetap bekerja jika ID LIKE tidak terbaca atau validasi langsung terlewat.
+      window.checkCuitRouletteMissionNow?.();
     } catch (missionError) {
       console.warn('Validasi misi LIKE Roulette akan dicoba ulang otomatis:', missionError?.message || missionError);
+      // Jangan biarkan kegagalan membaca ID LIKE menghentikan pemeriksaan server.
+      window.checkCuitRouletteMissionNow?.();
     }
   }
 }
