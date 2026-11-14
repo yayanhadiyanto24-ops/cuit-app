@@ -2725,6 +2725,15 @@ poolStatus=feePaid>0
       <div id="dokuSandboxCheckResult" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #d7b46a;font-size:12px;line-height:1.6;white-space:pre-line"></div>
       <button class="btn-primary" style="width: 100%; margin-top: 8px; background: #176b55;" onclick="testDokuSandboxAuth()">🧪 Uji Autentikasi DOKU Sandbox</button>
       <div id="dokuSandboxAuthResult" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fff;border:1px solid #9bc9b5;font-size:12px;line-height:1.6;white-space:pre-line"></div>
+
+      <div id="cuitHealthAuditCard" style="margin-top:12px;padding:12px;background:linear-gradient(145deg,#fff,#fff8e7);border:1px solid #d7b46a;border-left:4px solid #b91c1c;border-radius:13px">
+        <div style="font-size:13px;font-weight:900;color:#a9142b">🩺 Audit & Kesehatan CUIT</div>
+        <div style="font-size:10px;color:#665b5d;margin:5px 0 9px">Pemeriksaan awal bersifat baca-saja. Tidak mengubah kode, saldo, transaksi, atau database.</div>
+        <button type="button" class="btn-primary" style="width:100%;background:linear-gradient(135deg,#b91c1c,#8f1024)" onclick="runCuitHealthAudit()">▶ Jalankan Pemeriksaan</button>
+        <div id="cuitHealthAuditStatus" role="status" aria-live="polite" style="margin-top:9px;font-size:11px;color:#555">Belum ada pemeriksaan.</div>
+        <div id="cuitHealthAuditResults" style="display:none;margin-top:9px"></div>
+        <div id="cuitHealthAuditNote" style="font-size:9px;color:#806b4a;margin-top:8px">Catatan: audit penuh GitHub, Security Advisor, dan pemeriksaan RPC memerlukan layanan backend admin khusus; panel ini tidak mengklaim telah memeriksa bagian tersebut.</div>
+      </div>
     </div>
 
     <div class="profile-menu-grid" style="margin-bottom: 12px;">
@@ -8261,6 +8270,45 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   document.addEventListener('DOMContentLoaded',()=>{renderHistory();refreshCuitAICoinBalance();});
 })();
+
+
+    // Audit awal CUIT: hanya SELECT/head-count, tanpa operasi tulis.
+    async function runCuitHealthAudit() {
+      const card = document.getElementById('cuitHealthAuditCard');
+      const status = document.getElementById('cuitHealthAuditStatus');
+      const results = document.getElementById('cuitHealthAuditResults');
+      if (!card || !status || !results) return;
+      if (!currentUser || document.getElementById('adminPanelSection')?.style.display === 'none') {
+        status.textContent = 'Akses ditolak. Masuk menggunakan akun ADMINCUIT.';
+        results.style.display = 'none';
+        return;
+      }
+      const button = card.querySelector('button');
+      if (button) button.disabled = true;
+      status.textContent = 'Sedang memeriksa koneksi dan tabel pusat…';
+      results.style.display = 'block';
+      results.innerHTML = '';
+      const checks = [
+        ['Koneksi Supabase', async () => { const { error } = await supabaseClient.from('profiles').select('id', { count:'exact', head:true }); if (error) throw error; return 'Terhubung; query baca berhasil'; }],
+        ['Central transactions', async () => { const { count, error } = await supabaseClient.from('cuit_central_transactions').select('id', { count:'exact', head:true }); if (error) throw error; return Number(count || 0).toLocaleString('id-ID') + ' transaksi'; }],
+        ['Central entries', async () => { const { count, error } = await supabaseClient.from('cuit_central_entries').select('id', { count:'exact', head:true }); if (error) throw error; return Number(count || 0).toLocaleString('id-ID') + ' entri'; }]
+      ];
+      const rows = [];
+      try {
+        for (const [label, fn] of checks) {
+          try { rows.push({label, ok:true, detail:await fn()}); }
+          catch (e) { rows.push({label, ok:false, detail:(e?.message || 'Pemeriksaan gagal').slice(0,180)}); }
+        }
+        const now = new Date();
+        const stamp = now.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'short' });
+        results.innerHTML = rows.map(r => '<div style="display:flex;gap:7px;align-items:flex-start;padding:8px;margin-top:6px;border:1px solid '+(r.ok?'#cde6d2':'#f0c6c6')+';border-radius:9px;background:'+(r.ok?'#f4fbf5':'#fff6f6')+'"><b style="color:'+(r.ok?'#16803c':'#b91c1c')+'">'+(r.ok?'✓':'!')+'</b><div><b style="font-size:11px">'+r.label+'</b><div style="font-size:10px;color:#555">'+String(r.detail).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</div></div></div>').join('') + '<div style="font-size:9px;color:#777;margin-top:8px">Diperiksa: '+stamp+' · Hanya baca</div>';
+        const passed = rows.filter(r=>r.ok).length;
+        status.textContent = passed + '/' + rows.length + ' pemeriksaan awal berhasil. Ini bukan audit keamanan penuh.';
+      } catch (e) {
+        status.textContent = 'Pemeriksaan tidak selesai: ' + (e?.message || 'kesalahan tidak diketahui');
+      } finally { if (button) button.disabled = false; }
+    }
+    window.runCuitHealthAudit = runCuitHealthAudit;
 </script>
 </body>
   </html>
