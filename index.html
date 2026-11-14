@@ -8279,9 +8279,10 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 
 
-    // Pusat Audit CUIT: semua tombol memiliki aksi terpisah dan tidak mengubah data produksi.
+    // Pusat Audit CUIT — tombol temuan, solusi, kelayakan perbaikan, uji ulang, dan riwayat.
     let cuitLastAudit = null;
     const cuitAuditEscape = value => String(value ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const cuitAuditHistoryKey = 'cuit_admin_audit_history';
     function cuitAuditShow(html, message) {
       const out=document.getElementById('cuitHealthAuditResults');
       const status=document.getElementById('cuitHealthAuditStatus');
@@ -8290,10 +8291,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function cuitAuditSaveHistory(data) {
       try {
-        const history=JSON.parse(localStorage.getItem('cuit_admin_audit_history')||'[]');
-        history.unshift({checked_at:data.checked_at,results:data.results||[],audit_type:data.audit_type||'initial'});
-        localStorage.setItem('cuit_admin_audit_history',JSON.stringify(history.slice(0,20)));
+        const history=JSON.parse(localStorage.getItem(cuitAuditHistoryKey)||'[]');
+        history.unshift({checked_at:data.checked_at,results:data.results||[],audit_type:data.audit_type||'catalog'});
+        localStorage.setItem(cuitAuditHistoryKey,JSON.stringify(history.slice(0,30)));
       } catch(e) { console.warn('Riwayat audit lokal tidak dapat disimpan',e); }
+    }
+    function cuitAuditSummary(results) {
+      const rows=results||[];
+      return {ok:rows.filter(r=>r.status==='ok').length, warning:rows.filter(r=>r.status==='warning').length, error:rows.filter(r=>r.status==='error').length, total:rows.length};
+    }
+    function cuitAuditRenderRows(rows) {
+      return (rows||[]).map(r=>{
+        const state=r.status==='ok'?'ok':r.status==='error'?'error':'warning';
+        const color=state==='ok'?'#16803c':state==='error'?'#b91c1c':'#9a6500';
+        const bg=state==='ok'?'#f4fbf5':state==='error'?'#fff4f4':'#fffaf0';
+        const border=state==='ok'?'#cde6d2':state==='error'?'#f0c6c6':'#ead9ae';
+        return '<div style="display:flex;gap:7px;padding:8px;margin-top:6px;border:1px solid '+border+';border-radius:9px;background:'+bg+'"><b style="color:'+color+'">'+(state==='ok'?'✓':state==='error'?'×':'!')+'</b><div style="min-width:0"><b style="font-size:11px">'+cuitAuditEscape(r.label)+'</b><div style="font-size:10px;color:#555;overflow-wrap:anywhere">'+cuitAuditEscape(r.detail)+'</div></div></div>';
+      }).join('');
     }
     async function runCuitHealthAudit() {
       const card=document.getElementById('cuitHealthAuditCard');
@@ -8301,43 +8315,56 @@ document.addEventListener('DOMContentLoaded', function () {
       const results=document.getElementById('cuitHealthAuditResults');
       if(!card||!status||!results)return;
       const buttons=card.querySelectorAll('button'); buttons.forEach(b=>b.disabled=true);
-      status.textContent='Memverifikasi ADMINCUIT dan menjalankan pemeriksaan database…';
+      status.textContent='Memverifikasi ADMINCUIT dan menjalankan audit baca-saja database…';
       results.style.display='none';
       try {
         const {data,error}=await supabaseClient.functions.invoke('cuit-admin-health-audit',{method:'POST'});
         if(error)throw error;
         if(!data?.success)throw new Error(data?.error||'Audit tidak berhasil.');
         cuitLastAudit=data; cuitAuditSaveHistory(data);
-        const html=(data.results||[]).map(r=>{
-          const ok=r.status==='ok';
-          return '<div style="display:flex;gap:7px;padding:8px;margin-top:6px;border:1px solid '+(ok?'#cde6d2':'#f0c6c6')+';border-radius:9px;background:'+(ok?'#f4fbf5':'#fff6f6')+'"><b style="color:'+(ok?'#16803c':'#b91c1c')+'">'+(ok?'✓':'!')+'</b><div><b style="font-size:11px">'+cuitAuditEscape(r.label)+'</b><div style="font-size:10px;color:#555">'+cuitAuditEscape(r.detail)+'</div></div></div>';
-        }).join('');
+        const s=cuitAuditSummary(data.results);
         const stamp=new Date(data.checked_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
-        cuitAuditShow(html+'<div style="font-size:9px;color:#777;margin-top:8px">Diperiksa: '+cuitAuditEscape(stamp)+' · Baca-saja</div><div style="font-size:9px;color:#806b4a;margin-top:5px">'+cuitAuditEscape(data.scope_note||'')+'</div>',(data.results||[]).filter(r=>r.status==='ok').length+'/'+(data.results||[]).length+' pemeriksaan database awal berhasil.');
+        const html='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:7px"><div style="padding:7px;border-radius:8px;background:#f4fbf5;text-align:center"><b style="color:#16803c;font-size:16px">'+s.ok+'</b><div style="font-size:9px">Lolos</div></div><div style="padding:7px;border-radius:8px;background:#fffaf0;text-align:center"><b style="color:#9a6500;font-size:16px">'+s.warning+'</b><div style="font-size:9px">Perlu tinjau</div></div><div style="padding:7px;border-radius:8px;background:#fff4f4;text-align:center"><b style="color:#b91c1c;font-size:16px">'+s.error+'</b><div style="font-size:9px">Gagal</div></div></div>'+cuitAuditRenderRows(data.results)+'<div style="font-size:9px;color:#777;margin-top:8px">Diperiksa: '+cuitAuditEscape(stamp)+' · '+cuitAuditEscape(data.audit_type||'audit baca-saja')+'</div><div style="font-size:9px;color:#806b4a;margin-top:5px">'+cuitAuditEscape(data.scope_note||'')+'</div>';
+        cuitAuditShow(html,s.ok+'/'+s.total+' pemeriksaan lolos · '+s.warning+' perlu tinjau · '+s.error+' gagal.');
       } catch(err) {
         status.textContent='Gagal: '+(err?.message||'Pemeriksaan tidak berhasil.');
         results.style.display='none';
       } finally { buttons.forEach(b=>b.disabled=false); }
     }
-    async function cuitAuditAction(action) {
+    function cuitAuditAction(action) {
       const status=document.getElementById('cuitHealthAuditStatus');
-      if(action==='retest'){await runCuitHealthAudit();return;}
+      if(action==='retest'){runCuitHealthAudit();return;}
       if(action==='history'){
-        let history=[];try{history=JSON.parse(localStorage.getItem('cuit_admin_audit_history')||'[]');}catch(e){}
-        if(!history.length){cuitAuditShow('<div style="padding:9px;border:1px solid #ddd;border-radius:9px">Belum ada riwayat audit pada perangkat ini. Jalankan audit terlebih dahulu.</div>','Riwayat audit kosong.');return;}
-        cuitAuditShow(history.map((h,i)=>'<div style="padding:8px;border:1px solid #ddd;border-radius:9px;margin-top:6px"><b>Audit '+(i+1)+'</b><div style="font-size:10px;color:#555">'+cuitAuditEscape(new Date(h.checked_at).toLocaleString('id-ID'))+' · '+(h.results||[]).filter(r=>r.status==='ok').length+'/'+(h.results||[]).length+' lolos</div></div>').join(''),'Riwayat tersimpan lokal (maksimal 20 audit).');return;
+        let history=[];try{history=JSON.parse(localStorage.getItem(cuitAuditHistoryKey)||'[]');}catch(e){}
+        if(!history.length){cuitAuditShow('<div style="padding:9px;border:1px solid #ddd;border-radius:9px">Belum ada riwayat audit di perangkat ini. Jalankan audit terlebih dahulu.</div>','Riwayat audit kosong.');return;}
+        const html=history.map((h,i)=>{
+          const s=cuitAuditSummary(h.results);
+          return '<div style="padding:8px;border:1px solid #ddd;border-radius:9px;margin-top:6px"><b>Audit '+(i+1)+' · '+cuitAuditEscape(h.audit_type||'audit')+'</b><div style="font-size:10px;color:#555">'+cuitAuditEscape(new Date(h.checked_at).toLocaleString('id-ID'))+' · '+s.ok+'/'+s.total+' lolos · '+s.warning+' peringatan · '+s.error+' gagal</div></div>';
+        }).join('');
+        cuitAuditShow(html,'Riwayat lokal: maksimal 30 pemeriksaan pada perangkat ini.');return;
       }
       if(!cuitLastAudit){if(status)status.textContent='Jalankan Audit terlebih dahulu agar analisis menggunakan hasil terbaru.';return;}
-      const checks=cuitLastAudit.results||[];
-      const failed=checks.filter(r=>r.status!=='ok');
+      const rows=cuitLastAudit.results||[];
+      const findings=rows.filter(r=>r.status!=='ok');
       if(action==='findings'){
-        const html=failed.length?failed.map(r=>'<div style="padding:8px;margin-top:6px;background:#fff5f5;border:1px solid #e7bcbc;border-radius:9px"><b>'+cuitAuditEscape(r.label)+'</b><div>'+cuitAuditEscape(r.detail)+'</div></div>').join(''):'<div style="padding:9px;border:1px solid #cde6d2;border-radius:9px;background:#f4fbf5">Tidak ditemukan kegagalan pada 3 pemeriksaan database awal. Ini bukan hasil audit keamanan menyeluruh.</div>';
-        cuitAuditShow(html,failed.length+' masalah terdeteksi pada pemeriksaan awal.');
+        cuitAuditShow(findings.length?cuitAuditRenderRows(findings):'<div style="padding:9px;border:1px solid #cde6d2;border-radius:9px;background:#f4fbf5">Tidak ada temuan pada cakupan audit yang baru dijalankan. Ini tidak berarti seluruh aplikasi bebas risiko.</div>',findings.length+' temuan perlu ditinjau dari hasil audit terakhir.');
       } else if(action==='solutions'){
-        const html=failed.length?failed.map(r=>'<div style="padding:8px;margin-top:6px;border:1px solid #e5d5b2;border-radius:9px"><b>'+cuitAuditEscape(r.label)+'</b><div style="font-size:10px">Solusi: periksa ketersediaan tabel, izin service-role Edge Function, dan log backend terkait. Jangan mengubah saldo atau transaksi untuk memperbaiki kegagalan koneksi.</div></div>').join(''):'<div style="padding:9px;border:1px solid #ddd;border-radius:9px">Belum ada masalah dari pemeriksaan awal. Solusi keamanan/ledger baru dapat disusun setelah modul audit lanjut tersedia.</div>';
-        cuitAuditShow(html,'Rekomendasi berdasarkan hasil pemeriksaan awal.');
+        const advice={
+          'Tabel RLS tanpa policy':'Periksa apakah tabel memang hanya boleh diakses fungsi backend/service role. Jangan menambahkan policy publik secara massal.',
+          'Policy publik ALL tanpa pembatasan':'Identifikasi tabel dan kebutuhan tiap operasi. Ganti dengan policy terpisah yang membatasi pemilik/admin; uji alur aplikasi sebelum menerapkan.',
+          'SECURITY DEFINER dapat dieksekusi anon':'Tinjau isi fungsi, validasi auth.uid(), search_path, dan apakah fungsi memang endpoint publik. Jangan mencabut EXECUTE secara massal.',
+          'SECURITY DEFINER dapat dieksekusi authenticated':'Tinjau otorisasi per fungsi dan kebutuhan frontend. Batasi hanya fungsi yang tidak seharusnya dipanggil anggota.',
+          'Indeks tanpa scan (snapshot statistik)':'Periksa sejak kapan statistik di-reset dan beban query sebelum menghapus indeks.',
+          'Definisi indeks duplikat':'Pastikan constraint, query plan, dan dependensi; hapus hanya lewat migrasi teruji setelah backup.',
+          'Transaksi central tanpa entry':'Telusuri source_table/source_id dan idempotency key; jangan membuat entry pengganti tanpa rekonsiliasi nilai.',
+          'Entry central tanpa transaksi':'Telusuri relasi dan sumber transaksi; jangan menghapus entry secara otomatis.',
+          'Idempotency key central duplikat':'Bandingkan seluruh entry dan asal transaksi; tentukan mana duplikat sungguhan sebelum koreksi.'
+        };
+        const html=findings.length?findings.map(r=>'<div style="padding:8px;margin-top:6px;border:1px solid #ead9ae;border-radius:9px"><b style="font-size:11px">'+cuitAuditEscape(r.label)+'</b><div style="font-size:10px;color:#555;margin-top:4px">'+cuitAuditEscape(advice[r.label]||'Periksa objek terkait, dependensi, dan log sebelum perubahan. Buat perubahan terpisah dan uji ulang setelahnya.')+'</div></div>').join(''):'<div style="padding:9px;border:1px solid #ddd;border-radius:9px">Belum ada temuan yang memerlukan rekomendasi dari hasil audit terakhir.</div>';
+        cuitAuditShow(html,'Solusi disusun berdasarkan kategori temuan; belum ada perubahan produksi.');
       } else if(action==='repair'){
-        cuitAuditShow('<div style="padding:9px;border:1px solid #e5d5b2;border-radius:9px;background:#fffaf0"><b>Belum ada perbaikan otomatis yang aman untuk dijalankan.</b><div style="font-size:10px;margin-top:5px">Endpoint saat ini hanya memeriksa tiga hitungan tabel. Mengubah policy, grant RPC, indeks, saldo, atau transaksi tanpa audit lengkap berisiko merusak CUIT. Tidak ada perubahan database yang dilakukan.</div></div>','Perbaikan otomatis ditahan demi keamanan data produksi.');
+        const safe=rows.filter(r=>r.status==='warning'||r.status==='error');
+        cuitAuditShow('<div style="padding:10px;border:1px solid #e5d5b2;border-radius:9px;background:#fffaf0"><b>Perbaikan otomatis belum dijalankan.</b><div style="font-size:10px;margin-top:5px">Ditemukan '+safe.length+' pemeriksaan yang perlu ditinjau. Temuan policy, grant SECURITY DEFINER, indeks, trigger, dan ledger memerlukan keputusan berdasarkan definisi objek serta alur aplikasi. Tidak ada perubahan saldo, transaksi, policy, grant, indeks, atau trigger yang dilakukan. Gunakan daftar Solusi untuk langkah verifikasi per temuan.</div></div>',safe.length+' kandidat perlu tinjauan manual; tidak ada perubahan produksi yang aman untuk diterapkan otomatis dari ringkasan ini.');
       }
     }
     window.runCuitHealthAudit=runCuitHealthAudit;
