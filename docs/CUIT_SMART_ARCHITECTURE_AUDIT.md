@@ -103,3 +103,67 @@ Tidak ada data anggota, saldo, transaksi, atau fungsi produksi yang diubah dalam
 ## Langkah berikutnya
 
 Audit database Supabase secara read-only: daftar tabel terkait, definisi RPC, trigger, policies, indeks, dan konfigurasi Realtime. Setelah peta backend lengkap, pilih satu perubahan berdampak tinggi dan berisiko rendah—kemungkinan pagination feed serta pemisahan initial load dari debounce realtime—lalu uji di staging.
+
+
+## Lampiran — Pemeriksaan Supabase read-only
+
+Project yang diperiksa: `CUIT` (`ozakuxlktqweembeqgyh`), status `ACTIVE_HEALTHY`, PostgreSQL 17.11. Pemeriksaan ini bersifat baca-saja; tidak ada SQL DDL/DML yang dijalankan.
+
+### Inventaris database
+- 52 tabel pada schema `public`.
+- 25 migration tercatat.
+- 82 fungsi pada schema `public`.
+- 118 indeks pada schema `public`.
+- 54 policy RLS pada schema `public`.
+- Trigger terdeteksi pada 11 tabel, total 16 trigger:
+  `comments`, `cuit_checkins`, `cuit_post_gift_ledger`,
+  `cuit_roulette_question_attempts`, `cuit_roulette_spins`,
+  `curhat`, `follows`, `gift_transactions`, `post_likes`,
+  `profiles`, dan `reels_claims`.
+
+### Temuan Supabase Performance Advisor
+
+| Temuan | Jumlah | Prioritas tindak lanjut |
+|---|---:|---|
+| Foreign key belum memiliki indeks penutup | 16 | Tinjau query dan tambah indeks yang memang mendukung beban nyata |
+| RLS auth initplan | 14 | Evaluasi policy agar pemanggilan auth function tidak dievaluasi per baris |
+| Indeks belum pernah digunakan | 7 | Jangan langsung dihapus; cek periode observasi dan query workload |
+| Multiple permissive policies | 21 | Audit duplikasi dan gabungkan hanya bila semantik akses tetap sama |
+| Duplicate index | 1 | `cuit_topup_ledger`: `cuit_topup_ledger_order_id_key` dan `cuit_topup_ledger_order_unique` terdeteksi identik; verifikasi constraint dan dependensi sebelum perubahan |
+
+### Temuan Supabase Security Advisor
+
+| Temuan | Jumlah | Makna |
+|---|---:|---|
+| RLS aktif tanpa policy | 18 tabel | Secara default akses API ditolak; pastikan ini disengaja dan tidak memutus fungsi yang diperlukan |
+| SECURITY DEFINER dapat dipanggil role anon | 22 fungsi | Perlu audit EXECUTE grants dan pemeriksaan identitas/otorisasi di body fungsi |
+| SECURITY DEFINER dapat dipanggil role authenticated | 51 fungsi | Perlu audit per fungsi; SECURITY DEFINER bisa benar untuk RPC transaksi, tetapi harus dibatasi dengan benar |
+| Ekstensi `pg_net` berada di schema public | 1 | Tinjau penempatan dan kebutuhan ekstensi |
+| Leaked password protection nonaktif | 1 | Pertimbangkan mengaktifkannya melalui pengaturan Auth |
+
+**Peringatan penting:** Advisor tidak otomatis berarti semua SECURITY DEFINER adalah celah. CUIT memakai RPC transaksi yang memang mungkin membutuhkan hak istimewa. Kita harus memeriksa body fungsi, `search_path`, validasi `auth.uid()`, hak EXECUTE untuk anon/authenticated, dan skenario pemanggilan sebelum mengubah grants. Jangan mencabut EXECUTE secara massal karena dapat mematikan transaksi, reward, game, atau login.
+
+### Fungsi pusat yang dikonfirmasi ada
+
+Fungsi berikut ditemukan di database dan berjalan sebagai SECURITY DEFINER:
+- `cuit_central_record_transaction(...)`
+- `cuit_central_get_activity_ranking(...)`
+- `cuit_roulette_claim_mission(...)`
+- `cuit_pay_like(...)`
+- `cuit_submit_comment_transaction(...)`
+- `cuit_submit_comment_thread_transaction(...)`
+- `cuit_send_post_gift(...)`
+
+Daftar ini mengonfirmasi bahwa titik pusat transaksi, ranking, like, komentar, hadiah, dan misi memang tersedia. Definisi dan hak aksesnya masih perlu diperiksa secara individual.
+
+### Prioritas baru berdasarkan temuan nyata
+
+1. **P0 — Keamanan RPC:** audit 22 fungsi SECURITY DEFINER yang dapat dipanggil anon. Tentukan mana yang harus publik, authenticated-only, atau admin-only; periksa validasi identitas dan otorisasi sebelum mengubah grants.
+2. **P1 — Feed:** pagination dan pemilihan kolom karena frontend sekarang mengambil semua baris curhat.
+3. **P1 — Realtime:** kurangi refresh feed global akibat event komentar/follow; pertahankan update saldo dan aktivitas akun sendiri.
+4. **P1 — Debounce:** pisahkan initial feed load dari wrapper 900 ms.
+5. **P2 — Database performance:** tinjau 16 foreign key tanpa indeks dan 14 policy RLS initplan.
+6. **P2 — RLS policy:** tinjau 21 kelompok multiple permissive policy tanpa mengubah cakupan akses.
+7. **P3 — Cleanup indeks:** verifikasi duplicate index dan unused indexes berdasarkan workload, lalu buat migrasi terpisah.
+
+Audit berikutnya harus mengambil definisi SQL fungsi RPC kritis, trigger, policy, dan indeks yang relevan. Belum ada perubahan database yang dilakukan.
