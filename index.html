@@ -3931,7 +3931,6 @@ async function openDailyCheckin() {
         if (isPrimaryAdmin) mySponsorCode = null;
         else if (!mySponsorCode || mySponsorCode === myOwnReferralCode) mySponsorCode = activeSponsorRef;
         const { error } = await supabaseClient.from('profiles').update({
-          email: myEmail,
           username: customDisplayName || 'Penilik Bageur',
         }).eq('id', currentUser.id);
         if (error) console.error('Gagal sinkron metadata profil:', error);
@@ -7282,18 +7281,16 @@ function cuitConfirm(message) {
       customDisplayName = newName;
       localStorage.setItem('cuit_user_name', newName);
 
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-
-      const { error } = await supabaseClient
-        .from('profiles')
-        .update({
-          username: newName
-        })
-        .eq('email', myEmail);
-
-      if (error) {
-        console.error('Gagal update di Supabase:', error);
+      if (currentUser?.id) {
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update({ username: newName })
+          .eq('id', currentUser.id);
+        if (error) {
+          console.error('Gagal update di Supabase:', error);
+          alert('Nama tampilan belum berhasil disimpan ke server.');
+          return;
+        }
       }
 
       document.getElementById('editProfileModal').style.display = 'none';
