@@ -5320,8 +5320,6 @@ async function toggleLike(postId) {
       return;
     }
 
-    await supabaseClient.from('curhat')
-      .update({ likes_count: currentPost.likes_count }).eq('id', postId);
     syncPostLikeButtons(postId, currentPost);
     return;
   }
@@ -5356,9 +5354,6 @@ async function toggleLike(postId) {
       alert('Gagal menyimpan Like: ' + error.message);
       return;
     }
-    await supabaseClient.from('curhat')
-      .update({ likes_count: Number(currentPost.likes_count || 0) + 1 })
-      .eq('id', postId);
   }
 
   // Perbarui status lokal segera setelah transaksi LIKE berhasil.
@@ -5666,9 +5661,6 @@ async function submitCommentAction() {
 
   if (currentPost) {
     currentPost.comments_count = (currentPost.comments_count || 0) + 1;
-    await supabaseClient.from('curhat')
-      .update({ comments_count: currentPost.comments_count })
-      .eq('id', postId);
   }
 
   input.value = '';
