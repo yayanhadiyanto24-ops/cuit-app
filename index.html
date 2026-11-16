@@ -7288,8 +7288,7 @@ function cuitConfirm(message) {
       const { error } = await supabaseClient
         .from('profiles')
         .update({
-          username: newName,
-          updated_at: new Date().toISOString()
+          username: newName
         })
         .eq('email', myEmail);
 
