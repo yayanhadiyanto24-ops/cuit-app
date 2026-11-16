@@ -4221,8 +4221,8 @@ async function loadAchievements() {
 
   try {
     const { data: profiles, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('id,email,username,used_paid_coins,activity_level,sponsor,created_at');
+      .from('profiles_public')
+      .select('id,username,used_paid_coins,activity_level,sponsor,created_at');
 
     if (profileError) throw profileError;
 
@@ -4232,8 +4232,8 @@ async function loadAchievements() {
       const activityLevel = Math.max(1,Math.min(10,Number(p.activity_level)||1));
       const level = Math.max(paidLevel,activityLevel);
       return {
-        id:p.id,email:p.email,
-        name:p.username || (p.email ? p.email.split('@')[0] : 'Member CUIT'),
+        .id:p.id,
+        name:p.username || 'Member CUIT',
         xp:paidXp,level
       };
     });
@@ -4361,8 +4361,8 @@ async function loadAchievements() {
 
         try {
           const { data, error: profilesError } = await supabaseClient
-            .from('profiles')
-            .select('id,email,username,used_paid_coins,activity_level');
+            .from('profiles_public')
+            .select('id,username,used_paid_coins,activity_level');
           if (profilesError) throw profilesError;
 
           profilesData = data || [];
@@ -4376,7 +4376,7 @@ async function loadAchievements() {
               profilesMap[profile.id] = displayXp;
               profilesById.set(profile.id, {...profile,display_level:displayLevel});
             }
-            if (profile.email) profilesMap[profile.email] = displayXp;
+            
           });
         } catch (profileError) {
           console.warn('Data profil untuk kartu Raja belum tersedia:', profileError);
@@ -4529,7 +4529,7 @@ promotedCarousel.querySelectorAll('[data-promoted-text="1"]').forEach(box => {
       let filteredData = allPostsCache;
 
       if (currentFeedFilter === 'mengikuti') {
-        filteredData = allPostsCache.filter(p => followingSet.has(p.user_email));
+        filteredData = allPostsCache.filter(p => followingSet.has(p.user_id));
       }
 
       if (filteredData.length === 0) {
@@ -4935,7 +4935,7 @@ function renderCardHTML(p) {
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
   const myEmail = currentUser ? currentUser.email : guestId;
   const isSelf = (p.user_email === myEmail);
-  const isFollowing = followingSet.has(p.user_email);
+  const isFollowing = followingSet.has(p.user_id);
   const isAdmin = (myEmail === 'mantanperamal@gmail.com');
 
   // Bersihkan teks agar tidak merusak fungsi JavaScript saat diklik
@@ -4947,7 +4947,7 @@ function renderCardHTML(p) {
     <div class="post-card" id="post-${p.id}">
       <div class="post-header">
         <!-- KIRI: Foto & Info User -->
-        <div class="user-info" onclick="openUserProfileModal('${safeEmail}', '${safeName}', ${authorPoin})">
+        <div class="user-info" onclick="openUserProfileModal('${p.user_id || ''}', '${safeName}', ${authorPoin})">
           <div class="avatar-container cuit-post-main-wrap">
             <div class="avatar-circle cuit-main-badge">
               ${cuitBadgeSvg(userLvl.title)}
@@ -5086,12 +5086,12 @@ function renderCardHTML(p) {
         let name = 'Belum Ada';
         if (winner?.user_id && score > 0) {
           const { data: profile, error: profileError } = await supabaseClient
-            .from('profiles')
-            .select('username,email')
+            .from('profiles_public')
+            .select('username')
             .eq('id', winner.user_id)
             .maybeSingle();
           if (profileError) throw profileError;
-          name = profile?.username || profile?.email?.split('@')[0] || 'Anggota CUIT';
+          name = profile?.username || 'Anggota CUIT';
         }
 
         if (nameElement) nameElement.innerText = name;
@@ -6025,7 +6025,7 @@ async function submitCommentAction() {
 
       if (filterType === 'top_level' || filterType === 'top_sawer') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Rangking Liga 7 Hari...</p>';
-        const { data: topUsers } = await supabaseClient.from('profiles').select('*').order('used_paid_coins', { ascending: false }).limit(10);
+        const { data: topUsers } = await supabaseClient.from('profiles_public').select('id,username,used_paid_coins,activity_level').order('used_paid_coins', { ascending: false }).limit(10);
 
         if (!topUsers || topUsers.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
@@ -6035,9 +6035,9 @@ async function submitCommentAction() {
         const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
         container.innerHTML = topUsers.map((u, idx) => {
           const lvl = getUserLevel(u.used_paid_coins || 0);
-          const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
+          const name = u.username || 'Anggota';
           return `
-            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.id}', '${name}', ${u.used_paid_coins || 0})">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 16px;">${rankIcons[idx]}</span>
                 <div>
@@ -6054,7 +6054,7 @@ async function submitCommentAction() {
 
       if (filterType === 'top_followers' || filterType === 'top_sponsor') {
         container.innerHTML = '<p style="text-align: center; color: var(--text-sub); font-size: 11px;">Memuat Data Rangking...</p>';
-        const { data: topFollowed } = await supabaseClient.from('profiles').select('*').order('followers_count', { ascending: false }).limit(10);
+        const { data: topFollowed } = await supabaseClient.from('profiles_public').select('id,username,followers_count,used_paid_coins,activity_level').order('followers_count', { ascending: false }).limit(10);
 
         if (!topFollowed || topFollowed.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: var(--text-sub);">Belum ada data rangking.</p>';
@@ -6065,7 +6065,7 @@ async function submitCommentAction() {
         container.innerHTML = topFollowed.map((u, idx) => {
           const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
           return `
-            <div class="user-rank-card" onclick="openUserProfileModal('${u.email}', '${name}', ${u.used_paid_coins || 0})">
+            <div class="user-rank-card" onclick="openUserProfileModal('${u.id}', '${name}', ${u.used_paid_coins || 0})">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 16px;">${rankIcons[idx]}</span>
                 <div>
@@ -6530,7 +6530,7 @@ if (isAdmin) {
       ] = await Promise.all([
         supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail),
         supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail),
-        supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`),
+        supabaseClient.from('profiles_public').select('id', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`),
         postQuery
       ]);
 
@@ -6542,7 +6542,7 @@ if (isAdmin) {
       const adminMemberCard = document.getElementById('adminTotalMemberCard');
       if (isAdmin) {
         adminMemberCard.style.display = 'block';
-        const { count: totalMembers } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true });
+        const { count: totalMembers } = await supabaseClient.from('profiles_public').select('id', { count: 'exact', head: true });
         document.getElementById('profTotalMembers').innerText = totalMembers || 0;
       } else {
         adminMemberCard.style.display = 'none';
@@ -6939,8 +6939,8 @@ await updateCoinUI(true);
       try {
         const { data: profiles, error: profileError } =
           await supabaseClient
-            .from('profiles')
-            .select('id, username, referral_code, email');
+            .from('profiles_public')
+            .select('id, username, referral_code');
 
         if (profileError) {
           console.error('Validasi sponsor:', profileError);
@@ -6955,7 +6955,7 @@ await updateCoinUI(true);
           const sponsorFound = (profiles || []).some((profile) =>
             normalizedSponsor(profile.referral_code) === sponsorCode ||
             normalizedSponsor(profile.username) === sponsorCode ||
-            normalizedSponsor(profile.email) === sponsorCode
+            false
           );
 
           if (!sponsorFound) {
