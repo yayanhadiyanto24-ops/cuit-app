@@ -3933,8 +3933,6 @@ async function openDailyCheckin() {
         const { error } = await supabaseClient.from('profiles').update({
           email: myEmail,
           username: customDisplayName || 'Penilik Bageur',
-          referral_code: myOwnReferralCode,
-          sponsor: mySponsorCode
         }).eq('id', currentUser.id);
         if (error) console.error('Gagal sinkron metadata profil:', error);
       } catch (err) {
@@ -4232,7 +4230,7 @@ async function loadAchievements() {
       const activityLevel = Math.max(1,Math.min(10,Number(p.activity_level)||1));
       const level = Math.max(paidLevel,activityLevel);
       return {
-        .id:p.id,
+        id:p.id,
         name:p.username || 'Member CUIT',
         xp:paidXp,level
       };
@@ -4957,7 +4955,7 @@ function renderCardHTML(p) {
           <div class="user-details">
             <div class="user-name-row">
               <span class="user-name">${rawName}</span>
-              ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_id || ''}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+              ${!isSelf && currentUser?.id && p.user_id ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_id}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
             </div>
             <div class="badge-row">
               <span class="btn-sm-badge" style="background:${userLvl.color}; color:#fff;">${userLvl.title}</span>
@@ -6046,7 +6044,7 @@ async function submitCommentAction() {
 
         const rankIcons = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
         container.innerHTML = topFollowed.map((u, idx) => {
-          const name = u.username || (u.email ? u.email.split('@')[0] : 'Anggota');
+          const name = u.username || 'Anggota';
           return `
             <div class="user-rank-card" onclick="openUserProfileModal('${u.id}', '${name}', ${u.used_paid_coins || 0})">
               <div style="display: flex; align-items: center; gap: 8px;">
@@ -6505,17 +6503,13 @@ if (isAdmin) {
         postQuery = postQuery.eq('user_email', myEmail);
       }
 
-      const [
-        { count: followersCount },
-        { count: followingCount },
-        { count: downlinesCount },
-        { count: postsCount }
-      ] = await Promise.all([
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', myEmail),
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail),
+      const [{ data: ownCounts }, { count: downlinesCount }, { count: postsCount }] = await Promise.all([
+        currentUser ? supabaseClient.from('profiles').select('followers_count,following_count').eq('id', currentUser.id).maybeSingle() : Promise.resolve({ data: null }),
         supabaseClient.from('profiles_public').select('id', { count: 'exact', head: true }).or(`sponsor.ilike.${sponsorCodeToUse},sponsor.ilike.${displayName}`),
         postQuery
       ]);
+      const followersCount = ownCounts?.followers_count || 0;
+      const followingCount = ownCounts?.following_count || 0;
 
       document.getElementById('profFollowers').innerText = followersCount || 0;
       document.getElementById('profFollowing').innerText = followingCount || 0;
@@ -6937,8 +6931,7 @@ await updateCoinUI(true);
 
           const sponsorFound = (profiles || []).some((profile) =>
             normalizedSponsor(profile.referral_code) === sponsorCode ||
-            normalizedSponsor(profile.username) === sponsorCode ||
-            false
+            normalizedSponsor(profile.username) === sponsorCode
           );
 
           if (!sponsorFound) {
@@ -6950,42 +6943,19 @@ await updateCoinUI(true);
         sponsorCode = 'ADMINCUIT';
       }
 
+      const defaultUsername = email.split('@')[0];
       const { data, error } = await supabaseClient.auth.signUp({
         email,
-        password
+        password,
+        options: { data: { username: defaultUsername, sponsor: sponsorCode } }
       });
 
       if (!error) {
-        const defaultUsername = email.split('@')[0];
-
         customDisplayName = defaultUsername;
         freeCoins = 0;
         paidCoins = 0;
         gems = 0;
         usedPaidCoins = 0;
-
-        const { error: saveError } = await supabaseClient
-          .from('profiles')
-          .upsert(
-            [{
-              id: data.user ? data.user.id : undefined,
-              email: email,
-              username: defaultUsername,
-              sponsor: sponsorCode,
-              free_coins: 0,
-              paid_coins: 0,
-              gems: 0,
-              used_paid_coins: 0,
-              created_at: new Date().toISOString()
-            }],
-            { onConflict: 'email' }
-          );
-
-        if (saveError) {
-          console.error('Gagal menyimpan profil:', saveError);
-          alert('Akun berhasil dibuat, tetapi profil gagal tersimpan.');
-          return;
-        }
 
         document.getElementById('authModal').style.display = 'none';
 
@@ -7319,7 +7289,6 @@ function cuitConfirm(message) {
         .from('profiles')
         .update({
           username: newName,
-          referral_code: newName.replace(/\s+/g, '').toUpperCase(),
           updated_at: new Date().toISOString()
         })
         .eq('email', myEmail);
