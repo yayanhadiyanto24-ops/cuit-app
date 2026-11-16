@@ -4934,7 +4934,7 @@ function renderCardHTML(p) {
   const userLvl = getUserLevel(authorPoin);
   const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
   const myEmail = currentUser ? currentUser.email : guestId;
-  const isSelf = (p.user_email === myEmail);
+  const isSelf = (currentUser?.id && currentUser.id === p.user_id) || (!p.user_id && p.user_email === myEmail);
   const isFollowing = followingSet.has(p.user_id);
   const isAdmin = (myEmail === 'mantanperamal@gmail.com');
 
@@ -4957,7 +4957,7 @@ function renderCardHTML(p) {
           <div class="user-details">
             <div class="user-name-row">
               <span class="user-name">${rawName}</span>
-              ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${safeEmail}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
+              ${!isSelf ? `<button class="btn-follow ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow('${p.user_id || ''}', this)">${isFollowing ? '✓ Mengikuti' : '+ Ikuti'}</button>` : ''}
             </div>
             <div class="badge-row">
               <span class="btn-sm-badge" style="background:${userLvl.color}; color:#fff;">${userLvl.title}</span>
@@ -5023,43 +5023,26 @@ function renderCardHTML(p) {
   `;
 }
 
-    async function toggleFollow(targetEmail, btn) {
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      if (!targetEmail || targetEmail === myEmail) return;
-
-      if (followingSet.has(targetEmail)) {
-        followingSet.delete(targetEmail);
-        await supabaseClient.from('follows').delete().eq('follower_email', myEmail).eq('following_email', targetEmail);
-      } else {
-        followingSet.add(targetEmail);
-        await supabaseClient.from('follows').insert([{ follower_email: myEmail, following_email: targetEmail }]);
+    async function toggleFollow(targetUserId, btn) {
+      if (!currentUser?.id || !targetUserId || targetUserId === currentUser.id) return;
+      try {
+        const { data, error } = await supabaseClient.rpc('cuit_toggle_follow_by_id', { p_target_user_id: targetUserId });
+        if (error) throw error;
+        if (data) followingSet.add(targetUserId); else followingSet.delete(targetUserId);
+        if (btn) { btn.classList.toggle('following', !!data); btn.textContent = data ? '✓ Mengikuti' : '+ Ikuti'; }
+        await loadPosts();
+        await renderProfileData();
+      } catch (error) {
+        console.error('Gagal memperbarui ikuti:', error);
+        alert('Belum dapat memperbarui daftar mengikuti. Coba lagi.');
       }
-
-      await updateFollowCounts(myEmail, targetEmail);
-      loadPosts();
-      renderProfileData();
     }
 
     async function loadFollows() {
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const { data: followsData } = await supabaseClient.from('follows').select('following_email').eq('follower_email', myEmail);
-      if (followsData) {
-        followingSet = new Set(followsData.map(f => f.following_email));
-      }
-    }
-
-    async function updateFollowCounts(myEmail, targetEmail) {
-      const [{ count: myFollowing }, { count: targetFollowers }] = await Promise.all([
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_email', myEmail),
-        supabaseClient.from('follows').select('*', { count: 'exact', head: true }).eq('following_email', targetEmail)
-      ]);
-
-      await Promise.all([
-        supabaseClient.from('profiles').update({ following_count: myFollowing || 0 }).eq('email', myEmail),
-        supabaseClient.from('profiles').update({ followers_count: targetFollowers || 0 }).eq('email', targetEmail)
-      ]);
+      if (!currentUser?.id) { followingSet = new Set(); return; }
+      const { data, error } = await supabaseClient.rpc('cuit_get_my_following_ids');
+      if (error) { console.warn('Daftar mengikuti belum dapat dimuat:', error); followingSet = new Set(); return; }
+      followingSet = new Set((data || []).map(row => row.user_id));
     }
 
     let cuitCurhatRealtimeChannel = null;
@@ -7260,89 +7243,55 @@ function cuitConfirm(message) {
       await prompt("Salin link sponsor kamu di bawah ini:", fullSponsorLink);
     }
 
-    async function openUserProfileModal(userEmail, userName, userExp) {
+    async function openUserProfileModal(userId, userName, userExp) {
       const modal = document.getElementById('userProfileModal');
       if (!modal) return;
-
-      // Tampilkan kerangka profil segera; jangan menunggu beberapa query jaringan.
       modal.style.display = 'flex';
-      ['mFollowers','mFollowing','mDownlines','mPostsCount','mFreeCoins','mPaidCoins','mGems','mSponsorName'].forEach(id=>{
-        const el=document.getElementById(id);
-        if(el) el.textContent='…';
+      ['mFollowers','mFollowing','mDownlines','mPostsCount','mFreeCoins','mPaidCoins','mGems','mSponsorName'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.textContent = '…';
       });
-
-      let effectiveUserExp = Number(userExp || 0);
-      if (currentUser?.email && currentUser.email.toLowerCase() === String(userEmail || '').toLowerCase()) {
-        await loadCuitActivityLevelProgress();
-      } else if (userEmail && supabaseClient) {
-        try {
-          const {data:levelProfile,error:levelError}=await supabaseClient
-            .from('profiles').select('used_paid_coins,activity_level')
-            .eq('email',userEmail).maybeSingle();
-          if (!levelError && levelProfile) {
-            const paidXp=Number(levelProfile.used_paid_coins||effectiveUserExp||0);
-            const paidLevel=getUserLevel(paidXp).level;
-            const activityLevel=Math.max(1,Math.min(10,Number(levelProfile.activity_level)||1));
-            const displayLevel=Math.max(paidLevel,activityLevel);
-            effectiveUserExp=Math.max(paidXp,Number(CUIT_LEVELS[displayLevel-1]?.xp||0));
-          }
-        } catch(levelError) {
-          console.warn('Level anggota belum dapat diperbarui:',levelError);
-        }
-      }
-      const lvl = currentUser?.email && currentUser.email.toLowerCase() === String(userEmail || '').toLowerCase()
-        ? getUserLevel()
-        : getUserLevel(effectiveUserExp);
-
+      const isSelf = !!(currentUser?.id && userId === currentUser.id);
+      const source = isSelf ? 'profiles' : 'profiles_public';
+      const fields = isSelf
+        ? 'id,username,followers_count,following_count,sponsor,free_coins,paid_coins,gems,used_paid_coins,activity_level'
+        : 'id,username,followers_count,following_count,sponsor,used_paid_coins,activity_level';
+      const { data: prof, error } = await supabaseClient.from(source).select(fields).eq('id', userId).maybeSingle();
+      if (error) console.warn('Data profil belum dapat dimuat:', error);
+      const paidXp = Number(prof?.used_paid_coins || userExp || 0);
+      const paidLevel = getUserLevel(paidXp).level;
+      const activityLevel = Math.max(1, Math.min(10, Number(prof?.activity_level) || 1));
+      const displayLevel = Math.max(paidLevel, activityLevel);
+      const effectiveExp = Math.max(paidXp, Number(CUIT_LEVELS[displayLevel - 1]?.xp || 0));
+      const lvl = isSelf ? getUserLevel() : getUserLevel(effectiveExp);
       document.getElementById('mMainBadge').innerHTML = cuitBadgeSvg(lvl.title);
-
-      document.getElementById('mName').innerText = userName || 'Pengguna CUIT';
+      document.getElementById('mName').innerText = prof?.username || userName || 'Pengguna CUIT';
       document.getElementById('mBadge').innerText = lvl.title;
       document.getElementById('mBadge').style.background = lvl.color;
       document.getElementById('mBadge').style.color = '#fff';
-      document.getElementById('mExp').innerText = `${userExp || 0}`;
-
-      const { data: prof } = await supabaseClient
-        .from('profiles')
-        .select('username, followers_count, following_count, sponsor, free_coins, paid_coins, gems, used_paid_coins')
-        .eq('email', userEmail)
-        .maybeSingle();
-
-      const userSponsorCode = (prof && prof.username ? prof.username : userName || '').replace(/\s+/g, '').toUpperCase();
-
+      document.getElementById('mExp').innerText = String(effectiveExp);
+      const sponsorCode = String(prof?.username || userName || '').replace(/\s+/g, '').toUpperCase();
       const [{ count: downlineCount }, { count: postCount }] = await Promise.all([
-        supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).or(`sponsor.ilike.${userSponsorCode},sponsor.ilike.${userName}`),
-        supabaseClient.from('curhat').select('*', { count: 'exact', head: true }).eq('user_email', userEmail)
+        supabaseClient.from('profiles_public').select('id', { count: 'exact', head: true }).or('sponsor.ilike.' + sponsorCode + ',sponsor.ilike.' + (userName || '')),
+        supabaseClient.from('curhat').select('id', { count: 'exact', head: true }).eq('user_id', userId)
       ]);
-
       document.getElementById('mFollowers').innerText = prof?.followers_count || 0;
       document.getElementById('mFollowing').innerText = prof?.following_count || 0;
       document.getElementById('mDownlines').innerText = downlineCount || 0;
       document.getElementById('mPostsCount').innerText = postCount || 0;
-      document.getElementById('mFreeCoins').innerText = prof?.free_coins || 0;
-      document.getElementById('mPaidCoins').innerText = `${(prof?.paid_coins || 0).toLocaleString('id-ID')} 🪙`;
-      document.getElementById('mGems').innerText = `${(prof?.gems || 0).toLocaleString('id-ID')} 💎`;
+      document.getElementById('mFreeCoins').innerText = isSelf ? (prof?.free_coins || 0) : '—';
+      document.getElementById('mPaidCoins').innerText = isSelf ? (Number(prof?.paid_coins || 0).toLocaleString('id-ID') + ' 🪙') : '—';
+      document.getElementById('mGems').innerText = isSelf ? (Number(prof?.gems || 0).toLocaleString('id-ID') + ' 💎') : '—';
       document.getElementById('mSponsorName').innerText = prof?.sponsor || 'ADMINCUIT';
-
-      const guestId = localStorage.getItem('cuit_guest_identifier') || 'guest@cuit.app';
-      const myEmail = currentUser ? currentUser.email : guestId;
-      const isSelf = (userEmail === myEmail);
-      const isFollowing = followingSet.has(userEmail);
-
       const followContainer = document.getElementById('mFollowActionContainer');
-      if (!isSelf) {
-        followContainer.innerHTML = `
-          <button class="btn-primary" style="width:100%; background:${isFollowing ? '#eaf5ff' : 'var(--primary-gradient)'}; color:${isFollowing ? '#555' : '#fff'};"
-                  onclick="toggleFollow('${userEmail}', this); openUserProfileModal('${userEmail}', '${userName}', ${userExp});">
-            ${isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini'}
-          </button>
-        `;
+      if (isSelf) {
+        followContainer.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>';
+      } else if (currentUser?.id && userId) {
+        const isFollowing = followingSet.has(userId);
+        followContainer.innerHTML = '<button class="btn-primary" style="width:100%;" onclick="toggleFollow(\'' + userId + '\', this)">' + (isFollowing ? '✓ Mengikuti' : '+ Ikuti Pengguna Ini') + '</button>';
       } else {
-        followContainer.innerHTML = `<div style="text-align:center; font-size:11px; color:var(--text-sub);">Ini adalah profil kamu sendiri.</div>`;
+        followContainer.innerHTML = '<div style="text-align:center;font-size:11px;color:var(--text-sub);">Masuk untuk mengikuti anggota.</div>';
       }
-
     }
-
     function openEditProfileModal() {
       const input = document.getElementById('editDisplayName');
       if (input) {
