@@ -14,23 +14,24 @@ permissions:
 
 jobs:
   build:
+    name: Build and publish CUIT APK
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
-
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-
-      - name: Generate CUIT launcher icons from official SVG
+      - name: Generate launcher icons from official CUIT SVG
         run: |
           python -m pip install --quiet cairosvg
           python - <<'PY'
@@ -40,23 +41,24 @@ jobs:
           for density, size in sizes.items():
               folder = f'android/app/src/main/res/mipmap-{density}'
               os.makedirs(folder, exist_ok=True)
-              cairosvg.svg2png(url=source, write_to=f'{folder}/ic_launcher.png',
-                               output_width=size, output_height=size)
+              cairosvg.svg2png(url=source, write_to=f'{folder}/ic_launcher.png', output_width=size, output_height=size)
           PY
-
-      - name: Build installable APK
-        run: gradle --no-daemon :app:assembleRelease
-
-      - name: Name APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk cuit.apk
-
+      - name: Build release APK
+        run: gradle --no-daemon --stacktrace :app:assembleRelease
+        working-directory: android
+      - name: Prepare downloadable APK
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk cuit.apk
+          test -s cuit.apk
       - name: Publish latest CUIT APK
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: CUIT Android — Latest
-          body: APK terbaru CUIT. Paket aplikasi baru: app.cuit.mobile.
+          body: APK terbaru CUIT. Paket aplikasi app.cuit.mobile. Ikon resmi CUIT.
           make_latest: true
           files: cuit.apk
           fail_on_unmatched_files: true
           overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
