@@ -35,7 +35,7 @@ class MainActivity : Activity() {
             }
         }
         setContentView(webView)
-        if (savedInstanceState == null) webView.loadUrl("https://cuit.app/")
+        if (savedInstanceState == null) webView.loadUrl("https://yayanhadiyanto24-ops.github.io/cuit-app/")
         else webView.restoreState(savedInstanceState)
     }
 
