@@ -4605,12 +4605,26 @@ window.openAllPromoted = function() {
   `;
 
   modal.style.display = 'flex';
-  // Pastikan gerakan vertikal di daftar ditangani panel, bukan halaman di belakangnya.
+  // Cegah overscroll daftar memicu pull-to-refresh halaman di Android.
   const list = document.getElementById('allPromotedScroll');
   if (list) {
-    list.addEventListener('touchmove', event => {
-      if (list.scrollHeight > list.clientHeight) event.stopPropagation();
+    let lastTouchY = 0;
+    list.addEventListener('touchstart', event => {
+      if (event.touches && event.touches.length) lastTouchY = event.touches[0].clientY;
     }, { passive: true });
+    list.addEventListener('touchmove', event => {
+      if (!event.touches || !event.touches.length) return;
+      const currentY = event.touches[0].clientY;
+      const movingDown = currentY > lastTouchY;
+      const movingUp = currentY < lastTouchY;
+      lastTouchY = currentY;
+      const atTop = list.scrollTop <= 0;
+      const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
+      if ((atTop && movingDown) || (atBottom && movingUp)) {
+        event.preventDefault();
+      }
+      event.stopPropagation();
+    }, { passive: false });
   }
 };
     function openPromotedDetail(postId) {
@@ -8036,6 +8050,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </style>
 
+/* ===== CUIT ANTI PULL-TO-REFRESH ANDROID ===== */
+(function () {
+  let startY = 0;
+  document.addEventListener('touchstart', function (event) {
+    if (event.touches && event.touches.length === 1) startY = event.touches[0].clientY;
+  }, { passive: true, capture: true });
+
+  document.addEventListener('touchmove', function (event) {
+    if (!event.touches || event.touches.length !== 1) return;
+    const currentY = event.touches[0].clientY;
+    const movingDown = currentY > startY;
+    startY = currentY;
+    if (!movingDown || window.scrollY > 1) return;
+
+    const modal = document.getElementById('promotedDetailModal');
+    if (!modal || getComputedStyle(modal).display === 'none') return;
+    const list = event.target && event.target.closest
+      ? event.target.closest('#allPromotedScroll')
+      : null;
+    if (list && list.scrollTop <= 0) event.preventDefault();
+  }, { passive: false, capture: true });
+})();
 
 <script>
 /* ===== CUIT REALTIME LOAD CONTROLLER ===== */
