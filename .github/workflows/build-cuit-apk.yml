@@ -1,0 +1,59 @@
+name: Build CUIT Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'assets/cuit-app-icon.svg'
+      - '.github/workflows/build-cuit-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Generate CUIT launcher icons from official SVG
+        run: |
+          python -m pip install --quiet cairosvg
+          python - <<'PY'
+          import cairosvg, os
+          source = 'assets/cuit-app-icon.svg'
+          sizes = {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}
+          for density, size in sizes.items():
+              folder = f'android/app/src/main/res/mipmap-{density}'
+              os.makedirs(folder, exist_ok=True)
+              cairosvg.svg2png(url=source, write_to=f'{folder}/ic_launcher.png',
+                               output_width=size, output_height=size)
+          PY
+
+      - name: Build installable APK
+        run: gradle --no-daemon :app:assembleRelease
+
+      - name: Publish latest CUIT APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: CUIT Android — Latest
+          body: APK terbaru CUIT. Paket aplikasi baru: app.cuit.mobile.
+          make_latest: true
+          files: android/app/build/outputs/apk/release/app-release.apk
+          fail_on_unmatched_files: true
+          overwrite_files: true
