@@ -47,6 +47,9 @@ jobs:
       - name: Build installable APK
         run: gradle --no-daemon :app:assembleRelease
 
+      - name: Name APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk cuit.apk
+
       - name: Publish latest CUIT APK
         uses: softprops/action-gh-release@v2
         with:
@@ -54,6 +57,6 @@ jobs:
           name: CUIT Android — Latest
           body: APK terbaru CUIT. Paket aplikasi baru: app.cuit.mobile.
           make_latest: true
-          files: android/app/build/outputs/apk/release/app-release.apk
+          files: cuit.apk
           fail_on_unmatched_files: true
           overwrite_files: true
