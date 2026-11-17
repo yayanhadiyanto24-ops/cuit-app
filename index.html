@@ -3181,15 +3181,13 @@ poolStatus=feePaid>0
       const start=new Date(day+'T00:00:00+07:00').toISOString(), end=new Date(new Date(day+'T00:00:00+07:00').getTime()+86400000).toISOString();
             async function rows(table,select,configure){try{let q=supabaseClient.from(table).select(select); if(configure)q=configure(q); const {data,error}=await q; if(error) return null; return data||[];}catch(e){return null;}}
 
-      const [checkins,reels,centralGameEntries,paidLedger,paidGames,socialProgressResult]=await Promise.all([
+      const [checkins,reels,centralGameEntries,socialProgressResult]=await Promise.all([
         rows('cuit_checkins','id',q=>q.eq('user_id',currentUser.id).eq('checkin_date',day)),
         rows('reels_claims','id,created_at,user_id,user_email',q=>q.gte('created_at',start).lt('created_at',end).eq('user_id',currentUser.id)),
         // Gunakan RPC yang sama dengan Raja Game agar pembacaan mengikuti akses SECURITY DEFINER.
         supabaseClient.rpc('cuit_central_get_activity_ranking',{
           p_category:'game',p_start:start,p_end:end,p_limit:500
         }),
-        rows('cuit_king_activity_ledger','points',q=>q.eq('user_id',currentUser.id).eq('category','sawer').gte('occurred_at',start).lt('occurred_at',end)),
-        rows('cuit_game_sessions','entry_fee,started_at',q=>q.eq('user_id',currentUser.id).gt('entry_fee',0).gte('started_at',start).lt('started_at',end)),
         supabaseClient.rpc('cuit_get_today_social_progress')
       ]);
 
@@ -3220,37 +3218,17 @@ if (centralGameEntries && !centralGameEntries.error && Array.isArray(centralGame
         values.posts=values.likesGiven=values.commentsGiven=values.likesReceived=values.commentsReceived='Belum terhubung';
         console.error('Gagal memuat progres sosial:',socialProgressResult?.error);
       }
-      // Total koin berbayar keluar hari ini
-if (paidLedger === null || paidGames === null) {
-  values.paidSpent = 'Belum terhubung';
-} else {
-  const fromActions = paidLedger.reduce(
-    (total, row) => total + Number(row.points || 0), 0
-  );
-
-  const fromGames = paidGames.reduce(
-    (total, row) => total + Number(row.entry_fee || 0), 0
-  );
-
-  // Biaya promosi dari kontribusi Pool Raja milik curhatan akun ini.
-  let fromPromotions = 0;
-  try {
-    const { data: promotionSpend, error: promotionSpendError } =
-      await supabaseClient.rpc('cuit_get_today_promotion_spend');
-    if (promotionSpendError) throw promotionSpendError;
-    fromPromotions = Number(promotionSpend || 0);
-  } catch (promotionSpendError) {
-    values.paidSpent = 'Belum terhubung';
-    console.error('Gagal memuat biaya promosi:', promotionSpendError);
-    fromPromotions = null;
-  }
-
-  if (fromPromotions !== null) {
-    values.paidSpent = (
-      fromActions + fromGames + fromPromotions
-    ).toLocaleString('id-ID');
-  }
-}
+      // Koin Berbayar Keluar: baca satu sumber resmi, yaitu Central Ledger.
+      // Hanya entri debit paid_coins milik akun yang sedang masuk yang dihitung.
+      try {
+        const { data: paidSpent, error: paidSpentError } =
+          await supabaseClient.rpc('cuit_get_today_paid_coin_spend');
+        if (paidSpentError) throw paidSpentError;
+        values.paidSpent = Number(paidSpent || 0).toLocaleString('id-ID');
+      } catch (paidSpentError) {
+        values.paidSpent = 'Belum terhubung';
+        console.error('Gagal memuat koin berbayar keluar dari Central Ledger:', paidSpentError);
+      }
 
       // Total permata yang diterima hari ini dari seluruh sumber CUIT
       try {
