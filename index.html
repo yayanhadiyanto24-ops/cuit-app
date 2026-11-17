@@ -8051,39 +8051,53 @@ document.addEventListener('DOMContentLoaded', function () {
 </style>
 
 <script>
-/* ===== CUIT ANTI PULL-TO-REFRESH ANDROID ===== */
+/* ===== CUIT ANTI PULL-TO-REFRESH: FEED DAN SELURUH HALAMAN ===== */
 (function () {
-  let lastY = 0;
+  if (window.__cuitAntiPullRefreshInstalled) return;
+  window.__cuitAntiPullRefreshInstalled = true;
+
+  const root = document.scrollingElement || document.documentElement;
+  let lastTouchY = 0;
+
+  // Minta browser/WebView tidak melakukan navigasi refresh saat overscroll vertikal.
+  document.documentElement.style.overscrollBehaviorY = 'none';
+  document.body.style.overscrollBehaviorY = 'none';
+
   document.addEventListener('touchstart', function (event) {
-    if (event.touches && event.touches.length === 1) lastY = event.touches[0].clientY;
+    if (event.touches && event.touches.length === 1) {
+      lastTouchY = event.touches[0].clientY;
+    }
   }, { passive: true, capture: true });
 
   document.addEventListener('touchmove', function (event) {
     if (!event.touches || event.touches.length !== 1) return;
-    const y = event.touches[0].clientY;
-    const movingDown = y > lastY;
-    lastY = y;
+
+    const currentY = event.touches[0].clientY;
+    const movingDown = currentY > lastTouchY;
+    lastTouchY = currentY;
     if (!movingDown) return;
 
-    let node = event.target && event.target.nodeType === 1 ? event.target : event.target.parentElement;
-    let scrollable = null;
+    // Jika ada area gulir di dalam modal, tahan hanya ketika area itu mentok di atas.
+    let node = event.target && event.target.nodeType === 1
+      ? event.target
+      : event.target && event.target.parentElement;
     while (node && node !== document.body && node !== document.documentElement) {
       const style = getComputedStyle(node);
-      const canScrollY = /(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1;
-      if (canScrollY) { scrollable = node; break; }
+      const scrollableY = /(auto|scroll)/.test(style.overflowY) &&
+        node.scrollHeight > node.clientHeight + 1;
+      if (scrollableY) {
+        if (node.scrollTop <= 0) event.preventDefault();
+        return;
+      }
       node = node.parentElement;
     }
 
-    // Tahan gerakan turun hanya jika halaman/area scroll sudah berada di batas atas.
-    // Scroll normal di tengah konten tetap berjalan.
-    if (scrollable) {
-      if (scrollable.scrollTop <= 0) event.preventDefault();
-    } else if (window.scrollY <= 1) {
-      event.preventDefault();
-    }
+    // Feed utama CUIT menggulir dokumen, bukan #postsList.
+    // Cegah overscroll ketika dokumen sudah tepat di paling atas.
+    if (root.scrollTop <= 1) event.preventDefault();
   }, { passive: false, capture: true });
 })();
-
+ 
 /* ===== CUIT REALTIME LOAD CONTROLLER ===== */
 (function () {
   if (window.__cuitLoadControllerInstalled) return;
