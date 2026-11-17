@@ -4632,9 +4632,18 @@ window.openAllPromoted = function() {
     let selectedPromotionType = 'biasa';
     let promotionSubmitting = false;
 
+    function cuitPromotionLevel(){
+      const paidLevel = Number(getUserLevel()?.level) || 1;
+      const activityLevel = Number(cuitActivityLevelProgress?.activity_level) || 1;
+      return Math.max(1, Math.min(10, paidLevel, 10), Math.min(10, activityLevel));
+    }
+
     function promotePost(postId) {
       closeAllPostMenus();
       if (!currentUser) return alert('Silakan masuk terlebih dahulu untuk mempromosikan curhatan.');
+      const promotionLevel = cuitPromotionLevel();
+      const specialOption = document.getElementById('promotionOptionIstimewa');
+      if (specialOption) specialOption.style.display = promotionLevel >= 2 ? '' : 'none';
       pendingPromotionPostId = postId;
       promotionSubmitting = false;
       const modal = document.getElementById('promotionChoiceModal');
@@ -4655,7 +4664,13 @@ window.openAllPromoted = function() {
     }
 
     function selectPromotionType(type) {
-      selectedPromotionType = type === 'istimewa' ? 'istimewa' : 'biasa';
+      if (type === 'istimewa' && cuitPromotionLevel() < 2) {
+        selectedPromotionType = 'biasa';
+        const feedback = document.getElementById('promotionFeedback');
+        if (feedback) feedback.textContent = 'Promosi Istimewa terbuka mulai Level 2. Level 1 hanya dapat menggunakan Promosi Biasa.';
+      } else {
+        selectedPromotionType = type === 'istimewa' ? 'istimewa' : 'biasa';
+      }
       const biasa = document.getElementById('promotionBiasaButton');
       const istimewa = document.getElementById('promotionIstimewaButton');
       biasa.style.background = selectedPromotionType === 'biasa' ? '#c81e32' : '#fff';
@@ -4711,6 +4726,12 @@ async function confirmPostPromotion() {
   const durationValue = Number(document.getElementById(inputId).value);
   const isIstimewa = selectedPromotionType === 'istimewa';
   const cost = isIstimewa ? durationValue / 5 : durationValue;
+
+  if (isIstimewa && cuitPromotionLevel() < 2) {
+    document.getElementById('promotionFeedback').textContent =
+      'Promosi Istimewa terbuka mulai Level 2. Level 1 hanya dapat menggunakan Promosi Biasa.';
+    return;
+  }
 
   const validDuration = Number.isInteger(durationValue) &&
     (isIstimewa
