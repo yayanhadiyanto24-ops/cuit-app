@@ -36,6 +36,8 @@ jobs:
         run: |
           mkdir -p _site/assets
           cp index.html _site/index.html
+          cp index.html _site/404.html
+          touch _site/.nojekyll
           cp -R assets/. _site/assets/
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
