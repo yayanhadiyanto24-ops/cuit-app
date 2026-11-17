@@ -6168,9 +6168,10 @@ const CUIT_LEVEL_FACILITIES = [
         host.appendChild(item);
       });
     }
-    const CUIT_POST_STYLE_DEFAULT = {border:'#a83249',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif'};
+    const CUIT_POST_STYLE_DEFAULT = {border:'#a83249',background:'#ffffff',bold:false,italic:false,decorBorder:'none',decorBackground:'none',textColor:'#4a2028',fontFamily:'system-ui, sans-serif',fontSize:'14px',textStyle:'normal'};
     function cuitCurrentStyleLevel(){
-      return getUserLevel().level;
+      const raw = Number(getUserLevel()?.level);
+      return Number.isFinite(raw) ? Math.max(1, Math.min(10, Math.floor(raw))) : 1;
     }
     async function cuitRefreshMyLevel(){
       if(!currentUser?.id || !supabaseClient) return cuitCurrentStyleLevel();
@@ -6183,11 +6184,27 @@ const CUIT_LEVEL_FACILITIES = [
       return cuitCurrentStyleLevel();
     }
     function cuitPostStyleRead(){
+      // Nilai kontrol yang masih terkunci tidak boleh ikut terbaca sebagai gaya posting.
+      // Ini menjaga level 1 tetap memakai tampilan dasar meskipun opsi terkunci
+      // memiliki pilihan pertama yang berwarna/berdekorasi.
       const style={...CUIT_POST_STYLE_DEFAULT};
-      const fields={border:'postBorderStyle',background:'postBackgroundStyle',decorBorder:'postDecorBorder',decorBackground:'postDecorBackground',textColor:'postTextColor',fontFamily:'postFontFamily',fontSize:'postFontSize',textStyle:'postTextStyle'};
-      Object.entries(fields).forEach(([key,id])=>{const el=document.getElementById(id);if(el)style[key]=el.value;});
-      style.bold=document.getElementById('postBoldBtn')?.classList.contains('selected')||false;
-      style.italic=document.getElementById('postItalicBtn')?.classList.contains('selected')||false;
+      const level=cuitCurrentStyleLevel();
+      const fields={
+        border:['postBorderStyle',3],
+        textColor:['postTextColor',3],
+        background:['postBackgroundStyle',4],
+        fontFamily:['postFontFamily',6],
+        fontSize:['postFontSize',7],
+        decorBorder:['postDecorBorder',8],
+        decorBackground:['postDecorBackground',9],
+        textStyle:['postTextStyle',10]
+      };
+      Object.entries(fields).forEach(([key,[id,unlock]])=>{
+        const el=document.getElementById(id);
+        if(el && level>=unlock) style[key]=el.value;
+      });
+      if(level>=4) style.bold=!!document.getElementById('postBoldBtn')?.classList.contains('selected');
+      if(level>=5) style.italic=!!document.getElementById('postItalicBtn')?.classList.contains('selected');
       return style;
     }
 
@@ -6991,18 +7008,8 @@ async function submitNewPost() {
   const postStyle = cuitPostStyleRead();
   const styleLevel = cuitCurrentStyleLevel();
 
-  if (
-    (postStyle.border !== 'solid' && styleLevel < 3) ||
-    (postStyle.background !== '#ffffff' && styleLevel < 4) ||
-    (postStyle.bold && styleLevel < 5) ||
-    (postStyle.italic && styleLevel < 6) ||
-    (postStyle.decorBorder !== 'none' && styleLevel < 7) ||
-    (postStyle.decorBackground !== 'none' && styleLevel < 8) ||
-    (postStyle.textColor !== '#4a2028' && styleLevel < 9) ||
-    (postStyle.fontFamily !== 'system-ui, sans-serif' && styleLevel < 10)
-  ) {
-    return alert('Ada fasilitas tampilan yang belum terbuka pada levelmu.');
-  }
+  // cuitPostStyleRead() hanya mengembalikan fasilitas yang sudah terbuka.
+  // Jangan menolak posting karena nilai default kontrol yang sedang terkunci.
 
   if (!content) return alert('Isi curhatan tidak boleh kosong!');
   if (rewardCoins < 0 || !Number.isSafeInteger(rewardCoins)) {
