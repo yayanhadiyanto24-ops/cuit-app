@@ -7,6 +7,12 @@ android {
     namespace 'app.cuit.mobile'
     compileSdk 35
 
+    signingConfigs { debug { } }
+
+    buildTypes {
+        release { signingConfig signingConfigs.debug }
+    }
+
     defaultConfig {
         applicationId 'app.cuit.mobile'
         minSdk 23
