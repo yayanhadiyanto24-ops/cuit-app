@@ -1,14 +1,14 @@
 package app.cuit.mobile
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.ComponentActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : Activity() {
     private lateinit var webView: WebView
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -16,8 +16,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.statusBarColor = android.graphics.Color.rgb(190, 12, 37)
         window.navigationBarColor = android.graphics.Color.rgb(95, 7, 20)
-        window.decorView.systemUiVisibility = 0
-
         webView = WebView(this)
         webView.overScrollMode = WebView.OVER_SCROLL_NEVER
         webView.isVerticalScrollBarEnabled = false
@@ -32,14 +30,8 @@ class MainActivity : ComponentActivity() {
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                val url = request.url
-                return if (url.scheme == "https" && (url.host == "cuit.app" || url.host?.endsWith(".cuit.app") == true)) {
-                    false
-                } else if (url.scheme == "http" || url.scheme == "https") {
-                    false
-                } else {
-                    true
-                }
+                val scheme = request.url.scheme
+                return scheme != "https" && scheme != "http"
             }
         }
         setContentView(webView)
