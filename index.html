@@ -8050,30 +8050,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </style>
 
+<script>
 /* ===== CUIT ANTI PULL-TO-REFRESH ANDROID ===== */
 (function () {
-  let startY = 0;
+  let lastY = 0;
   document.addEventListener('touchstart', function (event) {
-    if (event.touches && event.touches.length === 1) startY = event.touches[0].clientY;
+    if (event.touches && event.touches.length === 1) lastY = event.touches[0].clientY;
   }, { passive: true, capture: true });
 
   document.addEventListener('touchmove', function (event) {
     if (!event.touches || event.touches.length !== 1) return;
-    const currentY = event.touches[0].clientY;
-    const movingDown = currentY > startY;
-    startY = currentY;
-    if (!movingDown || window.scrollY > 1) return;
+    const y = event.touches[0].clientY;
+    const movingDown = y > lastY;
+    lastY = y;
+    if (!movingDown) return;
 
-    const modal = document.getElementById('promotedDetailModal');
-    if (!modal || getComputedStyle(modal).display === 'none') return;
-    const list = event.target && event.target.closest
-      ? event.target.closest('#allPromotedScroll')
-      : null;
-    if (list && list.scrollTop <= 0) event.preventDefault();
+    let node = event.target && event.target.nodeType === 1 ? event.target : event.target.parentElement;
+    let scrollable = null;
+    while (node && node !== document.body && node !== document.documentElement) {
+      const style = getComputedStyle(node);
+      const canScrollY = /(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1;
+      if (canScrollY) { scrollable = node; break; }
+      node = node.parentElement;
+    }
+
+    // Tahan gerakan turun hanya jika halaman/area scroll sudah berada di batas atas.
+    // Scroll normal di tengah konten tetap berjalan.
+    if (scrollable) {
+      if (scrollable.scrollTop <= 0) event.preventDefault();
+    } else if (window.scrollY <= 1) {
+      event.preventDefault();
+    }
   }, { passive: false, capture: true });
 })();
 
-<script>
 /* ===== CUIT REALTIME LOAD CONTROLLER ===== */
 (function () {
   if (window.__cuitLoadControllerInstalled) return;
