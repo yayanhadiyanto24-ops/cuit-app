@@ -3853,15 +3853,55 @@ async function openDailyCheckin() {
       const overlay=document.getElementById('waterSortGameOverlay');
       const frame=document.getElementById('cuitWaterSortFrame');
       if(!overlay||!frame)return;
-      if(frame.src==='about:blank') frame.src='./games/water-sort-alkimia.html';
+      if(!currentUser){if(typeof showCuitToast==='function')showCuitToast('Silakan masuk untuk memainkan Alkimia Warna.');else console.info('Silakan masuk untuk memainkan Alkimia Warna.');return;}
       overlay.style.display='block';
       document.body.style.overflow='hidden';
+      if(frame.dataset.cuitReady==='1'){requestCuitWaterSortSession(1);return;}
+      frame.addEventListener('load',()=>{frame.dataset.cuitReady='1';requestCuitWaterSortSession(1);},{once:true});
+      if(frame.src==='about:blank')frame.src='./games/water-sort-alkimia.html';
+    }
+    async function requestCuitWaterSortSession(level){
+      const frame=document.getElementById('cuitWaterSortFrame');
+      if(!currentUser||!frame||frame.dataset.cuitReady!=='1')return;
+      try{
+        const {data,error}=await supabaseClient.rpc('cuit_water_sort_start_session',{p_level:Number(level)||1});
+        if(error)throw error;
+        if(!data||!data.ok)throw new Error(data?.message||'Sesi permainan gagal dibuat.');
+        frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_INIT',payload:data},location.origin);
+      }catch(err){
+        console.error('Gagal membuat sesi Alkimia Warna:',err);
+        if(typeof showCuitToast==='function')showCuitToast(err.message||'Gagal memulai permainan.');
+      }
     }
     function closeCuitWaterSort() {
       const overlay=document.getElementById('waterSortGameOverlay');
-      if(overlay) overlay.style.display='none';
+      if(overlay)overlay.style.display='none';
       document.body.style.overflow='';
     }
+    window.addEventListener('message',async event=>{
+      const frame=document.getElementById('cuitWaterSortFrame');
+      if(!frame||event.origin!==location.origin||event.source!==frame.contentWindow)return;
+      const msg=event.data||{};
+      if(msg.type==='CUIT_WATER_SORT_START'){
+        await requestCuitWaterSortSession(msg.payload?.level||1);
+        return;
+      }
+      if(msg.type!=='CUIT_WATER_SORT_RESULT')return;
+      const p=msg.payload||{};
+      try{
+        const {data,error}=await supabaseClient.rpc('cuit_water_sort_finish_session',{
+          p_session_id:p.session_id,
+          p_move_trace:p.move_trace||[],
+          p_status:p.status||'completed'
+        });
+        if(error)throw error;
+        await updateCoinUI();
+        frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:data},location.origin);
+      }catch(err){
+        console.error('Validasi Alkimia Warna gagal:',err);
+        frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:{ok:false,message:err.message||'Validasi server gagal.'}},location.origin);
+      }
+    });
 \n    function switchTab(pageId, navElement) {
       if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
       if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
