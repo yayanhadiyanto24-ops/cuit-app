@@ -1599,6 +1599,7 @@
 
   // 2. Memulai Game Saat Tombol Diklik
   async function startGame() {
+    if (!window.cuitRequireMember('bermain 3 Huruf Kilat')) return;
     if (gameStarting) return;
     gameStarting = true;
     startBtn.disabled = true;
@@ -2416,6 +2417,7 @@ poolStatus=feePaid>0
   });
 }
   async function start() {
+  if (!window.cuitRequireMember('bermain Balap Kelereng')) return;
   if (busy || session) return;
 
   busy = true;
@@ -3008,7 +3010,16 @@ poolStatus=feePaid>0
   <!-- MODAL LOGIN/DAFTAR -->
   <div id="authModal" class="modal">
     <div class="modal-content">
-      <h3 style="margin-bottom: 8px;">Masuk / Daftar Akun Real</h3>
+      <div style="padding:12px;margin:-2px -2px 12px;border-radius:13px;background:linear-gradient(135deg,#760b1d,#c81e32 58%,#8e1025);border:1px solid #e0b64c;color:#fff;">
+        <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;color:#ffe39a;">KELUARGA BESAR CUIT</div>
+        <h3 id="authIntroTitle" style="font-size:19px;line-height:1.2;margin:4px 0 6px;color:#fff;">Gabung Bersama CUIT!</h3>
+        <div id="authIntroText" style="font-size:11px;line-height:1.45;color:#fff2d2;">Daftar gratis untuk mulai berinteraksi dan menikmati pengalaman CUIT secara lengkap.</div>
+      </div>
+      <div style="padding:9px 10px;margin-bottom:10px;border:1px solid #f0d99a;border-radius:11px;background:linear-gradient(135deg,#fffdf5,#fff5f5);">
+        <div style="font-size:11px;font-weight:900;color:#9a6b08;margin-bottom:5px;">✨ Keuntungan menjadi anggota</div>
+        <div style="font-size:10px;line-height:1.65;color:#58343a;">🪙 Berkesempatan memperoleh Koin dan Permata CUIT<br>❤️ Like, komentar, Gift, dan ikuti anggota lain<br>🏆 Kumpulkan poin, naik level, dan masuk peringkat Raja CUIT<br>🎮 Main game dan catat hasil serta hadiah di akunmu<br>✍️ Terbitkan curhatan dan bangun komunitas</div>
+      </div>
+      <h3 style="font-size:13px;margin-bottom:8px;color:#8f1025;">Masuk atau buat akun gratis</h3>
       <input type="email" id="email" placeholder="Alamat Email">
       <input type="password" id="password" placeholder="Kata Sandi">
 
@@ -3647,6 +3658,7 @@ async function openDailyCheckin() {
     }
 
     async function sharePost(postId, postText) {
+      if (!window.cuitRequireMember('membagikan curhatan')) return;
       closeAllPostMenus();
       const shareUrl = `${window.location.origin}${window.location.pathname}#post-${postId}`;
       const shareText = postText ? `"${postText.substring(0, 80)}..." - Baca selengkapnya di CUIT!\n${shareUrl}` : `Lihat curhatan ini di CUIT!\n${shareUrl}`;
@@ -3683,6 +3695,7 @@ async function openDailyCheckin() {
     }
 
     function reportPost(postId) {
+      if (!window.cuitRequireMember('melaporkan curhatan')) return;
       closeAllPostMenus();
       alert("🚩 Laporan berhasil dikirim! Tim moderasi CUIT akan meninjau postingan ini.");
     }
@@ -4693,6 +4706,7 @@ window.openAllPromoted = function() {
     }
 
     function promotePost(postId) {
+      if (!window.cuitRequireMember('mempromosikan curhatan')) return;
       closeAllPostMenus();
       if (!currentUser) return alert('Silakan masuk terlebih dahulu untuk mempromosikan curhatan.');
       const promotionLevel = cuitPromotionLevel();
@@ -5074,6 +5088,7 @@ function renderCardHTML(p) {
 }
 
     async function toggleFollow(targetUserId, btn) {
+      if (!window.cuitRequireMember('mengikuti anggota lain')) return;
       if (!currentUser?.id || !targetUserId || targetUserId === currentUser.id) return;
       try {
         const { data, error } = await supabaseClient.rpc('cuit_toggle_follow_by_id', { p_target_user_id: targetUserId });
@@ -5308,6 +5323,7 @@ function syncPostLikeButtons(postId, post) {
 }
 
 async function toggleLike(postId) {
+  if (!window.cuitRequireMember('memberi Like')) return;
   const strPostId = String(postId);
   let guestToken = localStorage.getItem('cuit_guest_token');
   if (!guestToken) {
@@ -5491,7 +5507,8 @@ async function toggleLike(postId) {
     }
 
     async function sendCommentReply(commentId) {
-      if (!currentUser || !currentUser.id) return alert('Silakan masuk untuk membalas komentar.');
+      if (!window.cuitRequireMember('membalas komentar')) return;
+      if (!currentUser || !currentUser.id) return;
       const input = document.getElementById('replyInput_' + commentId);
       const content = input ? input.value.trim() : '';
       if (!content) return alert('Isi balasan tidak boleh kosong.');
@@ -5605,6 +5622,7 @@ async function toggleLike(postId) {
     }
 
 async function submitCommentAction() {
+  if (!window.cuitRequireMember('mengirim komentar')) return;
   const input = document.getElementById('commentInputText');
   const comm = input.value.trim();
 
@@ -5706,6 +5724,7 @@ async function submitCommentAction() {
 }
 
     function openGiftModal(postId) {
+      if (!window.cuitRequireMember('mengirim Gift')) return;
       activeTargetPostId = postId;
       document.getElementById('giftModal').style.display = 'flex';
     }
@@ -6813,6 +6832,7 @@ container.innerHTML = html;
     }
 
     async function claimVideoRewardAndClose() {
+      if (!window.cuitRequireMember('mengklaim hadiah Nonton')) return;
       const btnClose = document.getElementById('btnCloseVideo');
       if (!btnClose || btnClose.disabled) return;
 
@@ -6944,6 +6964,35 @@ await updateCoinUI(true);
       }
     }
 
+    window.cuitRequireMember = function(activity) {
+      if (currentUser && currentUser.id) return true;
+      const labels = {
+        'memberi Like': 'Bergabunglah agar kamu bisa menyukai curhatan dan memberi dukungan kepada penulis.',
+        'mengirim komentar': 'Jadilah bagian dari percakapan. Daftar agar komentarmu tersimpan dan kamu bisa ikut berdiskusi.',
+        'mengikuti anggota lain': 'Daftar untuk mengikuti anggota favoritmu dan membangun jaringan pertemanan.',
+        'mengirim Gift': 'Daftar untuk mengirim Gift, memberi apresiasi, dan mendukung kreator CUIT.',
+        'menerbitkan curhatan': 'Daftar agar curhatanmu memiliki identitas, tersimpan di profil, dan berkesempatan memperoleh apresiasi.',
+        'membagikan curhatan': 'Daftar untuk menggunakan fitur berbagi dan ikut menyebarkan cerita di komunitas CUIT.',
+        'melaporkan curhatan': 'Masuk atau daftar agar laporanmu tercatat dan dapat ditindaklanjuti tim moderasi.',
+        'mempromosikan curhatan': 'Daftar untuk membuka fitur promosi dan menampilkan curhatanmu lebih luas.',
+        'membalas komentar': 'Daftar agar balasanmu tersimpan sebagai bagian dari diskusi.',
+        'bermain Balap Kelereng': 'Daftar untuk mengikuti Balap Kelereng. Hasil permainan, biaya, poin, dan hadiah akan tercatat pada akunmu.',
+        'bermain 3 Huruf Kilat': 'Daftar untuk bermain 3 Huruf Kilat, mengumpulkan poin, dan mencatat hasil permainanmu.',
+        'bermain Roulette': 'Daftar untuk mengikuti tantangan Roulette dan mencatat aktivitas serta hasilnya.',
+        'mengklaim hadiah Nonton': 'Daftar agar aktivitas Nonton dan hadiah yang memenuhi syarat tercatat pada akunmu.'
+      };
+      const title = document.getElementById('authIntroTitle');
+      const intro = document.getElementById('authIntroText');
+      if (title) title.textContent = 'Gabung untuk ' + String(activity || 'menikmati CUIT').replace(/^./, c => c.toUpperCase()) + '!';
+      if (intro) intro.textContent = labels[activity] || 'Daftar gratis untuk melakukan aktivitas ini, menyimpan riwayat, dan menikmati seluruh fitur anggota CUIT.';
+      const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
+      const referral = document.getElementById('referralCodeInput');
+      if (referral) referral.value = activeSponsor;
+      const modal = document.getElementById('authModal');
+      if (modal) modal.style.display = 'flex';
+      return false;
+    };
+
     function handleAuthAction() {
       if (currentUser) {
         supabaseClient.auth.signOut().then(() => {
@@ -6952,9 +7001,7 @@ await updateCoinUI(true);
           location.reload();
         });
       } else {
-        const activeSponsor = localStorage.getItem('cuit_active_sponsor_ref') || CONFIG.DEFAULT_SPONSOR;
-        document.getElementById('referralCodeInput').value = activeSponsor;
-        document.getElementById('authModal').style.display = 'flex';
+        window.cuitRequireMember('menjadi anggota CUIT');
       }
     }
 
@@ -7055,6 +7102,7 @@ function updateCommentCharCount(input) {
 }
 
 async function submitNewPost() {
+  if (!window.cuitRequireMember('menerbitkan curhatan')) return;
   const content = document.getElementById('postContent').value.trim();
   const feeling = document.getElementById('postFeeling').value;
   const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
@@ -7870,6 +7918,7 @@ document.addEventListener('DOMContentLoaded', function () {
   return new Promise(resolve=>setTimeout(resolve,4400));
  }
  async function spin(){
+  if(!window.cuitRequireMember('bermain Roulette'))return;
   if(busy)return;
   if(activeMission){status('Misi belum selesai. Selesaikan LIKE/KOMEN terlebih dahulu.');return;}
   const client=getClient();if(!(await signedIn())?.id||!client){status('Sesi login tidak ditemukan. Silakan masuk kembali.');return;}
