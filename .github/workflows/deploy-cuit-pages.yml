@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
-      - 'assets/**'
+      - 'assets/**'\n      - 'games/**'
       - 'CNAME'
       - '.github/workflows/deploy-cuit-pages.yml'
   workflow_dispatch:
@@ -34,11 +34,11 @@ jobs:
           enablement: true
       - name: Prepare website
         run: |
-          mkdir -p _site/assets
+          mkdir -p _site/assets _site/games
           cp index.html _site/index.html
           cp index.html _site/404.html
           touch _site/.nojekyll
-          cp -R assets/. _site/assets/
+          cp -R assets/. _site/assets/\n          if [ -d games ]; then cp -R games/. _site/games/; fi
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
