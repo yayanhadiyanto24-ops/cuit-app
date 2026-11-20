@@ -7776,12 +7776,19 @@ document.addEventListener('DOMContentLoaded', function () {
  function positionWheelLabels(){
   const wheel=$('cuit-roulette-edu-wheel');if(!wheel)return;
   const size=wheel.getBoundingClientRect().width;if(!size)return;
-  const outerRadius=Math.max(20,size/2-17);
-  const innerRadius=Math.max(18,size*0.22);
-  const labelWidth=Math.max(30,outerRadius-innerRadius);
+  // Sisakan jarak aman dari tepi roda agar ujung setiap kata tetap di dalam juring.
+  const outerRadius=Math.max(24,size/2-25);
+  const innerRadius=Math.max(22,size*0.23);
+  const labelWidth=Math.max(24,outerRadius-innerRadius);
   wheel.querySelectorAll('.cuit-roulette-edu-label').forEach(label=>{
    const angle=Number(label.dataset.angle||0);
+   const textLength=(label.textContent||'').length;
+   const fontSize=Math.max(5.2,Math.min(7.5,labelWidth/Math.max(1,textLength)*1.45));
    label.style.width=labelWidth+'px';
+   label.style.fontSize=fontSize+'px';
+   label.style.boxSizing='border-box';
+   label.style.textAlign='right';
+   label.style.overflow='hidden';
    label.style.transform='rotate('+(angle-90)+'deg) translateX('+innerRadius+'px)';
   });
  }
