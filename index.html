@@ -3444,10 +3444,7 @@ function showCuitCheckinModal(day) {
 }
 
 async function openDailyCheckin() {
-  if (!currentUser) {
-    alert('Silakan masuk terlebih dahulu untuk melakukan absen.');
-    return;
-  }
+  if (!window.cuitRequireMember('melakukan Absen')) return;
 
   const day = new Date().toLocaleDateString('en-CA', {
     timeZone: 'Asia/Jakarta'
@@ -6727,6 +6724,7 @@ container.innerHTML = html;
     }
 
     function playEmbeddedVideo(targetUrl, slot, extraMode = false) {
+      if (!window.cuitRequireMember('menonton video misi')) return;
       if (!targetUrl || targetUrl.trim() === '' || targetUrl === 'null') {
         return alert('Belum ada link video yang dipasang oleh Admin pada slot ini.');
       }
@@ -6979,7 +6977,9 @@ await updateCoinUI(true);
         'bermain Balap Kelereng': 'Daftar untuk mengikuti Balap Kelereng. Hasil permainan, biaya, poin, dan hadiah akan tercatat pada akunmu.',
         'bermain 3 Huruf Kilat': 'Daftar untuk bermain 3 Huruf Kilat, mengumpulkan poin, dan mencatat hasil permainanmu.',
         'bermain Roulette': 'Daftar untuk mengikuti tantangan Roulette dan mencatat aktivitas serta hasilnya.',
-        'mengklaim hadiah Nonton': 'Daftar agar aktivitas Nonton dan hadiah yang memenuhi syarat tercatat pada akunmu.'
+        'mengklaim hadiah Nonton': 'Daftar agar aktivitas Nonton dan hadiah yang memenuhi syarat tercatat pada akunmu.',
+        'menonton video misi': 'Daftar agar aktivitas menonton video dan klaim hadiah yang memenuhi syarat tercatat pada akunmu.',
+        'melakukan Absen': 'Daftar untuk melakukan Absen, mendapatkan bonus harian, dan menyimpan rangkaian kehadiran pada akunmu.'
       };
       const title = document.getElementById('authIntroTitle');
       const intro = document.getElementById('authIntroText');
@@ -7895,6 +7895,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }catch(e){console.error('Roulette bank check:',e);if($('cuit-roulette-edu-launch'))$('cuit-roulette-edu-launch').style.display='none';}
  }
  async function open(){
+  if(!window.cuitRequireMember('bermain Roulette'))return;
   ensureUI();$('cuit-roulette-edu-mini').style.display='none';$('cuit-roulette-edu-card').style.display='block';$('cuit-roulette-edu-overlay').style.display='flex';
   positionWheelLabels();
   status('Memeriksa sesi akun...');
