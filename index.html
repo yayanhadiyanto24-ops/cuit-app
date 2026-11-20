@@ -8080,6 +8080,18 @@ document.addEventListener('DOMContentLoaded', function () {
 #promotedCarousel>button{scroll-snap-align:none!important}
 #promotedCarousel:active{cursor:grabbing}
 
+
+/* CUIT: Curhatan Istimewa melebar penuh tanpa padding horizontal */
+@media (max-width: 599px) {
+  #pageHome #specialPostsSection {
+    width: calc(100% + 12px) !important;
+    margin-left: -6px !important;
+    margin-right: -6px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
 </style>
 
 <script>
