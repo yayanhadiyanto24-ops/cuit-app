@@ -7743,7 +7743,7 @@ document.addEventListener('DOMContentLoaded', function () {
 #cuit-roulette-edu-wheel{position:absolute;inset:0;width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:5px solid #e1bd58;background:repeating-conic-gradient(#bd172d 0deg 30deg,#f4d77d 30deg 60deg,#fff8e9 60deg 90deg,#8e1028 90deg 120deg);box-shadow:0 4px 14px #0003;transition:transform 4.3s cubic-bezier(.12,.72,.12,1);will-change:transform}
 #cuit-roulette-edu-center{position:absolute;z-index:4;left:50%;top:50%;width:25%;height:25%;box-sizing:border-box;transform:translate(-50%,-50%);display:grid;place-items:center;border-radius:50%;background:#fff8df;border:3px solid #d7ad42;box-shadow:0 2px 6px #0005;pointer-events:none}
 #cuit-roulette-edu-center img{display:block;width:82%;height:82%;object-fit:contain;transform:none!important;animation:none!important}
-.cuit-roulette-edu-label{position:absolute;left:50%;top:50%;width:46px;height:24px;margin:-12px 0 0 -23px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:7.5px;line-height:1.05;font-weight:950;pointer-events:none;white-space:normal;overflow-wrap:anywhere;text-shadow:none}.cuit-roulette-edu-label.is-light{color:#4a1820;text-shadow:0 1px 0 rgba(255,255,255,.55)}.cuit-roulette-edu-label.is-dark{color:#fff;text-shadow:0 1px 2px #3d0711}
+.cuit-roulette-edu-label{position:absolute;left:50%;top:50%;width:104px;height:18px;margin:-9px 0 0 -52px;display:block;text-align:left;font-size:7.5px;line-height:18px;font-weight:950;letter-spacing:-.15px;pointer-events:none;white-space:nowrap;overflow:visible;text-shadow:none}.cuit-roulette-edu-label.is-light{color:#4a1820;text-shadow:0 1px 0 rgba(255,255,255,.55)}.cuit-roulette-edu-label.is-dark{color:#fff;text-shadow:0 1px 2px #3d0711}
 #cuit-roulette-edu-pointer{position:absolute;z-index:3;top:-5px;left:calc(50% - 10px);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:24px solid #a51026;filter:drop-shadow(0 2px 2px #0005)}
 #cuit-roulette-edu-status{text-align:center;font-size:12px;line-height:1.45;color:#70434b;min-height:22px;margin:8px 0}
 #cuit-roulette-edu-spin,#cuit-roulette-edu-close,#cuit-roulette-edu-publish{width:100%;border:0;border-radius:11px;padding:12px;margin-top:8px;font-weight:950}
@@ -7775,11 +7775,11 @@ document.addEventListener('DOMContentLoaded', function () {
  function status(t){const n=$('cuit-roulette-edu-status');if(n)n.textContent=t;}
  function positionWheelLabels(){
   const wheel=$('cuit-roulette-edu-wheel');if(!wheel)return;
-  const radius=Math.round(wheel.getBoundingClientRect().width*0.365);
+  const radius=Math.round(wheel.getBoundingClientRect().width*0.30);
   if(!radius)return;
   wheel.querySelectorAll('.cuit-roulette-edu-label').forEach(label=>{
    const angle=Number(label.dataset.angle||0);
-   label.style.transform='rotate('+angle+'deg) translateY(-'+radius+'px) rotate('+(-angle)+'deg)';
+   label.style.transform='rotate('+angle+'deg) translateY(-'+radius+'px) rotate(-90deg)';
   });
  }
  function ensureUI(){
