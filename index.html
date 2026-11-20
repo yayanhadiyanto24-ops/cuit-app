@@ -997,6 +997,7 @@
       <button type="button" onclick="openReelsModal()"><span class="shortcut-icon nonton"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="2.5" width="22" height="27" rx="6" fill="#fff" stroke="#1877f2" stroke-width="2"/><path d="M13 10 L22 16 L13 22Z" fill="#1877f2"/><path d="M8 5 L13 5 M19 27 L24 27" stroke="#8cc4ff" stroke-width="1.7" stroke-linecap="round"/></svg></span><span>Nonton</span></button>
       <button type="button" onclick="switchTab('pageContentAI',null);" aria-label="Buka KontenAI"><span class="shortcut-icon ai"><svg viewBox="0 0 40 40" role="img" aria-label="Ikon AI berkilau"><defs><linearGradient id="cuitAiRed" x1="0" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#ff5b45"/><stop offset=".48" stop-color="#e7192f"/><stop offset="1" stop-color="#9e0926"/></linearGradient><linearGradient id="cuitAiGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff5b0"/><stop offset=".5" stop-color="#e9ad25"/><stop offset="1" stop-color="#9b5a08"/></linearGradient></defs><path d="M7 27C2 18 8 7 19 5c8-2 15 2 17 8" fill="none" stroke="url(#cuitAiRed)" stroke-width="3.2" stroke-linecap="round"/><path d="M33 13c5 9-1 20-12 22-7 1-13-2-16-7" fill="none" stroke="url(#cuitAiGold)" stroke-width="2.6" stroke-linecap="round"/><text x="19.5" y="27" text-anchor="middle" font-size="20" font-weight="900" font-family="Arial,sans-serif" font-style="italic" fill="url(#cuitAiRed)" stroke="#fff4d1" stroke-width=".7" paint-order="stroke">AI</text><path d="M7 4l1.7 4.3L13 10l-4.3 1.7L7 16l-1.7-4.3L1 10l4.3-1.7L7 4zM33 25l1.2 3.1L37.5 29l-3.3 1.2L33 33.5l-1.2-3.3-3.3-1.2 3.3-1.2L33 25z" fill="url(#cuitAiGold)" stroke="#fff9d9" stroke-width=".6"/></svg></span><span>KontenAI</span></button>
       <button type="button" id="cuit-roulette-edu-launch" aria-label="Buka Roulette CUIT" style="display:none"><span class="shortcut-icon" style="background:linear-gradient(145deg,#fff2c7,#f8d98a);border:1px solid #e6bf55;">🎡</span><span>Roulette</span></button>
+      <button type="button" id="cuit-water-sort-shortcut" onclick="openCuitWaterSort()" aria-label="Main Alkimia Warna"><span class="shortcut-icon" style="background:linear-gradient(145deg,#fff0b8,#f4a340);border:1px solid #e6bf55;">🧪</span><span>Alkimia</span></button>
     </div>
 
     <!-- CURHATAN ISTIMEWA: empat jendela kurasi -->
@@ -1440,11 +1441,11 @@
       .cuit-kilat-page #kilatCurhatBtn:active{transform:translateY(1px)}
       @media(max-height:650px){.cuit-kilat-page .kilat-shell{padding:9px}.cuit-kilat-page .kilat-tile{height:min(16vw,5.5dvh,50px)}.cuit-kilat-page .kilat-panel{padding:7px}}
 
-    .home-shortcuts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
+    .home-shortcuts{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:4px 0 5px;padding:5px;background:linear-gradient(105deg,#fff 0%,#fff9f7 54%,#f4f7ff 100%);border:1px solid #f0e2e5;border-radius:16px;box-shadow:0 3px 10px rgba(52,38,60,.045)}
     .home-shortcuts button{min-width:0;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:1px 0;color:#45343a;font-size:9px;font-weight:850;cursor:pointer}
     .shortcut-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(30,35,60,.06)}
     .shortcut-icon svg{width:24px;height:24px}.shortcut-icon.levelku{background:linear-gradient(145deg,#fff3c4,#f8d878);border:1px solid #e5bd4e;color:#805300}.shortcut-icon.ai{background:linear-gradient(145deg,#fff0c2,#ffe0e5);border:1px solid #e8c56b;color:#a50f2b}.shortcut-icon.game{background:#fff0e2}.shortcut-icon.checkin{background:#e5f8ee}.shortcut-icon.king{background:#fff4c9}.shortcut-icon.progress{background:#f1e8ff}.shortcut-icon.nonton{background:#e7f2ff;border:1px solid #c7e0ff}
-    @media(min-width:600px){.home-shortcuts{max-width:600px;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
+    @media(min-width:600px){.home-shortcuts{max-width:600px;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}.home-shortcuts button{font-size:11px}.shortcut-icon{width:44px;height:44px}}
 
       .pool-shortcut{float:right;margin:-34px 0 8px 8px;border:1px solid #e5b8bd;border-radius:999px;padding:6px 10px;background:#fff;color:#b91c1c;font-size:11px;font-weight:850;box-shadow:0 2px 6px #b91c1c12}
       .page-section{position:relative}.page-section>.pool-shortcut{position:absolute;right:12px;top:12px;float:none;margin:0;z-index:2}
@@ -2652,13 +2653,6 @@ poolStatus=feePaid>0
 
   <!-- 5. HALAMAN PROFIL -->
   
-    <section id="waterSortCuitCard" style="margin:12px auto;max-width:520px;padding:14px;border:1px solid #e8cf83;border-radius:18px;background:linear-gradient(135deg,#fffdf5,#fff3e8);box-shadow:0 5px 18px #8d202012">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#fbbf24,#c2410c);font-size:24px">🧪</div>
-        <div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:900;letter-spacing:1px;color:#9a6b13">PERMAINAN CUIT</div><h2 style="margin:2px 0;color:#a51627;font-size:18px;font-weight:950">Alkimia Warna</h2><p style="margin:0;color:#806a6a;font-size:11px">Water Sort · Susun warna dengan langkah seefisien mungkin.</p></div>
-      </div>
-      <button type="button" onclick="openCuitWaterSort()" style="width:100%;margin-top:12px;padding:11px;border:0;border-radius:12px;background:linear-gradient(110deg,#b91c1c,#e3b43b);color:white;font-weight:900;font-size:12px">🧪 Main Alkimia Warna</button>
-    </section>
     <div id="waterSortGameOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:#080d1beF;padding:10px">
       <div style="height:100%;max-width:760px;margin:auto;display:flex;flex-direction:column;background:#fff;border-radius:16px;overflow:hidden">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;font-weight:900;font-size:13px">
