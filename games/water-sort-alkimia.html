@@ -27,7 +27,7 @@ function gen(l){if(l===1){let a=[['R','B','R','R'],['B','R','B'],['B']];let b=bf
 function reward(){return Math.max(1,optimal-Math.max(0,moves-optimal))}
 function hud(){document.getElementById('level').textContent=level;document.getElementById('optimal').textContent=optimal;document.getElementById('moves').textContent=moves;document.getElementById('potential').textContent=over?'—':reward()+' 🪙';}
 function render(){let root=document.getElementById('tubes');root.innerHTML='';tubes.forEach((t,i)=>{let w=document.createElement('div');w.className='tube'+(selected===i?' selected':'');w.onclick=()=>tap(i);let rim=document.createElement('div');rim.className='rim';let g=document.createElement('div');g.className='glass';t.forEach(c=>{let s=document.createElement('div');s.className='slot';s.style.background='linear-gradient(180deg,#ffffff33,'+C[c]+')';g.appendChild(s)});w.append(rim,g);root.appendChild(w)});hud()}
-function start(l){level=l;let x=gen(l);initial=clone(x.a);tubes=clone(x.a);optimal=x.optimal;path=x.path;history=[];moves=0;selected=-1;over=false;document.getElementById('hint').textContent='Satukan warna dengan langkah sesedikit mungkin.';render()}
+function start(l){window.moveTrace=[];level=l;let x=gen(l);initial=clone(x.a);tubes=clone(x.a);optimal=x.optimal;path=x.path;history=[];moves=0;selected=-1;over=false;document.getElementById('hint').textContent='Satukan warna dengan langkah sesedikit mungkin.';render()}
 function tap(i){if(over)return;if(selected<0){if(tubes[i].length){selected=i;render()}return}if(selected===i){selected=-1;render();return}if(!can(tubes,selected,i)){selected=tubes[i].length?i:-1;render();return}history.push(clone(tubes));tubes=pour(tubes,selected,i);selected=-1;moves++;render();if(solved(tubes))finish('completed')}
 function undo(){if(over||!history.length)return;tubes=history.pop();moves=Math.max(0,moves-1);selected=-1;render()}
 function hintMove(){if(over)return;let b=bfs(tubes);if(b?.path?.length){let [a,z]=b.path[0];document.getElementById('hint').textContent='Saran: pindahkan tabung '+(a+1)+' ke tabung '+(z+1)+'.';selected=a;render()}}
@@ -36,7 +36,7 @@ function finish(status){over=true;let coins=status==='completed'?reward():0;docu
 function surrender(){if(!over&&confirm('Menyerah? Hadiah ronde ini 0 koin.'))finish('surrendered')}
 function closeResult(){document.getElementById('result').classList.remove('show');start(level)}
 function nextLevel(){document.getElementById('result').classList.remove('show');start(level+1)}
-window.moveTrace=[];const oldTap=tap;tap=function(i){let before=selected;oldTap(i);if(before>=0&&before!==i&&window.moveTrace)window.moveTrace.push([before,i])};
+window.moveTrace=[];const oldTap=tap;tap=function(i){let before=selected,priorMoves=moves;oldTap(i);if(moves===priorMoves+1&&before>=0&&before!==i)window.moveTrace.push([before,i])};
 window.CUIT_GAME_BRIDGE={getState:()=>({level,moves,optimalMoves:optimal}),setLevel:l=>start(Math.max(1,Number(l)||1))};
 start(1);
 </script></body></html>
