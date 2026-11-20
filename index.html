@@ -547,6 +547,9 @@
 #promotedSection{margin-top:0!important;margin-bottom:3px!important}
 #promotedCarousel{gap:0!important}
 #postsList .post-card:first-child{margin-top:2px!important}
+ .cuit-alkimia-invite-action{display:block;margin:10px 0 4px}
+ .cuit-alkimia-invite-action button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border:1px solid #e6bf55;border-radius:12px;background:linear-gradient(110deg,#a80f2c,#d51e32 55%,#e4b43b);color:#fff;font-size:12px;font-weight:950;letter-spacing:.2px;box-shadow:inset 0 1px 0 #ffffff66,0 3px 8px #8d102b2b}
+ .cuit-alkimia-invite-action button:active{transform:scale(.98)}
 .home-feature-heading{
   display:flex;align-items:center;gap:7px;margin:10px 0 7px;
   color:#8e1830;font-size:12px;font-weight:900;letter-spacing:.25px;
@@ -3880,7 +3883,7 @@ async function openDailyCheckin() {
         const coins=Math.max(0,Number(msg.payload?.coins)||0);
         const textarea=document.getElementById('postContent');
         if(textarea){
-          textarea.value='Alhamdulillah, saya berhasil menyelesaikan tantangan Alkimia Warna di CUIT dan mendapatkan '+coins+' Koin Gratis. Terima kasih CUIT!';
+          textarea.value='Alhamdulillah, saya berhasil menyelesaikan tantangan Alkimia Warna di CUIT dan mendapatkan '+coins+' Koin Gratis. Terima kasih CUIT!\\n\\nTeman-teman CUIT, yuk ikut mencoba tantangan Alkimia Warna! Susun warna dengan langkah seefisien mungkin dan buktikan kemampuan kalian. Ketuk tombol di bawah untuk mulai bermain.\\n\\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
           textarea.dispatchEvent(new Event('input',{bubbles:true}));
           if(typeof updateCharCount==='function')updateCharCount(textarea);
         }
@@ -5044,10 +5047,12 @@ function togglePostReadMore(postId, button) {
 // Format bold AI dengan aman: teks di-escape dahulu, lalu hanya **...**
 // yang diubah menjadi elemen strong. Konten biasa tetap tampil normal.
 function cuitFormatPostContent(value) {
+  const gameButtonToken = '[[CUIT_ALKIMIA_GAME_BUTTON]]';
   const escaped = escapeHtml(String(value || ''));
   return escaped
     .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
+    .replace(/\n/g, '<br>')
+    .replace(gameButtonToken, '<div class="cuit-alkimia-invite-action"><button type="button" onclick="event.stopPropagation();openCuitWaterSort()">🧪 MAIN ALKIMIA WARNA</button></div>');
 }
 
 function renderCardHTML(p) {
