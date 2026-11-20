@@ -2651,7 +2651,23 @@ poolStatus=feePaid>0
 <!-- ===== AKHIR BALAP KELERENG INSPIRASI CUIT ===== -->
 
   <!-- 5. HALAMAN PROFIL -->
-  <div id="pageProfile" class="page-section">
+  
+    <section id="waterSortCuitCard" style="margin:12px auto;max-width:520px;padding:14px;border:1px solid #e8cf83;border-radius:18px;background:linear-gradient(135deg,#fffdf5,#fff3e8);box-shadow:0 5px 18px #8d202012">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#fbbf24,#c2410c);font-size:24px">🧪</div>
+        <div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:900;letter-spacing:1px;color:#9a6b13">PERMAINAN CUIT</div><h2 style="margin:2px 0;color:#a51627;font-size:18px;font-weight:950">Alkimia Warna</h2><p style="margin:0;color:#806a6a;font-size:11px">Water Sort · Susun warna dengan langkah seefisien mungkin.</p></div>
+      </div>
+      <button type="button" onclick="openCuitWaterSort()" style="width:100%;margin-top:12px;padding:11px;border:0;border-radius:12px;background:linear-gradient(110deg,#b91c1c,#e3b43b);color:white;font-weight:900;font-size:12px">🧪 Main Alkimia Warna</button>
+    </section>
+    <div id="waterSortGameOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:#080d1beF;padding:10px">
+      <div style="height:100%;max-width:760px;margin:auto;display:flex;flex-direction:column;background:#fff;border-radius:16px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:linear-gradient(110deg,#b91c1c,#d9a52d);color:white;font-weight:900;font-size:13px">
+          <span>🧪 Alkimia Warna</span><button type="button" onclick="closeCuitWaterSort()" style="border:1px solid #ffffff88;background:#ffffff20;color:white;border-radius:9px;padding:5px 10px">Tutup ✕</button>
+        </div>
+        <iframe id="cuitWaterSortFrame" title="Water Sort: Alkimia Warna" src="about:blank" style="border:0;width:100%;height:100%;flex:1;background:#0f172a" allow="autoplay; clipboard-write"></iframe>
+      </div>
+    </div>
+<div id="pageProfile" class="page-section">
     <button class="back-btn" onclick="switchTab('pageHome', document.querySelectorAll('.nav-item')[0])">←</button>
     <button class="pool-shortcut" onclick="openPoolInfo()" aria-label="Info Pool">🏆 Pool</button>
     <h2 class="section-title" style="margin-bottom: 12px;">Profil</h2>
@@ -3832,7 +3848,21 @@ async function openDailyCheckin() {
       if (feed) feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function switchTab(pageId, navElement) {
+    
+    function openCuitWaterSort() {
+      const overlay=document.getElementById('waterSortGameOverlay');
+      const frame=document.getElementById('cuitWaterSortFrame');
+      if(!overlay||!frame)return;
+      if(frame.src==='about:blank') frame.src='./games/water-sort-alkimia.html';
+      overlay.style.display='block';
+      document.body.style.overflow='hidden';
+    }
+    function closeCuitWaterSort() {
+      const overlay=document.getElementById('waterSortGameOverlay');
+      if(overlay) overlay.style.display='none';
+      document.body.style.overflow='';
+    }
+\n    function switchTab(pageId, navElement) {
       if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
       if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
 
