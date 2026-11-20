@@ -547,7 +547,7 @@
 #promotedSection{margin-top:0!important;margin-bottom:3px!important}
 #promotedCarousel{gap:0!important}
 #postsList .post-card:first-child{margin-top:2px!important}
- .cuit-alkimia-invite-action{display:block;margin:10px 0 4px}
+ .cuit-alkimia-invite-action{display:block;margin:0!important;padding:0!important;line-height:1}
  .cuit-alkimia-invite-action button{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border:1px solid #e6bf55;border-radius:12px;background:linear-gradient(110deg,#a80f2c,#d51e32 55%,#e4b43b);color:#fff;font-size:12px;font-weight:950;letter-spacing:.2px;box-shadow:inset 0 1px 0 #ffffff66,0 3px 8px #8d102b2b}
  .cuit-alkimia-invite-action button:active{transform:scale(.98)}
 .home-feature-heading{
@@ -5052,7 +5052,8 @@ function cuitFormatPostContent(value) {
   return escaped
     .replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br>')
-    .replace(gameButtonToken, '<div class="cuit-alkimia-invite-action"><button type="button" onclick="event.stopPropagation();openCuitWaterSort()">🧪 MAIN ALKIMIA WARNA</button></div>');
+    .replace(gameButtonToken, '<div class="cuit-alkimia-invite-action"><button type="button" onclick="event.stopPropagation();openCuitWaterSort()">🧪 MAIN ALKIMIA WARNA</button></div>')
+    .replace(/(?:<br>)+(?=<div class="cuit-alkimia-invite-action">)/g, '');
 }
 
 function renderCardHTML(p) {
