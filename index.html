@@ -3916,7 +3916,7 @@ async function openDailyCheckin() {
         frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:{ok:false,message:err.message||'Validasi server gagal.'}},location.origin);
       }
     });
-\n    function switchTab(pageId, navElement) {
+    function switchTab(pageId, navElement) {
       if (pageId === 'pageKings' && typeof loadAchievements === 'function') { loadAchievements(); }
       if (pageId === 'pageHome' && typeof refreshGameKingUI === 'function') { refreshGameKingUI(); }
 
