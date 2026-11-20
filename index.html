@@ -3906,8 +3906,15 @@ async function openDailyCheckin() {
           p_status:p.status||'completed'
         });
         if(error)throw error;
-        await updateCoinUI();
+        if(!data||data.ok!==true)throw new Error(data?.message||'Server belum mengonfirmasi hasil permainan.');
+        // Kirim konfirmasi ke game segera setelah RPC sukses. Penyegaran saldo
+        // tidak boleh membatalkan atau menyembunyikan hadiah yang sudah dikreditkan.
         frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:data},location.origin);
+        try{
+          await updateCoinUI();
+        }catch(refreshErr){
+          console.warn('Hadiah Alkimia sudah divalidasi, tetapi tampilan saldo gagal diperbarui:',refreshErr);
+        }
       }catch(err){
         console.error('Validasi Alkimia Warna gagal:',err);
         frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:{ok:false,message:err.message||'Validasi server gagal.'}},location.origin);
