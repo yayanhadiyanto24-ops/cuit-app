@@ -3882,6 +3882,20 @@ async function openDailyCheckin() {
       const frame=document.getElementById('cuitWaterSortFrame');
       if(!frame||event.origin!==location.origin||event.source!==frame.contentWindow)return;
       const msg=event.data||{};
+      if(msg.type==='CUIT_WATER_SORT_GRATITUDE'){
+        const coins=Math.max(0,Number(msg.payload?.coins)||0);
+        const textarea=document.getElementById('postContent');
+        if(textarea){
+          textarea.value='Alhamdulillah, saya berhasil menyelesaikan tantangan Alkimia Warna di CUIT dan mendapatkan '+coins+' Koin Gratis. Terima kasih CUIT!';
+          textarea.dispatchEvent(new Event('input',{bubbles:true}));
+          if(typeof updateCharCount==='function')updateCharCount(textarea);
+        }
+        closeCuitWaterSort();
+        const navItems=document.querySelectorAll('.nav-bar .nav-item');
+        switchTab('pageCreate',navItems[2]||null);
+        if(textarea){textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});}
+        return;
+      }
       if(msg.type==='CUIT_WATER_SORT_START'){
         await requestCuitWaterSortSession(msg.payload?.level||1);
         return;
