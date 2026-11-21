@@ -3911,28 +3911,38 @@ async function openDailyCheckin() {
       }
       if(msg.type==='CUIT_ALKIMIA_OPEN_CURHAT'){
         const theme=msg.payload||{};
-        if(!theme.id||!theme.text)return;
+        if(!theme.id||!String(theme.text||'').trim()){
+          console.error('Draf Alkimia tidak dibuat: data tema tidak lengkap.',theme);
+          if(typeof showCuitToast==='function')showCuitToast('Tema curhat Alkimia belum tersedia. Muat ulang game lalu coba lagi.');
+          return;
+        }
         window.cuitAlkimiaThemeId=theme.id;
-        window.cuitAlkimiaThemeText=theme.text;
+        window.cuitAlkimiaThemeText=String(theme.text).trim();
+        const level=Math.max(1,Number(theme.level)||1);
+        const coins=Math.max(1,Number(theme.coins)||1);
+        const draft='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\\n\\n'+window.cuitAlkimiaThemeText+'\\n\\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\\n\\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
+        window.cuitAlkimiaDraftText=draft;
         closeCuitWaterSort();
         const navItems=document.querySelectorAll('.nav-bar .nav-item');
         switchTab('pageCreate',navItems[2]||null);
-        const textarea=document.getElementById('postContent');
-        if(textarea){
-          const level=Math.max(1,Number(theme.level)||1);
-          const coins=Math.max(1,Number(theme.coins)||1);
-          textarea.value='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\\n\\n'+String(theme.text).trim()+'\\n\\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\\n\\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
+        const applyDraft=()=>{
+          const textarea=document.getElementById('postContent');
+          if(!textarea)return false;
+          textarea.value=window.cuitAlkimiaDraftText;
           textarea.dispatchEvent(new Event('input',{bubbles:true}));
           if(typeof updateCharCount==='function')updateCharCount(textarea);
           let note=document.getElementById('alkimiaThemeNote');
           if(!note){
             note=document.createElement('div');note.id='alkimiaThemeNote';
-            note.style.cssText='margin:0 0 10px;padding:11px;border:1px solid #d6a43b;border-radius:12px;background:#fff8df;color:#75410b;font-size:12px;font-weight:700';
+            note.style.cssText='margin:0 0 10px;padding:11px;border:1px solid #d6b85b;border-radius:12px;background:#fff8df;color:#75410b;font-size:12px;font-weight:700';
             textarea.parentNode.insertBefore(note,textarea);
           }
-          note.textContent='🧪 Curhatan Alkimia sudah disiapkan otomatis. Silakan sunting atau tambahkan ceritamu; kalimat tema wajib tetap disertakan.';
-          textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});
-        }
+          note.textContent='🧪 Draf curhatan Alkimia sudah terisi otomatis. Kamu boleh menambahkan cerita, tetapi teks tema wajib tetap disertakan.';
+          return true;
+        };
+        applyDraft();
+        requestAnimationFrame(()=>{applyDraft();const textarea=document.getElementById('postContent');if(textarea){textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});}});
+        setTimeout(()=>{if(!applyDraft())console.error('Kolom curhat Alkimia tidak ditemukan.');},250);
         return;
       }
       if(msg.type==='CUIT_WATER_SORT_GRATITUDE'){
