@@ -3901,6 +3901,13 @@ async function openDailyCheckin() {
         }
         return;
       }
+      if(msg.type==='CUIT_ALKIMIA_OPEN_SOCIAL'){
+        closeCuitWaterSort();
+        const navItems=document.querySelectorAll('.nav-bar .nav-item');
+        switchTab('pageHome',navItems[0]||null);
+        if(typeof showCuitToast==='function')showCuitToast('Silakan Like dan komentari curhatan anggota lain, lalu buka kembali Alkimia untuk cek hadiah.');
+        return;
+      }
       if(msg.type==='CUIT_ALKIMIA_OPEN_CURHAT'){
         const theme=msg.payload||{};
         if(!theme.id||!theme.text)return;
