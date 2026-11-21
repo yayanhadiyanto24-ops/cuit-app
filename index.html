@@ -3920,7 +3920,7 @@ async function openDailyCheckin() {
         window.cuitAlkimiaThemeText=String(theme.text).trim();
         const level=Math.max(1,Number(theme.level)||1);
         const coins=Math.max(1,Number(theme.coins)||1);
-        const draft='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\\n\\n'+window.cuitAlkimiaThemeText+'\\n\\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\\n\\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
+        const draft='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\n\n'+window.cuitAlkimiaThemeText+'\n\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\n\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
         window.cuitAlkimiaDraftText=draft;
         closeCuitWaterSort();
         const navItems=document.querySelectorAll('.nav-bar .nav-item');
