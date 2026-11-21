@@ -3853,7 +3853,10 @@ async function openDailyCheckin() {
       if(!currentUser){if(typeof showCuitToast==='function')showCuitToast('Silakan masuk untuk memainkan Alkimia Warna.');else console.info('Silakan masuk untuk memainkan Alkimia Warna.');return;}
       overlay.style.display='block';
       document.body.style.overflow='hidden';
-      if(frame.dataset.cuitReady==='1'){requestCuitWaterSortSession(1);return;}
+      if(frame.dataset.cuitReady==='1'){
+        if(window.cuitPendingAlkimiaClaim)return;
+        requestCuitWaterSortSession(1);return;
+      }
       frame.addEventListener('load',()=>{frame.dataset.cuitReady='1';requestCuitWaterSortSession(1);},{once:true});
       if(frame.src==='about:blank')frame.src='./games/water-sort-alkimia.html';
     }
@@ -3943,6 +3946,11 @@ async function openDailyCheckin() {
         if(!data||data.ok!==true)throw new Error(data?.message||'Server belum mengonfirmasi hasil permainan.');
         // Kirim konfirmasi ke game segera setelah RPC sukses. Penyegaran saldo
         // tidak boleh membatalkan atau menyembunyikan hadiah yang sudah dikreditkan.
+        if(data.status==='pending_requirements'){
+          window.cuitPendingAlkimiaClaim=p;
+        }else if(data.status==='completed'||data.status==='surrendered'||data.status==='dead_end'){
+          window.cuitPendingAlkimiaClaim=null;
+        }
         frame.contentWindow.postMessage({type:'CUIT_WATER_SORT_VERIFIED',payload:data},location.origin);
         try{
           await updateCoinUI();
