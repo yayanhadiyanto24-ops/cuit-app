@@ -3854,6 +3854,7 @@ async function openDailyCheckin() {
       overlay.style.display='block';
       document.body.style.overflow='hidden';
       if(frame.dataset.cuitReady==='1'){
+        frame.contentWindow.postMessage({type:'CUIT_ALKIMIA_THEME_REQUEST'},location.origin);
         if(window.cuitPendingAlkimiaClaim)return;
         requestCuitWaterSortSession(1);return;
       }
