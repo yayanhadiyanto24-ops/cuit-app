@@ -7237,7 +7237,7 @@ function updateCommentCharCount(input) {
 
 async function submitNewPost() {
   if (!window.cuitRequireMember('menerbitkan curhatan')) return;
-  const content = document.getElementById('postContent').value.trim();
+  let content = document.getElementById('postContent').value.trim();
   const feeling = document.getElementById('postFeeling').value;
   const rewardCoins = parseInt(document.getElementById('postRewardCoins').value) || 0;
   const postStyle = cuitPostStyleRead();
@@ -7257,6 +7257,16 @@ async function submitNewPost() {
   // AKUN TERDAFTAR: transaksi koin dilakukan di database.
   if (currentUser && currentUser.id) {
     const alkimiaThemeId = window.cuitAlkimiaThemeId || null;
+    // Tema dimasukkan otomatis; pengguna tidak perlu menyalin kalimat secara manual.
+    if (alkimiaThemeId && window.cuitAlkimiaThemeText) {
+      const requiredThemeText = String(window.cuitAlkimiaThemeText).trim();
+      if (requiredThemeText && !content.toLocaleLowerCase('id').includes(requiredThemeText.toLocaleLowerCase('id'))) {
+        content = requiredThemeText + (content ? '\\n\\n' + content : '\\n\\n');
+        const editor = document.getElementById('postContent');
+        editor.value = content;
+        editor.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
     const rpcName = alkimiaThemeId
       ? 'cuit_submit_alkimia_curhat_transaction'
       : 'cuit_submit_post_transaction';
