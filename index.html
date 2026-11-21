@@ -4004,7 +4004,7 @@ async function openDailyCheckin() {
       if (navElement) navElement.classList.add('active');
 
       if (pageId === 'pageProfile') renderProfileData();
-      if (pageId === 'pageCreate') loadDraftLocally();
+      if (pageId === 'pageCreate' && typeof loadDraftLocally === 'function') loadDraftLocally();
     }
 
     // Tidak ada lagi jatah tetap 20 Koin Gratis harian.
