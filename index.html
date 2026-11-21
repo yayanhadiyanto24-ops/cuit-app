@@ -3879,6 +3879,40 @@ async function openDailyCheckin() {
       const frame=document.getElementById('cuitWaterSortFrame');
       if(!frame||event.origin!==location.origin||event.source!==frame.contentWindow)return;
       const msg=event.data||{};
+      if(msg.type==='CUIT_ALKIMIA_THEME_REQUEST'){
+        try{
+          const {data,error}=await supabaseClient.rpc('cuit_alkimia_get_daily_theme');
+          if(error)throw error;
+          frame.contentWindow.postMessage({type:'CUIT_ALKIMIA_THEME_RESPONSE',payload:data?.theme||null},location.origin);
+        }catch(err){
+          console.error('Tema Alkimia gagal dimuat:',err);
+          frame.contentWindow.postMessage({type:'CUIT_ALKIMIA_THEME_RESPONSE',payload:null},location.origin);
+        }
+        return;
+      }
+      if(msg.type==='CUIT_ALKIMIA_OPEN_CURHAT'){
+        const theme=msg.payload||{};
+        if(!theme.id||!theme.text)return;
+        window.cuitAlkimiaThemeId=theme.id;
+        window.cuitAlkimiaThemeText=theme.text;
+        closeCuitWaterSort();
+        const navItems=document.querySelectorAll('.nav-bar .nav-item');
+        switchTab('pageCreate',navItems[2]||null);
+        const textarea=document.getElementById('postContent');
+        if(textarea){
+          textarea.value=theme.text+'\\n\\n';
+          textarea.dispatchEvent(new Event('input',{bubbles:true}));
+          let note=document.getElementById('alkimiaThemeNote');
+          if(!note){
+            note=document.createElement('div');note.id='alkimiaThemeNote';
+            note.style.cssText='margin:0 0 10px;padding:11px;border:1px solid #d6a43b;border-radius:12px;background:#fff8df;color:#75410b;font-size:12px;font-weight:700';
+            textarea.parentNode.insertBefore(note,textarea);
+          }
+          note.textContent='🧪 Tema harian dari Alkimia Warna. Kembangkan dengan pengalaman dan pendapatmu sendiri sebelum diterbitkan.';
+          textarea.focus({preventScroll:true});textarea.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+        return;
+      }
       if(msg.type==='CUIT_WATER_SORT_GRATITUDE'){
         const coins=Math.max(0,Number(msg.payload?.coins)||0);
         const textarea=document.getElementById('postContent');
@@ -7213,15 +7247,18 @@ async function submitNewPost() {
 
   // AKUN TERDAFTAR: transaksi koin dilakukan di database.
   if (currentUser && currentUser.id) {
-    const { data, error } = await supabaseClient.rpc(
-      'cuit_submit_post_transaction',
-      {
-        p_content: content,
-        p_feeling: feeling,
-        p_reward_coins: rewardCoins,
-        p_username: myName
-      }
-    );
+    const alkimiaThemeId = window.cuitAlkimiaThemeId || null;
+    const rpcName = alkimiaThemeId
+      ? 'cuit_submit_alkimia_curhat_transaction'
+      : 'cuit_submit_post_transaction';
+    const rpcArgs = {
+      p_content: content,
+      p_feeling: feeling,
+      p_reward_coins: rewardCoins,
+      p_username: myName
+    };
+    if (alkimiaThemeId) rpcArgs.p_theme_id = alkimiaThemeId;
+    const { data, error } = await supabaseClient.rpc(rpcName,rpcArgs);
 
     if (error) {
       return alert('Posting gagal diproses: ' + error.message);
@@ -7252,6 +7289,11 @@ async function submitNewPost() {
     }
 
     document.getElementById('postContent').value = '';
+    if (window.cuitAlkimiaThemeId) {
+      window.cuitAlkimiaThemeId = null;
+      window.cuitAlkimiaThemeText = null;
+      document.getElementById('alkimiaThemeNote')?.remove();
+    }
     document.getElementById('postRewardCoins').value = '';
     if (typeof updateCharCount === 'function') {
       updateCharCount(document.getElementById('postContent'));
