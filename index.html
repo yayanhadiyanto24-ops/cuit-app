@@ -7286,7 +7286,8 @@ async function submitNewPost() {
   // AKUN TERDAFTAR: transaksi koin dilakukan di database.
   if (currentUser && currentUser.id) {
     const alkimiaThemeId = window.cuitAlkimiaThemeId || null;
-    // Teks tema harian tidak ditambahkan ke isi curhatan Alkimia.\n    const rpcName = alkimiaThemeId
+    // Teks tema harian tidak ditambahkan ke isi curhatan Alkimia.
+    const rpcName = alkimiaThemeId
       ? 'cuit_submit_alkimia_curhat_transaction'
       : 'cuit_submit_post_transaction';
     const rpcArgs = {
