@@ -3846,11 +3846,57 @@ async function openDailyCheckin() {
     }
 
     
-    function openCuitWaterSort() {
+    async function openCuitWaterSort() {
+      if(!currentUser){
+        if(typeof showCuitToast==='function')showCuitToast('Silakan masuk untuk memainkan Alkimia Warna.');
+        return;
+      }
+      let gate;
+      try{
+        const {data,error}=await supabaseClient.rpc('cuit_alkimia_get_daily_requirements');
+        if(error)throw error;
+        gate=data;
+      }catch(err){
+        console.error('Pemeriksaan syarat Alkimia gagal:',err);
+        await alert('Alkimia Warna belum dapat dibuka karena pemeriksaan aktivitas harian gagal. Periksa koneksi lalu coba lagi.');
+        return;
+      }
+      const req=gate?.requirements||{};
+      if(!gate?.all_complete){
+        const missing=[];
+        if(!req.curhat)missing.push('• Belum menerbitkan curhatan dari tema harian Alkimia Warna.');
+        if(!req.like)missing.push('• Belum memberi Like pada curhatan anggota lain.');
+        if(!req.comment)missing.push('• Belum memberi komentar pada curhatan anggota lain.');
+        await alert('🔒 ALKIMIA WARNA TERKUNCI\n\nKamu belum melakukan semua aktivitas wajib hari ini:\n\n'+missing.join('\n')+'\n\nSelesaikan aktivitas tersebut terlebih dahulu. Biaya Like dan komentar tetap mengikuti ketentuan normal CUIT.');
+        if(!req.curhat && gate?.theme?.id && gate?.theme?.text){
+          window.cuitAlkimiaThemeId=gate.theme.id;
+          window.cuitAlkimiaThemeText=gate.theme.text;
+          switchTab('pageCreate',document.querySelectorAll('.nav-bar .nav-item')[2]||null);
+          const textarea=document.getElementById('postContent');
+          if(textarea){
+            const current=textarea.value.trim();
+            if(!current.toLocaleLowerCase('id').includes(gate.theme.text.toLocaleLowerCase('id'))){
+              textarea.value=gate.theme.text+'\\n\\n'+(current?current:'');
+            }
+            textarea.dispatchEvent(new Event('input',{bubbles:true}));
+            let note=document.getElementById('alkimiaThemeNote');
+            if(!note){
+              note=document.createElement('div');note.id='alkimiaThemeNote';
+              note.style.cssText='margin:0 0 10px;padding:11px;border:1px solid #d6a43b;border-radius:12px;background:#fff8df;color:#75410b;font-size:12px;font-weight:700';
+              textarea.parentNode.insertBefore(note,textarea);
+            }
+            note.textContent='🧪 Tema harian Alkimia Warna. Kembangkan dengan pengalaman dan pendapatmu sendiri sebelum diterbitkan.';
+            textarea.focus({preventScroll:true});
+            textarea.scrollIntoView({behavior:'smooth',block:'center'});
+          }
+        }else{
+          switchTab('pageHome',document.querySelectorAll('.nav-bar .nav-item')[0]||null);
+        }
+        return;
+      }
       const overlay=document.getElementById('waterSortGameOverlay');
       const frame=document.getElementById('cuitWaterSortFrame');
       if(!overlay||!frame)return;
-      if(!currentUser){if(typeof showCuitToast==='function')showCuitToast('Silakan masuk untuk memainkan Alkimia Warna.');else console.info('Silakan masuk untuk memainkan Alkimia Warna.');return;}
       overlay.style.display='block';
       document.body.style.overflow='hidden';
       if(frame.dataset.cuitReady==='1'){
@@ -3861,7 +3907,7 @@ async function openDailyCheckin() {
       frame.addEventListener('load',()=>{frame.dataset.cuitReady='1';requestCuitWaterSortSession(1);},{once:true});
       if(frame.src==='about:blank')frame.src='./games/water-sort-alkimia.html';
     }
-    async function requestCuitWaterSortSession(level){
+        async function requestCuitWaterSortSession(level){
       const frame=document.getElementById('cuitWaterSortFrame');
       if(!currentUser||!frame||frame.dataset.cuitReady!=='1')return;
       try{
