@@ -3967,7 +3967,8 @@ async function openDailyCheckin() {
         const coins=Math.max(0,Number(msg.payload?.coins)||0);
         const textarea=document.getElementById('postContent');
         if(textarea){
-          const level=Math.max(1,Number(msg.payload?.level)||1);\n          textarea.value='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\n\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\n\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
+          const level=Math.max(1,Number(msg.payload?.level)||1);
+          textarea.value='Alhamdulillah saya sudah berhasil menyelesaikan level '+level+' dan mendapatkan hadiah '+coins+' koin gratisan. Terima kasih CUIT!\n\nAyo ikut bermain Alkimia Warna bersama saya. Ketuk tombol di bawah untuk mulai bermain.\n\n[[CUIT_ALKIMIA_GAME_BUTTON]]';
           textarea.dispatchEvent(new Event('input',{bubbles:true}));
           if(typeof updateCharCount==='function')updateCharCount(textarea);
         }
