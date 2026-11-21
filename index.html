@@ -7261,7 +7261,7 @@ async function submitNewPost() {
     if (alkimiaThemeId && window.cuitAlkimiaThemeText) {
       const requiredThemeText = String(window.cuitAlkimiaThemeText).trim();
       if (requiredThemeText && !content.toLocaleLowerCase('id').includes(requiredThemeText.toLocaleLowerCase('id'))) {
-        content = requiredThemeText + (content ? '\\n\\n' + content : '\\n\\n');
+        content = requiredThemeText + (content ? '\n\n' + content : '\n\n');
         const editor = document.getElementById('postContent');
         editor.value = content;
         editor.dispatchEvent(new Event('input', { bubbles: true }));
